@@ -1,14 +1,27 @@
 {
-  "name": "hardhat-project",
+  "name": "lmaas-contracts",
+  "version": "1.0.0",
   "scripts": {
-    "test": "hardhat test"
+    "test": "hardhat test",
+    "compile": "hardhat compile",
+    "coverage": "hardhat coverage",
+    "deploy": "hardhat deploy --tags Greeter --write true",
+    "testnet:deploy": "hardhat deploy --tags Greeter --network rinkeby",
+    "mainnet:deploy": "hardhat deploy --tags Greeter --network mainnet",
+    "t:verify": "hardhat --network rinkeby etherscan-verify --sleep",
+    "m:verify": "hardhat --network mainnet etherscan-verify --sleep",
+    "prettier": "prettier --write 'contracts/**/*.sol'"
   },
   "dependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-etherscan": "^2.1.6",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
     "chai": "^4.3.4",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.4.7",
     "hardhat": "^2.6.4",
+    "hardhat-deploy": "^0.9.3",
+    "hardhat-gas-reporter": "^1.0.4",
     "prettier": "^2.4.1",
     "prettier-plugin-solidity": "^1.0.0-beta.18"
   },
