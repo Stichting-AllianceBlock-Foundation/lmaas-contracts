@@ -12,6 +12,9 @@
     "m:verify": "hardhat --network mainnet etherscan-verify --sleep",
     "prettier": "prettier --write 'contracts/**/*.sol'"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^2.1.6",
