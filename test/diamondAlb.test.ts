@@ -298,7 +298,7 @@ describe('[Diamond Test]', async function () {
     await test1Facet.deployed();
 
     // Adding the whitelisted address
-    await masterWhitelistFacet.addFacetToWhiteList({ facetAddress: test1Facet.address, isWhiteListed: true });
+    await masterWhitelistFacet.addFacetToWhiteList(test1Facet.address);
     const selectors = getSelectors(Test1Facet).remove(['supportsInterface(bytes4)']);
     tx = await diamondTestCutFacet.diamondCut(
       [

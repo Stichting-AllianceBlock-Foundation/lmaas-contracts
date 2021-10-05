@@ -20,21 +20,14 @@ library LibDiamond {
         uint256 facetAddressPosition; // position of facetAddress in facetAddresses array
     }
 
-    struct WhiteListedFacet {
-        address facetAddress;
-        bool isWhiteListed; // Check if the address is whitelisted or not
-    }
-
     struct DiamondStorage {
         // maps function selector to the facet address and
         // the position of the selector in the facetFunctionSelectors.selectors array
         mapping(bytes4 => FacetAddressAndPosition) selectorToFacetAndPosition;
         // maps facet addresses to function selectors
         mapping(address => FacetFunctionSelectors) facetFunctionSelectors;
-        // mapping to see the whitelisted facets, added in the diamond alb
-        mapping(uint256 => WhiteListedFacet) whiteListFacets;
-        // count of the whitelisted address for the facets
-        uint256 whiteListedFacetsCount;
+        // mapping to see which facets are whitelisted
+        mapping(address => bool) whiteListFacets;
         // facet addresses
         address[] facetAddresses;
         // Used to query if a contract implements an interface.
@@ -110,26 +103,22 @@ library LibDiamond {
         initializeDiamondCut(_init, _calldata);
     }
 
-    function addFacetToWhileList(WhiteListedFacet memory _facet) internal {
+    function addFacetToWhileList(address _facet) internal {
         enforceIsContractOwner();
         DiamondStorage storage ds = diamondStorage();
-        ds.whiteListFacets[ds.whiteListedFacetsCount].facetAddress = _facet.facetAddress;
-        ds.whiteListFacets[ds.whiteListedFacetsCount].isWhiteListed = true;
-        ds.whiteListedFacetsCount = ds.whiteListedFacetsCount + 1;
-        emit AddToWhiteList(_facet.facetAddress);
+        ds.whiteListFacets[_facet] = true;
+        emit AddToWhiteList(_facet);
     }
 
-    function removeFacetFromWhiteList(uint256 _indexWhiteListed) internal {
+    function removeFacetFromWhiteList(address _facet) internal {
         enforceIsContractOwner();
         DiamondStorage storage ds = diamondStorage();
-        require(
-            ds.whiteListFacets[_indexWhiteListed].facetAddress != address(0),
-            'removeFacetFromWhiteList: NO_FAUCET'
-        );
-        emit RemoveFromWhiteList(ds.whiteListFacets[_indexWhiteListed].facetAddress);
-        ds.whiteListFacets[_indexWhiteListed] = ds.whiteListFacets[ds.whiteListedFacetsCount];
-        delete ds.whiteListFacets[ds.whiteListedFacetsCount];
-        ds.whiteListedFacetsCount = ds.whiteListedFacetsCount - 1;
+
+        require(ds.whiteListFacets[_facet], 'removeFacetFromWhiteList: NO_FAUCET');
+
+        emit RemoveFromWhiteList(_facet);
+
+        ds.whiteListFacets[_facet] = false;
     }
 
     function addFunctions(address _facetAddress, bytes4[] memory _functionSelectors) internal {
