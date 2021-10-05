@@ -48,12 +48,6 @@ library LibDiamond {
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-    event AddToWhiteList(address indexed facetAddress);
-
-    event RemoveFromWhiteList(address indexed facetAddres);
-
-    event MasterDiamondTransferred(address indexed previousDiamond, address indexed newDiamond);
-
     function setContractOwner(address _newOwner) internal {
         DiamondStorage storage ds = diamondStorage();
         address previousOwner = ds.contractOwner;
@@ -61,19 +55,8 @@ library LibDiamond {
         emit OwnershipTransferred(previousOwner, _newOwner);
     }
 
-    function setMasterDiamond(address _newMasterDiamond) internal {
-        DiamondStorage storage ds = diamondStorage();
-        address previousDiamond = ds.masterDiamond;
-        ds.masterDiamond = _newMasterDiamond;
-        emit MasterDiamondTransferred(previousDiamond, _newMasterDiamond);
-    }
-
     function contractOwner() internal view returns (address contractOwner_) {
         contractOwner_ = diamondStorage().contractOwner;
-    }
-
-    function masterDiamond() internal view returns (address albDiamond_) {
-        albDiamond_ = diamondStorage().masterDiamond;
     }
 
     function enforceIsContractOwner() internal view {
@@ -101,24 +84,6 @@ library LibDiamond {
         }
         emit DiamondCut(_diamondCut, _init, _calldata);
         initializeDiamondCut(_init, _calldata);
-    }
-
-    function addFacetToWhileList(address _facet) internal {
-        enforceIsContractOwner();
-        DiamondStorage storage ds = diamondStorage();
-        ds.whiteListFacets[_facet] = true;
-        emit AddToWhiteList(_facet);
-    }
-
-    function removeFacetFromWhiteList(address _facet) internal {
-        enforceIsContractOwner();
-        DiamondStorage storage ds = diamondStorage();
-
-        require(ds.whiteListFacets[_facet], 'removeFacetFromWhiteList: NO_FAUCET');
-
-        emit RemoveFromWhiteList(_facet);
-
-        ds.whiteListFacets[_facet] = false;
     }
 
     function addFunctions(address _facetAddress, bytes4[] memory _functionSelectors) internal {

@@ -9,6 +9,7 @@ pragma solidity ^0.8.0;
 /******************************************************************************/
 
 import {LibDiamond} from './libraries/LibDiamond.sol';
+import {LibWhiteList} from './libraries/LibWhiteList.sol';
 import {IDiamondCut} from './interfaces/IDiamondCut.sol';
 
 // A efficient way to call external functions from a faucet
@@ -27,7 +28,7 @@ contract Diamond {
         address _masterDiamond
     ) payable {
         LibDiamond.setContractOwner(_contractOwner);
-        LibDiamond.setMasterDiamond(address(_masterDiamond)); // Should be the whitelisted diamond from ALB
+        LibWhiteList.setMasterDiamond(address(_masterDiamond)); // Should be the whitelisted diamond from ALB
 
         // Add the diamondCut external function from the diamondCutFacet
         IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](1);
