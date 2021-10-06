@@ -4,6 +4,22 @@ pragma solidity ^0.8.0;
 import {LibDiamond} from './LibDiamond.sol';
 
 library LibWhiteList {
+  bytes32 constant WHITELIST_STORAGE_POSITION = keccak256('diamond.standard.whitelist.storage');
+  
+  struct WhiteListStorage {
+    // mapping to see which facets are whitelisted
+    mapping(address => bool) whiteListFacets;
+    // whitelisted alb diamond address
+    address masterDiamond;
+  }
+  
+  function whiteListStorage() internal pure returns (WhiteListStorage storage ws) {
+    bytes32 position = WHITELIST_STORAGE_POSITION;
+    // this is the position in the storage of the whitelist storage
+    assembly {
+      ws.slot := position
+    }
+  }
   
   event AddToWhiteList(address indexed facetAddress);
   
@@ -17,27 +33,27 @@ library LibWhiteList {
   
   function setMasterDiamond(address _newMasterDiamond) internal {
     LibDiamond.enforceIsContractOwner();
-    LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
-    address previousDiamond = ds.masterDiamond;
-    ds.masterDiamond = _newMasterDiamond;
+    WhiteListStorage storage ws = whiteListStorage();
+    address previousDiamond = ws.masterDiamond;
+    ws.masterDiamond = _newMasterDiamond;
     emit MasterDiamondTransferred(previousDiamond, _newMasterDiamond);
   }
   
   function addFacetToWhileList(address _facet) internal {
     LibDiamond.enforceIsContractOwner();
-    LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
-    ds.whiteListFacets[_facet] = true;
+    WhiteListStorage storage ws = whiteListStorage();
+    ws.whiteListFacets[_facet] = true;
     emit AddToWhiteList(_facet);
   }
   
   function removeFacetFromWhiteList(address _facet) internal {
     LibDiamond.enforceIsContractOwner();
-    LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+    WhiteListStorage storage ws = whiteListStorage();
     
-    require(ds.whiteListFacets[_facet], 'removeFacetFromWhiteList: NO_FAUCET');
+    require(ws.whiteListFacets[_facet], 'removeFacetFromWhiteList: NO_FAUCET');
     
     emit RemoveFromWhiteList(_facet);
     
-    ds.whiteListFacets[_facet] = false;
+    ws.whiteListFacets[_facet] = false;
   }
 }
