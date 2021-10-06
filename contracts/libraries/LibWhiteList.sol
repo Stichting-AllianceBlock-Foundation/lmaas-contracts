@@ -28,7 +28,7 @@ library LibWhiteList {
   event MasterDiamondTransferred(address indexed previousDiamond, address indexed newDiamond);
   
   function masterDiamond() internal view returns (address masterDiamond_) {
-    masterDiamond_ = LibDiamond.diamondStorage().masterDiamond;
+    masterDiamond_ = whiteListStorage().masterDiamond;
   }
   
   function setMasterDiamond(address _newMasterDiamond) internal {
