@@ -4,6 +4,7 @@ import { deployDiamond } from '../scripts/deployDiamond';
 import { ethers } from 'hardhat';
 import { FacetCutAction } from '../scripts/libraries/diamond';
 import { assert } from 'chai';
+import { deployMasterDiamond } from '../scripts/deployMasterDiamond';
 
 // The diamond example comes with 8 function selectors
 // [cut, loupe, loupe, loupe, loupe, erc165, transferOwnership, owner]
@@ -33,7 +34,7 @@ describe('Cache bug test', async () => {
 
     let selectors = [sel0, sel1, sel2, sel3, sel4, sel5, sel6, sel7, sel8, sel9, sel10];
 
-    let diamondAddress = await deployDiamond();
+    let { diamondAddress } = await deployMasterDiamond();
     let diamondCutFacet = await ethers.getContractAt('DiamondCutFacet', diamondAddress);
     diamondLoupeFacet = await ethers.getContractAt('DiamondLoupeFacet', diamondAddress);
     const Test1Facet = await ethers.getContractFactory('Test1Facet');

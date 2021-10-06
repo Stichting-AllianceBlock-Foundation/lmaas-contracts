@@ -8,6 +8,7 @@ pragma solidity ^0.8.0;
 
 import {IDiamondCut} from '../interfaces/IDiamondCut.sol';
 import {LibDiamond} from '../libraries/LibDiamond.sol';
+import {LibWhiteList} from '../libraries/LibWhiteList.sol';
 import 'hardhat/console.sol';
 import './WhiteListFacet.sol';
 
@@ -23,10 +24,10 @@ contract DiamondCutFacet is IDiamondCut {
         address _init,
         bytes calldata _calldata
     ) external override {
-        if (LibDiamond.masterDiamond() != address(0)) {
+        if (LibWhiteList.masterDiamond() != address(0)) {
             for (uint256 facetIndex; facetIndex < _diamondCut.length; facetIndex++) {
                 require(
-                    WhiteListFacet(LibDiamond.masterDiamond()).facetWhiteListed(_diamondCut[facetIndex].facetAddress),
+                    WhiteListFacet(LibWhiteList.masterDiamond()).facetWhiteListed(_diamondCut[facetIndex].facetAddress),
                     'diamondMasterCut: NOT_WHITE_LISTED'
                 );
             }

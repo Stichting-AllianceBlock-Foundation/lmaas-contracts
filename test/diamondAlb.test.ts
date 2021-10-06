@@ -10,13 +10,20 @@ import { ethers } from 'hardhat';
 import { deployDiamond } from '../scripts/deployDiamond';
 
 import { assert } from 'chai';
+import { deployMasterDiamond } from '../scripts/deployMasterDiamond';
 
 describe('[Diamond Test]', async function () {
   let diamondAddress: string;
+  let diamondInitAddress: string;
   let diamondCutFacet: any;
+  let diamondCutFacetAddress: string;
   let diamondLoupeFacet: any;
+  let diamondLoupeFacetAddress: string;
   let ownershipFacet: any;
+  let ownershipFacetAddress: string;
   let masterWhitelistFacet: any;
+  let whitelistFacetAddress: string;
+  let facets: { name: string; address: string }[];
   let tx;
   let receipt;
   let result;
@@ -24,11 +31,30 @@ describe('[Diamond Test]', async function () {
 
   before(async function () {
     // Deploying the albDiamond
-    diamondAddress = await deployDiamond();
+    ({
+      diamondAddress,
+      diamondInitAddress,
+      diamondCutFacetAddress,
+      diamondLoupeFacetAddress,
+      ownershipFacetAddress,
+      whitelistFacetAddress,
+    } = await deployMasterDiamond());
     diamondCutFacet = await ethers.getContractAt('DiamondCutFacet', diamondAddress);
     diamondLoupeFacet = await ethers.getContractAt('DiamondLoupeFacet', diamondAddress);
     ownershipFacet = await ethers.getContractAt('OwnershipFacet', diamondAddress);
     masterWhitelistFacet = await ethers.getContractAt('WhiteListFacet', diamondAddress);
+    await masterWhitelistFacet.addFacetToWhiteList(diamondInitAddress);
+    await masterWhitelistFacet.addFacetToWhiteList(diamondCutFacetAddress);
+    await masterWhitelistFacet.addFacetToWhiteList(diamondLoupeFacetAddress);
+    await masterWhitelistFacet.addFacetToWhiteList(ownershipFacetAddress);
+    await masterWhitelistFacet.addFacetToWhiteList(whitelistFacetAddress);
+    facets = [
+      { name: 'DiamondCutFacet', address: diamondCutFacetAddress },
+      { name: 'DiamondInit', address: diamondInitAddress },
+      { name: 'DiamondLoupeFacet', address: diamondLoupeFacetAddress },
+      { name: 'OwnershipFacet', address: ownershipFacetAddress },
+      { name: 'WhiteListFacet', address: whitelistFacetAddress },
+    ];
   });
 
   it('[Should have four facets calling to facetAddresses function]', async () => {
@@ -281,16 +307,13 @@ describe('[Diamond Test]', async function () {
   });
 
   it('[Should deploy a new diamond thats not the master diamond]', async function () {
-    const diamondTestAddress = await deployDiamond();
+    const diamondTestAddress = await deployDiamond(diamondAddress, facets);
     const masterWhitelistTestFacet = await ethers.getContractAt('WhiteListFacet', diamondTestAddress);
-    await masterWhitelistTestFacet.changeMasterDiamond(diamondAddress);
     assert.equal(diamondAddress, await masterWhitelistTestFacet.masterDiamond());
   });
 
   it('[Should add a new whitelisted address to the list]', async function () {
-    const diamondTestAddress = await deployDiamond();
-    const masterWhitelistTestFacet = await ethers.getContractAt('WhiteListFacet', diamondTestAddress);
-    await masterWhitelistTestFacet.changeMasterDiamond(diamondAddress);
+    const diamondTestAddress = await deployDiamond(diamondAddress, facets);
     const diamondTestCutFacet = await ethers.getContractAt('DiamondCutFacet', diamondTestAddress);
     const diamondTestLoupeFacet = await ethers.getContractAt('DiamondLoupeFacet', diamondTestAddress);
     const Test1Facet = await ethers.getContractFactory('Test1Facet');
