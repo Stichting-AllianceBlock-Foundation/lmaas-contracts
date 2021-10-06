@@ -26,8 +26,6 @@ library LibDiamond {
         mapping(bytes4 => FacetAddressAndPosition) selectorToFacetAndPosition;
         // maps facet addresses to function selectors
         mapping(address => FacetFunctionSelectors) facetFunctionSelectors;
-        // mapping to see which facets are whitelisted
-        mapping(address => bool) whiteListFacets;
         // facet addresses
         address[] facetAddresses;
         // Used to query if a contract implements an interface.
@@ -35,8 +33,6 @@ library LibDiamond {
         mapping(bytes4 => bool) supportedInterfaces;
         // owner of the contract
         address contractOwner;
-        // whitelisted alb diamond address
-        address masterDiamond;
     }
 
     function diamondStorage() internal pure returns (DiamondStorage storage ds) {
