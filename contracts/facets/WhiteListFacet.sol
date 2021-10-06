@@ -6,8 +6,8 @@ import {LibWhiteList} from '../libraries/LibWhiteList.sol';
 
 contract WhiteListFacet {
     function facetWhiteListed(address _facet) external view returns (bool) {
-        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
-        return ds.whiteListFacets[_facet];
+        LibWhiteList.WhiteListStorage storage ws = LibWhiteList.whiteListStorage();
+        return ws.whiteListFacets[_facet];
     }
 
     function changeMasterDiamond(address _newDiamond) external {
