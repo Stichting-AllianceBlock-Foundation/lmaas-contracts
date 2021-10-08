@@ -1,14 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-/******************************************************************************\
-* Author: Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)
-* EIP-2535 Diamonds: https://eips.ethereum.org/EIPS/eip-2535
-*
-* Implementation of a diamond.
-/******************************************************************************/
-
 import {LibDiamond} from './libraries/LibDiamond.sol';
+import {LibWhiteList} from './libraries/LibWhiteList.sol';
 import {IDiamondCut} from './interfaces/IDiamondCut.sol';
 
 // A efficient way to call external functions from a faucet
@@ -27,7 +21,14 @@ contract Diamond {
         address _masterDiamond
     ) payable {
         LibDiamond.setContractOwner(_contractOwner);
-        LibDiamond.setMasterDiamond(address(_masterDiamond)); // Should be the whitelisted diamond from ALB
+
+        /**
+          @dev We initialize the _masterDiamond if the
+          address of the constructor is different of the address(0).
+        **/
+        if (_masterDiamond != address(0)) {
+            LibWhiteList.setMasterDiamond(address(_masterDiamond));
+        }
 
         // Add the diamondCut external function from the diamondCutFacet
         IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](1);
