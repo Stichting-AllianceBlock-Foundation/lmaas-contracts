@@ -11,7 +11,7 @@ import { AutoStake } from '../typechain-types/AutoStake';
 import { TestERC20 } from '../typechain-types/TestERC20';
 import { timeTravel } from './utils';
 
-describe.only('AutoStake', () => {
+describe('AutoStake', () => {
   let accounts: SignerWithAddress[];
   let OneStakerRewardsPoolInstance: OneStakerRewardsPoolMock;
   let AutoStakingInstance: AutoStake;
