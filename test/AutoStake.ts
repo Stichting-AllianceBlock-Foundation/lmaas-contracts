@@ -9,11 +9,7 @@ import TestERC20Artifact from '../artifacts/contracts/TestERC20.sol/TestERC20.js
 import { OneStakerRewardsPoolMock } from '../typechain-types/OneStakerRewardsPoolMock';
 import { AutoStake } from '../typechain-types/AutoStake';
 import { TestERC20 } from '../typechain-types/TestERC20';
-
-async function timeTravel(seconds: number) {
-  await network.provider.send('evm_increaseTime', [seconds]);
-  await network.provider.send('evm_mine');
-}
+import { timeTravel } from './utils';
 
 describe.only('AutoStake', () => {
   let accounts: SignerWithAddress[];
