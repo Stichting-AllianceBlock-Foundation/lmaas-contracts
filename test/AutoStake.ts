@@ -15,7 +15,7 @@ async function timeTravel(seconds: number) {
   await network.provider.send('evm_mine');
 }
 
-describe.only('AutoStake', () => {
+describe('AutoStake', () => {
   let accounts: SignerWithAddress[];
   let OneStakerRewardsPoolInstance: OneStakerRewardsPoolMock;
   let AutoStakingInstance: AutoStake;
