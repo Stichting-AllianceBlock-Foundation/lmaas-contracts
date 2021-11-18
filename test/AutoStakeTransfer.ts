@@ -13,7 +13,7 @@ import { StakeTransfererAutoStake } from '../typechain-types/StakeTransfererAuto
 import { StakeReceiverAutoStake } from '../typechain-types/StakeReceiverAutoStake';
 import { timeTravel } from './utils';
 
-describe.only('AutoStakeTransfer', () => {
+describe('AutoStakeTransfer', () => {
   let accounts: SignerWithAddress[];
   let testAccount: SignerWithAddress;
   let test1Account: SignerWithAddress;
