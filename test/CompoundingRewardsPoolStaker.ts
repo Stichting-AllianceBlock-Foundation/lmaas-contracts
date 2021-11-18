@@ -11,7 +11,7 @@ import { CompoundingRewardsPool } from '../typechain-types/CompoundingRewardsPoo
 import { TestERC20 } from '../typechain-types/TestERC20';
 import { timeTravel } from './utils';
 
-describe.only('CompoundingRewardsPoolStaker', () => {
+describe('CompoundingRewardsPoolStaker', () => {
   let accounts: SignerWithAddress[];
   let testAccount: SignerWithAddress;
   let test1Account: SignerWithAddress;
