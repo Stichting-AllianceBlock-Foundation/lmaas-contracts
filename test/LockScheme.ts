@@ -11,7 +11,7 @@ import { LockScheme } from '../typechain-types/LockScheme';
 import { TestERC20 } from '../typechain-types/TestERC20';
 import { timeTravel } from './utils';
 
-describe.only('LockScheme', () => {
+describe('LockScheme', () => {
   let accounts: SignerWithAddress[];
   let testAccount: SignerWithAddress;
   let test1Account: SignerWithAddress;
