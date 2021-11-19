@@ -13,7 +13,7 @@ import { PercentageCalculator } from '../typechain-types/PercentageCalculator';
 import { LiquidityMiningCampaign } from '../typechain-types/LiquidityMiningCampaign';
 import { timeTravel } from './utils';
 
-describe.only('LMC No Lock', () => {
+describe('LMC No Lock', () => {
   let accounts: SignerWithAddress[];
   let testAccount: SignerWithAddress;
   let test1Account: SignerWithAddress;
