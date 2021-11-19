@@ -11,7 +11,7 @@ import RewardsPoolBaseArtifact from '../artifacts/contracts/RewardsPoolBase.sol/
 import { CompoundingRewardsPoolFactory } from '../typechain-types/CompoundingRewardsPoolFactory';
 import { TestERC20 } from '../typechain-types/TestERC20';
 
-describe.only('CompoundingRewardsPoolFactory', () => {
+describe('CompoundingRewardsPoolFactory', () => {
   let accounts: SignerWithAddress[];
   let testAccount: SignerWithAddress;
   let test1Account: SignerWithAddress;

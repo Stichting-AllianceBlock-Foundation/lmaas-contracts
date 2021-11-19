@@ -3,7 +3,6 @@ import { ethers, waffle, network } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 const { deployContract } = waffle;
-import LockSchemeArtifact from '../artifacts/contracts/LockScheme.sol/LockScheme.json';
 import TestERC20Artifact from '../artifacts/contracts/TestERC20.sol/TestERC20.json';
 import PercentageCalculatorArtifact from '../artifacts/contracts/PercentageCalculator.sol/PercentageCalculator.json';
 import LMCArtifact from '../artifacts/contracts/LiquidityMiningCampaign.sol/LiquidityMiningCampaign.json';
@@ -14,7 +13,7 @@ import { PercentageCalculator } from '../typechain-types/PercentageCalculator';
 import { LiquidityMiningCampaign } from '../typechain-types/LiquidityMiningCampaign';
 import { timeTravel } from './utils';
 
-describe('LMC No Lock', () => {
+describe.only('LMC No Lock', () => {
   let accounts: SignerWithAddress[];
   let testAccount: SignerWithAddress;
   let test1Account: SignerWithAddress;
