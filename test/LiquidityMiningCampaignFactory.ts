@@ -18,7 +18,7 @@ import { PercentageCalculator } from '../typechain-types/PercentageCalculator';
 import { timeTravel } from './utils';
 import { NonCompoundingRewardsPool } from '../typechain-types/NonCompoundingRewardsPool';
 
-describe.only('LMC Factory', () => {
+describe('LMC Factory', () => {
   let accounts: SignerWithAddress[];
   let testAccount: SignerWithAddress;
   let test1Account: SignerWithAddress;
