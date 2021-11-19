@@ -11,7 +11,7 @@ import { LimitedAutoStake } from '../typechain-types/LimitedAutoStake';
 import { TestERC20 } from '../typechain-types/TestERC20';
 import { timeTravel } from './utils';
 
-describe.only('LimitedAutoStake', () => {
+describe('LimitedAutoStake', () => {
   let accounts: SignerWithAddress[];
   let testAccount: SignerWithAddress;
   let test1Account: SignerWithAddress;
