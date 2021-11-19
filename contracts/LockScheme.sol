@@ -41,7 +41,7 @@ contract LockScheme is ReentrancyGuard {
         uint256 _bonusPercent,
         address _lmcContract,
         uint256 _virtualBLockTime
-    ) public {
+    ) {
         require(_lmcContract != address(0x0), 'constructor:: Invalid LMC address');
         require(_rampUpPeriod <= _lockPeriod, 'constructor:: Periods are not properly set');
         require(_virtualBLockTime != 0, 'constructor::VirtualBlockTime should be greater than zero');
