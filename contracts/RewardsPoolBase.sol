@@ -424,28 +424,38 @@ contract RewardsPoolBase is ReentrancyGuard {
 		@param _endTimestamp  new end block for the rewards
 		@param _rewardsPerBlock array with new rewards per block for each token 
 	 */
-    function extend(
-        uint256 _endTimestamp,
-        uint256[] memory _rewardsPerBlock,
-        uint256[] memory _currentRemainingRewards,
-        uint256[] memory _newRemainingRewards
-    ) external virtual onlyOwner {
+    function extend(uint256 _endTimestamp, uint256[] memory _rewardsPerBlock) external virtual onlyOwner {
         require(_endTimestamp > _getCurrentTime(), 'Extend::End block must be in the future');
         require(_endTimestamp >= endTimestamp, 'Extend::End block must be after the current end block');
         require(
             _rewardsPerBlock.length == rewardsTokens.length,
             'Extend::Rewards amounts length is less than expected'
         );
+
+        uint256[] memory currentRemainingRewards = new uint256[](_rewardsPerBlock.length);
+        uint256[] memory newRemainingRewards = new uint256[](_rewardsPerBlock.length);
+
+        for (uint256 i = 0; i < _rewardsPerBlock.length; i++) {
+            currentRemainingRewards[i] = calculateRewardsAmount(block.timestamp, endTimestamp, rewardPerBlock[i]);
+
+            newRemainingRewards[i] = calculateRewardsAmount(block.timestamp, _endTimestamp, _rewardsPerBlock[i]);
+
+            require(
+                newRemainingRewards[i] < currentRemainingRewards[i],
+                'Extend:: Not enough rewards in the pool to extend'
+            );
+        }
+
         updateRewardMultipliers();
 
         for (uint256 i = 0; i < _rewardsPerBlock.length; i++) {
             address rewardsToken = rewardsTokens[i];
 
-            if (_currentRemainingRewards[i] > _newRemainingRewards[i]) {
+            if (currentRemainingRewards[i] > newRemainingRewards[i]) {
                 // Some reward leftover needs to be returned
                 IERC20Detailed(rewardsToken).safeTransfer(
                     msg.sender,
-                    (_currentRemainingRewards[i] - _newRemainingRewards[i])
+                    (currentRemainingRewards[i] - newRemainingRewards[i])
                 );
             }
 
