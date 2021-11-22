@@ -448,6 +448,7 @@ contract RewardsPoolBase is ReentrancyGuard {
 
         updateRewardMultipliers();
 
+        // TODO: maybe remove this because its not needed anymore without factory
         for (uint256 i = 0; i < _rewardsPerBlock.length; i++) {
             address rewardsToken = rewardsTokens[i];
 
