@@ -200,11 +200,11 @@ contract LiquidityMiningCampaign is StakeTransferer, OnlyExitFeature {
         _exitAndUnlock(msg.sender);
     }
 
-    function stake(uint256 _tokenAmount) public pure override {
+    function stake(uint256) public pure override {
         revert('LiquidityMiningCampaign::staking without locking is forbidden');
     }
 
-    function exitAndTransfer(address transferTo) public pure override {
+    function exitAndTransfer(address) public pure override {
         revert('LiquidityMiningCampaign::exit and transfer is forbidden');
     }
 

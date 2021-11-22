@@ -55,8 +55,6 @@ contract NonCompoundingRewardsPool is
     }
 
     function completeExit() public virtual override(ThrottledExitFeature) {
-        ExitInfo storage info = exitInfo[msg.sender];
-        uint256 exitReward = info.rewards[0];
         ThrottledExitFeature.completeExit();
     }
 

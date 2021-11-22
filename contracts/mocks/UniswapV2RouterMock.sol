@@ -21,22 +21,24 @@ contract UniswapV2RouterMock is IUniswapV2Router {
         address tokenB,
         uint256 amountADesired,
         uint256 amountBDesired,
-        uint256 amountAMin,
-        uint256 amountBMin,
-        address to,
-        uint256 deadline
+        uint256, // amountAMin,
+        uint256, // amountBMin,
+        address, // to,
+        uint256 // deadline
     )
         external
         override
         returns (
-            uint256 amountA,
-            uint256 amountB,
-            uint256 liquidity
+            uint256, // amountA,
+            uint256, // amountB,
+            uint256 // liquidity
         )
     {
         IERC20Detailed(tokenA).safeTransferFrom(msg.sender, address(this), amountADesired);
         IERC20Detailed(tokenB).safeTransferFrom(msg.sender, address(this), amountBDesired);
         IERC20Detailed(lpToken).safeTransfer(msg.sender, 10**18);
+
+        return (0, 0, 0);
     }
 
     function removeLiquidity(
@@ -45,11 +47,13 @@ contract UniswapV2RouterMock is IUniswapV2Router {
         uint256 liquidity,
         uint256 amountAMin,
         uint256 amountBMin,
-        address to,
-        uint256 deadline
+        address, // to,
+        uint256 // deadline
     ) external override returns (uint256 amountA, uint256 amountB) {
         IERC20Detailed(lpToken).safeTransferFrom(msg.sender, address(this), liquidity);
         IERC20Detailed(tokenA).safeTransfer(msg.sender, amountAMin);
         IERC20Detailed(tokenB).safeTransfer(msg.sender, amountBMin);
+
+        return (0, 0);
     }
 }

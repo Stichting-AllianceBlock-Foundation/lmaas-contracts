@@ -83,7 +83,7 @@ contract LiquidityMiningCampaignNoLock is StakeTransferer, OnlyExitFeature {
         StakeReceiver(_stakePool).delegateStake(_userAddress, finalRewards);
     }
 
-    function exitAndTransfer(address transferTo) public override {
+    function exitAndTransfer(address) public pure override {
         revert('LiquidityMiningCampaign::exit and transfer is forbidden');
     }
 }

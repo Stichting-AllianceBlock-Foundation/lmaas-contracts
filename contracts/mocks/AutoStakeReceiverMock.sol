@@ -11,5 +11,5 @@ contract AutoStakeReceiverMock is StakeReceiverAutoStake {
         uint256 _throttleRoundCap,
         uint256 stakeEnd,
         uint256 _virtualBlockTime
-    ) public AutoStake(token, _throttleRoundBlocks, _throttleRoundCap, stakeEnd, _virtualBlockTime) {}
+    ) AutoStake(token, _throttleRoundBlocks, _throttleRoundCap, stakeEnd, _virtualBlockTime) {}
 }
