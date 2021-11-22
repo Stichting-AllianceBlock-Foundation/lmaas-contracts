@@ -51,8 +51,6 @@ contract LiquidityMiningCampaignNoLock is StakeTransferer, OnlyExitFeature {
         rewardToken = _rewardsTokens[0];
     }
 
-    function start() public onlyOwner {}
-
     function setReceiverWhitelisted(address receiver, bool whitelisted) public override(StakeTransferer) onlyOwner {
         StakeTransferer.setReceiverWhitelisted(receiver, whitelisted);
     }

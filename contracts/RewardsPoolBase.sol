@@ -36,6 +36,7 @@ contract RewardsPoolBase is ReentrancyGuard {
 
     mapping(address => UserInfo) public userInfo;
 
+    event Started();
     event Staked(address indexed user, uint256 amount);
     event Claimed(address indexed user, uint256 amount, address token);
     event Withdrawn(address indexed user, uint256 amount);
@@ -99,6 +100,18 @@ contract RewardsPoolBase is ReentrancyGuard {
         require(user.amountStaked.add(newStake) <= stakeLimit, 'onlyUnderStakeLimit::Stake limit reached');
         require(totalStaked.add(newStake) <= contractStakeLimit, 'onlyUnderStakeLimit::Contract Stake limit reached');
         _;
+    }
+
+    function start() public onlyOwner {
+        for (uint256 i = 0; i < rewardsTokens.length; i++) {
+            uint256 rewardsAmount = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerBlock[i]);
+
+            uint256 balance = IERC20Detailed(rewardsTokens[i]).balanceOf(address(this));
+
+            require(balance >= rewardsAmount, 'Start::Rewards pool does not have enough rewards');
+        }
+
+        emit Started();
     }
 
     /** @dev Providing LP tokens to stake, update rewards.
