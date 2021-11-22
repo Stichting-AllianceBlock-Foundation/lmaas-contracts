@@ -89,7 +89,7 @@ contract RewardsPoolBase is ReentrancyGuard {
         _;
     }
 
-    modifier onlyFactory() {
+    modifier onlyOwner() {
         require(msg.sender == rewardsPoolFactory, 'Caller is not RewardsPoolFactory contract');
         _;
     }
@@ -429,7 +429,7 @@ contract RewardsPoolBase is ReentrancyGuard {
         uint256[] memory _rewardsPerBlock,
         uint256[] memory _currentRemainingRewards,
         uint256[] memory _newRemainingRewards
-    ) external virtual onlyFactory {
+    ) external virtual onlyOwner {
         require(_endTimestamp > _getCurrentTime(), 'Extend::End block must be in the future');
         require(_endTimestamp >= endTimestamp, 'Extend::End block must be after the current end block');
         require(
@@ -461,7 +461,7 @@ contract RewardsPoolBase is ReentrancyGuard {
      * @param recipient The address to whom the rewards will be trasferred
      * @param lpTokenContract The address of the rewards contract
      */
-    function withdrawLPRewards(address recipient, address lpTokenContract) external nonReentrant onlyFactory {
+    function withdrawLPRewards(address recipient, address lpTokenContract) external nonReentrant onlyOwner {
         uint256 currentReward = IERC20Detailed(lpTokenContract).balanceOf(address(this));
         require(currentReward > 0, 'WithdrawLPRewards::There are no rewards from liquidity pools');
 

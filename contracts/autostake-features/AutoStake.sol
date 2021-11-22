@@ -54,11 +54,6 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
         rewardPool = IRewardsPoolBase(pool);
     }
 
-    modifier onlyFactory() {
-        require(msg.sender == factory, 'Caller is not the Factory contract');
-        _;
-    }
-
     function refreshAutoStake() external {
         exitRewardPool();
         updateValuePerShare();

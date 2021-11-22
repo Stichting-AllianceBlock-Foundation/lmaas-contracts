@@ -132,7 +132,7 @@ contract LiquidityMiningCampaign is StakeTransferer, OnlyExitFeature {
         emit ExitedAndUnlocked(_userAddress);
     }
 
-    function setReceiverWhitelisted(address receiver, bool whitelisted) public override(StakeTransferer) onlyFactory {
+    function setReceiverWhitelisted(address receiver, bool whitelisted) public override(StakeTransferer) onlyOwner {
         StakeTransferer.setReceiverWhitelisted(receiver, whitelisted);
     }
 
@@ -211,7 +211,7 @@ contract LiquidityMiningCampaign is StakeTransferer, OnlyExitFeature {
     /** @dev Sets all schemes that are part of the current LMC
 	@param _lockSchemes the address of the staker
 	 */
-    function setLockSchemes(address[] memory _lockSchemes) external onlyFactory {
+    function setLockSchemes(address[] memory _lockSchemes) external onlyOwner {
         for (uint256 i = 0; i < _lockSchemes.length; i++) {
             if (!lockSchemesExist[_lockSchemes[i]]) {
                 lockSchemes.push(_lockSchemes[i]);
