@@ -5,7 +5,7 @@ import { expect } from 'chai';
 const { deployContract } = waffle;
 import TestERC20Artifact from '../artifacts/contracts/TestERC20.sol/TestERC20.json';
 import PercentageCalculatorArtifact from '../artifacts/contracts/PercentageCalculator.sol/PercentageCalculator.json';
-import LMCArtifact from '../artifacts/contracts/LiquidityMiningCampaign.sol/LiquidityMiningCampaign.json';
+import LMCArtifact from '../artifacts/contracts/LiquidityMiningCampaignNoLock.sol/LiquidityMiningCampaignNoLock.json';
 import NonCompoundingRewardsPoolArtifact from '../artifacts/contracts/V2/NonCompoundingRewardsPool.sol/NonCompoundingRewardsPool.json';
 import { NonCompoundingRewardsPool } from '../typechain-types/NonCompoundingRewardsPool';
 import { TestERC20 } from '../typechain-types/TestERC20';
@@ -13,7 +13,7 @@ import { PercentageCalculator } from '../typechain-types/PercentageCalculator';
 import { LiquidityMiningCampaign } from '../typechain-types/LiquidityMiningCampaign';
 import { timeTravel } from './utils';
 
-describe('LMC No Lock', () => {
+describe.only('LMC No Lock', () => {
   let accounts: SignerWithAddress[];
   let testAccount: SignerWithAddress;
   let test1Account: SignerWithAddress;
@@ -77,6 +77,7 @@ describe('LMC No Lock', () => {
       let parsedReward = await ethers.utils.parseEther(`${i + 1}`);
       rewardPerBlock.push(parsedReward);
     }
+
     const currentBlock = await ethers.provider.getBlock('latest');
     startTimestmap = currentBlock.timestamp + oneMinute;
     endTimestamp = startTimestmap + oneMinute * 2;
@@ -132,9 +133,8 @@ describe('LMC No Lock', () => {
     });
 
     it('[Should stake and lock sucessfully]:', async () => {
-      let currentBlock = await ethers.provider.getBlock('latest');
       let contractInitialBalance = await stakingTokenInstance.balanceOf(LmcInstance.address);
-      let userInitialBalance = await stakingTokenInstance.balanceOf(test1Account.address);
+      let userInitialBalance = await stakingTokenInstance.balanceOf(testAccount.address);
 
       await LmcInstance.stake(bTen);
 
@@ -165,7 +165,7 @@ describe('LMC No Lock', () => {
       await LmcInstance.stake(bTen);
       await LmcInstance.stake(bTwenty);
 
-      await timeTravel(70);
+      await timeTravel(80);
       const accumulatedReward = await LmcInstance.getUserAccumulatedReward(testAccount.address, 0);
       let contractFinalBalance = await stakingTokenInstance.balanceOf(LmcInstance.address);
       const totalStakedAmount = await LmcInstance.totalStaked();
@@ -176,7 +176,7 @@ describe('LMC No Lock', () => {
       expect(contractFinalBalance).to.equal(contractInitialBalance.add(bTen).add(bTwenty));
       expect(totalStakedAmount).to.equal(bTen.add(bTwenty));
       expect(userInfo.amountStaked).to.equal(bTen.add(bTwenty));
-      expect(accumulatedReward).to.equal(bOne.mul(7));
+      expect(accumulatedReward).to.equal(bOne.mul(8).sub(20));
     });
 
     it('[Should fail staking and locking with zero amount]:', async () => {
@@ -267,7 +267,7 @@ describe('LMC No Lock', () => {
       expect(userAccruedRewards).to.equal(0);
     });
 
-    it('Should exit and stake sucessfully', async () => {
+    it('[Should exit and stake sucessfully]:', async () => {
       await setupRewardsPoolParameters();
       await setupRewardsPoolParameters();
 
@@ -347,7 +347,7 @@ describe('LMC No Lock', () => {
       await LmcInstance.connect(test2Account).exitAndStake(testAccount.address);
     });
 
-    it('Should fail to exit and stake if the poolAddress is not whitelisted ', async () => {
+    it('[Should fail to exit and stake if the poolAddress is not whitelisted]:', async () => {
       await expect(LmcInstance.exitAndStake(testAccount.address)).to.be.revertedWith(
         'exitAndTransfer::receiver is not whitelisted'
       );
