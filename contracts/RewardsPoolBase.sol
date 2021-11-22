@@ -46,8 +46,6 @@ contract RewardsPoolBase is ReentrancyGuard {
 
     constructor(
         IERC20Detailed _stakingToken,
-        uint256 _startTimestamp,
-        uint256 _endTimestamp,
         address[] memory _rewardsTokens,
         uint256[] memory _rewardPerBlock,
         uint256 _stakeLimit,
@@ -56,8 +54,6 @@ contract RewardsPoolBase is ReentrancyGuard {
     ) {
         require(address(_stakingToken) != address(0), 'Constructor::Invalid staking token address');
 
-        require(_startTimestamp > _getCurrentTime(), 'Constructor::The starting timestamp must be in the future.');
-        require(_endTimestamp > _startTimestamp, 'Constructor::The end timestamp must be in the future.');
         require(
             _rewardPerBlock.length == _rewardsTokens.length,
             'Constructor::Rewards per block and rewards tokens must be with the same length.'
@@ -68,16 +64,12 @@ contract RewardsPoolBase is ReentrancyGuard {
 
         stakingToken = _stakingToken;
         rewardPerBlock = _rewardPerBlock;
-        startTimestamp = _startTimestamp;
-        endTimestamp = _endTimestamp;
         rewardsTokens = _rewardsTokens;
         lastRewardBlock = startBlock;
         rewardsPoolFactory = msg.sender;
         stakeLimit = _stakeLimit;
         contractStakeLimit = _contractStakeLimit;
         virtualBlockTime = _virtualBlockTime * 1 seconds;
-        startBlock = _calculateBlocks(startTimestamp);
-        endBlock = _calculateBlocks(endTimestamp);
         for (uint256 i = 0; i < rewardsTokens.length; i++) {
             accumulatedRewardMultiplier.push(0);
         }
@@ -85,7 +77,7 @@ contract RewardsPoolBase is ReentrancyGuard {
 
     modifier onlyInsideBlockBounds() {
         uint256 currentBlock = _getBlock();
-        require(currentBlock > startBlock, 'Stake::Staking has not yet started');
+        require(startBlock > 0 && currentBlock > startBlock, 'Stake::Staking has not yet started');
         require(currentBlock <= endBlock, 'Stake::Staking has finished');
         _;
     }
@@ -102,7 +94,12 @@ contract RewardsPoolBase is ReentrancyGuard {
         _;
     }
 
-    function start() public onlyOwner {
+    function start(uint256 _startTimestamp, uint256 _endTimestamp) public onlyOwner {
+        require(startTimestamp == 0 && endTimestamp == 0, 'start::Pool is already started');
+
+        require(_startTimestamp > _getCurrentTime(), 'start::The starting timestamp must be in the future.');
+        require(_endTimestamp > _startTimestamp, 'start::The end timestamp must be bigger then the start timestamp.');
+
         for (uint256 i = 0; i < rewardsTokens.length; i++) {
             uint256 rewardsAmount = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerBlock[i]);
 
@@ -110,6 +107,12 @@ contract RewardsPoolBase is ReentrancyGuard {
 
             require(balance >= rewardsAmount, 'Start::Rewards pool does not have enough rewards');
         }
+
+        startTimestamp = _startTimestamp;
+        endTimestamp = _endTimestamp;
+
+        startBlock = _calculateBlocks(startTimestamp);
+        endBlock = _calculateBlocks(endTimestamp);
 
         emit Started();
     }

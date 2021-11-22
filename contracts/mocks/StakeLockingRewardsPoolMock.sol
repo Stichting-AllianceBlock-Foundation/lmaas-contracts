@@ -19,8 +19,6 @@ contract StakeLockingRewardsPoolMock is RewardsPoolBase, OnlyExitFeature, StakeL
     )
         RewardsPoolBase(
             _stakingToken,
-            _startBlock,
-            _endBlock,
             _rewardsTokens,
             _rewardPerBlock,
             _stakeLimit,

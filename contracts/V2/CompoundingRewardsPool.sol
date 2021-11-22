@@ -17,16 +17,7 @@ contract CompoundingRewardsPool is RewardsPoolBase, OneStakerFeature {
         uint256[] memory _rewardPerBlock,
         uint256 _virtualBlockTime
     )
-        RewardsPoolBase(
-            _stakingToken,
-            _startTimestamp,
-            _endTimestamp,
-            _rewardsTokens,
-            _rewardPerBlock,
-            MAX_INT,
-            MAX_INT,
-            _virtualBlockTime
-        )
+        RewardsPoolBase(_stakingToken, _rewardsTokens, _rewardPerBlock, MAX_INT, MAX_INT, _virtualBlockTime)
         OneStakerFeature(_staker)
     {}
 

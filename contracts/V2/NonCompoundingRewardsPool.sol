@@ -29,8 +29,6 @@ contract NonCompoundingRewardsPool is
     )
         RewardsPoolBase(
             _stakingToken,
-            _startTimestamp,
-            _endTimestamp,
             _rewardsTokens,
             _rewardPerBlock,
             _stakeLimit,

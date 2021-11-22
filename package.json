@@ -39,6 +39,7 @@
     "@types/chai": "^4.2.22",
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.11.7",
+    "hardhat-contract-sizer": "^2.1.1",
     "ts-node": "^10.4.0",
     "typescript": "^4.4.4"
   }

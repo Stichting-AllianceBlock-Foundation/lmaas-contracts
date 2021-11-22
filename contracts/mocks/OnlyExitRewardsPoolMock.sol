@@ -18,8 +18,6 @@ contract OnlyExitRewardsPoolMock is RewardsPoolBase, OnlyExitFeature {
     )
         RewardsPoolBase(
             _stakingToken,
-            _startBlock,
-            _endBlock,
             _rewardsTokens,
             _rewardPerBlock,
             _stakeLimit,

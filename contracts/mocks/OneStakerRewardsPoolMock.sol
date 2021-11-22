@@ -19,8 +19,6 @@ contract OneStakerRewardsPoolMock is RewardsPoolBase, OneStakerFeature {
     )
         RewardsPoolBase(
             _stakingToken,
-            _startBlock,
-            _endBlock,
             _rewardsTokens,
             _rewardPerBlock,
             _stakeLimit,

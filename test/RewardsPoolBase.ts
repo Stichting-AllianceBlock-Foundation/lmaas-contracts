@@ -6,7 +6,7 @@ import { BigNumber, BigNumberish } from 'ethers';
 import { TestERC20 } from '../typechain-types/TestERC20';
 import { RewardsPoolBase } from '../typechain-types/RewardsPoolBase';
 
-describe('RewardsPoolBase', () => {
+describe.only('RewardsPoolBase', () => {
   let aliceAccount: SignerWithAddress;
   let bobAccount: SignerWithAddress;
   let carolAccount: SignerWithAddress;
@@ -78,14 +78,14 @@ describe('RewardsPoolBase', () => {
     const RewardsPoolBase = await ethers.getContractFactory('RewardsPoolBase');
     RewardsPoolBaseInstance = (await RewardsPoolBase.deploy(
       stakingTokenAddress,
-      startTimestamp,
-      endTimestamp,
       rewardTokensAddresses,
       rewardPerBlock,
       stakeLimit,
       contractStakeLimit,
       virtualBlockTime
     )) as RewardsPoolBase;
+
+    await RewardsPoolBaseInstance.start(startTimestamp, endTimestamp);
 
     await rewardTokensInstances[0].mint(RewardsPoolBaseInstance.address, amount);
   });
@@ -128,8 +128,6 @@ describe('RewardsPoolBase', () => {
     await expect(
       RewardsPoolBase.deploy(
         ethers.constants.AddressZero,
-        startTimestamp,
-        endTimestamp,
         rewardTokensAddresses,
         rewardPerBlock,
         stakeLimit,
@@ -142,16 +140,7 @@ describe('RewardsPoolBase', () => {
   it('Should fail to deploy RewardsPoolBase with empty rewards token addresses array', async () => {
     const RewardsPoolBase = await ethers.getContractFactory('RewardsPoolBase');
     await expect(
-      RewardsPoolBase.deploy(
-        stakingTokenAddress,
-        startTimestamp,
-        endTimestamp,
-        [],
-        rewardPerBlock,
-        stakeLimit,
-        contractStakeLimit,
-        virtualBlockTime
-      )
+      RewardsPoolBase.deploy(stakingTokenAddress, [], rewardPerBlock, stakeLimit, contractStakeLimit, virtualBlockTime)
     ).to.be.revertedWith('Constructor::Rewards per block and rewards tokens must be with the same length.');
   });
 
@@ -160,8 +149,6 @@ describe('RewardsPoolBase', () => {
     await expect(
       RewardsPoolBase.deploy(
         stakingTokenAddress,
-        startTimestamp,
-        endTimestamp,
         rewardTokensAddresses,
         [],
         stakeLimit,
@@ -171,36 +158,36 @@ describe('RewardsPoolBase', () => {
     ).to.be.revertedWith('Constructor::Rewards per block and rewards tokens must be with the same length.');
   });
 
-  it('Should fail to deploy RewardsPoolBase if the start timestamp is not in the future', async () => {
+  it('Should fail to start RewardsPoolBase if the start timestamp is not in the future', async () => {
     const RewardsPoolBase = await ethers.getContractFactory('RewardsPoolBase');
-    await expect(
-      RewardsPoolBase.deploy(
-        stakingTokenAddress,
-        0,
-        endTimestamp,
-        rewardTokensAddresses,
-        rewardPerBlock,
-        stakeLimit,
-        contractStakeLimit,
-        virtualBlockTime
-      )
-    ).to.be.revertedWith('Constructor::The starting timestamp must be in the future.');
+    RewardsPoolBaseInstance = (await RewardsPoolBase.deploy(
+      stakingTokenAddress,
+      rewardTokensAddresses,
+      rewardPerBlock,
+      stakeLimit,
+      contractStakeLimit,
+      virtualBlockTime
+    )) as RewardsPoolBase;
+
+    await expect(RewardsPoolBaseInstance.start(0, endTimestamp)).to.be.revertedWith(
+      'start::The starting timestamp must be in the future.'
+    );
   });
 
   it('Should fail to deploy RewardsPoolBase if the end timestamp is not in the future', async () => {
     const RewardsPoolBase = await ethers.getContractFactory('RewardsPoolBase');
-    await expect(
-      RewardsPoolBase.deploy(
-        stakingTokenAddress,
-        startTimestamp,
-        0,
-        rewardTokensAddresses,
-        rewardPerBlock,
-        stakeLimit,
-        contractStakeLimit,
-        virtualBlockTime
-      )
-    ).to.be.revertedWith('Constructor::The end timestamp must be in the future.');
+    RewardsPoolBaseInstance = (await RewardsPoolBase.deploy(
+      stakingTokenAddress,
+      rewardTokensAddresses,
+      rewardPerBlock,
+      stakeLimit,
+      contractStakeLimit,
+      virtualBlockTime
+    )) as RewardsPoolBase;
+
+    await expect(RewardsPoolBaseInstance.start(startTimestamp, 0)).to.be.revertedWith(
+      'start::The end timestamp must be bigger then the start timestamp.'
+    );
   });
 
   it('Should fail to deploy RewardsPoolBase with 0 staking limit', async () => {
@@ -208,8 +195,6 @@ describe('RewardsPoolBase', () => {
     await expect(
       RewardsPoolBase.deploy(
         stakingTokenAddress,
-        startTimestamp,
-        endTimestamp,
         rewardTokensAddresses,
         rewardPerBlock,
         0,
@@ -223,8 +208,6 @@ describe('RewardsPoolBase', () => {
     await expect(
       RewardsPoolBase.deploy(
         stakingTokenAddress,
-        startTimestamp,
-        endTimestamp,
         rewardTokensAddresses,
         rewardPerBlock,
         stakeLimit,
@@ -451,29 +434,14 @@ describe('RewardsPoolBase', () => {
       let newRewardsPerBlock = [];
 
       const newEndTimestamp = currentEndTimestamp.add(oneMinute);
-      let currentRemainingRewards = [];
-      let newRemainingReward = [];
-      const currentBlock = await ethers.provider.getBlock('latest');
 
       for (let i = 0; i < rewardTokensCount; i++) {
         let parsedReward = await ethers.utils.parseEther(`${i + 2}`);
         newRewardsPerBlock.push(parsedReward);
-        let currentRewardsPerBlock = await RewardsPoolBaseInstance.rewardPerBlock(i);
-
-        currentRemainingRewards.push(
-          await calculateRewardsAmount(currentBlock.timestamp, currentEndTimestamp.toNumber(), currentRewardsPerBlock)
-        );
-        newRemainingReward.push(
-          await calculateRewardsAmount(currentBlock.timestamp, newEndTimestamp.toNumber(), newRewardsPerBlock[i])
-        );
       }
 
-      await RewardsPoolBaseInstance.extend(
-        newEndTimestamp,
-        newRewardsPerBlock,
-        currentRemainingRewards,
-        newRemainingReward
-      );
+      await RewardsPoolBaseInstance.extend(newEndTimestamp, newRewardsPerBlock);
+
       let endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
       let rewardPerBlock = await RewardsPoolBaseInstance.rewardPerBlock(0);
 
@@ -485,23 +453,18 @@ describe('RewardsPoolBase', () => {
     });
 
     it('Should fail extending the rewards pool if the end block is not in the future', async () => {
-      let currentRemainingRewards: BigNumberish[] = [];
-      let newRemainingReward: BigNumberish[] = [];
-
-      await expect(
-        RewardsPoolBaseInstance.extend(0, rewardPerBlock, currentRemainingRewards, newRemainingReward)
-      ).to.be.revertedWith('Extend::End block must be in the future');
+      await expect(RewardsPoolBaseInstance.extend(0, rewardPerBlock)).to.be.revertedWith(
+        'Extend::End block must be in the future'
+      );
     });
 
     it('Should fail extentind the rewards pool if the end block is not greater than the previous', async () => {
       let currentEndBlock = await RewardsPoolBaseInstance.endTimestamp();
       let newEndBlock = currentEndBlock.sub(1);
-      let currentRemainingRewards: BigNumberish[] = [];
-      let newRemainingReward: BigNumberish[] = [];
 
-      await expect(
-        RewardsPoolBaseInstance.extend(newEndBlock, rewardPerBlock, currentRemainingRewards, newRemainingReward)
-      ).to.be.revertedWith('Extend::End block must be after the current end block');
+      await expect(RewardsPoolBaseInstance.extend(newEndBlock, rewardPerBlock)).to.be.revertedWith(
+        'Extend::End block must be after the current end block'
+      );
     });
 
     it('Should fail extentind the rewards pool if the rewards per block arrays is with different length', async () => {
@@ -509,31 +472,23 @@ describe('RewardsPoolBase', () => {
       let newRewardsPerBlock = [];
 
       const newEndBlock = currentEndBlock.add(20);
-      let currentRemainingRewards: BigNumberish[] = [];
-      let newRemainingReward: BigNumberish[] = [];
 
       for (let i = 0; i <= rewardTokensCount; i++) {
         let parsedReward = await ethers.utils.parseEther(`${i + 2}`);
         newRewardsPerBlock.push(parsedReward);
       }
-      await expect(
-        RewardsPoolBaseInstance.extend(newEndBlock, newRewardsPerBlock, currentRemainingRewards, newRemainingReward)
-      ).to.be.revertedWith('Extend::Rewards amounts length is less than expected');
+
+      await expect(RewardsPoolBaseInstance.extend(newEndBlock, newRewardsPerBlock)).to.be.revertedWith(
+        'Extend::Rewards amounts length is less than expected'
+      );
     });
 
     it('Should fail extending the rewards pool the caller is not the factory', async () => {
       let newEndTime = endTimestamp + 10;
-      let currentRemainingRewards: BigNumberish[] = [];
-      let newRemainingReward: BigNumberish[] = [];
 
-      await expect(
-        RewardsPoolBaseInstance.connect(bobAccount).extend(
-          newEndTime,
-          rewardPerBlock,
-          currentRemainingRewards,
-          newRemainingReward
-        )
-      ).to.be.revertedWith('Caller is not RewardsPoolFactory contract');
+      await expect(RewardsPoolBaseInstance.connect(bobAccount).extend(newEndTime, rewardPerBlock)).to.be.revertedWith(
+        'Caller is not RewardsPoolFactory contract'
+      );
     });
   });
 
