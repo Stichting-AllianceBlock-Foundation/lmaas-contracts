@@ -15,8 +15,6 @@ contract LiquidityMiningCampaign is StakeTransferer, OnlyExitFeature {
 
     constructor(
         IERC20Detailed _stakingToken,
-        uint256 _startTimeStamp,
-        uint256 _endTimeStamp,
         address[] memory _rewardsTokens,
         uint256[] memory _rewardPerBlock,
         address _albtAddress,

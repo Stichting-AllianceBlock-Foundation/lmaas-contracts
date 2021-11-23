@@ -97,7 +97,7 @@ contract RewardsPoolBase is ReentrancyGuard {
     function start(uint256 _startTimestamp, uint256 _endTimestamp) public onlyOwner {
         require(startTimestamp == 0 && endTimestamp == 0, 'start::Pool is already started');
 
-        require(_startTimestamp > _getCurrentTime(), 'start::The starting timestamp must be in the future.');
+        require(_startTimestamp > block.timestamp, 'start::The starting timestamp must be in the future.');
         require(_endTimestamp > _startTimestamp, 'start::The end timestamp must be bigger then the start timestamp.');
 
         for (uint256 i = 0; i < rewardsTokens.length; i++) {
@@ -370,10 +370,6 @@ contract RewardsPoolBase is ReentrancyGuard {
         return (block.timestamp.div(virtualBlockTime));
     }
 
-    function _getCurrentTime() internal view virtual returns (uint256) {
-        return block.timestamp;
-    }
-
     function _calculateBlocks(uint256 _timeInSeconds) internal view virtual returns (uint256) {
         return _timeInSeconds.div(virtualBlockTime);
     }
@@ -440,9 +436,33 @@ contract RewardsPoolBase is ReentrancyGuard {
 		@param _endTimestamp  new end block for the rewards
 		@param _rewardsPerBlock array with new rewards per block for each token 
 	 */
-    function extend(uint256 _endTimestamp, uint256[] memory _rewardsPerBlock) external virtual onlyOwner {
-        require(_endTimestamp > _getCurrentTime(), 'Extend::End block must be in the future');
+    function extend(
+        uint256 _endTimestamp,
+        uint256[] memory _rewardsPerBlock,
+        address[] memory _rewardsTokens
+    ) external virtual onlyOwner {
+        require(_endTimestamp > block.timestamp, 'Extend::End block must be in the future');
         require(_endTimestamp >= endTimestamp, 'Extend::End block must be after the current end block');
+
+        for (uint256 i; i < _rewardsTokens.length; i++) {
+            for (uint256 j; j < rewardsTokens.length; j++) {
+                if (_rewardsTokens[i] == rewardsTokens[j]) {
+                    /*
+                      If we have a reward inside of rewardsTokens, just delete
+                      that because we don't want a new reward.
+                    */
+                    delete rewardsTokens[j];
+                } else {
+                    /*
+                      If is not in the rewardsTokens, that means that we want to
+                      add a new reward into the pool, so it will be there for
+                      extending.
+                    */
+                    rewardsTokens.push(_rewardsTokens[i]);
+                }
+            }
+        }
+
         require(
             _rewardsPerBlock.length == rewardsTokens.length,
             'Extend::Rewards amounts length is less than expected'
@@ -455,21 +475,14 @@ contract RewardsPoolBase is ReentrancyGuard {
             currentRemainingRewards[i] = calculateRewardsAmount(block.timestamp, endTimestamp, rewardPerBlock[i]);
 
             newRemainingRewards[i] = calculateRewardsAmount(block.timestamp, _endTimestamp, _rewardsPerBlock[i]);
-
-            require(
-                newRemainingRewards[i] < currentRemainingRewards[i],
-                'Extend:: Not enough rewards in the pool to extend'
-            );
         }
 
         updateRewardMultipliers();
 
-        // TODO: maybe remove this because its not needed anymore without factory
         for (uint256 i = 0; i < _rewardsPerBlock.length; i++) {
             address rewardsToken = rewardsTokens[i];
 
             if (currentRemainingRewards[i] > newRemainingRewards[i]) {
-                // Some reward leftover needs to be returned
                 IERC20Detailed(rewardsToken).safeTransfer(
                     msg.sender,
                     (currentRemainingRewards[i] - newRemainingRewards[i])
