@@ -447,7 +447,7 @@ describe.only('RewardsPoolBase', () => {
         newRewardsPerBlock.push(parsedReward);
       }
 
-      await RewardsPoolBaseInstance.extend(newEndTimestamp, newRewardsPerBlock, []);
+      await RewardsPoolBaseInstance.extend(newEndTimestamp, newRewardsPerBlock);
 
       let endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
       let rewardPerBlock = await RewardsPoolBaseInstance.rewardPerBlock(0);
@@ -460,7 +460,7 @@ describe.only('RewardsPoolBase', () => {
     });
 
     it('Should fail extending the rewards pool if the end block is not in the future', async () => {
-      await expect(RewardsPoolBaseInstance.extend(0, rewardPerBlock, [])).to.be.revertedWith(
+      await expect(RewardsPoolBaseInstance.extend(0, rewardPerBlock)).to.be.revertedWith(
         'Extend::End block must be in the future'
       );
     });
@@ -469,7 +469,7 @@ describe.only('RewardsPoolBase', () => {
       let currentEndBlock = await RewardsPoolBaseInstance.endTimestamp();
       let newEndBlock = currentEndBlock.sub(1);
 
-      await expect(RewardsPoolBaseInstance.extend(newEndBlock, rewardPerBlock, [])).to.be.revertedWith(
+      await expect(RewardsPoolBaseInstance.extend(newEndBlock, rewardPerBlock)).to.be.revertedWith(
         'Extend::End block must be after the current end block'
       );
     });
@@ -485,7 +485,7 @@ describe.only('RewardsPoolBase', () => {
         newRewardsPerBlock.push(parsedReward);
       }
 
-      await expect(RewardsPoolBaseInstance.extend(newEndBlock, newRewardsPerBlock, [])).to.be.revertedWith(
+      await expect(RewardsPoolBaseInstance.extend(newEndBlock, newRewardsPerBlock)).to.be.revertedWith(
         'Extend::Rewards amounts length is less than expected'
       );
     });
@@ -493,9 +493,9 @@ describe.only('RewardsPoolBase', () => {
     it('Should fail extending the rewards pool the caller is not the factory', async () => {
       let newEndTime = endTimestamp + 10;
 
-      await expect(
-        RewardsPoolBaseInstance.connect(bobAccount).extend(newEndTime, rewardPerBlock, [])
-      ).to.be.revertedWith('Caller is not RewardsPoolFactory contract');
+      await expect(RewardsPoolBaseInstance.connect(bobAccount).extend(newEndTime, rewardPerBlock)).to.be.revertedWith(
+        'Caller is not RewardsPoolFactory contract'
+      );
     });
   });
 
