@@ -25,8 +25,6 @@ interface IRewardsPoolBase {
 
     function updateRewardMultipliers() external;
 
-    function initialiseUserTokensOwed(address _userAddress) external;
-
     function updateUserAccruedReward(address _userAddress) external;
 
     //Public/external

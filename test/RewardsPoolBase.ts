@@ -6,7 +6,7 @@ import { BigNumber, BigNumberish } from 'ethers';
 import { TestERC20 } from '../typechain-types/TestERC20';
 import { RewardsPoolBase } from '../typechain-types/RewardsPoolBase';
 
-describe.only('RewardsPoolBase', () => {
+describe('RewardsPoolBase', () => {
   let aliceAccount: SignerWithAddress;
   let bobAccount: SignerWithAddress;
   let carolAccount: SignerWithAddress;
@@ -237,7 +237,7 @@ describe.only('RewardsPoolBase', () => {
       it('Should successfully stake and accumulate reward', async () => {
         await RewardsPoolBaseInstance.stake(standardStakingAmount);
 
-        const block = await RewardsPoolBaseInstance._getBlock();
+        const block = await ethers.provider.getBlockNumber();
 
         const totalStakedAmount = await RewardsPoolBaseInstance.totalStaked();
         const userInfo = await RewardsPoolBaseInstance.userInfo(aliceAccount.address);

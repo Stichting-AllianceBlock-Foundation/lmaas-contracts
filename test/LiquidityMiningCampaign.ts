@@ -13,7 +13,7 @@ import { PercentageCalculator } from '../typechain-types/PercentageCalculator';
 import { LiquidityMiningCampaign } from '../typechain-types/LiquidityMiningCampaign';
 import { timeTravel } from './utils';
 
-describe('LMC No Lock', () => {
+describe.only('Liquidity mining campaign', () => {
   let accounts: SignerWithAddress[];
   let testAccount: SignerWithAddress;
   let test1Account: SignerWithAddress;
@@ -57,7 +57,7 @@ describe('LMC No Lock', () => {
   let throttleRoundBlocks = 10;
   let throttleRoundCap = ethers.utils.parseEther('1');
 
-  let startTimestmap: number;
+  let startTimestamp: number;
   let endTimestamp: number;
   const virtualBlocksTime = 10; // 10s == 10000ms
   const oneMinute = 60;
@@ -79,9 +79,9 @@ describe('LMC No Lock', () => {
     }
 
     const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestmap = currentBlock.timestamp + oneMinute;
-    endTimestamp = startTimestmap + oneMinute * 2;
-    startBlock = Math.trunc(startTimestmap / virtualBlocksTime);
+    startTimestamp = currentBlock.timestamp + oneMinute;
+    endTimestamp = startTimestamp + oneMinute * 2;
+    startBlock = Math.trunc(startTimestamp / virtualBlocksTime);
     endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
     rampUpBlock = startBlock + 5;
     lockBlock = endBlock + 30;
@@ -108,8 +108,6 @@ describe('LMC No Lock', () => {
 
     LmcInstance = (await deployContract(testAccount, LMCArtifact, [
       stakingTokenAddress,
-      startTimestmap,
-      endTimestamp,
       rewardTokensAddresses,
       rewardPerBlock,
       rewardTokensAddresses[0],
@@ -119,6 +117,8 @@ describe('LMC No Lock', () => {
     ])) as LiquidityMiningCampaign;
 
     await rewardTokensInstances[0].mint(LmcInstance.address, amount);
+
+    await LmcInstance.start(startTimestamp, endTimestamp);
   });
 
   it('[Should deploy the lock scheme successfully]:', async () => {
@@ -271,8 +271,6 @@ describe('LMC No Lock', () => {
 
       let NewLmcInstance: LiquidityMiningCampaign = (await deployContract(testAccount, LMCArtifact, [
         stakingTokenAddress,
-        startTimestmap,
-        endTimestamp,
         rewardTokensAddresses,
         rewardPerBlock,
         rewardTokensAddresses[0],
@@ -282,6 +280,8 @@ describe('LMC No Lock', () => {
       ])) as LiquidityMiningCampaign;
 
       await rewardTokensInstances[0].mint(NewLmcInstance.address, amount);
+      await NewLmcInstance.start(startTimestamp, endTimestamp);
+
       let externalRewardsTokenInstance: TestERC20 = (await deployContract(testAccount, TestERC20Artifact, [
         amount,
       ])) as TestERC20;
@@ -292,7 +292,7 @@ describe('LMC No Lock', () => {
         NonCompoundingRewardsPoolArtifact,
         [
           rewardTokensAddresses[0],
-          startTimestmap,
+          startTimestamp,
           endTimestamp + oneMinute,
           rewardTokensAddresses,
           rewardPerBlock,
@@ -303,6 +303,9 @@ describe('LMC No Lock', () => {
           virtualBlocksTime,
         ]
       )) as NonCompoundingRewardsPool;
+
+      await rewardTokensInstances[0].mint(NonCompoundingRewardsPoolInstance.address, amount);
+      await NonCompoundingRewardsPoolInstance.start(startTimestamp, endTimestamp + oneMinute);
 
       await stakingTokenInstance.approve(NewLmcInstance.address, amount);
       await timeTravel(70);
