@@ -85,9 +85,9 @@ describe.only('RewardsPoolBase', () => {
       virtualBlockTime
     )) as RewardsPoolBase;
 
-    await RewardsPoolBaseInstance.start(startTimestamp, endTimestamp);
-
     await rewardTokensInstances[0].mint(RewardsPoolBaseInstance.address, amount);
+
+    await RewardsPoolBaseInstance.start(startTimestamp, endTimestamp);
   });
 
   it('Should deploy the RewardsPoolBase properly', async () => {
@@ -437,6 +437,13 @@ describe.only('RewardsPoolBase', () => {
 
       for (let i = 0; i < rewardTokensCount; i++) {
         let parsedReward = await ethers.utils.parseEther(`${i + 2}`);
+
+        // Send the required reward tokens to the RewardsPool
+        await rewardTokensInstances[0].mint(
+          RewardsPoolBaseInstance.address,
+          parsedReward.mul(oneMinute / virtualBlockTime)
+        );
+
         newRewardsPerBlock.push(parsedReward);
       }
 
