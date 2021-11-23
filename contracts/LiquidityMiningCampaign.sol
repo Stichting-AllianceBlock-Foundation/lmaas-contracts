@@ -10,8 +10,8 @@ import './pool-features/OnlyExitFeature.sol';
 
 contract LiquidityMiningCampaign is StakeTransferer, OnlyExitFeature {
     using SafeERC20Detailed for IERC20Detailed;
-
     address public immutable rewardToken;
+    string public campaignName;
 
     constructor(
         IERC20Detailed _stakingToken,
@@ -20,7 +20,8 @@ contract LiquidityMiningCampaign is StakeTransferer, OnlyExitFeature {
         address _albtAddress,
         uint256 _stakeLimit,
         uint256 _contractStakeLimit,
-        uint256 _virtualBlockTime
+        uint256 _virtualBlockTime,
+        string memory _campaignName
     )
         RewardsPoolBase(
             _stakingToken,
@@ -33,6 +34,7 @@ contract LiquidityMiningCampaign is StakeTransferer, OnlyExitFeature {
     {
         require(_albtAddress == _rewardsTokens[0], 'constructor:: The first reward address is different from the ALBT');
         rewardToken = _rewardsTokens[0];
+        campaignName = _campaignName;
     }
 
     function setReceiverWhitelisted(address receiver, bool whitelisted) public override(StakeTransferer) onlyOwner {
