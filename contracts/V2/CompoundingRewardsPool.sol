@@ -14,12 +14,8 @@ contract CompoundingRewardsPool is RewardsPoolBase, OneStakerFeature {
         address _staker,
         uint256 _startTimestamp,
         uint256 _endTimestamp,
-        uint256[] memory _rewardPerBlock,
         uint256 _virtualBlockTime
-    )
-        RewardsPoolBase(_stakingToken, _rewardsTokens, _rewardPerBlock, MAX_INT, MAX_INT, _virtualBlockTime)
-        OneStakerFeature(_staker)
-    {}
+    ) RewardsPoolBase(_stakingToken, _rewardsTokens, MAX_INT, MAX_INT, _virtualBlockTime) OneStakerFeature(_staker) {}
 
     function stake(uint256 _tokenAmount) public override(RewardsPoolBase, OneStakerFeature) {
         OneStakerFeature.stake(_tokenAmount);

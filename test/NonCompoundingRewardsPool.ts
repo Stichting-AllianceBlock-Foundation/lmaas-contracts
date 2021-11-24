@@ -9,7 +9,7 @@ import { TestERC20 } from '../typechain-types/TestERC20';
 import { NonCompoundingRewardsPool } from '../typechain-types/NonCompoundingRewardsPool';
 import { timeTravel } from './utils';
 
-describe.only('NonCompoundingRewardsPool', () => {
+describe('NonCompoundingRewardsPool', () => {
   let accounts: SignerWithAddress[];
   let testAccount: SignerWithAddress;
   let test1Account: SignerWithAddress;
@@ -44,7 +44,7 @@ describe.only('NonCompoundingRewardsPool', () => {
   const standardStakingAmount = ethers.utils.parseEther('5'); // 5 tokens
   const contractStakeLimit = ethers.utils.parseEther('10'); // 10 tokens
 
-  let startTimestmap: number;
+  let startTimestamp: number;
   let endTimestamp: number;
   const virtualBlocksTime = 10; // 10s == 10000ms
   const oneMinute = 60;
@@ -66,19 +66,18 @@ describe.only('NonCompoundingRewardsPool', () => {
     }
 
     const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestmap = currentBlock.timestamp + oneMinute;
-    endTimestamp = startTimestmap + oneMinute * 2;
-    startBlock = Math.trunc(startTimestmap / virtualBlocksTime);
+    startTimestamp = currentBlock.timestamp + oneMinute;
+    endTimestamp = startTimestamp + oneMinute * 2;
+    startBlock = Math.trunc(startTimestamp / virtualBlocksTime);
     endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
   };
 
   const stake = async (_throttleRoundBlocks: number, _throttleRoundCap: BigNumber) => {
     NonCompoundingRewardsPoolInstance = (await deployContract(testAccount, NonCompoundingRewardsPoolArtifact, [
       stakingTokenAddress,
-      startTimestmap,
+      startTimestamp,
       endTimestamp,
       rewardTokensAddresses,
-      rewardPerBlock,
       stakeLimit,
       _throttleRoundBlocks,
       _throttleRoundCap,
@@ -87,8 +86,9 @@ describe.only('NonCompoundingRewardsPool', () => {
     ])) as NonCompoundingRewardsPool;
 
     const reward = rewardPerBlock[0].mul(endBlock - startBlock);
-
     await rewardTokensInstances[0].mint(NonCompoundingRewardsPoolInstance.address, reward);
+
+    await NonCompoundingRewardsPoolInstance.start(startTimestamp, endTimestamp, rewardPerBlock);
 
     await stakingTokenInstance.approve(NonCompoundingRewardsPoolInstance.address, standardStakingAmount);
     await stakingTokenInstance

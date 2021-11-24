@@ -16,22 +16,12 @@ contract LiquidityMiningCampaign is StakeTransferer, OnlyExitFeature {
     constructor(
         IERC20Detailed _stakingToken,
         address[] memory _rewardsTokens,
-        uint256[] memory _rewardPerBlock,
         address _albtAddress,
         uint256 _stakeLimit,
         uint256 _contractStakeLimit,
         uint256 _virtualBlockTime,
         string memory _campaignName
-    )
-        RewardsPoolBase(
-            _stakingToken,
-            _rewardsTokens,
-            _rewardPerBlock,
-            _stakeLimit,
-            _contractStakeLimit,
-            _virtualBlockTime
-        )
-    {
+    ) RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _virtualBlockTime) {
         require(_albtAddress == _rewardsTokens[0], 'constructor:: The first reward address is different from the ALBT');
         rewardToken = _rewardsTokens[0];
         campaignName = _campaignName;

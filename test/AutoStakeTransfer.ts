@@ -32,7 +32,7 @@ describe('AutoStakeTransfer', () => {
 
   let startBlock: number;
   let endBlock: number;
-  let startTimestmap: number;
+  let startTimestamp: number;
   let endTimestamp: number;
 
   const virtualBlocksTime: number = 10; // 10s == 10000ms
@@ -48,8 +48,8 @@ describe('AutoStakeTransfer', () => {
 
   const setupRewardsPoolParameters = async () => {
     const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestmap = currentBlock.timestamp + oneMinute;
-    endTimestamp = startTimestmap + oneMinute * 2;
+    startTimestamp = currentBlock.timestamp + oneMinute;
+    endTimestamp = startTimestamp + oneMinute * 2;
     endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
   };
 
@@ -70,10 +70,9 @@ describe('AutoStakeTransfer', () => {
 
     OneStakerRewardsPoolInstance = (await deployContract(testAccount, OneStakerRewardsPoolArtifact, [
       stakingTokenAddress,
-      startTimestmap,
+      startTimestamp,
       endTimestamp,
       [stakingTokenAddress],
-      [bOne],
       ethers.constants.MaxUint256,
       StakeTransfererAutoStakeInstance.address,
       contractStakeLimit,
@@ -82,6 +81,8 @@ describe('AutoStakeTransfer', () => {
 
     await StakeTransfererAutoStakeInstance.setPool(OneStakerRewardsPoolInstance.address);
     await stakingTokenInstance.mint(OneStakerRewardsPoolInstance.address, amount);
+
+    await OneStakerRewardsPoolInstance.start(startTimestamp, endTimestamp, [bOne]);
 
     StakeReceiverAutoStakeInstance = (await deployContract(testAccount, StakeReceiverAutoStakeArtifact, [
       stakingTokenAddress,
@@ -93,10 +94,9 @@ describe('AutoStakeTransfer', () => {
 
     OneStakerRewardsPoolInstance = (await deployContract(testAccount, OneStakerRewardsPoolArtifact, [
       stakingTokenAddress,
-      startTimestmap,
+      startTimestamp,
       endTimestamp + oneMinute,
       [stakingTokenAddress],
-      [bOne],
       ethers.constants.MaxUint256,
       StakeReceiverAutoStakeInstance.address,
       contractStakeLimit,
@@ -105,6 +105,8 @@ describe('AutoStakeTransfer', () => {
 
     await StakeReceiverAutoStakeInstance.setPool(OneStakerRewardsPoolInstance.address);
     await stakingTokenInstance.mint(OneStakerRewardsPoolInstance.address, amount);
+
+    await OneStakerRewardsPoolInstance.start(startTimestamp, endTimestamp + oneMinute, [bOne]);
 
     await StakeTransfererAutoStakeInstance.setReceiverWhitelisted(StakeReceiverAutoStakeInstance.address, true);
 
@@ -143,6 +145,6 @@ describe('AutoStakeTransfer', () => {
   it('[Should not set contract whitelisted by not deployer]:', async () => {
     await expect(
       StakeTransfererAutoStakeInstance.connect(test2Account).setReceiverWhitelisted(test2Account.address, true)
-    ).to.be.revertedWith('Caller is not the Factory contract');
+    ).to.be.revertedWith('Ownable: caller is not the owner');
   });
 });

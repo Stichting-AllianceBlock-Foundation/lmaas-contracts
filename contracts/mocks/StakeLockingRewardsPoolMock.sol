@@ -12,19 +12,11 @@ contract StakeLockingRewardsPoolMock is RewardsPoolBase, OnlyExitFeature, StakeL
         uint256 _startBlock,
         uint256 _endBlock,
         address[] memory _rewardsTokens,
-        uint256[] memory _rewardPerBlock,
         uint256 _stakeLimit,
         uint256 _contractStakeLimit,
         uint256 _virtualBlockTime
     )
-        RewardsPoolBase(
-            _stakingToken,
-            _rewardsTokens,
-            _rewardPerBlock,
-            _stakeLimit,
-            _contractStakeLimit,
-            _virtualBlockTime
-        )
+        RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _virtualBlockTime)
         StakeLock(_endBlock)
     {}
 

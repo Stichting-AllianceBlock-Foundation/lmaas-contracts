@@ -109,7 +109,6 @@ describe('Liquidity mining campaign', () => {
     LmcInstance = (await deployContract(testAccount, LMCArtifact, [
       stakingTokenAddress,
       rewardTokensAddresses,
-      rewardPerBlock,
       rewardTokensAddresses[0],
       stakeLimit,
       contractStakeLimit,
@@ -118,7 +117,7 @@ describe('Liquidity mining campaign', () => {
 
     await rewardTokensInstances[0].mint(LmcInstance.address, amount);
 
-    await LmcInstance.start(startTimestamp, endTimestamp);
+    await LmcInstance.start(startTimestamp, endTimestamp, rewardPerBlock);
   });
 
   it('[Should deploy the lock scheme successfully]:', async () => {
@@ -272,7 +271,6 @@ describe('Liquidity mining campaign', () => {
       let NewLmcInstance: LiquidityMiningCampaign = (await deployContract(testAccount, LMCArtifact, [
         stakingTokenAddress,
         rewardTokensAddresses,
-        rewardPerBlock,
         rewardTokensAddresses[0],
         stakeLimit,
         _contractStakeLimit,
@@ -280,7 +278,7 @@ describe('Liquidity mining campaign', () => {
       ])) as LiquidityMiningCampaign;
 
       await rewardTokensInstances[0].mint(NewLmcInstance.address, amount);
-      await NewLmcInstance.start(startTimestamp, endTimestamp);
+      await NewLmcInstance.start(startTimestamp, endTimestamp, rewardPerBlock);
 
       let externalRewardsTokenInstance: TestERC20 = (await deployContract(testAccount, TestERC20Artifact, [
         amount,
@@ -295,7 +293,6 @@ describe('Liquidity mining campaign', () => {
           startTimestamp,
           endTimestamp + oneMinute,
           rewardTokensAddresses,
-          rewardPerBlock,
           stakeLimit,
           throttleRoundBlocks,
           throttleRoundCap,
@@ -305,7 +302,7 @@ describe('Liquidity mining campaign', () => {
       )) as NonCompoundingRewardsPool;
 
       await rewardTokensInstances[0].mint(NonCompoundingRewardsPoolInstance.address, amount);
-      await NonCompoundingRewardsPoolInstance.start(startTimestamp, endTimestamp + oneMinute);
+      await NonCompoundingRewardsPoolInstance.start(startTimestamp, endTimestamp + oneMinute, rewardPerBlock);
 
       await stakingTokenInstance.approve(NewLmcInstance.address, amount);
       await timeTravel(70);

@@ -32,7 +32,7 @@ describe('CompoundingRewardsPoolStaker', () => {
   let externalRewardsTokenAddress: string;
 
   let endBlock;
-  let startTimestmap: number;
+  let startTimestamp: number;
   let endTimestamp: number;
 
   const virtualBlocksTime: number = 10; // 10s == 10000ms
@@ -48,8 +48,8 @@ describe('CompoundingRewardsPoolStaker', () => {
 
   const setupRewardsPoolParameters = async () => {
     const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestmap = currentBlock.timestamp + oneMinute;
-    endTimestamp = startTimestmap + oneMinute * 2;
+    startTimestamp = currentBlock.timestamp + oneMinute;
+    endTimestamp = startTimestamp + oneMinute * 2;
     endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
   };
 
@@ -78,14 +78,15 @@ describe('CompoundingRewardsPoolStaker', () => {
       stakingTokenAddress,
       [stakingTokenAddress],
       StakeTransfererAutoStakeInstance.address,
-      startTimestmap,
+      startTimestamp,
       endTimestamp,
-      [bOne],
       virtualBlocksTime,
     ])) as CompoundingRewardsPool;
 
     await StakeTransfererAutoStakeInstance.setPool(CompoundingRewardsPoolInstance.address);
     await stakingTokenInstance.mint(CompoundingRewardsPoolInstance.address, amount);
+
+    await CompoundingRewardsPoolInstance.start(startTimestamp, endTimestamp, [bOne]);
 
     StakeReceiverAutoStakeInstance = (await deployContract(testAccount, CompoundingRewardsPoolStakerArtifact, [
       stakingTokenAddress,
@@ -100,14 +101,15 @@ describe('CompoundingRewardsPoolStaker', () => {
       stakingTokenAddress,
       [stakingTokenAddress],
       StakeReceiverAutoStakeInstance.address,
-      startTimestmap,
+      startTimestamp,
       endTimestamp + oneMinute,
-      [bOne],
       virtualBlocksTime,
     ])) as CompoundingRewardsPool;
 
     await StakeReceiverAutoStakeInstance.setPool(CompoundingRewardsPoolInstance.address);
     await stakingTokenInstance.mint(CompoundingRewardsPoolInstance.address, amount);
+
+    await CompoundingRewardsPoolInstance.start(startTimestamp, endTimestamp + oneMinute, [bOne]);
 
     await StakeTransfererAutoStakeInstance.setReceiverWhitelisted(StakeReceiverAutoStakeInstance.address, true);
 

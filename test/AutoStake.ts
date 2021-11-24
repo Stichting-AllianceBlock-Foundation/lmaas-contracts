@@ -28,7 +28,7 @@ describe('AutoStake', () => {
     staker = testAccount;
   });
 
-  let startTimestmap: number;
+  let startTimestamp: number;
   let endTimestamp: number;
   let endBlock;
 
@@ -44,8 +44,8 @@ describe('AutoStake', () => {
 
   const setupRewardsPoolParameters = async () => {
     const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestmap = currentBlock.timestamp + oneMinute;
-    endTimestamp = startTimestmap + oneMinute * 2;
+    startTimestamp = currentBlock.timestamp + oneMinute;
+    endTimestamp = startTimestamp + oneMinute * 2;
     endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
   };
 
@@ -66,10 +66,9 @@ describe('AutoStake', () => {
 
       OneStakerRewardsPoolInstance = (await deployContract(staker, OneStakerRewardsPoolArtifact, [
         stakingTokenAddress,
-        startTimestmap,
+        startTimestamp,
         endTimestamp,
         [stakingTokenAddress],
-        [bOne],
         ethers.constants.MaxUint256,
         AutoStakingInstance.address,
         contractStakeLimit,
@@ -99,10 +98,9 @@ describe('AutoStake', () => {
         OneStakerRewardsPoolArtifact,
         [
           stakingTokenAddress,
-          startTimestmap,
+          startTimestamp,
           endTimestamp,
           [stakingTokenAddress],
-          [bOne],
           ethers.constants.MaxUint256,
           AutoStakingInstance.address,
           contractStakeLimit,
@@ -133,10 +131,9 @@ describe('AutoStake', () => {
 
       OneStakerRewardsPoolInstance = (await deployContract(staker, OneStakerRewardsPoolArtifact, [
         stakingTokenAddress,
-        startTimestmap,
+        startTimestamp,
         endTimestamp,
         [stakingTokenAddress],
-        [bOne],
         ethers.constants.MaxUint256,
         AutoStakingInstance.address,
         contractStakeLimit,
@@ -149,13 +146,15 @@ describe('AutoStake', () => {
 
       await stakingTokenInstance.mint(OneStakerRewardsPoolInstance.address, amount);
 
+      await OneStakerRewardsPoolInstance.start(startTimestamp, endTimestamp, [bOne]);
+
       await stakingTokenInstance.connect(staker).approve(AutoStakingInstance.address, standardStakingAmount);
       await stakingTokenInstance.connect(test1Account).approve(AutoStakingInstance.address, standardStakingAmount);
       await timeTravel(70);
     });
 
     it('[Should successfully stake]:', async () => {
-      let startBlock = Math.trunc(startTimestmap / virtualBlocksTime);
+      let startBlock = Math.trunc(startTimestamp / virtualBlocksTime);
 
       await AutoStakingInstance.connect(staker).stake(standardStakingAmount);
       const totalStakedAmount = await OneStakerRewardsPoolInstance.totalStaked();

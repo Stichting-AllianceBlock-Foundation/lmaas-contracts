@@ -31,7 +31,7 @@ describe('StakeLockingFeature', () => {
   const standardStakingAmount = ethers.utils.parseEther('5'); // 5 tokens
   const contractStakeLimit = ethers.utils.parseEther('10'); // 10 tokens
 
-  let startTimestmap: number;
+  let startTimestamp: number;
   let endTimestamp: number;
   const virtualBlocksTime = 10; // 10s == 10000ms
   const oneMinute = 60;
@@ -54,9 +54,9 @@ describe('StakeLockingFeature', () => {
     }
 
     const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestmap = currentBlock.timestamp + oneMinute;
-    endTimestamp = startTimestmap + oneMinute * 2;
-    startBlock = Math.trunc(startTimestmap / virtualBlocksTime);
+    startTimestamp = currentBlock.timestamp + oneMinute;
+    endTimestamp = startTimestamp + oneMinute * 2;
+    startBlock = Math.trunc(startTimestamp / virtualBlocksTime);
     endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
   };
 
@@ -75,16 +75,17 @@ describe('StakeLockingFeature', () => {
     const StakeLockingRewardsPoolMock = await ethers.getContractFactory('StakeLockingRewardsPoolMock');
     StakeLockingFeatureInstance = (await StakeLockingRewardsPoolMock.deploy(
       stakingTokenAddress,
-      startTimestmap,
+      startTimestamp,
       endTimestamp,
       rewardTokensAddresses,
-      rewardPerBlock,
       stakeLimit,
       contractStakeLimit,
       virtualBlocksTime
     )) as StakeLockingRewardsPoolMock;
 
     await rewardTokensInstances[0].mint(StakeLockingFeatureInstance.address, amount);
+
+    await StakeLockingFeatureInstance.start(startTimestamp, endTimestamp, rewardPerBlock);
 
     await stakingTokenInstance.approve(StakeLockingFeatureInstance.address, standardStakingAmount);
     await stakingTokenInstance.connect(bobAccount).approve(StakeLockingFeatureInstance.address, standardStakingAmount);

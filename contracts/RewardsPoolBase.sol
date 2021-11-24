@@ -47,7 +47,6 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     constructor(
         IERC20Detailed _stakingToken,
         address[] memory _rewardsTokens,
-        uint256[] memory _rewardPerBlock,
         uint256 _stakeLimit,
         uint256 _contractStakeLimit,
         uint256 _virtualBlockTime
@@ -55,17 +54,15 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         require(address(_stakingToken) != address(0), 'Constructor::Invalid staking token address');
 
         require(
-            _rewardPerBlock.length == _rewardsTokens.length,
-            'Constructor::Rewards per block and rewards tokens must be with the same length.'
+            _stakeLimit != 0 && _contractStakeLimit != 0,
+            'Constructor::Stake limit and contract stake limit needs to be more than 0'
         );
-        require(_stakeLimit != 0, 'Constructor::Stake limit needs to be more than 0');
-        require(_contractStakeLimit != 0, 'Constructor:: Contract Stake limit needs to be more than 0');
         require(_virtualBlockTime != 0, 'Constructor:: Virtual block time should be greater than 0');
 
+        require(_rewardsTokens.length > 0, 'Constructor::Rewards tokens array should not be empty');
+
         stakingToken = _stakingToken;
-        rewardPerBlock = _rewardPerBlock;
         rewardsTokens = _rewardsTokens;
-        lastRewardBlock = startBlock;
         rewardsPoolFactory = msg.sender;
         stakeLimit = _stakeLimit;
         contractStakeLimit = _contractStakeLimit;
@@ -80,23 +77,38 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 
     modifier onlyInsideBlockBounds() {
         uint256 currentBlock = _getBlock();
-        require(startBlock > 0 && currentBlock > startBlock, 'Stake::Staking has not yet started');
-        require(currentBlock <= endBlock, 'Stake::Staking has finished');
+        require(
+            (startBlock > 0 && currentBlock > startBlock) && (currentBlock <= endBlock),
+            'Stake::Staking has not started or is finished'
+        );
         _;
     }
 
     modifier onlyUnderStakeLimit(address staker, uint256 newStake) {
         UserInfo storage user = userInfo[staker];
-        require(user.amountStaked + newStake <= stakeLimit, 'onlyUnderStakeLimit::Stake limit reached');
-        require(totalStaked + newStake <= contractStakeLimit, 'onlyUnderStakeLimit::Contract Stake limit reached');
+        require(
+            (user.amountStaked + newStake <= stakeLimit) && (totalStaked + newStake <= contractStakeLimit),
+            'onlyUnderStakeLimit::Stake limit reached'
+        );
         _;
     }
 
-    function start(uint256 _startTimestamp, uint256 _endTimestamp) public onlyOwner {
+    function start(
+        uint256 _startTimestamp,
+        uint256 _endTimestamp,
+        uint256[] memory _rewardPerBlock
+    ) public onlyOwner {
         require(startTimestamp == 0, 'start::Pool is already started');
+        require(
+            _startTimestamp > block.timestamp && _endTimestamp > _startTimestamp,
+            'start::The start & end timestamp must be in the future.'
+        );
 
-        require(_startTimestamp > block.timestamp, 'start::The starting timestamp must be in the future.');
-        require(_endTimestamp > _startTimestamp, 'start::The end timestamp must be bigger then the start timestamp.');
+        require(
+            _rewardPerBlock.length == rewardsTokens.length,
+            'Constructor::Rewards per block and rewards tokens must be with the same length.'
+        );
+        rewardPerBlock = _rewardPerBlock;
 
         for (uint256 i = 0; i < rewardsTokens.length; i++) {
             uint256 rewardsAmount = calculateRewardsAmount(_startTimestamp, _endTimestamp, rewardPerBlock[i]);
@@ -111,6 +123,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 
         startBlock = _calculateBlocks(startTimestamp);
         endBlock = _calculateBlocks(endTimestamp);
+        lastRewardBlock = startBlock;
 
         emit Started();
     }
@@ -379,8 +392,10 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 		@param _rewardsPerBlock array with new rewards per block for each token 
 	 */
     function extend(uint256 _endTimestamp, uint256[] memory _rewardsPerBlock) external virtual onlyOwner {
-        require(_endTimestamp > block.timestamp, 'Extend::End block must be in the future');
-        require(_endTimestamp >= endTimestamp, 'Extend::End block must be after the current end block');
+        require(
+            _endTimestamp > block.timestamp && _endTimestamp > endTimestamp,
+            'Extend::End block must be in the future and after current'
+        );
         require(
             _rewardsPerBlock.length == rewardsTokens.length,
             'Extend::Rewards amounts length is less than expected'

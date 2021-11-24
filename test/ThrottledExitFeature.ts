@@ -33,7 +33,7 @@ describe('ThrottledExitFeature', () => {
   const standardStakingAmount = ethers.utils.parseEther('5'); // 5 tokens
   const contractStakeLimit = ethers.utils.parseEther('10'); // 10 tokens
 
-  let startTimestmap: number;
+  let startTimestamp: number;
   let endTimestamp: number;
   const virtualBlocksTime = 10; // 10s == 10000ms
   const oneMinute = 60;
@@ -56,9 +56,9 @@ describe('ThrottledExitFeature', () => {
     }
 
     const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestmap = currentBlock.timestamp + oneMinute;
-    endTimestamp = startTimestmap + oneMinute * 2;
-    startBlock = Math.trunc(startTimestmap / virtualBlocksTime);
+    startTimestamp = currentBlock.timestamp + oneMinute;
+    endTimestamp = startTimestamp + oneMinute * 2;
+    startBlock = Math.trunc(startTimestamp / virtualBlocksTime);
     endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
   };
 
@@ -66,10 +66,9 @@ describe('ThrottledExitFeature', () => {
     const ThrottledExitRewardsPoolMock = await ethers.getContractFactory('ThrottledExitRewardsPoolMock');
     ThrottledExitFeatureInstance = (await ThrottledExitRewardsPoolMock.deploy(
       stakingTokenAddress,
-      startTimestmap,
+      startTimestamp,
       endTimestamp,
       rewardTokensAddresses,
-      rewardPerBlock,
       stakeLimit,
       _throttleRoundBlocks,
       _throttleRoundCap,
@@ -78,6 +77,8 @@ describe('ThrottledExitFeature', () => {
     )) as ThrottledExitRewardsPoolMock;
 
     await rewardTokensInstances[0].mint(ThrottledExitFeatureInstance.address, amount);
+
+    await ThrottledExitFeatureInstance.start(startTimestamp, endTimestamp, rewardPerBlock);
 
     await stakingTokenInstance.approve(ThrottledExitFeatureInstance.address, standardStakingAmount);
     await stakingTokenInstance.connect(bobAccount).approve(ThrottledExitFeatureInstance.address, standardStakingAmount);

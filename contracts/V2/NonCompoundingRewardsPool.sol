@@ -20,21 +20,13 @@ contract NonCompoundingRewardsPool is
         uint256 _startTimestamp,
         uint256 _endTimestamp,
         address[] memory _rewardsTokens,
-        uint256[] memory _rewardPerBlock,
         uint256 _stakeLimit,
         uint256 _throttleRoundBlocks,
         uint256 _throttleRoundCap,
         uint256 _contractStakeLimit,
         uint256 _virtualBlockTime
     )
-        RewardsPoolBase(
-            _stakingToken,
-            _rewardsTokens,
-            _rewardPerBlock,
-            _stakeLimit,
-            _contractStakeLimit,
-            _virtualBlockTime
-        )
+        RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _virtualBlockTime)
         StakeLock(_endTimestamp)
     {
         setThrottleParams(_throttleRoundBlocks, _throttleRoundCap, _endTimestamp, _virtualBlockTime);

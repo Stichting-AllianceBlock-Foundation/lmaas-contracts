@@ -29,7 +29,7 @@ describe('LimitedAutoStake', () => {
 
   let startBlock: number;
   let endBlock: number;
-  let startTimestmap: number;
+  let startTimestamp: number;
   let endTimestamp: number;
 
   const virtualBlocksTime: number = 10; // 10s == 10000ms
@@ -46,9 +46,9 @@ describe('LimitedAutoStake', () => {
 
   const setupRewardsPoolParameters = async () => {
     const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestmap = currentBlock.timestamp + oneMinute;
-    endTimestamp = startTimestmap + oneMinute * 2;
-    startBlock = Math.trunc(startTimestmap / virtualBlocksTime);
+    startTimestamp = currentBlock.timestamp + oneMinute;
+    endTimestamp = startTimestamp + oneMinute * 2;
+    startBlock = Math.trunc(startTimestamp / virtualBlocksTime);
     endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
   };
 
@@ -70,10 +70,9 @@ describe('LimitedAutoStake', () => {
 
       OneStakerRewardsPoolInstance = (await deployContract(testAccount, OneStakerRewardsPoolArtifact, [
         stakingTokenAddress,
-        startTimestmap,
+        startTimestamp,
         endTimestamp,
         [stakingTokenAddress],
-        [bOne],
         ethers.constants.MaxUint256,
         AutoStakingInstance.address,
         contractStakeLimit,
@@ -125,10 +124,9 @@ describe('LimitedAutoStake', () => {
 
       OneStakerRewardsPoolInstance = (await deployContract(testAccount, OneStakerRewardsPoolArtifact, [
         stakingTokenAddress,
-        startTimestmap,
+        startTimestamp,
         endTimestamp,
         [stakingTokenAddress],
-        [bOne],
         ethers.constants.MaxUint256,
         AutoStakingInstance.address,
         contractStakeLimit,
@@ -140,6 +138,8 @@ describe('LimitedAutoStake', () => {
       await stakingTokenInstance.mint(test2Account.address, amount);
 
       await stakingTokenInstance.mint(OneStakerRewardsPoolInstance.address, amount);
+
+      await OneStakerRewardsPoolInstance.start(startTimestamp, endTimestamp, [bOne]);
 
       await stakingTokenInstance.approve(AutoStakingInstance.address, standardStakingAmount);
       await stakingTokenInstance.connect(test2Account).approve(AutoStakingInstance.address, standardStakingAmount);

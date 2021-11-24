@@ -11,20 +11,10 @@ contract OnlyExitRewardsPoolMock is RewardsPoolBase, OnlyExitFeature {
         uint256 _startBlock,
         uint256 _endBlock,
         address[] memory _rewardsTokens,
-        uint256[] memory _rewardPerBlock,
         uint256 _stakeLimit,
         uint256 _contractStakeLimit,
         uint256 _virtualBlockTime
-    )
-        RewardsPoolBase(
-            _stakingToken,
-            _rewardsTokens,
-            _rewardPerBlock,
-            _stakeLimit,
-            _contractStakeLimit,
-            _virtualBlockTime
-        )
-    {}
+    ) RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _virtualBlockTime) {}
 
     function withdraw(uint256 _tokenAmount) public virtual override(OnlyExitFeature, RewardsPoolBase) {
         OnlyExitFeature.withdraw(_tokenAmount);
