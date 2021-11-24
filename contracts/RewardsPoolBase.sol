@@ -403,9 +403,11 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
                 uint256 spentRewards = calculateRewardsAmount(startTimestamp, block.timestamp, rewardPerBlock[i]);
 
                 uint256 balance = IERC20Detailed(rewardsTokens[i]).balanceOf(address(this));
-                uint256 availableBalance = balance -
-                    totalStaked -
-                    (totalSpentRewards[i] + spentRewards - totalClaimed[i]);
+                uint256 availableBalance = balance - (totalSpentRewards[i] + spentRewards - totalClaimed[i]);
+
+                if (rewardsTokens[i] == address(stakingToken)) {
+                    availableBalance = availableBalance - totalStaked;
+                }
 
                 require(availableBalance > newRemainingRewards, 'Extend:: Not enough rewards in the pool to extend');
 

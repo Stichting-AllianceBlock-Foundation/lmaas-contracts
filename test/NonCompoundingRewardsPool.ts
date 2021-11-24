@@ -9,7 +9,7 @@ import { TestERC20 } from '../typechain-types/TestERC20';
 import { NonCompoundingRewardsPool } from '../typechain-types/NonCompoundingRewardsPool';
 import { timeTravel } from './utils';
 
-describe('NonCompoundingRewardsPool', () => {
+describe.only('NonCompoundingRewardsPool', () => {
   let accounts: SignerWithAddress[];
   let testAccount: SignerWithAddress;
   let test1Account: SignerWithAddress;
