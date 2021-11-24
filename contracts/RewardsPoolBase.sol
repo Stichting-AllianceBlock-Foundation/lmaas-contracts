@@ -11,20 +11,25 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     using SafeERC20Detailed for IERC20Detailed;
 
     uint256 public totalStaked;
-    uint256[] public totalClaimed;
-    uint256[] public totalSpentRewards;
+    uint256[] private totalClaimed;
+    uint256[] private totalSpentRewards;
+
     uint256[] public rewardPerBlock;
     address[] public rewardsTokens;
+
     IERC20Detailed public stakingToken;
+
     uint256 public startTimestamp;
     uint256 public endTimestamp;
-    uint256 public startBlock;
-    uint256 public endBlock;
-    uint256 public lastRewardBlock;
+    uint256 private startBlock;
+    uint256 private endBlock;
+    uint256 private lastRewardBlock;
+
     uint256[] public accumulatedRewardMultiplier;
-    address public rewardsPoolFactory;
+
     uint256 public stakeLimit;
     uint256 public contractStakeLimit;
+
     uint256 private virtualBlockTime;
 
     struct UserInfo {
@@ -63,7 +68,6 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 
         stakingToken = _stakingToken;
         rewardsTokens = _rewardsTokens;
-        rewardsPoolFactory = msg.sender;
         stakeLimit = _stakeLimit;
         contractStakeLimit = _contractStakeLimit;
         virtualBlockTime = _virtualBlockTime * 1 seconds;
@@ -414,18 +418,11 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
                 );
             } else {
                 // We need to check if we have enough balance available in the contract to pay for the extension
-
-                uint256 spentRewards = calculateRewardsAmount(startTimestamp, block.timestamp, rewardPerBlock[i]);
-
-                uint256 balance = IERC20Detailed(rewardsTokens[i]).balanceOf(address(this));
-                uint256 availableBalance = balance - (totalSpentRewards[i] + spentRewards - totalClaimed[i]);
-
-                if (rewardsTokens[i] == address(stakingToken)) {
-                    availableBalance = availableBalance - totalStaked;
-                }
+                uint256 availableBalance = getAvailableBalance(i);
 
                 require(availableBalance > newRemainingRewards, 'Extend:: Not enough rewards in the pool to extend');
 
+                uint256 spentRewards = calculateRewardsAmount(startTimestamp, block.timestamp, rewardPerBlock[i]);
                 totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
             }
 
@@ -437,6 +434,26 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         endTimestamp = _endTimestamp;
 
         emit Extended(_endTimestamp, _rewardsPerBlock);
+    }
+
+    function getAvailableBalance(uint256 _rewardTokenIndex) public view returns (uint256) {
+        uint256 spentRewards = calculateRewardsAmount(
+            startTimestamp,
+            block.timestamp,
+            rewardPerBlock[_rewardTokenIndex]
+        );
+
+        address rewardToken = rewardsTokens[_rewardTokenIndex];
+
+        uint256 balance = IERC20Detailed(rewardToken).balanceOf(address(this));
+        uint256 availableBalance = balance -
+            (totalSpentRewards[_rewardTokenIndex] + spentRewards - totalClaimed[_rewardTokenIndex]);
+
+        if (rewardToken == address(stakingToken)) {
+            availableBalance = availableBalance - totalStaked;
+        }
+
+        return availableBalance;
     }
 
     /** @dev Withdrawing rewards acumulated from different pools for providing liquidity
