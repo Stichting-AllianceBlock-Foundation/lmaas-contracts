@@ -109,7 +109,10 @@ describe('OneStakerRewardsPool', () => {
     });
 
     it('Should successfully stake and accumulate reward', async () => {
+      const blockNumber = Math.floor((await ethers.provider.getBlock('latest')).timestamp / virtualBlocksTime);
+
       await OneStakerRewardsPoolInstance.connect(staker).stake(standardStakingAmount);
+
       const totalStakedAmount = await OneStakerRewardsPoolInstance.totalStaked();
       const userInfo = await OneStakerRewardsPoolInstance.userInfo(aliceAccount.address);
       const userRewardDebt = await OneStakerRewardsPoolInstance.getUserRewardDebt(aliceAccount.address, 0);
@@ -117,7 +120,7 @@ describe('OneStakerRewardsPool', () => {
 
       expect(totalStakedAmount).to.equal(standardStakingAmount, 'The stake was not successful');
       expect(userInfo.amountStaked).to.equal(standardStakingAmount, "User's staked amount is not correct");
-      expect(userInfo.firstStakedBlockNumber).to.equal(startBlock + 1, "User's first block is not correct");
+      expect(userInfo.firstStakedBlockNumber).to.equal(blockNumber, "User's first block is not correct");
       expect(userRewardDebt).to.equal(0, "User's reward debt is not correct");
       expect(userOwedToken).to.equal(0, "User's reward debt is not correct");
 
