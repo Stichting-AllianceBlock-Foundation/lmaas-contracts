@@ -405,6 +405,8 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
             'Extend::Rewards amounts length is less than expected'
         );
 
+        updateRewardMultipliers();
+
         for (uint256 i = 0; i < _rewardsPerBlock.length; i++) {
             uint256 currentRemainingRewards = calculateRewardsAmount(block.timestamp, endTimestamp, rewardPerBlock[i]);
             uint256 newRemainingRewards = calculateRewardsAmount(block.timestamp, _endTimestamp, _rewardsPerBlock[i]);
@@ -428,8 +430,6 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 
             rewardPerBlock[i] = _rewardsPerBlock[i];
         }
-
-        updateRewardMultipliers();
 
         endTimestamp = _endTimestamp;
 
