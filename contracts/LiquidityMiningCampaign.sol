@@ -11,6 +11,7 @@ import './pool-features/OnlyExitFeature.sol';
 contract LiquidityMiningCampaign is StakeTransferer, OnlyExitFeature {
     using SafeERC20Detailed for IERC20Detailed;
     address public immutable rewardToken;
+    string public campaignName;
 
     constructor(
         IERC20Detailed _stakingToken,
@@ -32,10 +33,19 @@ contract LiquidityMiningCampaign is StakeTransferer, OnlyExitFeature {
         _exitAndStake(msg.sender, _stakePool);
     }
 
-    /** @dev Exits the current campaing, claims the bonus and stake all rewards to ALBT staking contract
-	@param _userAddress the address of the staker
-	@param _stakePool the address of the pool where the tokens will be staked
-	 */
+    /**
+      @notice This method, if in the future the user wants to change the campaignName.
+      @param _campaignName string of the new name of the campaign.
+    */
+    function setCampaignName(string memory _campaignName) public onlyOwner {
+        campaignName = _campaignName;
+    }
+
+    /**
+     @dev Exits the current campaing, claims the bonus and stake all rewards to ALBT staking contract
+	   @param _userAddress the address of the staker
+	   @param _stakePool the address of the pool where the tokens will be staked
+	  */
     function _exitAndStake(address _userAddress, address _stakePool) internal onlyWhitelistedReceiver(_stakePool) {
         UserInfo storage user = userInfo[_userAddress];
 
