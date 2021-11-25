@@ -109,9 +109,9 @@ describe('OneStakerRewardsPool', () => {
     });
 
     it('Should successfully stake and accumulate reward', async () => {
-      const blockNumber = Math.floor((await ethers.provider.getBlock('latest')).timestamp / virtualBlocksTime);
-
       await OneStakerRewardsPoolInstance.connect(staker).stake(standardStakingAmount);
+
+      const blockNumber = Math.floor((await ethers.provider.getBlock('latest')).timestamp / virtualBlocksTime);
 
       const totalStakedAmount = await OneStakerRewardsPoolInstance.totalStaked();
       const userInfo = await OneStakerRewardsPoolInstance.userInfo(aliceAccount.address);

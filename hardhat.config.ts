@@ -3,6 +3,7 @@ import '@typechain/hardhat';
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-waffle';
 import 'hardhat-contract-sizer';
+import 'hardhat-gas-reporter';
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -27,5 +28,18 @@ module.exports = {
       runs: 200,
       enabled: true,
     },
+  },
+  networks: {
+    hardhat: {
+      mining: {
+        auto: true,
+        interval: 0,
+      },
+    },
+  },
+  gasReporter: {
+    currency: 'USD',
+    gasPrice: 120,
+    coinmarketcap: '2f8f78a1-2769-493f-9cd4-df353a6594d7',
   },
 };
