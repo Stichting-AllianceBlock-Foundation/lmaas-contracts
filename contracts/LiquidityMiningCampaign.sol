@@ -34,14 +34,6 @@ contract LiquidityMiningCampaign is StakeTransferer, OnlyExitFeature {
     }
 
     /**
-      @notice This method, if in the future the user wants to change the campaignName.
-      @param _campaignName string of the new name of the campaign.
-    */
-    function setCampaignName(string memory _campaignName) public onlyOwner {
-        campaignName = _campaignName;
-    }
-
-    /**
      @dev Exits the current campaing, claims the bonus and stake all rewards to ALBT staking contract
 	   @param _userAddress the address of the staker
 	   @param _stakePool the address of the pool where the tokens will be staked
