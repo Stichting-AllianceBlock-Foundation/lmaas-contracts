@@ -52,7 +52,9 @@ contract RewardsPoolBase is ReentrancyGuard {
         uint256 _stakeLimit,
         uint256 _contractStakeLimit,
         uint256 _virtualBlockTime
-    ) public {
+    ) {
+        require(address(_stakingToken) != address(0), 'Constructor::Invalid staking token address');
+
         require(_startTimestamp > _getCurrentTime(), 'Constructor::The starting timestamp must be in the future.');
         require(_endTimestamp > _startTimestamp, 'Constructor::The end timestamp must be in the future.');
         require(

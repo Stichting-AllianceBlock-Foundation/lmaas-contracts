@@ -55,11 +55,12 @@ contract LiquidityMiningCampaign is StakeTransferer, OnlyExitFeature {
         _stakeAndLock(msg.sender, _tokenAmount, _lockScheme);
     }
 
-    /** @dev Stakes LP tokens to the campaing and lockes them to a specific lockScheme contract to earn bonuses
-	@param _userAddress the address of the staker
-	@param _tokenAmount the amount to be staked
-	@param _lockScheme the address of the lock scheme 
-	 */
+    /** 
+      @dev Stakes LP tokens to the campaing and lockes them to a specific lockScheme contract to earn bonuses
+      @param _userAddress the address of the staker
+      @param _tokenAmount the amount to be staked
+      @param _lockScheme the address of the lock scheme 
+	  **/
     function _stakeAndLock(
         address _userAddress,
         uint256 _tokenAmount,
@@ -199,11 +200,11 @@ contract LiquidityMiningCampaign is StakeTransferer, OnlyExitFeature {
         _exitAndUnlock(msg.sender);
     }
 
-    function stake(uint256 _tokenAmount) public override {
+    function stake(uint256 _tokenAmount) public pure override {
         revert('LiquidityMiningCampaign::staking without locking is forbidden');
     }
 
-    function exitAndTransfer(address transferTo) public override {
+    function exitAndTransfer(address transferTo) public pure override {
         revert('LiquidityMiningCampaign::exit and transfer is forbidden');
     }
 

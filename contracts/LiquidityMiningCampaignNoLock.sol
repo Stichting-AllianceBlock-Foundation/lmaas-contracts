@@ -36,7 +36,6 @@ contract LiquidityMiningCampaignNoLock is StakeTransferer, OnlyExitFeature {
         uint256 _contractStakeLimit,
         uint256 _virtualBlockTime
     )
-        public
         RewardsPoolBase(
             _stakingToken,
             _startTimeStamp,
