@@ -11,6 +11,7 @@ import './pool-features/OnlyExitFeature.sol';
 contract LiquidityMiningCampaign is StakeTransferer, OnlyExitFeature {
     using SafeERC20Detailed for IERC20Detailed;
     address public immutable rewardToken;
+    string public campaignName;
 
     constructor(
         IERC20Detailed _stakingToken,
@@ -18,10 +19,12 @@ contract LiquidityMiningCampaign is StakeTransferer, OnlyExitFeature {
         address _albtAddress,
         uint256 _stakeLimit,
         uint256 _contractStakeLimit,
-        uint256 _virtualBlockTime
+        uint256 _virtualBlockTime,
+        string memory _campaingName
     ) RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _virtualBlockTime) {
         require(_albtAddress == _rewardsTokens[0], 'constructor:: The first reward address is different from the ALBT');
         rewardToken = _rewardsTokens[0];
+        campaignName = _campaingName;
     }
 
     function setReceiverWhitelisted(address receiver, bool whitelisted) public override(StakeTransferer) onlyOwner {
@@ -32,10 +35,11 @@ contract LiquidityMiningCampaign is StakeTransferer, OnlyExitFeature {
         _exitAndStake(msg.sender, _stakePool);
     }
 
-    /** @dev Exits the current campaing, claims the bonus and stake all rewards to ALBT staking contract
-	@param _userAddress the address of the staker
-	@param _stakePool the address of the pool where the tokens will be staked
-	 */
+    /**
+     @dev Exits the current campaing, claims the bonus and stake all rewards to ALBT staking contract
+	   @param _userAddress the address of the staker
+	   @param _stakePool the address of the pool where the tokens will be staked
+	  */
     function _exitAndStake(address _userAddress, address _stakePool) internal onlyWhitelistedReceiver(_stakePool) {
         UserInfo storage user = userInfo[_userAddress];
 
