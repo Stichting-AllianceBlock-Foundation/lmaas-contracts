@@ -104,7 +104,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     ) public onlyOwner {
         require(startTimestamp == 0, 'start::Pool is already started');
         require(
-            _startTimestamp > block.timestamp && _endTimestamp > _startTimestamp,
+            _startTimestamp >= block.timestamp && _endTimestamp > _startTimestamp,
             'start::The start & end timestamp must be in the future.'
         );
 
@@ -170,8 +170,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
             uint256 tokenDecimals = IERC20Detailed(rewardsTokens[i]).decimals();
             uint256 tokenMultiplier = 10**tokenDecimals;
 
-            uint256 totalDebt = (user.amountStaked * accumulatedRewardMultiplier[i]) / tokenMultiplier; // Update user reward debt for each token
-            user.rewardDebt[i] = totalDebt;
+            user.rewardDebt[i] = (user.amountStaked * accumulatedRewardMultiplier[i]) / tokenMultiplier; // Update user reward debt for each token
         }
 
         stakingToken.safeTransferFrom(address(chargeStaker ? staker : msg.sender), address(this), _tokenAmount);
@@ -407,8 +406,10 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 
         updateRewardMultipliers();
 
+        uint256 campaignTime = block.timestamp > endTimestamp ? endTimestamp : block.timestamp;
+
         for (uint256 i = 0; i < _rewardsPerBlock.length; i++) {
-            uint256 currentRemainingRewards = calculateRewardsAmount(block.timestamp, endTimestamp, rewardPerBlock[i]);
+            uint256 currentRemainingRewards = calculateRewardsAmount(campaignTime, endTimestamp, rewardPerBlock[i]);
             uint256 newRemainingRewards = calculateRewardsAmount(block.timestamp, _endTimestamp, _rewardsPerBlock[i]);
 
             if (currentRemainingRewards > newRemainingRewards) {
@@ -422,26 +423,28 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
                 // We need to check if we have enough balance available in the contract to pay for the extension
                 uint256 availableBalance = getAvailableBalance(i);
 
-                require(availableBalance > newRemainingRewards, 'Extend:: Not enough rewards in the pool to extend');
+                require(availableBalance >= newRemainingRewards, 'Extend:: Not enough rewards in the pool to extend');
 
-                uint256 spentRewards = calculateRewardsAmount(startTimestamp, block.timestamp, rewardPerBlock[i]);
+                uint256 spentRewards = calculateRewardsAmount(startTimestamp, campaignTime, rewardPerBlock[i]);
                 totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
             }
 
             rewardPerBlock[i] = _rewardsPerBlock[i];
         }
 
+        startTimestamp = block.timestamp;
         endTimestamp = _endTimestamp;
+
+        startBlock = _calculateBlocks(startTimestamp);
+        endBlock = _calculateBlocks(endTimestamp);
 
         emit Extended(_endTimestamp, _rewardsPerBlock);
     }
 
     function getAvailableBalance(uint256 _rewardTokenIndex) public view returns (uint256) {
-        uint256 spentRewards = calculateRewardsAmount(
-            startTimestamp,
-            block.timestamp,
-            rewardPerBlock[_rewardTokenIndex]
-        );
+        uint256 campaignTime = block.timestamp > endTimestamp ? endTimestamp : block.timestamp;
+
+        uint256 spentRewards = calculateRewardsAmount(startTimestamp, campaignTime, rewardPerBlock[_rewardTokenIndex]);
 
         address rewardToken = rewardsTokens[_rewardTokenIndex];
 

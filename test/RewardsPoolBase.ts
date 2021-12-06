@@ -1,13 +1,13 @@
 import { expect } from 'chai';
 import { ethers, network } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { BigNumber, BigNumberish } from 'ethers';
+import { BigNumber } from 'ethers';
 
 import { TestERC20 } from '../typechain-types/TestERC20';
 import { RewardsPoolBase } from '../typechain-types/RewardsPoolBase';
-import { getBlockNumber } from './utils';
+import { deployERC20, getTime, timeTravel } from './utils';
 
-describe('RewardsPoolBase', () => {
+describe.only('RewardsPoolBase', () => {
   let aliceAccount: SignerWithAddress;
   let bobAccount: SignerWithAddress;
   let carolAccount: SignerWithAddress;
@@ -24,9 +24,9 @@ describe('RewardsPoolBase', () => {
   let endTimestamp: number;
   const virtualBlockTime: number = 10; //10s == 10000ms
   const oneMinute: number = 60; // 1 minute
+  const poolLength = oneMinute * 60; // 1 hour
 
-  const rewardTokensCount = 1; // 5 rewards tokens for tests
-  const day = 60 * 24 * 60;
+  const rewardTokensCount = 5; // 5 rewards tokens for tests
   const amount = ethers.utils.parseEther('5184000');
   const stakeLimit = amount;
   const bOne = ethers.utils.parseEther('1');
@@ -38,10 +38,8 @@ describe('RewardsPoolBase', () => {
     rewardTokensAddresses = [];
     rewardPerBlock = [];
 
-    const TestERC20 = await ethers.getContractFactory('TestERC20');
-
     for (let i = 0; i < rewardTokensCount; i++) {
-      const tknInst = (await TestERC20.deploy(amount)) as TestERC20;
+      const tknInst = await deployERC20(amount);
 
       // populate tokens
       rewardTokensInstances.push(tknInst);
@@ -52,22 +50,14 @@ describe('RewardsPoolBase', () => {
       rewardPerBlock.push(parsedReward);
     }
 
-    const currentBlockNumber = await ethers.provider.getBlockNumber();
-    const currentBlock = await ethers.provider.getBlock(currentBlockNumber);
-    startTimestamp = currentBlock.timestamp + oneMinute;
-    endTimestamp = startTimestamp + oneMinute * 2;
+    startTimestamp = (await getTime()) + oneMinute;
+    endTimestamp = startTimestamp + poolLength;
   };
-
-  async function timeTravel(seconds: number) {
-    await network.provider.send('evm_increaseTime', [seconds]);
-    await network.provider.send('evm_mine');
-  }
 
   beforeEach(async () => {
     [aliceAccount, bobAccount, carolAccount] = await ethers.getSigners();
 
-    const TestERC20 = await ethers.getContractFactory('TestERC20');
-    stakingTokenInstance = (await TestERC20.deploy(amount)) as TestERC20;
+    stakingTokenInstance = await deployERC20(amount);
 
     await stakingTokenInstance.mint(aliceAccount.address, amount);
     await stakingTokenInstance.mint(bobAccount.address, amount);
@@ -85,7 +75,13 @@ describe('RewardsPoolBase', () => {
       virtualBlockTime
     )) as RewardsPoolBase;
 
-    await rewardTokensInstances[0].mint(RewardsPoolBaseInstance.address, amount);
+    // Send the required amount of tokens to the contract
+    for (let i = 0; i < rewardTokensCount; i++) {
+      await rewardTokensInstances[i].mint(
+        RewardsPoolBaseInstance.address,
+        rewardPerBlock[i].mul((endTimestamp - startTimestamp) / virtualBlockTime)
+      );
+    }
 
     await RewardsPoolBaseInstance.start(startTimestamp, endTimestamp, rewardPerBlock);
   });
@@ -401,29 +397,23 @@ describe('RewardsPoolBase', () => {
       expect(RewardsPoolBaseInstance.withdraw(0)).to.be.revertedWith('Withdraw::Cannot withdraw 0');
     });
 
-    const calculateRewardsAmount = async (startTime: number, endTime: number, rewardsPerBlock: BigNumber) => {
-      let rewardsPeriod = endTimestamp - startTime;
-      let rewardsBlockPeriod = Math.trunc(rewardsPeriod / virtualBlockTime);
-      let rewardsAmount = rewardsPerBlock.mul(rewardsBlockPeriod);
-      return rewardsAmount;
-    };
-
-    it('Should extend the periods and update the reward per block', async () => {
+    async function extend() {
       await timeTravel(10);
 
-      let currentEndTimestamp = await RewardsPoolBaseInstance.endTimestamp();
-      let currentRewardPerBlock = await RewardsPoolBaseInstance.rewardPerBlock(0);
+      let currentEndTimestamp = (await RewardsPoolBaseInstance.endTimestamp()).toNumber();
       let newRewardsPerBlock = [];
 
-      const newEndTimestamp = currentEndTimestamp.add(oneMinute);
+      let currentTime = await getTime();
+      const newEndTimestamp = BigNumber.from(Math.max(currentTime, currentEndTimestamp) + poolLength);
 
       for (let i = 0; i < rewardTokensCount; i++) {
-        let parsedReward = await ethers.utils.parseEther(`${i + 2}`);
+        let parsedReward = await ethers.utils.parseEther(`${(i + 1) * 2}`);
+        const availableBalance = await RewardsPoolBaseInstance.getAvailableBalance(i);
 
         // Send the required reward tokens to the RewardsPool
-        await rewardTokensInstances[0].mint(
+        await rewardTokensInstances[i].mint(
           RewardsPoolBaseInstance.address,
-          parsedReward.mul(oneMinute / virtualBlockTime)
+          parsedReward.mul(newEndTimestamp.sub(currentTime).div(virtualBlockTime)).sub(availableBalance)
         );
 
         newRewardsPerBlock.push(parsedReward);
@@ -432,13 +422,85 @@ describe('RewardsPoolBase', () => {
       await RewardsPoolBaseInstance.extend(newEndTimestamp, newRewardsPerBlock);
 
       let endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
-      let rewardPerBlock = await RewardsPoolBaseInstance.rewardPerBlock(0);
 
-      expect(endTimestamp).to.equal(currentEndTimestamp.add(oneMinute), 'Extending the end block was not successfull');
-      expect(rewardPerBlock).to.equal(
-        currentRewardPerBlock.add(bOne),
-        'Extending the reward per block was not successfull'
+      expect(endTimestamp).to.equal(newEndTimestamp, 'Extending the end block was not successfull');
+
+      for (let i = 0; i < rewardTokensCount; i++) {
+        let rewardPerBlock = await RewardsPoolBaseInstance.rewardPerBlock(i);
+        expect(rewardPerBlock).to.equal(newRewardsPerBlock[i], 'Extending the reward per block was not successfull');
+      }
+    }
+
+    it('Should extend correctly', async () => {
+      await extend();
+    });
+
+    it('Should extend correctly when pool is already done', async () => {
+      await timeTravel(poolLength * 2);
+      await extend();
+    });
+
+    it('Should extend correctly multiple times', async () => {
+      await extend();
+      await timeTravel(poolLength / 2);
+      await extend();
+      await timeTravel(poolLength / 2);
+      await extend();
+      await timeTravel(poolLength / 2);
+      await extend();
+    });
+
+    it('Should fail extending if there are not enough rewards', async () => {
+      await timeTravel(10);
+
+      let currentEndTimestamp = await RewardsPoolBaseInstance.endTimestamp();
+      let newRewardsPerBlock = [];
+
+      const newEndTimestamp = currentEndTimestamp.add(poolLength);
+      let currentTime = await getTime();
+
+      for (let i = 0; i < rewardTokensCount; i++) {
+        let parsedReward = await ethers.utils.parseEther(`${(i + 1) * 2}`);
+        const availableBalance = await RewardsPoolBaseInstance.getAvailableBalance(i);
+
+        // Send 50% less then the required reward tokens to the RewardsPool
+        await rewardTokensInstances[i].mint(
+          RewardsPoolBaseInstance.address,
+          parsedReward.mul(newEndTimestamp.sub(currentTime).div(virtualBlockTime)).sub(availableBalance).div(2)
+        );
+
+        newRewardsPerBlock.push(parsedReward);
+      }
+
+      await expect(RewardsPoolBaseInstance.extend(newEndTimestamp, newRewardsPerBlock)).to.be.revertedWith(
+        'Extend:: Not enough rewards in the pool to extend'
       );
+    });
+
+    it('Should send back rewards when extending if there are more than enough rewards', async () => {
+      await timeTravel(10);
+
+      let currentEndTimestamp = await RewardsPoolBaseInstance.endTimestamp();
+      let newRewardsPerBlock = [];
+
+      const newEndTimestamp = currentEndTimestamp.add(poolLength);
+
+      for (let i = 0; i < rewardTokensCount; i++) {
+        let parsedReward = await ethers.utils.parseEther(`${(i + 1) * 0.1}`);
+        newRewardsPerBlock.push(parsedReward);
+      }
+
+      const beforeBalances = [];
+      for (let i = 0; i < rewardTokensCount; i++) {
+        beforeBalances.push(await rewardTokensInstances[i].balanceOf(aliceAccount.address));
+      }
+
+      await RewardsPoolBaseInstance.extend(newEndTimestamp, newRewardsPerBlock);
+
+      for (let i = 0; i < rewardTokensCount; i++) {
+        const afterBalance = await rewardTokensInstances[i].balanceOf(aliceAccount.address);
+        expect(afterBalance.gt(beforeBalances[i])).to.equal(true, 'Extending the reward per block was not successfull');
+      }
     });
 
     it('Should fail extending the rewards pool if the end block is not in the future', async () => {
@@ -447,7 +509,7 @@ describe('RewardsPoolBase', () => {
       );
     });
 
-    it('Should fail extentind the rewards pool if the end block is not greater than the previous', async () => {
+    it('Should fail extending the rewards pool if the end block is not greater than the previous', async () => {
       let currentEndBlock = await RewardsPoolBaseInstance.endTimestamp();
       let newEndBlock = currentEndBlock.sub(1);
 
@@ -456,7 +518,7 @@ describe('RewardsPoolBase', () => {
       );
     });
 
-    it('Should fail extentind the rewards pool if the rewards per block arrays is with different length', async () => {
+    it('Should fail extending the rewards pool if the rewards per block arrays is with different length', async () => {
       let currentEndBlock = await RewardsPoolBaseInstance.endTimestamp();
       let newRewardsPerBlock = [];
 
@@ -483,9 +545,7 @@ describe('RewardsPoolBase', () => {
 
   describe('Withdrawing LP rewards', async function () {
     it('Should not withdtaw if the caller is not the factory contract', async () => {
-      const TestERC20 = await ethers.getContractFactory('TestERC20');
-      const lpContractInstance = (await TestERC20.deploy(amount)) as TestERC20;
-
+      const lpContractInstance = await deployERC20(amount);
       await lpContractInstance.mint(RewardsPoolBaseInstance.address, '100000000000');
 
       await expect(
