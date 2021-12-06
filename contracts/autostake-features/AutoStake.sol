@@ -50,7 +50,7 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
     }
 
     function setPool(address pool) public onlyOwner {
-        require(address(rewardPool) == address(0x0), 'Reward pool already set');
+        require(address(rewardPool) == address(0), 'Reward pool already set');
         rewardPool = IRewardsPoolBase(pool);
     }
 

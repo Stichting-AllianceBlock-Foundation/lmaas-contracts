@@ -1,5 +1,5 @@
 import { BigNumber } from 'ethers';
-import { ethers, waffle, network } from 'hardhat';
+import { ethers, waffle } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 const { deployContract } = waffle;
@@ -17,6 +17,7 @@ describe('AutoStake', () => {
   let AutoStakingInstance: AutoStake;
   let stakingTokenInstance: TestERC20;
   let stakingTokenAddress: string;
+
   let testAccount: SignerWithAddress;
   let test1Account: SignerWithAddress;
   let test2Account: SignerWithAddress;
@@ -30,31 +31,28 @@ describe('AutoStake', () => {
 
   let startTimestamp: number;
   let endTimestamp: number;
-  let endBlock;
+  let endBlock: number;
 
   let throttleRoundBlocks = 20;
-  const virtualBlocksTime: number = 10; // 10s == 10000ms
+  const virtualBlocksTime: number = 10;
   const oneMinute: number = 60;
 
-  const day: number = 60 * 24 * 60;
   const amount: BigNumber = ethers.utils.parseEther('5184000');
   const bOne: BigNumber = ethers.utils.parseEther('1');
-  const standardStakingAmount: BigNumber = ethers.utils.parseEther('5'); // 5 tokens
-  const contractStakeLimit: BigNumber = ethers.utils.parseEther('15'); // 10 tokens
-
-  const setupRewardsPoolParameters = async () => {
-    const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestamp = currentBlock.timestamp + oneMinute;
-    endTimestamp = startTimestamp + oneMinute * 2;
-    endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
-  };
+  const standardStakingAmount: BigNumber = ethers.utils.parseEther('5');
+  const contractStakeLimit: BigNumber = ethers.utils.parseEther('15');
 
   describe('Deploy and Connect', async function () {
+    beforeEach(async () => {
+      const currentBlock = await ethers.provider.getBlock('latest');
+      startTimestamp = currentBlock.timestamp + oneMinute;
+      endTimestamp = startTimestamp + oneMinute * 2;
+      endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
+    });
+
     it('[Should deploy and connect the two tokens]:', async () => {
       stakingTokenInstance = (await deployContract(staker, TestERC20Artifact, [amount])) as TestERC20;
       stakingTokenAddress = stakingTokenInstance.address;
-
-      await setupRewardsPoolParameters();
 
       AutoStakingInstance = (await deployContract(staker, AutoStakeArtifact, [
         stakingTokenAddress,
@@ -119,7 +117,10 @@ describe('AutoStake', () => {
       stakingTokenInstance = (await deployContract(staker, TestERC20Artifact, [amount])) as TestERC20;
       stakingTokenAddress = stakingTokenInstance.address;
 
-      await setupRewardsPoolParameters();
+      const currentBlock = await ethers.provider.getBlock('latest');
+      startTimestamp = currentBlock.timestamp + oneMinute;
+      endTimestamp = startTimestamp + oneMinute * 2;
+      endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
 
       AutoStakingInstance = (await deployContract(staker, AutoStakeArtifact, [
         stakingTokenAddress,
@@ -263,16 +264,13 @@ describe('AutoStake', () => {
           await expect(AutoStakingInstance.completeExit()).revertedWith('finalizeExit::Trying to exit too early');
         });
 
-        it('Should complete succesfully', async () => {
+        it('[Should complete succesfully]:', async () => {
           await timeTravel(190);
           await AutoStakingInstance.exit();
 
           await timeTravel(300);
 
           const userBalanceBefore = await stakingTokenInstance.balanceOf(staker.address);
-          const contractBalance = await stakingTokenInstance.balanceOf(AutoStakingInstance.address);
-
-          const tokenAddress = await AutoStakingInstance.stakingToken();
 
           await AutoStakingInstance.completeExit();
 
