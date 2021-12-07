@@ -1,5 +1,4 @@
-import { BigNumber } from 'ethers';
-import { ethers, waffle, network } from 'hardhat';
+import { ethers, waffle } from 'hardhat';
 const { deployContract } = waffle;
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
@@ -40,25 +39,20 @@ describe('AutoStakeTransfer', () => {
 
   let throttleRoundBlocks: number = 20;
 
-  const day = 60 * 24 * 60;
   const amount = ethers.utils.parseEther('5184000');
   const bOne = ethers.utils.parseEther('1');
   const standardStakingAmount = ethers.utils.parseEther('5'); // 5 tokens
   const contractStakeLimit = amount;
-
-  const setupRewardsPoolParameters = async () => {
-    const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestamp = currentBlock.timestamp + oneMinute;
-    endTimestamp = startTimestamp + oneMinute * 2;
-    endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
-  };
 
   beforeEach(async () => {
     stakingTokenInstance = (await deployContract(testAccount, TestERC20Artifact, [amount])) as TestERC20;
 
     stakingTokenAddress = stakingTokenInstance.address;
 
-    await setupRewardsPoolParameters();
+    const currentBlock = await ethers.provider.getBlock('latest');
+    startTimestamp = currentBlock.timestamp + oneMinute;
+    endTimestamp = startTimestamp + oneMinute * 2;
+    endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
 
     StakeTransfererAutoStakeInstance = (await deployContract(testAccount, StakeTransfererAutoStakeArtifact, [
       stakingTokenAddress,
