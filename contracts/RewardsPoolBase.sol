@@ -421,7 +421,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
                 );
             } else {
                 // We need to check if we have enough balance available in the contract to pay for the extension
-                uint256 availableBalance = getAvailableBalance(i);
+                uint256 availableBalance = getAvailableBalance(i, block.timestamp);
 
                 require(availableBalance >= newRemainingRewards, 'Extend:: Not enough rewards in the pool to extend');
 
@@ -441,8 +441,8 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         emit Extended(_endTimestamp, _rewardsPerBlock);
     }
 
-    function getAvailableBalance(uint256 _rewardTokenIndex) public view returns (uint256) {
-        uint256 campaignTime = block.timestamp > endTimestamp ? endTimestamp : block.timestamp;
+    function getAvailableBalance(uint256 _rewardTokenIndex, uint256 time) public view returns (uint256) {
+        uint256 campaignTime = time > endTimestamp ? endTimestamp : time;
 
         uint256 spentRewards = calculateRewardsAmount(startTimestamp, campaignTime, rewardPerBlock[_rewardTokenIndex]);
 

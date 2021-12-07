@@ -7,6 +7,10 @@ export async function timeTravel(seconds: number) {
   await network.provider.send('evm_mine');
 }
 
+export async function timeTravelTo(time: number) {
+  await network.provider.send('evm_setNextBlockTimestamp', [time]);
+}
+
 export async function getBlockNumber(virtualBlockTime: number) {
   return Math.trunc((await getTime()) / virtualBlockTime);
 }

@@ -5,7 +5,7 @@ import { BigNumber } from 'ethers';
 
 import { TestERC20 } from '../typechain-types/TestERC20';
 import { RewardsPoolBase } from '../typechain-types/RewardsPoolBase';
-import { deployERC20, getTime, timeTravel } from './utils';
+import { deployERC20, getTime, timeTravel, timeTravelTo } from './utils';
 
 describe.only('RewardsPoolBase', () => {
   let aliceAccount: SignerWithAddress;
@@ -329,7 +329,7 @@ describe.only('RewardsPoolBase', () => {
       expect(userTokensOwed).to.equal(0, 'User tokens owed should be zero');
     });
 
-    it('Shouild withdraw the stake succesfully', async () => {
+    it('Should withdraw the stake succesfully', async () => {
       await timeTravel(10);
 
       const userInitialBalance = await stakingTokenInstance.balanceOf(aliceAccount.address);
@@ -400,24 +400,31 @@ describe.only('RewardsPoolBase', () => {
     async function extend() {
       await timeTravel(10);
 
-      let currentEndTimestamp = (await RewardsPoolBaseInstance.endTimestamp()).toNumber();
       let newRewardsPerBlock = [];
 
-      let currentTime = await getTime();
-      const newEndTimestamp = BigNumber.from(Math.max(currentTime, currentEndTimestamp) + poolLength);
+      let startTime = (await getTime()) + 20000;
+      const newEndTimestamp = BigNumber.from(startTime + poolLength);
+
+      const mintPromises = [];
 
       for (let i = 0; i < rewardTokensCount; i++) {
         let parsedReward = await ethers.utils.parseEther(`${(i + 1) * 2}`);
-        const availableBalance = await RewardsPoolBaseInstance.getAvailableBalance(i);
+        const availableBalance = await RewardsPoolBaseInstance.getAvailableBalance(i, startTime);
 
         // Send the required reward tokens to the RewardsPool
-        await rewardTokensInstances[i].mint(
-          RewardsPoolBaseInstance.address,
-          parsedReward.mul(newEndTimestamp.sub(currentTime).div(virtualBlockTime)).sub(availableBalance)
+        mintPromises.push(
+          rewardTokensInstances[i].mint(
+            RewardsPoolBaseInstance.address,
+            parsedReward.mul(Math.floor(poolLength / virtualBlockTime)).sub(availableBalance)
+          )
         );
 
         newRewardsPerBlock.push(parsedReward);
       }
+
+      await Promise.all(mintPromises);
+
+      await timeTravelTo(startTime);
 
       await RewardsPoolBaseInstance.extend(newEndTimestamp, newRewardsPerBlock);
 
@@ -442,12 +449,22 @@ describe.only('RewardsPoolBase', () => {
 
     it('Should extend correctly multiple times', async () => {
       await extend();
+
       await timeTravel(poolLength / 2);
       await extend();
+
       await timeTravel(poolLength / 2);
       await extend();
+
       await timeTravel(poolLength / 2);
       await extend();
+
+      // Wait for pool to end
+      await timeTravel(poolLength * 2);
+
+      for (let i = 0; i < rewardTokensCount; i++) {
+        expect(await RewardsPoolBaseInstance.getAvailableBalance(i, await getTime())).to.equal(0);
+      }
     });
 
     it('Should fail extending if there are not enough rewards', async () => {
@@ -461,7 +478,7 @@ describe.only('RewardsPoolBase', () => {
 
       for (let i = 0; i < rewardTokensCount; i++) {
         let parsedReward = await ethers.utils.parseEther(`${(i + 1) * 2}`);
-        const availableBalance = await RewardsPoolBaseInstance.getAvailableBalance(i);
+        const availableBalance = await RewardsPoolBaseInstance.getAvailableBalance(i, await getTime());
 
         // Send 50% less then the required reward tokens to the RewardsPool
         await rewardTokensInstances[i].mint(
@@ -540,6 +557,16 @@ describe.only('RewardsPoolBase', () => {
       await expect(RewardsPoolBaseInstance.connect(bobAccount).extend(newEndTime, rewardPerBlock)).to.be.revertedWith(
         'Ownable: caller is not the owner'
       );
+    });
+  });
+
+  describe('Get available balance', async function () {
+    it('Should return 0 when done', async () => {
+      await timeTravel(poolLength * 2);
+
+      for (let i = 0; i < rewardTokensCount; i++) {
+        expect(await RewardsPoolBaseInstance.getAvailableBalance(i, await getTime())).to.equal(0);
+      }
     });
   });
 
