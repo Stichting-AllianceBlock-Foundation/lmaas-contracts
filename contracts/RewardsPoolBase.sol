@@ -110,7 +110,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 
         require(
             _rewardPerBlock.length == rewardsTokens.length,
-            'Constructor::Rewards per block and rewards tokens must be with the same length.'
+            'Start::Rewards per block and rewards tokens must be with the same length.'
         );
         rewardPerBlock = _rewardPerBlock;
 
@@ -442,13 +442,16 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     }
 
     function getAvailableBalance(uint256 _rewardTokenIndex, uint256 time) public view returns (uint256) {
+        address rewardToken = rewardsTokens[_rewardTokenIndex];
+        uint256 balance = IERC20Detailed(rewardToken).balanceOf(address(this));
+
+        if (startTimestamp == 0) {
+            return balance;
+        }
+
         uint256 campaignTime = time > endTimestamp ? endTimestamp : time;
 
         uint256 spentRewards = calculateRewardsAmount(startTimestamp, campaignTime, rewardPerBlock[_rewardTokenIndex]);
-
-        address rewardToken = rewardsTokens[_rewardTokenIndex];
-
-        uint256 balance = IERC20Detailed(rewardToken).balanceOf(address(this));
         uint256 availableBalance = balance -
             (totalSpentRewards[_rewardTokenIndex] + spentRewards - totalClaimed[_rewardTokenIndex]);
 
