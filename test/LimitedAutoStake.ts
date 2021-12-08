@@ -1,15 +1,15 @@
 import { BigNumber } from 'ethers';
-import { ethers, waffle, network } from 'hardhat';
+import { ethers, waffle } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 const { deployContract } = waffle;
-import OneStakerRewardsPoolArtifact from '../artifacts/contracts/mocks/OneStakerRewardsPoolMock.sol/OneStakerRewardsPoolMock.json';
+import CompoundingRewardsPoolArtifact from '../artifacts/contracts/V2/CompoundingRewardsPool.sol/CompoundingRewardsPool.json';
 import LimitedAutoStakeArtifact from '../artifacts/contracts/autostake-features/LimitedAutoStake.sol/LimitedAutoStake.json';
 import TestERC20Artifact from '../artifacts/contracts/TestERC20.sol/TestERC20.json';
-import { OneStakerRewardsPoolMock } from '../typechain-types/OneStakerRewardsPoolMock';
 import { LimitedAutoStake } from '../typechain-types/LimitedAutoStake';
 import { TestERC20 } from '../typechain-types/TestERC20';
 import { timeTravel } from './utils';
+import { CompoundingRewardsPool } from '../typechain-types/CompoundingRewardsPool';
 
 describe('LimitedAutoStake', () => {
   let accounts: SignerWithAddress[];
@@ -22,10 +22,9 @@ describe('LimitedAutoStake', () => {
     [testAccount, test1Account, test2Account] = accounts;
   });
 
-  let OneStakerRewardsPoolInstance: OneStakerRewardsPoolMock;
+  let CompoundingRewardsPoolInstance: CompoundingRewardsPool;
   let AutoStakingInstance: LimitedAutoStake;
   let stakingTokenInstance: TestERC20;
-  let stakingTokenAddress: string;
 
   let startBlock: number;
   let endBlock: number;
@@ -42,25 +41,21 @@ describe('LimitedAutoStake', () => {
   const stakeLimit: BigNumber = amount;
   const bOne: BigNumber = ethers.utils.parseEther('1');
   const standardStakingAmount: BigNumber = ethers.utils.parseEther('5'); // 5 tokens
-  const contractStakeLimit: BigNumber = ethers.utils.parseEther('10'); // 10 tokens
-
-  const setupRewardsPoolParameters = async () => {
-    const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestamp = currentBlock.timestamp + oneMinute;
-    endTimestamp = startTimestamp + oneMinute * 2;
-    startBlock = Math.trunc(startTimestamp / virtualBlocksTime);
-    endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
-  };
 
   describe('Deploy and connect', async function () {
+    beforeEach(async () => {
+      const currentBlock = await ethers.provider.getBlock('latest');
+      startTimestamp = currentBlock.timestamp + oneMinute;
+      endTimestamp = startTimestamp + oneMinute * 2;
+      startBlock = Math.trunc(startTimestamp / virtualBlocksTime);
+      endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
+    });
+
     it('[Should deploy and connect the two tokens]:', async () => {
       stakingTokenInstance = (await deployContract(testAccount, TestERC20Artifact, [amount])) as TestERC20;
-      stakingTokenAddress = stakingTokenInstance.address;
-
-      await setupRewardsPoolParameters();
 
       AutoStakingInstance = (await deployContract(testAccount, LimitedAutoStakeArtifact, [
-        stakingTokenAddress,
+        stakingTokenInstance.address,
         throttleRoundBlocks,
         bOne,
         endTimestamp,
@@ -68,34 +63,29 @@ describe('LimitedAutoStake', () => {
         virtualBlocksTime,
       ])) as LimitedAutoStake;
 
-      OneStakerRewardsPoolInstance = (await deployContract(testAccount, OneStakerRewardsPoolArtifact, [
-        stakingTokenAddress,
+      CompoundingRewardsPoolInstance = (await deployContract(testAccount, CompoundingRewardsPoolArtifact, [
+        stakingTokenInstance.address,
+        [stakingTokenInstance.address],
+        AutoStakingInstance.address,
         startTimestamp,
         endTimestamp,
-        [stakingTokenAddress],
-        ethers.constants.MaxUint256,
-        AutoStakingInstance.address,
-        contractStakeLimit,
         virtualBlocksTime,
-      ])) as OneStakerRewardsPoolMock;
+      ])) as CompoundingRewardsPool;
 
-      await AutoStakingInstance.setPool(OneStakerRewardsPoolInstance.address);
+      await AutoStakingInstance.setPool(CompoundingRewardsPoolInstance.address);
 
       const stakingToken = await AutoStakingInstance.stakingToken();
-      expect(stakingToken).to.equal(stakingTokenAddress);
+      expect(stakingToken).to.equal(stakingTokenInstance.address);
       const rewardPool = await AutoStakingInstance.rewardPool();
-      expect(rewardPool).to.equal(OneStakerRewardsPoolInstance.address);
+      expect(rewardPool).to.equal(CompoundingRewardsPoolInstance.address);
     });
 
     it('[Should fail to deploy RewardsPoolBase with 0 staking limit]:', async () => {
       stakingTokenInstance = (await deployContract(testAccount, TestERC20Artifact, [amount])) as TestERC20;
-      stakingTokenAddress = stakingTokenInstance.address;
-
-      await setupRewardsPoolParameters();
 
       await expect(
         deployContract(testAccount, LimitedAutoStakeArtifact, [
-          stakingTokenAddress,
+          stakingTokenInstance.address,
           throttleRoundBlocks,
           bOne,
           endTimestamp,
@@ -109,12 +99,15 @@ describe('LimitedAutoStake', () => {
   describe('Staking', async function () {
     beforeEach(async () => {
       stakingTokenInstance = (await deployContract(testAccount, TestERC20Artifact, [amount])) as TestERC20;
-      stakingTokenAddress = stakingTokenInstance.address;
 
-      await setupRewardsPoolParameters();
+      const currentBlock = await ethers.provider.getBlock('latest');
+      startTimestamp = currentBlock.timestamp + oneMinute;
+      endTimestamp = startTimestamp + oneMinute * 2;
+      startBlock = Math.trunc(startTimestamp / virtualBlocksTime);
+      endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
 
       AutoStakingInstance = (await deployContract(testAccount, LimitedAutoStakeArtifact, [
-        stakingTokenAddress,
+        stakingTokenInstance.address,
         throttleRoundBlocks,
         bOne,
         endTimestamp,
@@ -122,24 +115,22 @@ describe('LimitedAutoStake', () => {
         virtualBlocksTime,
       ])) as LimitedAutoStake;
 
-      OneStakerRewardsPoolInstance = (await deployContract(testAccount, OneStakerRewardsPoolArtifact, [
-        stakingTokenAddress,
+      CompoundingRewardsPoolInstance = (await deployContract(testAccount, CompoundingRewardsPoolArtifact, [
+        stakingTokenInstance.address,
+        [stakingTokenInstance.address],
+        AutoStakingInstance.address,
         startTimestamp,
         endTimestamp,
-        [stakingTokenAddress],
-        ethers.constants.MaxUint256,
-        AutoStakingInstance.address,
-        contractStakeLimit,
         virtualBlocksTime,
-      ])) as OneStakerRewardsPoolMock;
+      ])) as CompoundingRewardsPool;
 
-      await AutoStakingInstance.setPool(OneStakerRewardsPoolInstance.address);
+      await AutoStakingInstance.setPool(CompoundingRewardsPoolInstance.address);
       await stakingTokenInstance.mint(testAccount.address, amount);
       await stakingTokenInstance.mint(test2Account.address, amount);
 
-      await stakingTokenInstance.mint(OneStakerRewardsPoolInstance.address, amount);
+      await stakingTokenInstance.mint(CompoundingRewardsPoolInstance.address, amount);
 
-      await OneStakerRewardsPoolInstance.start(startTimestamp, endTimestamp, [bOne]);
+      await CompoundingRewardsPoolInstance.start(startTimestamp, endTimestamp, [bOne]);
 
       await stakingTokenInstance.approve(AutoStakingInstance.address, standardStakingAmount);
       await stakingTokenInstance.connect(test2Account).approve(AutoStakingInstance.address, standardStakingAmount);
@@ -149,10 +140,10 @@ describe('LimitedAutoStake', () => {
 
     it('[Should successfully stake]:', async () => {
       await AutoStakingInstance.stake(standardStakingAmount);
-      const totalStakedAmount = await OneStakerRewardsPoolInstance.totalStaked();
-      const userInfo = await OneStakerRewardsPoolInstance.userInfo(AutoStakingInstance.address);
-      const userRewardDebt = await OneStakerRewardsPoolInstance.getUserRewardDebt(AutoStakingInstance.address, 0);
-      const userOwedToken = await OneStakerRewardsPoolInstance.getUserOwedTokens(AutoStakingInstance.address, 0);
+      const totalStakedAmount = await CompoundingRewardsPoolInstance.totalStaked();
+      const userInfo = await CompoundingRewardsPoolInstance.userInfo(AutoStakingInstance.address);
+      const userRewardDebt = await CompoundingRewardsPoolInstance.getUserRewardDebt(AutoStakingInstance.address, 0);
+      const userOwedToken = await CompoundingRewardsPoolInstance.getUserOwedTokens(AutoStakingInstance.address, 0);
       const userBalance = await AutoStakingInstance.balanceOf(testAccount.address);
       const userShares = await AutoStakingInstance.share(testAccount.address);
 
