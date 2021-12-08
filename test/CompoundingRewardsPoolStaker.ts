@@ -1,5 +1,4 @@
-import { BigNumber } from 'ethers';
-import { ethers, waffle, network } from 'hardhat';
+import { ethers, waffle } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 const { deployContract } = waffle;
@@ -16,20 +15,17 @@ describe('CompoundingRewardsPoolStaker', () => {
   let testAccount: SignerWithAddress;
   let test1Account: SignerWithAddress;
   let test2Account: SignerWithAddress;
-  let treasury: SignerWithAddress;
 
   before(async () => {
     accounts = await ethers.getSigners();
-    [testAccount, test1Account, test2Account, treasury] = accounts;
+    [testAccount, test1Account, test2Account] = accounts;
   });
 
   let CompoundingRewardsPoolInstance: CompoundingRewardsPool;
   let StakeTransfererAutoStakeInstance: CompoundingRewardsPoolStaker;
   let StakeReceiverAutoStakeInstance: CompoundingRewardsPoolStaker;
   let stakingTokenInstance: TestERC20;
-  let stakingTokenAddress: string;
   let externalRewardsTokenInstance: TestERC20;
-  let externalRewardsTokenAddress: string;
 
   let endBlock;
   let startTimestamp: number;
@@ -46,37 +42,30 @@ describe('CompoundingRewardsPoolStaker', () => {
   const standardStakingAmount = ethers.utils.parseEther('5'); // 5 tokens
   const contractStakeLimit = ethers.utils.parseEther('15'); // 10 tokens
 
-  const setupRewardsPoolParameters = async () => {
-    const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestamp = currentBlock.timestamp + oneMinute;
-    endTimestamp = startTimestamp + oneMinute * 2;
-    endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
-  };
-
   beforeEach(async () => {
     stakingTokenInstance = (await deployContract(testAccount, TestERC20Artifact, [amount])) as TestERC20;
-
-    stakingTokenAddress = stakingTokenInstance.address;
 
     externalRewardsTokenInstance = (await deployContract(testAccount, TestERC20Artifact, [
       ethers.utils.parseEther('300000'),
     ])) as TestERC20;
-    externalRewardsTokenAddress = externalRewardsTokenInstance.address;
 
-    await setupRewardsPoolParameters();
+    const currentBlock = await ethers.provider.getBlock('latest');
+    startTimestamp = currentBlock.timestamp + oneMinute;
+    endTimestamp = startTimestamp + oneMinute * 2;
+    endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
 
     StakeTransfererAutoStakeInstance = (await deployContract(testAccount, CompoundingRewardsPoolStakerArtifact, [
-      stakingTokenAddress,
+      stakingTokenInstance.address,
       throttleRoundBlocks,
       bOne,
       endTimestamp,
-      standardStakingAmount.mul(2),
+      contractStakeLimit,
       virtualBlocksTime,
     ])) as CompoundingRewardsPoolStaker;
 
     CompoundingRewardsPoolInstance = (await deployContract(testAccount, CompoundingRewardsPoolArtifact, [
-      stakingTokenAddress,
-      [stakingTokenAddress],
+      stakingTokenInstance.address,
+      [stakingTokenInstance.address],
       StakeTransfererAutoStakeInstance.address,
       startTimestamp,
       endTimestamp,
@@ -84,12 +73,13 @@ describe('CompoundingRewardsPoolStaker', () => {
     ])) as CompoundingRewardsPool;
 
     await StakeTransfererAutoStakeInstance.setPool(CompoundingRewardsPoolInstance.address);
+
     await stakingTokenInstance.mint(CompoundingRewardsPoolInstance.address, amount);
 
     await CompoundingRewardsPoolInstance.start(startTimestamp, endTimestamp, [bOne]);
 
     StakeReceiverAutoStakeInstance = (await deployContract(testAccount, CompoundingRewardsPoolStakerArtifact, [
-      stakingTokenAddress,
+      stakingTokenInstance.address,
       throttleRoundBlocks,
       bOne,
       endTimestamp + oneMinute,
@@ -98,8 +88,8 @@ describe('CompoundingRewardsPoolStaker', () => {
     ])) as CompoundingRewardsPoolStaker;
 
     CompoundingRewardsPoolInstance = (await deployContract(testAccount, CompoundingRewardsPoolArtifact, [
-      stakingTokenAddress,
-      [stakingTokenAddress],
+      stakingTokenInstance.address,
+      [stakingTokenInstance.address],
       StakeReceiverAutoStakeInstance.address,
       startTimestamp,
       endTimestamp + oneMinute,
@@ -107,6 +97,7 @@ describe('CompoundingRewardsPoolStaker', () => {
     ])) as CompoundingRewardsPool;
 
     await StakeReceiverAutoStakeInstance.setPool(CompoundingRewardsPoolInstance.address);
+
     await stakingTokenInstance.mint(CompoundingRewardsPoolInstance.address, amount);
 
     await CompoundingRewardsPoolInstance.start(startTimestamp, endTimestamp + oneMinute, [bOne]);
@@ -141,6 +132,12 @@ describe('CompoundingRewardsPoolStaker', () => {
 
     expect(userBalance).to.lt(userBalanceAfter);
     expect(userShares).to.lt(userSharesAfter);
+  });
+
+  it('[Should fail when calling from the non-staker contract]:', async () => {
+    expect(CompoundingRewardsPoolInstance.connect(testAccount).stake(standardStakingAmount.div(10))).to.be.revertedWith(
+      'onlyStaker::incorrect staker'
+    );
   });
 
   it('[Should not exit to non whitelisted contract]:', async () => {
