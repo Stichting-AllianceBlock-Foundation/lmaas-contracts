@@ -1,10 +1,10 @@
 import { expect } from 'chai';
-import { ethers, network } from 'hardhat';
+import { ethers } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { BigNumber, BigNumberish } from 'ethers';
+import { BigNumber } from 'ethers';
 
 import { TestERC20 } from '../typechain-types/TestERC20';
-import { OneStakerRewardsPoolMock } from '../typechain-types/OneStakerRewardsPoolMock';
+import { CompoundingRewardsPool } from '../typechain-types/CompoundingRewardsPool';
 import { timeTravel } from './utils';
 
 describe('OneStakerRewardsPool', () => {
@@ -12,7 +12,7 @@ describe('OneStakerRewardsPool', () => {
   let bobAccount: SignerWithAddress;
   let staker: SignerWithAddress;
 
-  let OneStakerRewardsPoolInstance: OneStakerRewardsPoolMock;
+  let OneStakerRewardsPoolInstance: CompoundingRewardsPool;
   let stakingTokenInstance: TestERC20;
   let stakingTokenAddress: string;
 
@@ -73,17 +73,15 @@ describe('OneStakerRewardsPool', () => {
 
     await setupRewardsPoolParameters();
 
-    const OneStakerRewardsPoolMock = await ethers.getContractFactory('OneStakerRewardsPoolMock');
-    OneStakerRewardsPoolInstance = (await OneStakerRewardsPoolMock.deploy(
+    const CompoundingRewardsPoolInstance = await ethers.getContractFactory('CompoundingRewardsPool');
+    OneStakerRewardsPoolInstance = (await CompoundingRewardsPoolInstance.deploy(
       stakingTokenAddress,
+      rewardTokensAddresses,
+      staker.address,
       startTimestamp,
       endTimestamp,
-      rewardTokensAddresses,
-      stakeLimit,
-      staker.address,
-      contractStakeLimit,
       virtualBlocksTime
-    )) as OneStakerRewardsPoolMock;
+    )) as CompoundingRewardsPool;
 
     await rewardTokensInstances[0].mint(OneStakerRewardsPoolInstance.address, amount);
 
