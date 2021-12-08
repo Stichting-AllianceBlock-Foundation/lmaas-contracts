@@ -41,6 +41,7 @@
     "@types/node": "^16.11.7",
     "hardhat-contract-sizer": "^2.1.1",
     "hardhat-gas-reporter": "^1.0.4",
+    "solidity-coverage": "^0.7.17",
     "ts-node": "^10.4.0",
     "typescript": "^4.4.4"
   }
