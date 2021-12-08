@@ -6,8 +6,6 @@ import './../RewardsPoolBase.sol';
 import './../pool-features/OneStakerFeature.sol';
 
 contract CompoundingRewardsPool is RewardsPoolBase, OneStakerFeature {
-    uint256 public MAX_INT = type(uint256).max;
-
     constructor(
         IERC20Detailed _stakingToken,
         address[] memory _rewardsTokens,
@@ -15,7 +13,10 @@ contract CompoundingRewardsPool is RewardsPoolBase, OneStakerFeature {
         uint256 _startTimestamp,
         uint256 _endTimestamp,
         uint256 _virtualBlockTime
-    ) RewardsPoolBase(_stakingToken, _rewardsTokens, MAX_INT, MAX_INT, _virtualBlockTime) OneStakerFeature(_staker) {}
+    )
+        RewardsPoolBase(_stakingToken, _rewardsTokens, type(uint256).max, type(uint256).max, _virtualBlockTime)
+        OneStakerFeature(_staker)
+    {}
 
     function stake(uint256 _tokenAmount) public override(RewardsPoolBase, OneStakerFeature) {
         OneStakerFeature.stake(_tokenAmount);
