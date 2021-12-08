@@ -9,7 +9,7 @@ abstract contract OneStakerFeature is RewardsPoolBase {
 
     constructor(address _staker) {
         require(
-            _staker != address(0x0),
+            _staker != address(0),
             "OneStakerFeature::setSconstructortaker new staker address can't be zero address"
         );
         staker = _staker;
