@@ -7,7 +7,7 @@ import { TestERC20 } from '../typechain-types/TestERC20';
 import { RewardsPoolBase } from '../typechain-types/RewardsPoolBase';
 import { deployERC20, getTime, timeTravel, timeTravelTo } from './utils';
 
-describe.only('RewardsPoolBase', () => {
+describe('RewardsPoolBase', () => {
   let aliceAccount: SignerWithAddress;
   let bobAccount: SignerWithAddress;
   let carolAccount: SignerWithAddress;
