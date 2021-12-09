@@ -50,6 +50,8 @@ describe('RewardsPoolBase', () => {
       rewardPerBlock.push(parsedReward);
     }
 
+    await rewardTokensInstances[1].setDecimals(6);
+
     startTimestamp = (await getTime()) + oneMinute;
     endTimestamp = startTimestamp + poolLength;
   };

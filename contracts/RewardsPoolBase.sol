@@ -10,6 +10,8 @@ import './SafeERC20Detailed.sol';
 contract RewardsPoolBase is ReentrancyGuard, Ownable {
     using SafeERC20Detailed for IERC20Detailed;
 
+    uint256 constant PRECISION = 1000000000000000000;
+
     uint256 public totalStaked;
     uint256[] private totalClaimed;
     uint256[] private totalSpentRewards;
@@ -167,10 +169,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         uint256 rewardsTokensLength = rewardsTokens.length;
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
-            uint256 tokenDecimals = IERC20Detailed(rewardsTokens[i]).decimals();
-            uint256 tokenMultiplier = 10**tokenDecimals;
-
-            user.rewardDebt[i] = (user.amountStaked * accumulatedRewardMultiplier[i]) / tokenMultiplier; // Update user reward debt for each token
+            user.rewardDebt[i] = (user.amountStaked * accumulatedRewardMultiplier[i]) / PRECISION; // Update user reward debt for each token
         }
 
         stakingToken.safeTransferFrom(address(chargeStaker ? staker : msg.sender), address(this), _tokenAmount);
@@ -178,7 +177,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         emit Staked(staker, _tokenAmount);
     }
 
-    /** @dev Claiming accrued rewards.
+    /** @dev Claiming accrued rewards
      */
     function claim() public virtual nonReentrant {
         _claim(msg.sender);
@@ -223,9 +222,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         uint256 rewardsTokensLength = rewardsTokens.length;
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
-            uint256 tokenDecimals = IERC20Detailed(rewardsTokens[i]).decimals();
-            uint256 tokenMultiplier = 10**tokenDecimals;
-            uint256 totalDebt = (user.amountStaked * accumulatedRewardMultiplier[i]) / tokenMultiplier; // Update user reward debt for each token
+            uint256 totalDebt = (user.amountStaked * accumulatedRewardMultiplier[i]) / PRECISION; // Update user reward debt for each token
             user.rewardDebt[i] = totalDebt;
         }
 
@@ -282,11 +279,8 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         uint256 rewardsTokensLength = rewardsTokens.length;
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
-            uint256 tokenDecimals = IERC20Detailed(rewardsTokens[i]).decimals();
-            uint256 tokenMultiplier = 10**tokenDecimals;
-
             uint256 newReward = blocksSinceLastReward * rewardPerBlock[i]; // Get newly accumulated reward
-            uint256 rewardMultiplierIncrease = (newReward * tokenMultiplier) / totalStaked; // Calculate the multiplier increase
+            uint256 rewardMultiplierIncrease = (newReward * PRECISION) / totalStaked; // Calculate the multiplier increase
             accumulatedRewardMultiplier[i] = accumulatedRewardMultiplier[i] + rewardMultiplierIncrease; // Add the multiplier increase to the accumulated multiplier
         }
         lastRewardBlock = applicableBlock;
@@ -315,10 +309,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         }
 
         for (uint256 tokenIndex = 0; tokenIndex < rewardsTokensLength; tokenIndex++) {
-            uint256 tokenDecimals = IERC20Detailed(rewardsTokens[tokenIndex]).decimals();
-            uint256 tokenMultiplier = 10**tokenDecimals;
-
-            uint256 totalDebt = (user.amountStaked * accumulatedRewardMultiplier[tokenIndex]) / tokenMultiplier;
+            uint256 totalDebt = (user.amountStaked * accumulatedRewardMultiplier[tokenIndex]) / PRECISION;
             uint256 pendingDebt = totalDebt - user.rewardDebt[tokenIndex];
 
             if (pendingDebt > 0) {
@@ -369,16 +360,13 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 
         uint256 blocksSinceLastReward = applicableBlock - lastRewardBlock;
 
-        uint256 tokenDecimals = IERC20Detailed(rewardsTokens[tokenIndex]).decimals();
-        uint256 tokenMultiplier = 10**tokenDecimals;
-
         uint256 newReward = blocksSinceLastReward * rewardPerBlock[tokenIndex]; // Get newly accumulated reward
-        uint256 rewardMultiplierIncrease = (newReward * tokenMultiplier) / totalStaked; // Calculate the multiplier increase
+        uint256 rewardMultiplierIncrease = (newReward * PRECISION) / totalStaked; // Calculate the multiplier increase
         uint256 currentMultiplier = accumulatedRewardMultiplier[tokenIndex] + rewardMultiplierIncrease; // Simulate the multiplier increase to the accumulated multiplier
 
         UserInfo storage user = userInfo[_userAddress];
 
-        uint256 totalDebt = (user.amountStaked * currentMultiplier) / tokenMultiplier; // Simulate the current debt
+        uint256 totalDebt = (user.amountStaked * currentMultiplier) / PRECISION; // Simulate the current debt
         uint256 pendingDebt = totalDebt - user.rewardDebt[tokenIndex]; // Simulate the pending debt
         return user.tokensOwed[tokenIndex] + pendingDebt;
     }
