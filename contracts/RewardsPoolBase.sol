@@ -359,8 +359,12 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 		@param _userAddress the address of the user
 		@param tokenIndex the index of the reward token you are interested
 	 */
-    function getUserAccumulatedReward(address _userAddress, uint256 tokenIndex) public view returns (uint256) {
-        uint256 currentBlock = _getBlock();
+    function getUserAccumulatedReward(
+        address _userAddress,
+        uint256 tokenIndex,
+        uint256 time
+    ) public view returns (uint256) {
+        uint256 currentBlock = _calculateBlocks(time);
         uint256 applicableBlock = (currentBlock < endBlock) ? currentBlock : endBlock;
 
         uint256 blocksSinceLastReward = applicableBlock - lastRewardBlock;

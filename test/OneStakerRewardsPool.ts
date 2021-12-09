@@ -5,7 +5,7 @@ import { BigNumber, BigNumberish } from 'ethers';
 
 import { TestERC20 } from '../typechain-types/TestERC20';
 import { OneStakerRewardsPoolMock } from '../typechain-types/OneStakerRewardsPoolMock';
-import { timeTravel } from './utils';
+import { getTime, timeTravel } from './utils';
 
 describe('OneStakerRewardsPool', () => {
   let aliceAccount: SignerWithAddress;
@@ -126,7 +126,11 @@ describe('OneStakerRewardsPool', () => {
 
       await timeTravel(10);
 
-      const accumulatedReward = await OneStakerRewardsPoolInstance.getUserAccumulatedReward(staker.address, 0);
+      const accumulatedReward = await OneStakerRewardsPoolInstance.getUserAccumulatedReward(
+        staker.address,
+        0,
+        await getTime()
+      );
       expect(accumulatedReward).to.equal(bOne, 'The reward accrued was not 1 token');
     });
 

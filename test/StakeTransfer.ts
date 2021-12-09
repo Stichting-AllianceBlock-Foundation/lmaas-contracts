@@ -6,7 +6,7 @@ import { BigNumber, BigNumberish } from 'ethers';
 import { TestERC20 } from '../typechain-types/TestERC20';
 import { StakeTransfererRewardsPoolMock } from '../typechain-types/StakeTransfererRewardsPoolMock';
 import { StakeReceiverRewardsPoolMock } from '../typechain-types/StakeReceiverRewardsPoolMock';
-import { timeTravel } from './utils';
+import { getTime, timeTravel } from './utils';
 
 describe('StakeTransfer', () => {
   let aliceAccount: SignerWithAddress;
@@ -120,7 +120,11 @@ describe('StakeTransfer', () => {
     const userInfoInitial = await StakeTransfererInstance.userInfo(aliceAccount.address);
     const initialTotalStakedAmount = await StakeTransfererInstance.totalStaked();
     const userInitialBalanceRewards = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
-    const userRewards = await StakeTransfererInstance.getUserAccumulatedReward(aliceAccount.address, 0);
+    const userRewards = await StakeTransfererInstance.getUserAccumulatedReward(
+      aliceAccount.address,
+      0,
+      await getTime()
+    );
 
     await StakeTransfererInstance.exitAndTransfer(StakeReceiverInstance.address);
 

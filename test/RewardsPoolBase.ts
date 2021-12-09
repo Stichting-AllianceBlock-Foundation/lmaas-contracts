@@ -7,7 +7,7 @@ import { TestERC20 } from '../typechain-types/TestERC20';
 import { RewardsPoolBase } from '../typechain-types/RewardsPoolBase';
 import { deployERC20, getTime, timeTravel, timeTravelTo } from './utils';
 
-describe('RewardsPoolBase', () => {
+describe.only('RewardsPoolBase', () => {
   let aliceAccount: SignerWithAddress;
   let bobAccount: SignerWithAddress;
   let carolAccount: SignerWithAddress;
@@ -39,7 +39,7 @@ describe('RewardsPoolBase', () => {
     rewardPerBlock = [];
 
     for (let i = 0; i < rewardTokensCount; i++) {
-      const tknInst = await deployERC20(amount);
+      const tknInst = i === 0 ? stakingTokenInstance : await deployERC20(amount);
 
       // populate tokens
       rewardTokensInstances.push(tknInst);
@@ -250,6 +250,7 @@ describe('RewardsPoolBase', () => {
 
       it('Should successfully stake and accumulate reward', async () => {
         await RewardsPoolBaseInstance.stake(standardStakingAmount);
+        const stakeTime = await getTime();
 
         const blockNumber = Math.floor((await ethers.provider.getBlock('latest')).timestamp / virtualBlockTime);
 
@@ -264,46 +265,87 @@ describe('RewardsPoolBase', () => {
         expect(userRewardDebt).to.equal(0, "User's reward debt is not correct");
         expect(userOwedToken).to.equal(0, "User's reward debt is not correct");
 
-        //simulate mining of one block after staking
-        await timeTravel(10);
+        for (let i = 0; i < rewardPerBlock.length; i++) {
+          const accumulatedReward = await RewardsPoolBaseInstance.getUserAccumulatedReward(
+            aliceAccount.address,
+            i,
+            stakeTime + oneMinute
+          );
 
-        const accumulatedReward = await RewardsPoolBaseInstance.getUserAccumulatedReward(aliceAccount.address, 0);
-        expect(accumulatedReward).to.equal(bOne, 'The reward accrued was not 1 token');
+          expect(accumulatedReward).to.equal(
+            rewardPerBlock[i].mul(oneMinute / virtualBlockTime),
+            'The reward accrued was not 1 token'
+          );
+        }
       });
 
       it('Should accumulate reward and update multipliers', async () => {
-        await timeTravel(10);
+        await timeTravelTo(startTimestamp + oneMinute);
 
         await RewardsPoolBaseInstance.stake(standardStakingAmount);
 
-        await timeTravel(10);
+        await timeTravelTo(startTimestamp + oneMinute * 2);
+
         await RewardsPoolBaseInstance.connect(bobAccount).stake(standardStakingAmount);
 
-        await timeTravel(10);
+        const tokenMultiplier = '1000000000000000000';
 
-        const totalStake = standardStakingAmount.add(standardStakingAmount);
+        for (let i = 0; i < rewardPerBlock.length; i++) {
+          const accumulatedMultiplier = await RewardsPoolBaseInstance.accumulatedRewardMultiplier(i);
+          const rewardMultiplierPerMinute = rewardPerBlock[i].mul(oneMinute / virtualBlockTime).mul(tokenMultiplier);
 
-        let accumulatedMultiplier = await RewardsPoolBaseInstance.accumulatedRewardMultiplier(0);
-        let expectedMultiplier = bOne.mul(2).div(totalStake.div(bOne));
+          // at the time of update (when bob staked) there has only been one minute staked with standardStakingAmount
+          expect(accumulatedMultiplier).to.equal(
+            rewardMultiplierPerMinute.div(standardStakingAmount),
+            'The accumulated multiplier was incorrect'
+          );
+        }
 
-        expect(accumulatedMultiplier).to.equal(expectedMultiplier, 'The accumulated multiplier was incorrect');
+        for (let i = 0; i < rewardPerBlock.length; i++) {
+          const accumulatedRewardAlice = await RewardsPoolBaseInstance.getUserAccumulatedReward(
+            aliceAccount.address,
+            i,
+            startTimestamp + oneMinute * 3
+          );
+          const totalReward = rewardPerBlock[i].mul((oneMinute * 2) / virtualBlockTime).mul(tokenMultiplier);
 
-        await timeTravel(10);
+          // use 3/4 here because alice staked the full first period and half of the second period (-1/4)
+          expect(accumulatedRewardAlice).to.equal(
+            totalReward.mul(3).div(4).div(tokenMultiplier),
+            'The reward accrued was not correct'
+          );
+        }
 
-        const accumulatedRewardAlice = await RewardsPoolBaseInstance.getUserAccumulatedReward(aliceAccount.address, 0);
-        expect(accumulatedRewardAlice).to.equal(bOne.add(bOne), 'The reward accrued was not 2 token');
+        for (let i = 0; i < rewardPerBlock.length; i++) {
+          const accumulatedRewardBob = await RewardsPoolBaseInstance.getUserAccumulatedReward(
+            bobAccount.address,
+            i,
+            startTimestamp + oneMinute * 3
+          );
+          const totalReward = rewardPerBlock[i].mul((oneMinute * 2) / virtualBlockTime).mul(tokenMultiplier);
 
-        const accumulatedRewardBob = await RewardsPoolBaseInstance.getUserAccumulatedReward(bobAccount.address, 0);
-        expect(accumulatedRewardBob).to.equal(bOne, 'The reward accrued was not 1 token');
+          // use 1/4 here because bob didn't stake the first period (-2/4) and half of the second period (-1/4)
+          expect(accumulatedRewardBob).to.equal(
+            totalReward.mul(1).div(4).div(tokenMultiplier),
+            'The reward accrued was not correct'
+          );
+        }
 
-        await timeTravel(10);
-
+        await timeTravelTo(startTimestamp + oneMinute * 3);
         await RewardsPoolBaseInstance.updateRewardMultipliers();
-        expectedMultiplier = bOne.mul(5).div(totalStake.div(bOne));
 
-        accumulatedMultiplier = await RewardsPoolBaseInstance.accumulatedRewardMultiplier(0);
+        for (let i = 0; i < rewardPerBlock.length; i++) {
+          const accumulatedMultiplier = await RewardsPoolBaseInstance.accumulatedRewardMultiplier(i);
+          const rewardMultiplierPerMinute = rewardPerBlock[i].mul(oneMinute / virtualBlockTime).mul(tokenMultiplier);
 
-        expect(accumulatedMultiplier).to.equal(expectedMultiplier, 'The accumulated multiplier was incorrect');
+          // at the time of update (now) there has been one minute staked with standardStakingAmount and one minute staked with standardStakingAmount * 2
+          expect(accumulatedMultiplier).to.equal(
+            rewardMultiplierPerMinute
+              .div(standardStakingAmount)
+              .add(rewardMultiplierPerMinute.div(standardStakingAmount.mul(2))),
+            'The accumulated multiplier was incorrect'
+          );
+        }
       });
 
       it('Should fail if amount to stake is not greater than zero', async () => {
@@ -352,7 +394,11 @@ describe('RewardsPoolBase', () => {
       await RewardsPoolBaseInstance.claim();
 
       const userFinalBalance = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
-      const userRewardsAfterClaiming = await RewardsPoolBaseInstance.getUserAccumulatedReward(aliceAccount.address, 0);
+      const userRewardsAfterClaiming = await RewardsPoolBaseInstance.getUserAccumulatedReward(
+        aliceAccount.address,
+        0,
+        await getTime()
+      );
       const userTokensOwed = await RewardsPoolBaseInstance.getUserOwedTokens(aliceAccount.address, 0);
 
       expect(userFinalBalance.gt(userInitialBalance)).to.equal(
@@ -390,39 +436,49 @@ describe('RewardsPoolBase', () => {
     it('Should exit successfully from the RewardsPool', async () => {
       await timeTravel(10);
 
-      const userInitialBalanceStaking = await stakingTokenInstance.balanceOf(aliceAccount.address);
-      const userInfoInitial = await RewardsPoolBaseInstance.userInfo(aliceAccount.address);
-      const initialTotalStakedAmount = await RewardsPoolBaseInstance.totalStaked();
-      const userInitialBalanceRewards = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
-      const userRewards = await RewardsPoolBaseInstance.getUserAccumulatedReward(aliceAccount.address, 0);
+      const exitTime = (await getTime()) + oneMinute;
+
+      const userInfoBeforeExit = await RewardsPoolBaseInstance.userInfo(aliceAccount.address);
+      const totalStakedBeforeExit = await RewardsPoolBaseInstance.totalStaked();
+
+      const rewardBalanceBeforeExit: BigNumber[] = [];
+      const rewardsBeforeExit: BigNumber[] = [];
+
+      for (let i = 0; i < rewardTokensCount; i++) {
+        rewardBalanceBeforeExit.push(await rewardTokensInstances[i].balanceOf(aliceAccount.address));
+        rewardsBeforeExit.push(
+          await RewardsPoolBaseInstance.getUserAccumulatedReward(aliceAccount.address, i, exitTime)
+        );
+      }
+
+      await timeTravelTo(exitTime);
 
       await RewardsPoolBaseInstance.exit();
 
-      const userFinalBalanceRewards = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
-      const userTokensOwed = await RewardsPoolBaseInstance.getUserOwedTokens(aliceAccount.address, 0);
-      const userFinalBalanceStaking = await stakingTokenInstance.balanceOf(aliceAccount.address);
-      const userInfoFinal = await RewardsPoolBaseInstance.userInfo(aliceAccount.address);
-      const finalTotalStkaedAmount = await RewardsPoolBaseInstance.totalStaked();
+      for (let i = 0; i < rewardTokensCount; i++) {
+        const rewardBalanceAfterExit = await rewardTokensInstances[i].balanceOf(aliceAccount.address);
+        const userTokensOwed = await RewardsPoolBaseInstance.getUserOwedTokens(aliceAccount.address, i);
 
-      expect(userFinalBalanceRewards.gt(userInitialBalanceRewards)).to.equal(
-        true,
-        "Rewards claim was not successful, user's final balance was not increased"
-      );
-      expect(userFinalBalanceRewards).to.equal(
-        userInitialBalanceRewards.add(userRewards),
-        "Rewards claim was not successful, users' final balance was not correct"
-      );
-      expect(userTokensOwed).to.equal(0, 'User tokens owed should be zero');
-      expect(userFinalBalanceStaking).to.equal(
-        userInitialBalanceStaking.add(standardStakingAmount),
-        'Withdraw was not successfull'
-      );
-      expect(userInfoFinal.amountStaked).to.equal(
-        userInfoInitial.amountStaked.sub(standardStakingAmount),
+        expect(rewardBalanceAfterExit).to.equal(
+          rewardBalanceBeforeExit[i]
+            .add(rewardsBeforeExit[i])
+            .add(rewardTokensInstances[i] === stakingTokenInstance ? userInfoBeforeExit.amountStaked : 0),
+          "Rewards claim was not successful, users' final balance was not correct"
+        );
+
+        expect(userTokensOwed).to.equal(0, 'User tokens owed should be zero');
+      }
+
+      const userInfoAfterExit = await RewardsPoolBaseInstance.userInfo(aliceAccount.address);
+      const totalStakedAfterExit = await RewardsPoolBaseInstance.totalStaked();
+
+      expect(userInfoAfterExit.amountStaked).to.equal(
+        userInfoBeforeExit.amountStaked.sub(standardStakingAmount),
         'User staked amount is not updated properly'
       );
-      expect(finalTotalStkaedAmount).to.equal(
-        initialTotalStakedAmount.sub(standardStakingAmount),
+
+      expect(totalStakedAfterExit).to.equal(
+        totalStakedBeforeExit.sub(standardStakingAmount),
         'Contract total staked amount is not updated properly'
       );
     });

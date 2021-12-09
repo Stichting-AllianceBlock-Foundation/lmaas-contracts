@@ -11,7 +11,7 @@ import { NonCompoundingRewardsPool } from '../typechain-types/NonCompoundingRewa
 import { TestERC20 } from '../typechain-types/TestERC20';
 import { PercentageCalculator } from '../typechain-types/PercentageCalculator';
 import { LiquidityMiningCampaign } from '../typechain-types/LiquidityMiningCampaign';
-import { timeTravel } from './utils';
+import { getTime, timeTravel } from './utils';
 
 describe('Liquidity mining campaign', () => {
   let accounts: SignerWithAddress[];
@@ -153,7 +153,7 @@ describe('Liquidity mining campaign', () => {
       expect(userOwedToken).to.equal(0);
       expect(userFinalBalance).to.equal(userInitialBalance.sub(bTen));
 
-      const accumulatedReward = await LmcInstance.getUserAccumulatedReward(testAccount.address, 0);
+      const accumulatedReward = await LmcInstance.getUserAccumulatedReward(testAccount.address, 0, await getTime());
       expect(accumulatedReward).to.equal(bOne);
     });
 
@@ -165,7 +165,7 @@ describe('Liquidity mining campaign', () => {
       await LmcInstance.stake(bTwenty);
 
       await timeTravel(80);
-      const accumulatedReward = await LmcInstance.getUserAccumulatedReward(testAccount.address, 0);
+      const accumulatedReward = await LmcInstance.getUserAccumulatedReward(testAccount.address, 0, await getTime());
       let contractFinalBalance = await stakingTokenInstance.balanceOf(LmcInstance.address);
       const totalStakedAmount = await LmcInstance.totalStaked();
       const userInfo = await LmcInstance.userInfo(testAccount.address);
@@ -198,7 +198,7 @@ describe('Liquidity mining campaign', () => {
       const userInfoInitial = await LmcInstance.userInfo(testAccount.address);
       const initialTotalStakedAmount = await LmcInstance.totalStaked();
       const userInitialBalanceRewards = await rewardTokensInstances[0].balanceOf(testAccount.address);
-      const userRewards = await LmcInstance.getUserAccumulatedReward(testAccount.address, 0);
+      const userRewards = await LmcInstance.getUserAccumulatedReward(testAccount.address, 0, await getTime());
 
       await LmcInstance.exit();
       const userFinalBalanceRewards = await rewardTokensInstances[0].balanceOf(testAccount.address);
@@ -230,7 +230,7 @@ describe('Liquidity mining campaign', () => {
 
       await timeTravel(120);
 
-      const userTokensOwedInitial = await LmcInstance.getUserAccumulatedReward(testAccount.address, 0);
+      const userTokensOwedInitial = await LmcInstance.getUserAccumulatedReward(testAccount.address, 0, await getTime());
       await LmcInstance.exit();
       let contractFinalBalance = await stakingTokenInstance.balanceOf(LmcInstance.address);
 
@@ -250,7 +250,7 @@ describe('Liquidity mining campaign', () => {
       const userInfo = await LmcInstance.userInfo(testAccount.address);
 
       await timeTravel(120);
-      const userTokensOwedInitial = await LmcInstance.getUserAccumulatedReward(testAccount.address, 0);
+      const userTokensOwedInitial = await LmcInstance.getUserAccumulatedReward(testAccount.address, 0, await getTime());
       await LmcInstance.exit();
       let contractFinalBalance = await stakingTokenInstance.balanceOf(LmcInstance.address);
 
@@ -312,7 +312,11 @@ describe('Liquidity mining campaign', () => {
       await timeTravel(120);
 
       let initialBalance = await NonCompoundingRewardsPoolInstance.balanceOf(testAccount.address);
-      const userTokensOwedInitial = await NewLmcInstance.getUserAccumulatedReward(testAccount.address, 0);
+      const userTokensOwedInitial = await NewLmcInstance.getUserAccumulatedReward(
+        testAccount.address,
+        0,
+        await getTime()
+      );
 
       await NewLmcInstance.exitAndStake(NonCompoundingRewardsPoolInstance.address);
 

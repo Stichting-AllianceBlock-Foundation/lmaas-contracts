@@ -6,7 +6,7 @@ import { BigNumber, BigNumberish } from 'ethers';
 import { TestERC20 } from '../typechain-types/TestERC20';
 import { StakeLockingRewardsPoolMock } from '../typechain-types/StakeLockingRewardsPoolMock';
 import { StakeLockingFeature } from '../typechain-types/StakeLockingFeature';
-import { timeTravel } from './utils';
+import { getTime, timeTravel } from './utils';
 
 describe('StakeLockingFeature', () => {
   let aliceAccount: SignerWithAddress;
@@ -120,7 +120,11 @@ describe('StakeLockingFeature', () => {
     const userInfoInitial = await StakeLockingFeatureInstance.userInfo(aliceAccount.address);
     const initialTotalStakedAmount = await StakeLockingFeatureInstance.totalStaked();
     const userInitialBalanceRewards = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
-    const userRewards = await StakeLockingFeatureInstance.getUserAccumulatedReward(aliceAccount.address, 0);
+    const userRewards = await StakeLockingFeatureInstance.getUserAccumulatedReward(
+      aliceAccount.address,
+      0,
+      await getTime()
+    );
 
     await StakeLockingFeatureInstance.exit();
 

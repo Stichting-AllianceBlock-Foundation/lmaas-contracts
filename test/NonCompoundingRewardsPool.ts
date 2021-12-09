@@ -7,7 +7,7 @@ import NonCompoundingRewardsPoolArtifact from '../artifacts/contracts/V2/NonComp
 import TestERC20Artifact from '../artifacts/contracts/TestERC20.sol/TestERC20.json';
 import { TestERC20 } from '../typechain-types/TestERC20';
 import { NonCompoundingRewardsPool } from '../typechain-types/NonCompoundingRewardsPool';
-import { timeTravel } from './utils';
+import { getTime, timeTravel } from './utils';
 
 describe('NonCompoundingRewardsPool', () => {
   let accounts: SignerWithAddress[];
@@ -140,7 +140,11 @@ describe('NonCompoundingRewardsPool', () => {
       const userInfoInitial = await NonCompoundingRewardsPoolInstance.userInfo(testAccount.address);
       const initialTotalStakedAmount = await NonCompoundingRewardsPoolInstance.totalStaked();
       const userInitialBalanceRewards = await rewardTokensInstances[0].balanceOf(testAccount.address);
-      const userRewards = await NonCompoundingRewardsPoolInstance.getUserAccumulatedReward(testAccount.address, 0);
+      const userRewards = await NonCompoundingRewardsPoolInstance.getUserAccumulatedReward(
+        testAccount.address,
+        0,
+        await getTime()
+      );
 
       await NonCompoundingRewardsPoolInstance.exit();
 
@@ -171,7 +175,11 @@ describe('NonCompoundingRewardsPool', () => {
       const userInfoInitial = await NonCompoundingRewardsPoolInstance.userInfo(testAccount.address);
       const initialTotalStakedAmount = await NonCompoundingRewardsPoolInstance.totalStaked();
       const userInitialBalanceRewards = await rewardTokensInstances[0].balanceOf(testAccount.address);
-      const userRewards = await NonCompoundingRewardsPoolInstance.getUserAccumulatedReward(testAccount.address, 0);
+      const userRewards = await NonCompoundingRewardsPoolInstance.getUserAccumulatedReward(
+        testAccount.address,
+        0,
+        await getTime()
+      );
 
       await NonCompoundingRewardsPoolInstance.exit();
       await NonCompoundingRewardsPoolInstance.exit();
@@ -319,7 +327,11 @@ describe('NonCompoundingRewardsPool', () => {
       const userInfoInitial = await NonCompoundingRewardsPoolInstance.userInfo(testAccount.address);
       const initialTotalStakedAmount = await NonCompoundingRewardsPoolInstance.totalStaked();
       const userInitialBalanceRewards = await rewardTokensInstances[0].balanceOf(testAccount.address);
-      const userRewards = await NonCompoundingRewardsPoolInstance.getUserAccumulatedReward(testAccount.address, 0);
+      const userRewards = await NonCompoundingRewardsPoolInstance.getUserAccumulatedReward(
+        testAccount.address,
+        0,
+        await getTime()
+      );
 
       await NonCompoundingRewardsPoolInstance.exit();
       await timeTravel(40);

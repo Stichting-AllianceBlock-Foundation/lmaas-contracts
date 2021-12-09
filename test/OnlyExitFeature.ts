@@ -5,7 +5,7 @@ import { BigNumber, BigNumberish } from 'ethers';
 
 import { TestERC20 } from '../typechain-types/TestERC20';
 import { OnlyExitRewardsPoolMock } from '../typechain-types/OnlyExitRewardsPoolMock';
-import { timeTravel } from './utils';
+import { getTime, timeTravel } from './utils';
 
 describe('OnlyExitFeature', () => {
   let aliceAccount: SignerWithAddress;
@@ -113,7 +113,11 @@ describe('OnlyExitFeature', () => {
     const userInfoInitial = await OnlyExitFeatureInstance.userInfo(aliceAccount.address);
     const initialTotalStakedAmount = await OnlyExitFeatureInstance.totalStaked();
     const userInitialBalanceRewards = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
-    const userRewards = await OnlyExitFeatureInstance.getUserAccumulatedReward(aliceAccount.address, 0);
+    const userRewards = await OnlyExitFeatureInstance.getUserAccumulatedReward(
+      aliceAccount.address,
+      0,
+      await getTime()
+    );
 
     await OnlyExitFeatureInstance.exit();
 

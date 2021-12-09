@@ -7,7 +7,11 @@ interface IRewardsPoolBase {
 
     function getUserOwedTokens(address _userAddress, uint256 _index) external view;
 
-    function getUserAccumulatedReward(address _userAddress, uint256 tokenIndex) external view returns (uint256);
+    function getUserAccumulatedReward(
+        address _userAddress,
+        uint256 tokenIndex,
+        uint256 time
+    ) external view returns (uint256);
 
     function getUserTokensOwedLength(address _userAddress) external view returns (uint256);
 

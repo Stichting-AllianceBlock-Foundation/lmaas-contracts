@@ -9,7 +9,7 @@ import TestERC20Artifact from '../artifacts/contracts/TestERC20.sol/TestERC20.js
 import { OneStakerRewardsPoolMock } from '../typechain-types/OneStakerRewardsPoolMock';
 import { AutoStake } from '../typechain-types/AutoStake';
 import { TestERC20 } from '../typechain-types/TestERC20';
-import { timeTravel } from './utils';
+import { getTime, timeTravel } from './utils';
 
 describe('AutoStake', () => {
   let accounts: SignerWithAddress[];
@@ -180,7 +180,8 @@ describe('AutoStake', () => {
       await timeTravel(10);
       const accumulatedReward = await OneStakerRewardsPoolInstance.getUserAccumulatedReward(
         AutoStakingInstance.address,
-        0
+        0,
+        await getTime()
       );
 
       expect(accumulatedReward).to.equal(bOne);

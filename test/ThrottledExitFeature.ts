@@ -5,7 +5,7 @@ import { BigNumber, BigNumberish } from 'ethers';
 
 import { TestERC20 } from '../typechain-types/TestERC20';
 import { ThrottledExitRewardsPoolMock } from '../typechain-types/ThrottledExitRewardsPoolMock';
-import { timeTravel } from './utils';
+import { getTime, timeTravel } from './utils';
 
 describe('ThrottledExitFeature', () => {
   let aliceAccount: SignerWithAddress;
@@ -106,7 +106,11 @@ describe('ThrottledExitFeature', () => {
 
     it('Should not claim or withdraw', async () => {
       const userInitialBalance = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
-      const userRewards = await ThrottledExitFeatureInstance.getUserAccumulatedReward(aliceAccount.address, 0);
+      const userRewards = await ThrottledExitFeatureInstance.getUserAccumulatedReward(
+        aliceAccount.address,
+        0,
+        await getTime()
+      );
 
       await expect(ThrottledExitFeatureInstance.claim()).to.be.revertedWith(
         'OnlyExitFeature::cannot claim from this contract. Only exit.'
@@ -125,7 +129,11 @@ describe('ThrottledExitFeature', () => {
       const userInfoInitial = await ThrottledExitFeatureInstance.userInfo(aliceAccount.address);
       const initialTotalStakedAmount = await ThrottledExitFeatureInstance.totalStaked();
       const userInitialBalanceRewards = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
-      const userRewards = await ThrottledExitFeatureInstance.getUserAccumulatedReward(aliceAccount.address, 0);
+      const userRewards = await ThrottledExitFeatureInstance.getUserAccumulatedReward(
+        aliceAccount.address,
+        0,
+        await getTime()
+      );
 
       await ThrottledExitFeatureInstance.exit();
 
@@ -160,7 +168,11 @@ describe('ThrottledExitFeature', () => {
       const userInfoInitial = await ThrottledExitFeatureInstance.userInfo(aliceAccount.address);
       const initialTotalStakedAmount = await ThrottledExitFeatureInstance.totalStaked();
       const userInitialBalanceRewards = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
-      const userRewards = await ThrottledExitFeatureInstance.getUserAccumulatedReward(aliceAccount.address, 0);
+      const userRewards = await ThrottledExitFeatureInstance.getUserAccumulatedReward(
+        aliceAccount.address,
+        0,
+        await getTime()
+      );
 
       await ThrottledExitFeatureInstance.exit();
       await ThrottledExitFeatureInstance.exit();
@@ -316,7 +328,11 @@ describe('ThrottledExitFeature', () => {
       const userInfoInitial = await ThrottledExitFeatureInstance.userInfo(aliceAccount.address);
       const initialTotalStakedAmount = await ThrottledExitFeatureInstance.totalStaked();
       const userInitialBalanceRewards = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
-      const userRewards = await ThrottledExitFeatureInstance.getUserAccumulatedReward(aliceAccount.address, 0);
+      const userRewards = await ThrottledExitFeatureInstance.getUserAccumulatedReward(
+        aliceAccount.address,
+        0,
+        await getTime()
+      );
 
       await ThrottledExitFeatureInstance.exit();
 
