@@ -23,9 +23,7 @@ describe('NonCompoundingRewardsPool', () => {
 
   let NonCompoundingRewardsPoolInstance: NonCompoundingRewardsPool;
   let stakingTokenInstance: TestERC20;
-  let stakingTokenAddress: string;
   let externalRewardsTokenInstance: TestERC20;
-  let externalRewardsTokenAddress: string;
 
   let rewardTokensInstances: TestERC20[];
   let rewardTokensAddresses: string[];
@@ -37,7 +35,6 @@ describe('NonCompoundingRewardsPool', () => {
   let throttleRoundCap = ethers.utils.parseEther('1');
 
   const rewardTokensCount = 1; // 5 rewards tokens for tests
-  const day = 60 * 24 * 60;
   const amount = ethers.utils.parseEther('5184000');
   const stakeLimit = amount;
   const bOne = ethers.utils.parseEther('1');
@@ -49,32 +46,9 @@ describe('NonCompoundingRewardsPool', () => {
   const virtualBlocksTime = 10; // 10s == 10000ms
   const oneMinute = 60;
 
-  const setupRewardsPoolParameters = async () => {
-    rewardTokensInstances = [];
-    rewardTokensAddresses = [];
-    rewardPerBlock = [];
-    for (let i = 0; i < rewardTokensCount; i++) {
-      const tknInst = (await deployContract(testAccount, TestERC20Artifact, [amount])) as TestERC20;
-
-      // populate tokens
-      rewardTokensInstances.push(tknInst);
-      rewardTokensAddresses.push(tknInst.address);
-
-      // populate amounts
-      let parsedReward = await ethers.utils.parseEther(`${i + 1}`);
-      rewardPerBlock.push(parsedReward);
-    }
-
-    const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestamp = currentBlock.timestamp + oneMinute;
-    endTimestamp = startTimestamp + oneMinute * 2;
-    startBlock = Math.trunc(startTimestamp / virtualBlocksTime);
-    endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
-  };
-
   const stake = async (_throttleRoundBlocks: number, _throttleRoundCap: BigNumber) => {
     NonCompoundingRewardsPoolInstance = (await deployContract(testAccount, NonCompoundingRewardsPoolArtifact, [
-      stakingTokenAddress,
+      stakingTokenInstance.address,
       startTimestamp,
       endTimestamp,
       rewardTokensAddresses,
@@ -105,14 +79,30 @@ describe('NonCompoundingRewardsPool', () => {
       await stakingTokenInstance.mint(testAccount.address, amount);
       await stakingTokenInstance.mint(test2Account.address, amount);
 
-      stakingTokenAddress = stakingTokenInstance.address;
-
       externalRewardsTokenInstance = (await deployContract(testAccount, TestERC20Artifact, [amount])) as TestERC20;
       await externalRewardsTokenInstance.mint(trasury.address, amount);
 
-      externalRewardsTokenAddress = externalRewardsTokenInstance.address;
+      rewardTokensInstances = [];
+      rewardTokensAddresses = [];
+      rewardPerBlock = [];
 
-      await setupRewardsPoolParameters();
+      for (let i = 0; i < rewardTokensCount; i++) {
+        const tknInst = (await deployContract(testAccount, TestERC20Artifact, [amount])) as TestERC20;
+
+        // populate tokens
+        rewardTokensInstances.push(tknInst);
+        rewardTokensAddresses.push(tknInst.address);
+
+        // populate amounts
+        let parsedReward = await ethers.utils.parseEther(`${i + 1}`);
+        rewardPerBlock.push(parsedReward);
+      }
+
+      const currentBlock = await ethers.provider.getBlock('latest');
+      startTimestamp = currentBlock.timestamp + oneMinute;
+      endTimestamp = startTimestamp + oneMinute * 2;
+      startBlock = Math.trunc(startTimestamp / virtualBlocksTime);
+      endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
 
       await stake(throttleRoundBlocks, throttleRoundCap);
     });
@@ -211,9 +201,27 @@ describe('NonCompoundingRewardsPool', () => {
       await stakingTokenInstance.mint(testAccount.address, amount);
       await stakingTokenInstance.mint(test2Account.address, amount);
 
-      stakingTokenAddress = stakingTokenInstance.address;
+      rewardTokensInstances = [];
+      rewardTokensAddresses = [];
+      rewardPerBlock = [];
 
-      await setupRewardsPoolParameters();
+      for (let i = 0; i < rewardTokensCount; i++) {
+        const tknInst = (await deployContract(testAccount, TestERC20Artifact, [amount])) as TestERC20;
+
+        // populate tokens
+        rewardTokensInstances.push(tknInst);
+        rewardTokensAddresses.push(tknInst.address);
+
+        // populate amounts
+        let parsedReward = await ethers.utils.parseEther(`${i + 1}`);
+        rewardPerBlock.push(parsedReward);
+      }
+
+      const currentBlock = await ethers.provider.getBlock('latest');
+      startTimestamp = currentBlock.timestamp + oneMinute;
+      endTimestamp = startTimestamp + oneMinute * 2;
+      startBlock = Math.trunc(startTimestamp / virtualBlocksTime);
+      endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
     });
 
     it('[Should not change nextAvailableExitBlock before cap]:', async () => {
@@ -273,9 +281,6 @@ describe('NonCompoundingRewardsPool', () => {
 
       await NonCompoundingRewardsPoolInstance.connect(test2Account).stake(standardStakingAmount);
 
-      const currentBlock = await ethers.provider.getBlock('latest');
-      const blocksDelta = endBlock - currentBlock.number;
-
       await timeTravel(120);
 
       await NonCompoundingRewardsPoolInstance.exit();
@@ -299,15 +304,30 @@ describe('NonCompoundingRewardsPool', () => {
       await stakingTokenInstance.mint(testAccount.address, amount);
       await stakingTokenInstance.mint(test2Account.address, amount);
 
-      stakingTokenAddress = stakingTokenInstance.address;
-
       externalRewardsTokenInstance = (await deployContract(testAccount, TestERC20Artifact, [amount])) as TestERC20;
       await externalRewardsTokenInstance.mint(trasury.address, amount);
 
-      externalRewardsTokenAddress = externalRewardsTokenInstance.address;
+      rewardTokensInstances = [];
+      rewardTokensAddresses = [];
+      rewardPerBlock = [];
 
-      await setupRewardsPoolParameters();
+      for (let i = 0; i < rewardTokensCount; i++) {
+        const tknInst = (await deployContract(testAccount, TestERC20Artifact, [amount])) as TestERC20;
 
+        // populate tokens
+        rewardTokensInstances.push(tknInst);
+        rewardTokensAddresses.push(tknInst.address);
+
+        // populate amounts
+        let parsedReward = await ethers.utils.parseEther(`${i + 1}`);
+        rewardPerBlock.push(parsedReward);
+      }
+
+      const currentBlock = await ethers.provider.getBlock('latest');
+      startTimestamp = currentBlock.timestamp + oneMinute;
+      endTimestamp = startTimestamp + oneMinute * 2;
+      startBlock = Math.trunc(startTimestamp / virtualBlocksTime);
+      endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
       await stake(throttleRoundBlocks, throttleRoundCap);
     });
 
