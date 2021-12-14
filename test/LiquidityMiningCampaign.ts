@@ -1,5 +1,5 @@
-import { BigNumber, Contract } from 'ethers';
-import { ethers, waffle, network } from 'hardhat';
+import { BigNumber } from 'ethers';
+import { ethers, waffle } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 const { deployContract } = waffle;
@@ -218,15 +218,12 @@ describe('Liquidity mining campaign', () => {
     });
 
     it('[Should withdraw sucessfully when staked in two different lmcs]:', async () => {
-      let currentBlock = await ethers.provider.getBlock('latest');
       let contractInitialBalance = await stakingTokenInstance.balanceOf(LmcInstance.address);
 
       const userInitialBalanceRewards = await rewardTokensInstances[0].balanceOf(testAccount.address);
 
       const totalStakedAmount = await LmcInstance.totalStaked();
       const userInfo = await LmcInstance.userInfo(testAccount.address);
-
-      currentBlock = await ethers.provider.getBlock('latest');
 
       await timeTravel(120);
 
