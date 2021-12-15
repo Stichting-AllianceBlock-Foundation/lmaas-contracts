@@ -16,26 +16,22 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     uint256[] private totalClaimed;
     uint256[] private totalSpentRewards;
 
-    uint256[] public rewardPerBlock;
+    uint256[] public rewardPerSecond;
     address[] public rewardsTokens;
 
     IERC20Detailed public stakingToken;
 
     uint256 public startTimestamp;
     uint256 public endTimestamp;
-    uint256 private startBlock;
-    uint256 private endBlock;
-    uint256 private lastRewardBlock;
+    uint256 private lastRewardTimestamp;
 
     uint256[] public accumulatedRewardMultiplier;
 
     uint256 public stakeLimit;
     uint256 public contractStakeLimit;
 
-    uint256 private virtualBlockTime;
-
     struct UserInfo {
-        uint256 firstStakedBlockNumber;
+        uint256 firstStakedTimestamp;
         uint256 amountStaked; // How many tokens the user has staked.
         uint256[] rewardDebt; //
         uint256[] tokensOwed; // How many tokens the contract owes to the user.
@@ -48,15 +44,14 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     event Claimed(address indexed user, uint256 amount, address token);
     event Withdrawn(address indexed user, uint256 amount);
     event Exited(address indexed user, uint256 amount);
-    event Extended(uint256 newEndBlock, uint256[] newRewardsPerBlock);
+    event Extended(uint256 newEndTimestamp, uint256[] newRewardsPerSecond);
     event WithdrawLPRewards(uint256 indexed rewardsAmount, address indexed recipient);
 
     constructor(
         IERC20Detailed _stakingToken,
         address[] memory _rewardsTokens,
         uint256 _stakeLimit,
-        uint256 _contractStakeLimit,
-        uint256 _virtualBlockTime
+        uint256 _contractStakeLimit
     ) {
         require(address(_stakingToken) != address(0), 'Constructor::Invalid staking token address');
 
@@ -64,7 +59,6 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
             _stakeLimit != 0 && _contractStakeLimit != 0,
             'Constructor::Stake limit and contract stake limit needs to be more than 0'
         );
-        require(_virtualBlockTime != 0, 'Constructor:: Virtual block time should be greater than 0');
 
         require(_rewardsTokens.length > 0, 'Constructor::Rewards tokens array should not be empty');
 
@@ -72,7 +66,6 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         rewardsTokens = _rewardsTokens;
         stakeLimit = _stakeLimit;
         contractStakeLimit = _contractStakeLimit;
-        virtualBlockTime = _virtualBlockTime * 1 seconds;
 
         for (uint256 i = 0; i < rewardsTokens.length; i++) {
             accumulatedRewardMultiplier.push(0);
@@ -81,10 +74,10 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         }
     }
 
-    modifier onlyInsideBlockBounds() {
-        uint256 currentBlock = _getBlock();
+    modifier onlyInsideBounds() {
+        uint256 currentTimestamp = block.timestamp;
         require(
-            (startBlock > 0 && currentBlock > startBlock) && (currentBlock <= endBlock),
+            (startTimestamp > 0 && currentTimestamp > startTimestamp) && (currentTimestamp <= endTimestamp),
             'Stake::Staking has not started or is finished'
         );
         _;
@@ -102,7 +95,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     function start(
         uint256 _startTimestamp,
         uint256 _endTimestamp,
-        uint256[] memory _rewardPerBlock
+        uint256[] memory _rewardPerSecond
     ) public onlyOwner {
         require(startTimestamp == 0, 'start::Pool is already started');
         require(
@@ -111,13 +104,13 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         );
 
         require(
-            _rewardPerBlock.length == rewardsTokens.length,
+            _rewardPerSecond.length == rewardsTokens.length,
             'Start::Rewards per block and rewards tokens must be with the same length.'
         );
-        rewardPerBlock = _rewardPerBlock;
+        rewardPerSecond = _rewardPerSecond;
 
         for (uint256 i = 0; i < rewardsTokens.length; i++) {
-            uint256 rewardsAmount = calculateRewardsAmount(_startTimestamp, _endTimestamp, rewardPerBlock[i]);
+            uint256 rewardsAmount = calculateRewardsAmount(_startTimestamp, _endTimestamp, rewardPerSecond[i]);
 
             uint256 balance = IERC20Detailed(rewardsTokens[i]).balanceOf(address(this));
 
@@ -126,10 +119,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 
         startTimestamp = _startTimestamp;
         endTimestamp = _endTimestamp;
-
-        startBlock = _calculateBlocks(startTimestamp);
-        endBlock = _calculateBlocks(endTimestamp);
-        lastRewardBlock = startBlock;
+        lastRewardTimestamp = _startTimestamp;
 
         emit Started();
     }
@@ -150,14 +140,14 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         uint256 _tokenAmount,
         address staker,
         bool chargeStaker
-    ) internal onlyInsideBlockBounds onlyUnderStakeLimit(staker, _tokenAmount) {
+    ) internal onlyInsideBounds onlyUnderStakeLimit(staker, _tokenAmount) {
         require(_tokenAmount > 0, 'Stake::Cannot stake 0');
 
         UserInfo storage user = userInfo[staker];
 
         // if no amount has been staked this is considered the initial stake
         if (user.amountStaked == 0) {
-            user.firstStakedBlockNumber = _getBlock();
+            user.firstStakedTimestamp = block.timestamp;
         }
 
         updateRewardMultipliers(); // Update the accumulated multipliers for everyone
@@ -256,34 +246,35 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 		@dev updates the accumulated reward multipliers for everyone and each token
 	 */
     function updateRewardMultipliers() public {
-        uint256 currentBlock = _getBlock();
+        uint256 currentTimestamp = block.timestamp;
 
-        if (currentBlock <= lastRewardBlock) {
+        if (currentTimestamp <= lastRewardTimestamp) {
             return;
         }
 
-        uint256 applicableBlock = (currentBlock < endBlock) ? currentBlock : endBlock;
+        uint256 applicableTimestamp = (currentTimestamp < endTimestamp) ? currentTimestamp : endTimestamp;
 
-        uint256 blocksSinceLastReward = applicableBlock - lastRewardBlock;
+        uint256 secondsSinceLastReward = applicableTimestamp - lastRewardTimestamp;
 
-        if (blocksSinceLastReward == 0) {
+        if (secondsSinceLastReward == 0) {
             // Nothing to update
             return;
         }
 
         if (totalStaked == 0) {
-            lastRewardBlock = applicableBlock;
+            lastRewardTimestamp = applicableTimestamp;
             return;
         }
 
         uint256 rewardsTokensLength = rewardsTokens.length;
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
-            uint256 newReward = blocksSinceLastReward * rewardPerBlock[i]; // Get newly accumulated reward
+            uint256 newReward = secondsSinceLastReward * rewardPerSecond[i]; // Get newly accumulated reward
             uint256 rewardMultiplierIncrease = (newReward * PRECISION) / totalStaked; // Calculate the multiplier increase
             accumulatedRewardMultiplier[i] = accumulatedRewardMultiplier[i] + rewardMultiplierIncrease; // Add the multiplier increase to the accumulated multiplier
         }
-        lastRewardBlock = applicableBlock;
+
+        lastRewardTimestamp = applicableTimestamp;
     }
 
     /**
@@ -319,20 +310,8 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         }
     }
 
-    function _getBlock() internal view virtual returns (uint256) {
-        return block.timestamp / virtualBlockTime;
-    }
-
-    function _calculateBlocks(uint256 _timeInSeconds) internal view virtual returns (uint256) {
-        return _timeInSeconds / virtualBlockTime;
-    }
-
     function hasStakingStarted() public view returns (bool) {
-        return (_getBlock() >= startBlock);
-    }
-
-    function getBlockTime() public view returns (uint256) {
-        return virtualBlockTime;
+        return (startTimestamp > 0 && block.timestamp >= startTimestamp);
     }
 
     function getUserRewardDebt(address _userAddress, uint256 _index) external view returns (uint256) {
@@ -353,14 +332,13 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     function getUserAccumulatedReward(
         address _userAddress,
         uint256 tokenIndex,
-        uint256 time
+        uint256 _currentTimestamp
     ) public view returns (uint256) {
-        uint256 currentBlock = _calculateBlocks(time);
-        uint256 applicableBlock = (currentBlock < endBlock) ? currentBlock : endBlock;
+        uint256 applicableTimestamp = (_currentTimestamp < endTimestamp) ? _currentTimestamp : endTimestamp;
 
-        uint256 blocksSinceLastReward = applicableBlock - lastRewardBlock;
+        uint256 secondsSinceLastReward = applicableTimestamp - lastRewardTimestamp;
 
-        uint256 newReward = blocksSinceLastReward * rewardPerBlock[tokenIndex]; // Get newly accumulated reward
+        uint256 newReward = secondsSinceLastReward * rewardPerSecond[tokenIndex]; // Get newly accumulated reward
         uint256 rewardMultiplierIncrease = (newReward * PRECISION) / totalStaked; // Calculate the multiplier increase
         uint256 currentMultiplier = accumulatedRewardMultiplier[tokenIndex] + rewardMultiplierIncrease; // Simulate the multiplier increase to the accumulated multiplier
 
@@ -384,25 +362,27 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     /**
 		@dev Extends the rewards period and updates the rates
 		@param _endTimestamp  new end block for the rewards
-		@param _rewardsPerBlock array with new rewards per block for each token 
+		@param _rewardPerSecond array with new rewards per block for each token 
 	 */
-    function extend(uint256 _endTimestamp, uint256[] memory _rewardsPerBlock) external virtual onlyOwner {
+    function extend(uint256 _endTimestamp, uint256[] memory _rewardPerSecond) external virtual onlyOwner {
+        uint256 currentTimestamp = block.timestamp;
+
         require(
-            _endTimestamp > block.timestamp && _endTimestamp > endTimestamp,
-            'Extend::End block must be in the future and after current'
+            _endTimestamp > currentTimestamp && _endTimestamp > endTimestamp,
+            'Extend::End timestamp must be in the future and after current'
         );
         require(
-            _rewardsPerBlock.length == rewardsTokens.length,
+            _rewardPerSecond.length == rewardsTokens.length,
             'Extend::Rewards amounts length is less than expected'
         );
 
         updateRewardMultipliers();
 
-        uint256 campaignTime = block.timestamp > endTimestamp ? endTimestamp : block.timestamp;
+        uint256 campaignTime = currentTimestamp > endTimestamp ? endTimestamp : currentTimestamp;
 
-        for (uint256 i = 0; i < _rewardsPerBlock.length; i++) {
-            uint256 currentRemainingRewards = calculateRewardsAmount(campaignTime, endTimestamp, rewardPerBlock[i]);
-            uint256 newRemainingRewards = calculateRewardsAmount(block.timestamp, _endTimestamp, _rewardsPerBlock[i]);
+        for (uint256 i = 0; i < _rewardPerSecond.length; i++) {
+            uint256 currentRemainingRewards = calculateRewardsAmount(campaignTime, endTimestamp, rewardPerSecond[i]);
+            uint256 newRemainingRewards = calculateRewardsAmount(currentTimestamp, _endTimestamp, _rewardPerSecond[i]);
 
             if (currentRemainingRewards > newRemainingRewards) {
                 // Some reward leftover needs to be returned
@@ -417,20 +397,17 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 
                 require(availableBalance >= newRemainingRewards, 'Extend:: Not enough rewards in the pool to extend');
 
-                uint256 spentRewards = calculateRewardsAmount(startTimestamp, campaignTime, rewardPerBlock[i]);
+                uint256 spentRewards = calculateRewardsAmount(startTimestamp, campaignTime, rewardPerSecond[i]);
                 totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
             }
 
-            rewardPerBlock[i] = _rewardsPerBlock[i];
+            rewardPerSecond[i] = _rewardPerSecond[i];
         }
 
-        startTimestamp = block.timestamp;
+        startTimestamp = currentTimestamp;
         endTimestamp = _endTimestamp;
 
-        startBlock = _calculateBlocks(startTimestamp);
-        endBlock = _calculateBlocks(endTimestamp);
-
-        emit Extended(_endTimestamp, _rewardsPerBlock);
+        emit Extended(_endTimestamp, _rewardPerSecond);
     }
 
     function getAvailableBalance(uint256 _rewardTokenIndex, uint256 time) public view returns (uint256) {
@@ -443,7 +420,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 
         uint256 campaignTime = time > endTimestamp ? endTimestamp : time;
 
-        uint256 spentRewards = calculateRewardsAmount(startTimestamp, campaignTime, rewardPerBlock[_rewardTokenIndex]);
+        uint256 spentRewards = calculateRewardsAmount(startTimestamp, campaignTime, rewardPerSecond[_rewardTokenIndex]);
         uint256 availableBalance = balance -
             (totalSpentRewards[_rewardTokenIndex] + spentRewards - totalClaimed[_rewardTokenIndex]);
 
@@ -478,11 +455,9 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     function calculateRewardsAmount(
         uint256 _startTimestamp,
         uint256 _endTimestamp,
-        uint256 _rewardPerBlock
+        uint256 _rewardPerSecond
     ) internal view returns (uint256) {
         uint256 rewardsPeriodSeconds = _endTimestamp - _startTimestamp;
-        uint256 rewardsPeriodBlocks = rewardsPeriodSeconds / virtualBlockTime;
-
-        return _rewardPerBlock * rewardsPeriodBlocks;
+        return _rewardPerSecond * rewardsPeriodSeconds;
     }
 }

@@ -17,10 +17,7 @@ describe('OnlyExitFeature', () => {
 
   let rewardTokensInstances: TestERC20[];
   let rewardTokensAddresses: string[];
-  let rewardPerBlock: BigNumber[];
-
-  let startBlock: number;
-  let endBlock: number;
+  let rewardPerSecond: BigNumber[];
 
   const rewardTokensCount = 1; // 5 rewards tokens for tests
   const day = 60 * 24 * 60;
@@ -32,13 +29,12 @@ describe('OnlyExitFeature', () => {
 
   let startTimestamp: number;
   let endTimestamp: number;
-  const virtualBlocksTime = 10; // 10s == 10000ms
   const oneMinute = 60;
 
   const setupRewardsPoolParameters = async () => {
     rewardTokensInstances = [];
     rewardTokensAddresses = [];
-    rewardPerBlock = [];
+    rewardPerSecond = [];
     for (let i = 0; i < rewardTokensCount; i++) {
       const TestERC20 = await ethers.getContractFactory('TestERC20');
       const tknInst = (await TestERC20.deploy(amount)) as TestERC20;
@@ -49,14 +45,12 @@ describe('OnlyExitFeature', () => {
 
       // populate amounts
       let parsedReward = await ethers.utils.parseEther(`${i + 1}`);
-      rewardPerBlock.push(parsedReward);
+      rewardPerSecond.push(parsedReward);
     }
 
     const currentBlock = await ethers.provider.getBlock('latest');
     startTimestamp = currentBlock.timestamp + oneMinute;
     endTimestamp = startTimestamp + oneMinute * 2;
-    startBlock = Math.trunc(startTimestamp / virtualBlocksTime);
-    endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
   };
 
   beforeEach(async () => {
@@ -78,13 +72,12 @@ describe('OnlyExitFeature', () => {
       endTimestamp,
       rewardTokensAddresses,
       stakeLimit,
-      contractStakeLimit,
-      virtualBlocksTime
+      contractStakeLimit
     )) as OnlyExitRewardsPoolMock;
 
     await rewardTokensInstances[0].mint(OnlyExitFeatureInstance.address, amount);
 
-    await OnlyExitFeatureInstance.start(startTimestamp, endTimestamp, rewardPerBlock);
+    await OnlyExitFeatureInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
 
     await stakingTokenInstance.approve(OnlyExitFeatureInstance.address, standardStakingAmount);
     await stakingTokenInstance.connect(bobAccount).approve(OnlyExitFeatureInstance.address, standardStakingAmount);

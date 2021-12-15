@@ -23,13 +23,9 @@ contract NonCompoundingRewardsPool is
         uint256 _stakeLimit,
         uint256 _throttleRoundBlocks,
         uint256 _throttleRoundCap,
-        uint256 _contractStakeLimit,
-        uint256 _virtualBlockTime
-    )
-        RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _virtualBlockTime)
-        StakeLock(_endTimestamp)
-    {
-        setThrottleParams(_throttleRoundBlocks, _throttleRoundCap, _endTimestamp, _virtualBlockTime);
+        uint256 _contractStakeLimit
+    ) RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit) StakeLock(_endTimestamp) {
+        setThrottleParams(_throttleRoundBlocks, _throttleRoundCap, _endTimestamp);
     }
 
     function withdraw(uint256 _tokenAmount) public override(OnlyExitFeature, RewardsPoolBase) {

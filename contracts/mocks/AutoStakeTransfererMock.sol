@@ -9,7 +9,6 @@ contract AutoStakeTransfererMock is StakeTransfererAutoStake {
         address token,
         uint256 _throttleRoundBlocks,
         uint256 _throttleRoundCap,
-        uint256 stakeEnd,
-        uint256 _virtualBlockTime
-    ) AutoStake(token, _throttleRoundBlocks, _throttleRoundCap, stakeEnd, _virtualBlockTime) {}
+        uint256 stakeEnd
+    ) AutoStake(token, _throttleRoundBlocks, _throttleRoundCap, stakeEnd) {}
 }

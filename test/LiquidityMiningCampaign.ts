@@ -32,12 +32,10 @@ describe('Liquidity mining campaign', () => {
   let rampUpBlock: number;
   let lockBlock: number;
   let secondLockBlock: number;
-  let startBlock: number;
-  let endBlock: number;
 
   let rewardTokensInstances: TestERC20[];
   let rewardTokensAddresses: string[];
-  let rewardPerBlock: BigNumber[];
+  let rewardPerSecond: BigNumber[];
   let lockSchemеs;
   let libraries;
 
@@ -54,18 +52,17 @@ describe('Liquidity mining campaign', () => {
   const additionalRewards = [bTen];
   const stakeLimit = amount;
   const contractStakeLimit = ethers.utils.parseEther('35'); // 10 tokens
-  let throttleRoundBlocks = 10;
+  let throttleRoundSeconds = 10;
   let throttleRoundCap = ethers.utils.parseEther('1');
 
   let startTimestamp: number;
   let endTimestamp: number;
-  const virtualBlocksTime = 10; // 10s == 10000ms
   const oneMinute = 60;
 
   const setupRewardsPoolParameters = async () => {
     rewardTokensInstances = [];
     rewardTokensAddresses = [];
-    rewardPerBlock = [];
+    rewardPerSecond = [];
     lockSchemеs = [];
 
     for (let i = 0; i < rewardTokensCount; i++) {
@@ -75,16 +72,14 @@ describe('Liquidity mining campaign', () => {
       rewardTokensAddresses.push(tknInst.address);
 
       let parsedReward = await ethers.utils.parseEther(`${i + 1}`);
-      rewardPerBlock.push(parsedReward);
+      rewardPerSecond.push(parsedReward);
     }
 
     const currentBlock = await ethers.provider.getBlock('latest');
     startTimestamp = currentBlock.timestamp + oneMinute;
     endTimestamp = startTimestamp + oneMinute * 2;
-    startBlock = Math.trunc(startTimestamp / virtualBlocksTime);
-    endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
-    rampUpBlock = startBlock + 5;
-    lockBlock = endBlock + 30;
+    rampUpBlock = startTimestamp + 5;
+    lockBlock = endTimestamp + 30;
     secondLockBlock = lockBlock + 5;
   };
 
@@ -112,12 +107,11 @@ describe('Liquidity mining campaign', () => {
       rewardTokensAddresses[0],
       stakeLimit,
       contractStakeLimit,
-      virtualBlocksTime,
     ])) as LiquidityMiningCampaign;
 
     await rewardTokensInstances[0].mint(LmcInstance.address, amount);
 
-    await LmcInstance.start(startTimestamp, endTimestamp, rewardPerBlock);
+    await LmcInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
   });
 
   it('[Should deploy the lock scheme successfully]:', async () => {
@@ -274,11 +268,10 @@ describe('Liquidity mining campaign', () => {
         rewardTokensAddresses[0],
         stakeLimit,
         _contractStakeLimit,
-        virtualBlocksTime,
       ])) as LiquidityMiningCampaign;
 
       await rewardTokensInstances[0].mint(NewLmcInstance.address, amount);
-      await NewLmcInstance.start(startTimestamp, endTimestamp, rewardPerBlock);
+      await NewLmcInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
 
       let externalRewardsTokenInstance: TestERC20 = (await deployContract(testAccount, TestERC20Artifact, [
         amount,
@@ -294,15 +287,14 @@ describe('Liquidity mining campaign', () => {
           endTimestamp + oneMinute,
           rewardTokensAddresses,
           stakeLimit,
-          throttleRoundBlocks,
+          throttleRoundSeconds,
           throttleRoundCap,
           _contractStakeLimit,
-          virtualBlocksTime,
         ]
       )) as NonCompoundingRewardsPool;
 
       await rewardTokensInstances[0].mint(NonCompoundingRewardsPoolInstance.address, amount);
-      await NonCompoundingRewardsPoolInstance.start(startTimestamp, endTimestamp + oneMinute, rewardPerBlock);
+      await NonCompoundingRewardsPoolInstance.start(startTimestamp, endTimestamp + oneMinute, rewardPerSecond);
 
       await stakingTokenInstance.approve(NewLmcInstance.address, amount);
       await timeTravel(70);

@@ -10,38 +10,38 @@ abstract contract ThrottledExit {
     using SafeMath for uint256;
     using SafeERC20Detailed for IERC20Detailed;
 
-    uint256 public nextAvailableExitBlock;
+    uint256 public nextAvailableExitTimestamp;
     uint256 public nextAvailableRoundExitVolume;
-    uint256 public throttleRoundBlocks;
+    uint256 public throttleRoundSeconds;
     uint256 public throttleRoundCap;
-    uint256 private virtualBlockTime;
-    uint256 public campaignEndBlock;
+    uint256 public campaignEndTimestamp;
 
     struct ExitInfo {
-        uint256 exitBlock;
+        uint256 exitTimestamp;
         uint256 exitStake;
         uint256[] rewards;
     }
 
     mapping(address => ExitInfo) public exitInfo;
 
-    event ExitRequested(address user, uint256 exitBlock);
+    event ExitRequested(address user, uint256 exitTimestamp);
     event ExitCompleted(address user, uint256 stake);
 
     function setThrottleParams(
-        uint256 _throttleRoundBlocks,
+        uint256 _throttleRoundSeconds,
         uint256 _throttleRoundCap,
-        uint256 throttleStart,
-        uint256 _virtualBlockTime
+        uint256 _throttleStart
     ) internal {
-        require(_throttleRoundBlocks > 0, 'setThrottle::throttle round blocks must be more than 0');
+        require(_throttleRoundSeconds > 0, 'setThrottle::throttle round blocks must be more than 0');
         require(_throttleRoundCap > 0, 'setThrottle::throttle round cap must be more than 0');
-        require(throttleRoundBlocks == 0 && throttleRoundCap == 0, 'setThrottle::throttle parameters were already set');
-        throttleRoundBlocks = _throttleRoundBlocks;
+        require(
+            throttleRoundSeconds == 0 && throttleRoundCap == 0,
+            'setThrottle::throttle parameters were already set'
+        );
+        throttleRoundSeconds = _throttleRoundSeconds;
         throttleRoundCap = _throttleRoundCap;
-        virtualBlockTime = _virtualBlockTime;
-        campaignEndBlock = _calculateBlock(throttleStart);
-        nextAvailableExitBlock = campaignEndBlock.add(throttleRoundBlocks);
+        campaignEndTimestamp = _throttleStart;
+        nextAvailableExitTimestamp = campaignEndTimestamp.add(throttleRoundSeconds);
     }
 
     function initiateExit(
@@ -52,19 +52,19 @@ abstract contract ThrottledExit {
         initialiseExitInfo(msg.sender, _rewardsTokensLength);
 
         ExitInfo storage info = exitInfo[msg.sender];
-        info.exitBlock = getAvailableExitTime(amountStaked);
+        info.exitTimestamp = getAvailableExitTime(amountStaked);
         info.exitStake = info.exitStake.add(amountStaked);
 
         for (uint256 i = 0; i < _rewardsTokensLength; i++) {
             info.rewards[i] = info.rewards[i].add(_tokensOwed[i]);
         }
 
-        emit ExitRequested(msg.sender, info.exitBlock);
+        emit ExitRequested(msg.sender, info.exitTimestamp);
     }
 
     function finalizeExit(address _stakingToken, address[] memory _rewardsTokens) internal virtual {
         ExitInfo storage info = exitInfo[msg.sender];
-        require(_getCurrentBlock() > info.exitBlock, 'finalizeExit::Trying to exit too early');
+        require(block.timestamp > info.exitTimestamp, 'finalizeExit::Trying to exit too early');
 
         uint256 infoExitStake = info.exitStake;
         info.exitStake = 0;
@@ -81,23 +81,24 @@ abstract contract ThrottledExit {
     }
 
     function getAvailableExitTime(uint256 exitAmount) internal returns (uint256 exitBlock) {
-        uint256 currentBlock = _getCurrentBlock();
-        if (currentBlock > nextAvailableExitBlock) {
+        uint256 currentTimestamp = block.timestamp;
+
+        if (currentTimestamp > nextAvailableExitTimestamp) {
             // We've passed the next available block and need to readjust
-            uint256 blocksFromCurrentRound = (currentBlock - nextAvailableExitBlock) % throttleRoundBlocks; // Find how many blocks have passed since last block should have started
-            nextAvailableExitBlock = currentBlock.sub(blocksFromCurrentRound).add(throttleRoundBlocks); // Find where the lst block should have started and add one round to find the next one
+            uint256 blocksFromCurrentRound = (currentTimestamp - nextAvailableExitTimestamp) % throttleRoundSeconds; // Find how many blocks have passed since last block should have started
+            nextAvailableExitTimestamp = currentTimestamp.sub(blocksFromCurrentRound).add(throttleRoundSeconds); // Find where the lst block should have started and add one round to find the next one
             nextAvailableRoundExitVolume = exitAmount; // Reset volume
-            return nextAvailableExitBlock;
+            return nextAvailableExitTimestamp;
         } else {
             // We are still before the next available block
             nextAvailableRoundExitVolume = nextAvailableRoundExitVolume.add(exitAmount); // Add volume
         }
 
-        exitBlock = nextAvailableExitBlock;
+        exitBlock = nextAvailableExitTimestamp;
 
         if (nextAvailableRoundExitVolume >= throttleRoundCap) {
             // If cap reached
-            nextAvailableExitBlock = nextAvailableExitBlock.add(throttleRoundBlocks); // update next exit block.
+            nextAvailableExitTimestamp = nextAvailableExitTimestamp.add(throttleRoundSeconds); // update next exit block.
             // Note we know that this behaviour will lead to people exiting a bit more than the cap when the last user does not hit perfectly the cap. This is OK
             nextAvailableRoundExitVolume = 0; // Reset volume
         }
@@ -119,17 +120,5 @@ abstract contract ThrottledExit {
         for (uint256 i = info.rewards.length; i < tokensLength; i++) {
             info.rewards.push(0);
         }
-    }
-
-    function _getCurrentBlock() public view returns (uint256) {
-        return (block.timestamp.div(virtualBlockTime));
-    }
-
-    function _calculateBlock(uint256 _timeInSeconds) internal view returns (uint256) {
-        return _timeInSeconds.div(virtualBlockTime);
-    }
-
-    function getVirtualBlockTime() public view returns (uint256) {
-        return virtualBlockTime;
     }
 }

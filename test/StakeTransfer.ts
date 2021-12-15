@@ -20,10 +20,7 @@ describe('StakeTransfer', () => {
 
   let rewardTokensInstances: TestERC20[];
   let rewardTokensAddresses: string[];
-  let rewardPerBlock: BigNumber[];
-
-  let startBlock: number;
-  let endBlock: number;
+  let rewardPerSecond: BigNumber[];
 
   const rewardTokensCount = 1; // 5 rewards tokens for tests
   const day = 60 * 24 * 60;
@@ -35,13 +32,12 @@ describe('StakeTransfer', () => {
 
   let startTimestamp: number;
   let endTimestamp: number;
-  const virtualBlocksTime = 10; // 10s == 10000ms
   const oneMinute = 60;
 
   const setupRewardsPoolParameters = async () => {
     rewardTokensInstances = [];
     rewardTokensAddresses = [];
-    rewardPerBlock = [];
+    rewardPerSecond = [];
     for (let i = 0; i < rewardTokensCount; i++) {
       const TestERC20 = await ethers.getContractFactory('TestERC20');
       const tknInst = (await TestERC20.deploy(amount)) as TestERC20;
@@ -52,14 +48,12 @@ describe('StakeTransfer', () => {
 
       // populate amounts
       let parsedReward = await ethers.utils.parseEther(`${i + 1}`);
-      rewardPerBlock.push(parsedReward);
+      rewardPerSecond.push(parsedReward);
     }
 
     const currentBlock = await ethers.provider.getBlock('latest');
     startTimestamp = currentBlock.timestamp + oneMinute;
     endTimestamp = startTimestamp + oneMinute * 2;
-    startBlock = Math.trunc(startTimestamp / virtualBlocksTime);
-    endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
   };
 
   beforeEach(async () => {
@@ -81,8 +75,7 @@ describe('StakeTransfer', () => {
       endTimestamp,
       rewardTokensAddresses,
       stakeLimit,
-      contractStakeLimit,
-      virtualBlocksTime
+      contractStakeLimit
     )) as StakeTransfererRewardsPoolMock;
 
     const StakeReceiverRewardsPoolMock = await ethers.getContractFactory('StakeReceiverRewardsPoolMock');
@@ -92,8 +85,7 @@ describe('StakeTransfer', () => {
       endTimestamp + oneMinute,
       rewardTokensAddresses,
       stakeLimit,
-      contractStakeLimit,
-      virtualBlocksTime
+      contractStakeLimit
     )) as StakeReceiverRewardsPoolMock;
 
     await StakeTransfererInstance.setReceiverWhitelisted(StakeReceiverInstance.address, true);
@@ -101,13 +93,13 @@ describe('StakeTransfer', () => {
     await rewardTokensInstances[0].mint(StakeTransfererInstance.address, amount);
     await rewardTokensInstances[0].mint(StakeReceiverInstance.address, amount);
 
-    await StakeTransfererInstance.start(startTimestamp, endTimestamp, rewardPerBlock);
-    await StakeReceiverInstance.start(startTimestamp, endTimestamp + oneMinute, rewardPerBlock);
+    await StakeTransfererInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
+    await StakeReceiverInstance.start(startTimestamp, endTimestamp + oneMinute, rewardPerSecond);
 
     await stakingTokenInstance.approve(StakeTransfererInstance.address, standardStakingAmount);
     await stakingTokenInstance.connect(bobAccount).approve(StakeTransfererInstance.address, standardStakingAmount);
     const currentBlock = await ethers.provider.getBlock('latest');
-    const blocksDelta = startBlock - currentBlock.number;
+    const blocksDelta = startTimestamp - currentBlock.number;
 
     await timeTravel(70);
     await StakeTransfererInstance.stake(standardStakingAmount);

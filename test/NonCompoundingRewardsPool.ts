@@ -29,11 +29,9 @@ describe('NonCompoundingRewardsPool', () => {
 
   let rewardTokensInstances: TestERC20[];
   let rewardTokensAddresses: string[];
-  let rewardPerBlock: BigNumber[];
+  let rewardPerSecond: BigNumber[];
 
-  let startBlock: number;
-  let endBlock: number;
-  let throttleRoundBlocks = 10;
+  let throttleRoundSeconds = 10;
   let throttleRoundCap = ethers.utils.parseEther('1');
 
   const rewardTokensCount = 1; // 5 rewards tokens for tests
@@ -46,13 +44,12 @@ describe('NonCompoundingRewardsPool', () => {
 
   let startTimestamp: number;
   let endTimestamp: number;
-  const virtualBlocksTime = 10; // 10s == 10000ms
   const oneMinute = 60;
 
   const setupRewardsPoolParameters = async () => {
     rewardTokensInstances = [];
     rewardTokensAddresses = [];
-    rewardPerBlock = [];
+    rewardPerSecond = [];
     for (let i = 0; i < rewardTokensCount; i++) {
       const tknInst = (await deployContract(testAccount, TestERC20Artifact, [amount])) as TestERC20;
 
@@ -62,33 +59,30 @@ describe('NonCompoundingRewardsPool', () => {
 
       // populate amounts
       let parsedReward = await ethers.utils.parseEther(`${i + 1}`);
-      rewardPerBlock.push(parsedReward);
+      rewardPerSecond.push(parsedReward);
     }
 
     const currentBlock = await ethers.provider.getBlock('latest');
     startTimestamp = currentBlock.timestamp + oneMinute;
     endTimestamp = startTimestamp + oneMinute * 2;
-    startBlock = Math.trunc(startTimestamp / virtualBlocksTime);
-    endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
   };
 
-  const stake = async (_throttleRoundBlocks: number, _throttleRoundCap: BigNumber) => {
+  const stake = async (_throttleRoundSeconds: number, _throttleRoundCap: BigNumber) => {
     NonCompoundingRewardsPoolInstance = (await deployContract(testAccount, NonCompoundingRewardsPoolArtifact, [
       stakingTokenAddress,
       startTimestamp,
       endTimestamp,
       rewardTokensAddresses,
       stakeLimit,
-      _throttleRoundBlocks,
+      _throttleRoundSeconds,
       _throttleRoundCap,
       contractStakeLimit,
-      virtualBlocksTime,
     ])) as NonCompoundingRewardsPool;
 
-    const reward = rewardPerBlock[0].mul(endBlock - startBlock);
+    const reward = rewardPerSecond[0].mul(endTimestamp - startTimestamp);
     await rewardTokensInstances[0].mint(NonCompoundingRewardsPoolInstance.address, reward);
 
-    await NonCompoundingRewardsPoolInstance.start(startTimestamp, endTimestamp, rewardPerBlock);
+    await NonCompoundingRewardsPoolInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
 
     await stakingTokenInstance.approve(NonCompoundingRewardsPoolInstance.address, standardStakingAmount);
     await stakingTokenInstance
@@ -114,7 +108,7 @@ describe('NonCompoundingRewardsPool', () => {
 
       await setupRewardsPoolParameters();
 
-      await stake(throttleRoundBlocks, throttleRoundCap);
+      await stake(throttleRoundSeconds, throttleRoundCap);
     });
 
     it('[Should not claim or withdraw]:', async () => {
@@ -216,35 +210,35 @@ describe('NonCompoundingRewardsPool', () => {
       await setupRewardsPoolParameters();
     });
 
-    it('[Should not change nextAvailableExitBlock before cap]:', async () => {
-      const _throttleRoundBlocks = 10;
+    it('[Should not change nextAvailableExitTimestamp before cap]:', async () => {
+      const _throttleRoundSeconds = 10;
       const _throttleRoundCap = standardStakingAmount.mul(2);
 
-      await stake(_throttleRoundBlocks, _throttleRoundCap);
+      await stake(_throttleRoundSeconds, _throttleRoundCap);
       await timeTravel(190);
 
       await NonCompoundingRewardsPoolInstance.exit();
 
-      const nextBlock = await NonCompoundingRewardsPoolInstance.nextAvailableExitBlock();
-      expect(nextBlock).to.equal(endBlock + throttleRoundBlocks);
+      const nextBlock = await NonCompoundingRewardsPoolInstance.nextAvailableExitTimestamp();
+      expect(nextBlock).to.equal(endTimestamp + throttleRoundSeconds);
 
       const volume = await NonCompoundingRewardsPoolInstance.nextAvailableRoundExitVolume();
       expect(volume.eq(standardStakingAmount), 'Exit volume was incorrect');
 
       const userExitInfo = await NonCompoundingRewardsPoolInstance.exitInfo(testAccount.address);
-      expect(userExitInfo.exitBlock.eq(nextBlock), 'The exit block for the user was not set on the next block');
+      expect(userExitInfo.exitTimestamp.eq(nextBlock), 'The exit block for the user was not set on the next block');
     });
 
-    it('[Should change nextAvailableExitBlock if cap is hit]:', async () => {
-      const _throttleRoundBlocks = 10;
+    it('[Should change nextAvailableExitTimestamp if cap is hit]:', async () => {
+      const _throttleRoundSeconds = 10;
       const _throttleRoundCap = standardStakingAmount.mul(2);
 
-      await stake(_throttleRoundBlocks, _throttleRoundCap);
+      await stake(_throttleRoundSeconds, _throttleRoundCap);
       await timeTravel(70);
       await NonCompoundingRewardsPoolInstance.connect(test2Account).stake(standardStakingAmount);
 
       const currentBlock = await ethers.provider.getBlock('latest');
-      const blocksDelta = endBlock - currentBlock.number;
+      const blocksDelta = endTimestamp - currentBlock.number;
 
       await timeTravel(70);
 
@@ -252,43 +246,43 @@ describe('NonCompoundingRewardsPool', () => {
       await timeTravel(10);
       await NonCompoundingRewardsPoolInstance.connect(test2Account).exit();
 
-      const nextBlock = await NonCompoundingRewardsPoolInstance.nextAvailableExitBlock();
-      expect(nextBlock.eq(endBlock + throttleRoundBlocks * 2), 'End block has changed incorrectly');
+      const nextBlock = await NonCompoundingRewardsPoolInstance.nextAvailableExitTimestamp();
+      expect(nextBlock.eq(endTimestamp + throttleRoundSeconds * 2), 'End block has changed incorrectly');
 
       const volume = await NonCompoundingRewardsPoolInstance.nextAvailableRoundExitVolume();
       expect(volume.eq(0), 'Exit volume was incorrect');
 
       const userExitInfo = await NonCompoundingRewardsPoolInstance.exitInfo(test2Account.address);
       expect(
-        userExitInfo.exitBlock.eq(endBlock + throttleRoundBlocks),
+        userExitInfo.exitTimestamp.eq(endTimestamp + throttleRoundSeconds),
         'The exit block for the user was not set for the current block'
       );
     });
 
     it('[Should find next available]:', async () => {
-      const _throttleRoundBlocks = 10;
+      const _throttleRoundSeconds = 10;
       const _throttleRoundCap = standardStakingAmount.mul(2);
 
-      await stake(_throttleRoundBlocks, _throttleRoundCap);
+      await stake(_throttleRoundSeconds, _throttleRoundCap);
 
       await NonCompoundingRewardsPoolInstance.connect(test2Account).stake(standardStakingAmount);
 
       const currentBlock = await ethers.provider.getBlock('latest');
-      const blocksDelta = endBlock - currentBlock.number;
+      const blocksDelta = endTimestamp - currentBlock.number;
 
       await timeTravel(120);
 
       await NonCompoundingRewardsPoolInstance.exit();
 
-      const nextBlock = await NonCompoundingRewardsPoolInstance.nextAvailableExitBlock();
+      const nextBlock = await NonCompoundingRewardsPoolInstance.nextAvailableExitTimestamp();
 
-      expect(nextBlock.eq(endBlock + throttleRoundBlocks), 'End block has changed incorrectly');
+      expect(nextBlock.eq(endTimestamp + throttleRoundSeconds), 'End block has changed incorrectly');
 
       const volume = await NonCompoundingRewardsPoolInstance.nextAvailableRoundExitVolume();
       expect(volume).to.equal(standardStakingAmount);
 
       const userExitInfo = await NonCompoundingRewardsPoolInstance.exitInfo(testAccount.address);
-      expect(userExitInfo.exitBlock).to.equal(nextBlock);
+      expect(userExitInfo.exitTimestamp).to.equal(nextBlock);
     });
   });
 
@@ -308,7 +302,7 @@ describe('NonCompoundingRewardsPool', () => {
 
       await setupRewardsPoolParameters();
 
-      await stake(throttleRoundBlocks, throttleRoundCap);
+      await stake(throttleRoundSeconds, throttleRoundCap);
     });
 
     it('[Should not complete early]:', async () => {

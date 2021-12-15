@@ -30,10 +30,8 @@ describe('AutoStake', () => {
 
   let startTimestamp: number;
   let endTimestamp: number;
-  let endBlock: number;
 
-  let throttleRoundBlocks = 20;
-  const virtualBlocksTime: number = 10;
+  let throttleRoundSeconds = 20;
   const oneMinute: number = 60;
 
   const amount: BigNumber = ethers.utils.parseEther('5184000');
@@ -45,7 +43,6 @@ describe('AutoStake', () => {
       const currentBlock = await ethers.provider.getBlock('latest');
       startTimestamp = currentBlock.timestamp + oneMinute;
       endTimestamp = startTimestamp + oneMinute * 2;
-      endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
     });
 
     it('[Should deploy and connect the two tokens]:', async () => {
@@ -53,10 +50,9 @@ describe('AutoStake', () => {
 
       AutoStakingInstance = (await deployContract(staker, AutoStakeArtifact, [
         stakingTokenInstance.address,
-        throttleRoundBlocks,
+        throttleRoundSeconds,
         bOne,
         endTimestamp,
-        virtualBlocksTime,
       ])) as AutoStake;
 
       CompoundingRewardsPoolInstance = (await deployContract(staker, CompoundingRewardsPoolArtifact, [
@@ -65,7 +61,6 @@ describe('AutoStake', () => {
         AutoStakingInstance.address,
         startTimestamp,
         endTimestamp,
-        virtualBlocksTime,
       ])) as CompoundingRewardsPool;
 
       await AutoStakingInstance.setPool(CompoundingRewardsPoolInstance.address);
@@ -80,10 +75,9 @@ describe('AutoStake', () => {
     it('[Should fail setting the pool from not owner]:', async () => {
       let AutoStakingInstanceNew: AutoStake = (await deployContract(staker, AutoStakeArtifact, [
         stakingTokenInstance.address,
-        throttleRoundBlocks,
+        throttleRoundSeconds,
         bOne,
         endTimestamp,
-        virtualBlocksTime,
       ])) as AutoStake;
 
       let CompoundingRewardsPoolInstanceNew: CompoundingRewardsPool = (await deployContract(
@@ -95,7 +89,6 @@ describe('AutoStake', () => {
           AutoStakingInstance.address,
           startTimestamp,
           endTimestamp,
-          virtualBlocksTime,
         ]
       )) as CompoundingRewardsPool;
 
@@ -112,14 +105,12 @@ describe('AutoStake', () => {
       const currentBlock = await ethers.provider.getBlock('latest');
       startTimestamp = currentBlock.timestamp + oneMinute;
       endTimestamp = startTimestamp + oneMinute * 2;
-      endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
 
       AutoStakingInstance = (await deployContract(staker, AutoStakeArtifact, [
         stakingTokenInstance.address,
-        throttleRoundBlocks,
+        throttleRoundSeconds,
         bOne,
         endTimestamp,
-        virtualBlocksTime,
       ])) as AutoStake;
 
       CompoundingRewardsPoolInstance = (await deployContract(staker, CompoundingRewardsPoolArtifact, [
@@ -128,7 +119,6 @@ describe('AutoStake', () => {
         AutoStakingInstance.address,
         startTimestamp,
         endTimestamp,
-        virtualBlocksTime,
       ])) as CompoundingRewardsPool;
 
       await AutoStakingInstance.setPool(CompoundingRewardsPoolInstance.address);
@@ -145,8 +135,6 @@ describe('AutoStake', () => {
     });
 
     it('[Should successfully stake]:', async () => {
-      let startBlock = Math.trunc(startTimestamp / virtualBlocksTime);
-
       await AutoStakingInstance.connect(staker).stake(standardStakingAmount);
       const totalStakedAmount = await CompoundingRewardsPoolInstance.totalStaked();
       const userInfo = await CompoundingRewardsPoolInstance.userInfo(AutoStakingInstance.address);
@@ -157,7 +145,7 @@ describe('AutoStake', () => {
 
       expect(totalStakedAmount).to.equal(standardStakingAmount);
       expect(userInfo.amountStaked).to.equal(standardStakingAmount);
-      expect(userInfo.firstStakedBlockNumber).to.gt(startBlock);
+      expect(userInfo.firstStakedTimestamp).to.gt(startTimestamp);
       expect(userRewardDebt).to.equal(0);
       expect(userOwedToken).to.equal(0);
       expect(userBalance).to.equal(standardStakingAmount);

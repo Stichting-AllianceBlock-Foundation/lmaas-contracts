@@ -26,15 +26,12 @@ describe('LimitedAutoStake', () => {
   let AutoStakingInstance: LimitedAutoStake;
   let stakingTokenInstance: TestERC20;
 
-  let startBlock: number;
-  let endBlock: number;
   let startTimestamp: number;
   let endTimestamp: number;
 
-  const virtualBlocksTime: number = 10; // 10s == 10000ms
   const oneMinute: number = 60;
 
-  let throttleRoundBlocks: number = 20;
+  let throttleRoundSeconds: number = 20;
 
   const day: number = 60 * 24 * 60;
   const amount: BigNumber = ethers.utils.parseEther('5184000');
@@ -47,8 +44,6 @@ describe('LimitedAutoStake', () => {
       const currentBlock = await ethers.provider.getBlock('latest');
       startTimestamp = currentBlock.timestamp + oneMinute;
       endTimestamp = startTimestamp + oneMinute * 2;
-      startBlock = Math.trunc(startTimestamp / virtualBlocksTime);
-      endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
     });
 
     it('[Should deploy and connect the two tokens]:', async () => {
@@ -56,11 +51,10 @@ describe('LimitedAutoStake', () => {
 
       AutoStakingInstance = (await deployContract(testAccount, LimitedAutoStakeArtifact, [
         stakingTokenInstance.address,
-        throttleRoundBlocks,
+        throttleRoundSeconds,
         bOne,
         endTimestamp,
         stakeLimit,
-        virtualBlocksTime,
       ])) as LimitedAutoStake;
 
       CompoundingRewardsPoolInstance = (await deployContract(testAccount, CompoundingRewardsPoolArtifact, [
@@ -69,7 +63,6 @@ describe('LimitedAutoStake', () => {
         AutoStakingInstance.address,
         startTimestamp,
         endTimestamp,
-        virtualBlocksTime,
       ])) as CompoundingRewardsPool;
 
       await AutoStakingInstance.setPool(CompoundingRewardsPoolInstance.address);
@@ -86,11 +79,10 @@ describe('LimitedAutoStake', () => {
       await expect(
         deployContract(testAccount, LimitedAutoStakeArtifact, [
           stakingTokenInstance.address,
-          throttleRoundBlocks,
+          throttleRoundSeconds,
           bOne,
           endTimestamp,
           0,
-          virtualBlocksTime,
         ])
       ).to.be.revertedWith('LimitedAutoStake:constructor::stake limit should not be 0');
     });
@@ -103,16 +95,13 @@ describe('LimitedAutoStake', () => {
       const currentBlock = await ethers.provider.getBlock('latest');
       startTimestamp = currentBlock.timestamp + oneMinute;
       endTimestamp = startTimestamp + oneMinute * 2;
-      startBlock = Math.trunc(startTimestamp / virtualBlocksTime);
-      endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
 
       AutoStakingInstance = (await deployContract(testAccount, LimitedAutoStakeArtifact, [
         stakingTokenInstance.address,
-        throttleRoundBlocks,
+        throttleRoundSeconds,
         bOne,
         endTimestamp,
         stakeLimit,
-        virtualBlocksTime,
       ])) as LimitedAutoStake;
 
       CompoundingRewardsPoolInstance = (await deployContract(testAccount, CompoundingRewardsPoolArtifact, [
@@ -121,7 +110,6 @@ describe('LimitedAutoStake', () => {
         AutoStakingInstance.address,
         startTimestamp,
         endTimestamp,
-        virtualBlocksTime,
       ])) as CompoundingRewardsPool;
 
       await AutoStakingInstance.setPool(CompoundingRewardsPoolInstance.address);
@@ -149,7 +137,7 @@ describe('LimitedAutoStake', () => {
 
       expect(totalStakedAmount).to.equal(standardStakingAmount);
       expect(userInfo.amountStaked).to.equal(standardStakingAmount);
-      expect(userInfo.firstStakedBlockNumber).to.equal(startBlock + 2);
+      expect(userInfo.firstStakedTimestamp).to.equal(startTimestamp + 2);
       expect(userRewardDebt).to.equal(0);
       expect(userOwedToken).to.equal(0);
       expect(userBalance).to.equal(standardStakingAmount);

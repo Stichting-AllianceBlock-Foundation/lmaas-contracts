@@ -20,7 +20,7 @@ interface IRewardsPoolBase {
     function calculateRewardsAmount(
         uint256 _startBlock,
         uint256 _endBlock,
-        uint256 _rewardPerBlock
+        uint256 _rewardPerSecond
     ) external pure returns (uint256);
 
     function balanceOf(address _userAddress) external view returns (uint256);
