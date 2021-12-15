@@ -6,7 +6,7 @@ import { BigNumber, BigNumberish } from 'ethers';
 import { TestERC20 } from '../typechain-types/TestERC20';
 import { StakeTransfererRewardsPoolMock } from '../typechain-types/StakeTransfererRewardsPoolMock';
 import { StakeReceiverRewardsPoolMock } from '../typechain-types/StakeReceiverRewardsPoolMock';
-import { timeTravel } from './utils';
+import { getTime, timeTravel } from './utils';
 
 describe('StakeTransfer', () => {
   let aliceAccount: SignerWithAddress;
@@ -20,10 +20,7 @@ describe('StakeTransfer', () => {
 
   let rewardTokensInstances: TestERC20[];
   let rewardTokensAddresses: string[];
-  let rewardPerBlock: BigNumber[];
-
-  let startBlock: number;
-  let endBlock: number;
+  let rewardPerSecond: BigNumber[];
 
   const rewardTokensCount = 1; // 5 rewards tokens for tests
   const day = 60 * 24 * 60;
@@ -33,15 +30,14 @@ describe('StakeTransfer', () => {
   const standardStakingAmount = ethers.utils.parseEther('5'); // 5 tokens
   const contractStakeLimit = ethers.utils.parseEther('10'); // 10 tokens
 
-  let startTimestmap: number;
+  let startTimestamp: number;
   let endTimestamp: number;
-  const virtualBlocksTime = 10; // 10s == 10000ms
   const oneMinute = 60;
 
   const setupRewardsPoolParameters = async () => {
     rewardTokensInstances = [];
     rewardTokensAddresses = [];
-    rewardPerBlock = [];
+    rewardPerSecond = [];
     for (let i = 0; i < rewardTokensCount; i++) {
       const TestERC20 = await ethers.getContractFactory('TestERC20');
       const tknInst = (await TestERC20.deploy(amount)) as TestERC20;
@@ -52,14 +48,12 @@ describe('StakeTransfer', () => {
 
       // populate amounts
       let parsedReward = await ethers.utils.parseEther(`${i + 1}`);
-      rewardPerBlock.push(parsedReward);
+      rewardPerSecond.push(parsedReward);
     }
 
     const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestmap = currentBlock.timestamp + oneMinute;
-    endTimestamp = startTimestmap + oneMinute * 2;
-    startBlock = Math.trunc(startTimestmap / virtualBlocksTime);
-    endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
+    startTimestamp = currentBlock.timestamp + oneMinute;
+    endTimestamp = startTimestamp + oneMinute * 2;
   };
 
   beforeEach(async () => {
@@ -77,25 +71,21 @@ describe('StakeTransfer', () => {
     const StakeTransfererRewardsPoolMock = await ethers.getContractFactory('StakeTransfererRewardsPoolMock');
     StakeTransfererInstance = (await StakeTransfererRewardsPoolMock.deploy(
       stakingTokenAddress,
-      startTimestmap,
+      startTimestamp,
       endTimestamp,
       rewardTokensAddresses,
-      rewardPerBlock,
       stakeLimit,
-      contractStakeLimit,
-      virtualBlocksTime
+      contractStakeLimit
     )) as StakeTransfererRewardsPoolMock;
 
     const StakeReceiverRewardsPoolMock = await ethers.getContractFactory('StakeReceiverRewardsPoolMock');
     StakeReceiverInstance = (await StakeReceiverRewardsPoolMock.deploy(
       stakingTokenAddress,
-      startTimestmap,
+      startTimestamp,
       endTimestamp + oneMinute,
       rewardTokensAddresses,
-      rewardPerBlock,
       stakeLimit,
-      contractStakeLimit,
-      virtualBlocksTime
+      contractStakeLimit
     )) as StakeReceiverRewardsPoolMock;
 
     await StakeTransfererInstance.setReceiverWhitelisted(StakeReceiverInstance.address, true);
@@ -103,10 +93,13 @@ describe('StakeTransfer', () => {
     await rewardTokensInstances[0].mint(StakeTransfererInstance.address, amount);
     await rewardTokensInstances[0].mint(StakeReceiverInstance.address, amount);
 
+    await StakeTransfererInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
+    await StakeReceiverInstance.start(startTimestamp, endTimestamp + oneMinute, rewardPerSecond);
+
     await stakingTokenInstance.approve(StakeTransfererInstance.address, standardStakingAmount);
     await stakingTokenInstance.connect(bobAccount).approve(StakeTransfererInstance.address, standardStakingAmount);
     const currentBlock = await ethers.provider.getBlock('latest');
-    const blocksDelta = startBlock - currentBlock.number;
+    const blocksDelta = startTimestamp - currentBlock.number;
 
     await timeTravel(70);
     await StakeTransfererInstance.stake(standardStakingAmount);
@@ -119,7 +112,11 @@ describe('StakeTransfer', () => {
     const userInfoInitial = await StakeTransfererInstance.userInfo(aliceAccount.address);
     const initialTotalStakedAmount = await StakeTransfererInstance.totalStaked();
     const userInitialBalanceRewards = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
-    const userRewards = await StakeTransfererInstance.getUserAccumulatedReward(aliceAccount.address, 0);
+    const userRewards = await StakeTransfererInstance.getUserAccumulatedReward(
+      aliceAccount.address,
+      0,
+      await getTime()
+    );
 
     await StakeTransfererInstance.exitAndTransfer(StakeReceiverInstance.address);
 
@@ -161,6 +158,6 @@ describe('StakeTransfer', () => {
 
     await expect(
       StakeTransfererInstance.connect(bobAccount).setReceiverWhitelisted(bobAccount.address, true)
-    ).to.be.revertedWith('Caller is not RewardsPoolFactory contract');
+    ).to.be.revertedWith('Ownable: caller is not the owner');
   });
 });

@@ -41,22 +41,16 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
         address token,
         uint256 _throttleRoundBlocks,
         uint256 _throttleRoundCap,
-        uint256 stakeEnd,
-        uint256 _virtualBlockTime
+        uint256 stakeEnd
     ) StakeLock(stakeEnd) {
         factory = msg.sender;
         stakingToken = IERC20Detailed(token);
-        setThrottleParams(_throttleRoundBlocks, _throttleRoundCap, stakeEnd, _virtualBlockTime);
+        setThrottleParams(_throttleRoundBlocks, _throttleRoundCap, stakeEnd);
     }
 
     function setPool(address pool) public onlyOwner {
-        require(address(rewardPool) == address(0x0), 'Reward pool already set');
+        require(address(rewardPool) == address(0), 'Reward pool already set');
         rewardPool = IRewardsPoolBase(pool);
-    }
-
-    modifier onlyFactory() {
-        require(msg.sender == factory, 'Caller is not the Factory contract');
-        _;
     }
 
     function refreshAutoStake() external {

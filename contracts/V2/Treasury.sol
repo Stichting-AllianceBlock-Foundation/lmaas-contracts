@@ -19,7 +19,7 @@ contract Treasury is Ownable {
     mapping(address => uint256) public liquidityDrawn;
     IUniswapV2Router public immutable uniswapRouter;
 
-    constructor(address _uniswapRouter, address _externalRewardToken) public {
+    constructor(address _uniswapRouter, address _externalRewardToken) {
         require(_uniswapRouter != address(0x0), 'Treasury:: Uniswap router cannot be 0');
         require(_externalRewardToken != address(0x0), 'Treasury:: External reward token not set');
         uniswapRouter = IUniswapV2Router(_uniswapRouter);

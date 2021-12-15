@@ -6,7 +6,7 @@ import { BigNumber, BigNumberish } from 'ethers';
 import { TestERC20 } from '../typechain-types/TestERC20';
 import { StakeLockingRewardsPoolMock } from '../typechain-types/StakeLockingRewardsPoolMock';
 import { StakeLockingFeature } from '../typechain-types/StakeLockingFeature';
-import { timeTravel } from './utils';
+import { getTime, timeTravel } from './utils';
 
 describe('StakeLockingFeature', () => {
   let aliceAccount: SignerWithAddress;
@@ -18,10 +18,7 @@ describe('StakeLockingFeature', () => {
 
   let rewardTokensInstances: TestERC20[];
   let rewardTokensAddresses: string[];
-  let rewardPerBlock: BigNumber[];
-
-  let startBlock: number;
-  let endBlock: number;
+  let rewardPerSecond: BigNumber[];
 
   const rewardTokensCount = 1; // 5 rewards tokens for tests
   const day = 60 * 24 * 60;
@@ -31,15 +28,14 @@ describe('StakeLockingFeature', () => {
   const standardStakingAmount = ethers.utils.parseEther('5'); // 5 tokens
   const contractStakeLimit = ethers.utils.parseEther('10'); // 10 tokens
 
-  let startTimestmap: number;
+  let startTimestamp: number;
   let endTimestamp: number;
-  const virtualBlocksTime = 10; // 10s == 10000ms
   const oneMinute = 60;
 
   const setupRewardsPoolParameters = async () => {
     rewardTokensInstances = [];
     rewardTokensAddresses = [];
-    rewardPerBlock = [];
+    rewardPerSecond = [];
     for (let i = 0; i < rewardTokensCount; i++) {
       const TestERC20 = await ethers.getContractFactory('TestERC20');
       const tknInst = (await TestERC20.deploy(amount)) as TestERC20;
@@ -50,14 +46,12 @@ describe('StakeLockingFeature', () => {
 
       // populate amounts
       let parsedReward = await ethers.utils.parseEther(`${i + 1}`);
-      rewardPerBlock.push(parsedReward);
+      rewardPerSecond.push(parsedReward);
     }
 
     const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestmap = currentBlock.timestamp + oneMinute;
-    endTimestamp = startTimestmap + oneMinute * 2;
-    startBlock = Math.trunc(startTimestmap / virtualBlocksTime);
-    endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
+    startTimestamp = currentBlock.timestamp + oneMinute;
+    endTimestamp = startTimestamp + oneMinute * 2;
   };
 
   beforeEach(async () => {
@@ -75,16 +69,16 @@ describe('StakeLockingFeature', () => {
     const StakeLockingRewardsPoolMock = await ethers.getContractFactory('StakeLockingRewardsPoolMock');
     StakeLockingFeatureInstance = (await StakeLockingRewardsPoolMock.deploy(
       stakingTokenAddress,
-      startTimestmap,
+      startTimestamp,
       endTimestamp,
       rewardTokensAddresses,
-      rewardPerBlock,
       stakeLimit,
-      contractStakeLimit,
-      virtualBlocksTime
+      contractStakeLimit
     )) as StakeLockingRewardsPoolMock;
 
     await rewardTokensInstances[0].mint(StakeLockingFeatureInstance.address, amount);
+
+    await StakeLockingFeatureInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
 
     await stakingTokenInstance.approve(StakeLockingFeatureInstance.address, standardStakingAmount);
     await stakingTokenInstance.connect(bobAccount).approve(StakeLockingFeatureInstance.address, standardStakingAmount);
@@ -111,7 +105,7 @@ describe('StakeLockingFeature', () => {
 
   it('Should exit successfully from the RewardsPool', async () => {
     const currentBlock = await ethers.provider.getBlock('latest');
-    const blocksDelta = endBlock - currentBlock.number;
+    const blocksDelta = endTimestamp - currentBlock.number;
 
     await timeTravel(130);
 
@@ -119,7 +113,11 @@ describe('StakeLockingFeature', () => {
     const userInfoInitial = await StakeLockingFeatureInstance.userInfo(aliceAccount.address);
     const initialTotalStakedAmount = await StakeLockingFeatureInstance.totalStaked();
     const userInitialBalanceRewards = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
-    const userRewards = await StakeLockingFeatureInstance.getUserAccumulatedReward(aliceAccount.address, 0);
+    const userRewards = await StakeLockingFeatureInstance.getUserAccumulatedReward(
+      aliceAccount.address,
+      0,
+      await getTime()
+    );
 
     await StakeLockingFeatureInstance.exit();
 

@@ -7,7 +7,11 @@ interface IRewardsPoolBase {
 
     function getUserOwedTokens(address _userAddress, uint256 _index) external view;
 
-    function getUserAccumulatedReward(address _userAddress, uint256 tokenIndex) external view returns (uint256);
+    function getUserAccumulatedReward(
+        address _userAddress,
+        uint256 tokenIndex,
+        uint256 time
+    ) external view returns (uint256);
 
     function getUserTokensOwedLength(address _userAddress) external view returns (uint256);
 
@@ -16,7 +20,7 @@ interface IRewardsPoolBase {
     function calculateRewardsAmount(
         uint256 _startBlock,
         uint256 _endBlock,
-        uint256 _rewardPerBlock
+        uint256 _rewardPerSecond
     ) external pure returns (uint256);
 
     function balanceOf(address _userAddress) external view returns (uint256);
@@ -24,8 +28,6 @@ interface IRewardsPoolBase {
     function stakingToken() external view returns (address);
 
     function updateRewardMultipliers() external;
-
-    function initialiseUserTokensOwed(address _userAddress) external;
 
     function updateUserAccruedReward(address _userAddress) external;
 

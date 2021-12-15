@@ -5,7 +5,7 @@ import { BigNumber, BigNumberish } from 'ethers';
 
 import { TestERC20 } from '../typechain-types/TestERC20';
 import { ThrottledExitRewardsPoolMock } from '../typechain-types/ThrottledExitRewardsPoolMock';
-import { timeTravel } from './utils';
+import { getTime, timeTravel } from './utils';
 
 describe('ThrottledExitFeature', () => {
   let aliceAccount: SignerWithAddress;
@@ -17,12 +17,9 @@ describe('ThrottledExitFeature', () => {
 
   let rewardTokensInstances: TestERC20[];
   let rewardTokensAddresses: string[];
-  let rewardPerBlock: BigNumber[];
+  let rewardPerSecond: BigNumber[];
 
-  let startBlock: number;
-  let endBlock: number;
-
-  let throttleRoundBlocks = 10;
+  let throttleRoundSeconds = 100;
   let throttleRoundCap = ethers.utils.parseEther('1');
 
   const rewardTokensCount = 1; // 5 rewards tokens for tests
@@ -33,15 +30,14 @@ describe('ThrottledExitFeature', () => {
   const standardStakingAmount = ethers.utils.parseEther('5'); // 5 tokens
   const contractStakeLimit = ethers.utils.parseEther('10'); // 10 tokens
 
-  let startTimestmap: number;
+  let startTimestamp: number;
   let endTimestamp: number;
-  const virtualBlocksTime = 10; // 10s == 10000ms
   const oneMinute = 60;
 
   const setupRewardsPoolParameters = async () => {
     rewardTokensInstances = [];
     rewardTokensAddresses = [];
-    rewardPerBlock = [];
+    rewardPerSecond = [];
     for (let i = 0; i < rewardTokensCount; i++) {
       const TestERC20 = await ethers.getContractFactory('TestERC20');
       const tknInst = (await TestERC20.deploy(amount)) as TestERC20;
@@ -52,37 +48,33 @@ describe('ThrottledExitFeature', () => {
 
       // populate amounts
       let parsedReward = await ethers.utils.parseEther(`${i + 1}`);
-      rewardPerBlock.push(parsedReward);
+      rewardPerSecond.push(parsedReward);
     }
 
     const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestmap = currentBlock.timestamp + oneMinute;
-    endTimestamp = startTimestmap + oneMinute * 2;
-    startBlock = Math.trunc(startTimestmap / virtualBlocksTime);
-    endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
+    startTimestamp = currentBlock.timestamp + oneMinute;
+    endTimestamp = startTimestamp + oneMinute * 2;
   };
 
-  const stake = async (_throttleRoundBlocks: BigNumberish, _throttleRoundCap: BigNumberish) => {
+  const stake = async (_throttleRoundSeconds: BigNumberish, _throttleRoundCap: BigNumberish) => {
     const ThrottledExitRewardsPoolMock = await ethers.getContractFactory('ThrottledExitRewardsPoolMock');
     ThrottledExitFeatureInstance = (await ThrottledExitRewardsPoolMock.deploy(
       stakingTokenAddress,
-      startTimestmap,
+      startTimestamp,
       endTimestamp,
       rewardTokensAddresses,
-      rewardPerBlock,
       stakeLimit,
-      _throttleRoundBlocks,
+      _throttleRoundSeconds,
       _throttleRoundCap,
-      contractStakeLimit,
-      virtualBlocksTime
+      contractStakeLimit
     )) as ThrottledExitRewardsPoolMock;
 
     await rewardTokensInstances[0].mint(ThrottledExitFeatureInstance.address, amount);
 
+    await ThrottledExitFeatureInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
+
     await stakingTokenInstance.approve(ThrottledExitFeatureInstance.address, standardStakingAmount);
     await stakingTokenInstance.connect(bobAccount).approve(ThrottledExitFeatureInstance.address, standardStakingAmount);
-    let currentBlock = await ethers.provider.getBlock('latest');
-    let blocksDelta = startBlock - currentBlock.number;
 
     await timeTravel(70);
     await ThrottledExitFeatureInstance.stake(standardStakingAmount);
@@ -100,13 +92,10 @@ describe('ThrottledExitFeature', () => {
       stakingTokenAddress = stakingTokenInstance.address;
 
       await setupRewardsPoolParameters();
-      await stake(throttleRoundBlocks, throttleRoundCap);
+      await stake(throttleRoundSeconds, throttleRoundCap);
     });
 
     it('Should not claim or withdraw', async () => {
-      const userInitialBalance = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
-      const userRewards = await ThrottledExitFeatureInstance.getUserAccumulatedReward(aliceAccount.address, 0);
-
       await expect(ThrottledExitFeatureInstance.claim()).to.be.revertedWith(
         'OnlyExitFeature::cannot claim from this contract. Only exit.'
       );
@@ -116,15 +105,16 @@ describe('ThrottledExitFeature', () => {
     });
 
     it('Should request exit successfully', async () => {
-      const currentBlock = await ethers.provider.getBlock('latest');
-      const blocksDelta = endBlock - currentBlock.number;
-
       await timeTravel(130);
       const userInitialBalanceStaking = await stakingTokenInstance.balanceOf(aliceAccount.address);
       const userInfoInitial = await ThrottledExitFeatureInstance.userInfo(aliceAccount.address);
       const initialTotalStakedAmount = await ThrottledExitFeatureInstance.totalStaked();
       const userInitialBalanceRewards = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
-      const userRewards = await ThrottledExitFeatureInstance.getUserAccumulatedReward(aliceAccount.address, 0);
+      const userRewards = await ThrottledExitFeatureInstance.getUserAccumulatedReward(
+        aliceAccount.address,
+        0,
+        await getTime()
+      );
 
       await ThrottledExitFeatureInstance.exit();
 
@@ -152,14 +142,17 @@ describe('ThrottledExitFeature', () => {
     });
 
     it('Should not get twice reward on exit twice', async () => {
-      const currentBlock = await ethers.provider.getBlock('latest');
       await timeTravel(130);
 
       const userInitialBalanceStaking = await stakingTokenInstance.balanceOf(aliceAccount.address);
       const userInfoInitial = await ThrottledExitFeatureInstance.userInfo(aliceAccount.address);
       const initialTotalStakedAmount = await ThrottledExitFeatureInstance.totalStaked();
       const userInitialBalanceRewards = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
-      const userRewards = await ThrottledExitFeatureInstance.getUserAccumulatedReward(aliceAccount.address, 0);
+      const userRewards = await ThrottledExitFeatureInstance.getUserAccumulatedReward(
+        aliceAccount.address,
+        0,
+        await getTime()
+      );
 
       await ThrottledExitFeatureInstance.exit();
       await ThrottledExitFeatureInstance.exit();
@@ -201,79 +194,77 @@ describe('ThrottledExitFeature', () => {
       await setupRewardsPoolParameters();
     });
 
-    it('Should not change nextAvailableExitBlock before cap', async () => {
-      const _throttleRoundBlocks = 10;
+    it('Should not change nextAvailableExitTimestamp before cap', async () => {
+      const _throttleRoundSeconds = 100;
       const _throttleRoundCap = standardStakingAmount.mul(2);
-      await stake(_throttleRoundBlocks, _throttleRoundCap);
-
-      const currentBlock = await ethers.provider.getBlock('latest');
-      const blocksDelta = endBlock - currentBlock.number;
+      await stake(_throttleRoundSeconds, _throttleRoundCap);
 
       await timeTravel(130);
 
       await ThrottledExitFeatureInstance.exit();
 
-      const nextBlock = await ThrottledExitFeatureInstance.nextAvailableExitBlock();
-      expect(nextBlock).to.equal(endBlock + throttleRoundBlocks, 'End block has changed but it should not have');
+      const nextBlock = await ThrottledExitFeatureInstance.nextAvailableExitTimestamp();
+      expect(nextBlock).to.equal(endTimestamp + throttleRoundSeconds, 'End block has changed but it should not have');
 
       const volume = await ThrottledExitFeatureInstance.nextAvailableRoundExitVolume();
       expect(volume).to.equal(standardStakingAmount, 'Exit volume was incorrect');
 
       const userExitInfo = await ThrottledExitFeatureInstance.exitInfo(aliceAccount.address);
-      expect(userExitInfo.exitBlock).to.equal(nextBlock, 'The exit block for the user was not set on the next block');
+      expect(userExitInfo.exitTimestamp).to.equal(
+        nextBlock,
+        'The exit block for the user was not set on the next block'
+      );
     });
 
-    it('Should change nextAvailableExitBlock if cap is hit', async () => {
-      const _throttleRoundBlocks = 10;
+    it('Should change nextAvailableExitTimestamp if cap is hit', async () => {
+      const _throttleRoundSeconds = 100;
       const _throttleRoundCap = standardStakingAmount.mul(2);
 
-      await stake(_throttleRoundBlocks, _throttleRoundCap);
+      await stake(_throttleRoundSeconds, _throttleRoundCap);
 
       await ThrottledExitFeatureInstance.connect(bobAccount).stake(standardStakingAmount);
-
-      const currentBlock = await ethers.provider.getBlock('latest');
-      const blocksDelta = endBlock - currentBlock.number;
 
       await timeTravel(130);
 
       await ThrottledExitFeatureInstance.exit();
       await ThrottledExitFeatureInstance.connect(bobAccount).exit();
 
-      const nextBlock = await ThrottledExitFeatureInstance.nextAvailableExitBlock();
-      expect(nextBlock).to.equal(endBlock + throttleRoundBlocks * 2, 'End block has changed incorrectly');
+      const nextBlock = await ThrottledExitFeatureInstance.nextAvailableExitTimestamp();
+      expect(nextBlock).to.equal(endTimestamp + throttleRoundSeconds * 2, 'End block has changed incorrectly');
 
       const volume = await ThrottledExitFeatureInstance.nextAvailableRoundExitVolume();
       expect(volume).to.equal(0, 'Exit volume was incorrect');
 
       const userExitInfo = await ThrottledExitFeatureInstance.exitInfo(bobAccount.address);
-      expect(userExitInfo.exitBlock).to.equal(
-        endBlock + throttleRoundBlocks,
+      expect(userExitInfo.exitTimestamp).to.equal(
+        endTimestamp + throttleRoundSeconds,
         'The exit block for the user was not set for the current block'
       );
     });
 
     it('Should find next available', async () => {
-      const _throttleRoundBlocks = 10;
+      const _throttleRoundSeconds = 100;
       const _throttleRoundCap = standardStakingAmount.mul(2);
 
-      await stake(_throttleRoundBlocks, _throttleRoundCap);
+      await stake(_throttleRoundSeconds, _throttleRoundCap);
 
       await ThrottledExitFeatureInstance.connect(bobAccount).stake(standardStakingAmount);
-
-      const currentBlock = await ethers.provider.getBlock('latest');
 
       await timeTravel(130);
 
       await ThrottledExitFeatureInstance.exit();
 
-      const nextBlock = await ThrottledExitFeatureInstance.nextAvailableExitBlock();
-      expect(nextBlock).to.equal(endBlock + throttleRoundBlocks, 'End block has changed incorrectly');
+      const nextBlock = await ThrottledExitFeatureInstance.nextAvailableExitTimestamp();
+      expect(nextBlock).to.equal(endTimestamp + throttleRoundSeconds, 'End block has changed incorrectly');
 
       const volume = await ThrottledExitFeatureInstance.nextAvailableRoundExitVolume();
       expect(volume).to.equal(standardStakingAmount, 'Exit volume was incorrect');
 
       const userExitInfo = await ThrottledExitFeatureInstance.exitInfo(aliceAccount.address);
-      expect(userExitInfo.exitBlock).to.equal(nextBlock, 'The exit block for the user was not set on the next block');
+      expect(userExitInfo.exitTimestamp).to.equal(
+        nextBlock,
+        'The exit block for the user was not set on the next block'
+      );
     });
   });
 
@@ -289,13 +280,10 @@ describe('ThrottledExitFeature', () => {
 
       await setupRewardsPoolParameters();
 
-      await stake(throttleRoundBlocks, throttleRoundCap);
+      await stake(throttleRoundSeconds, throttleRoundCap);
     });
 
     it('Should not complete early', async () => {
-      const currentBlock = await ethers.provider.getBlock('latest');
-      const blocksDelta = endBlock - currentBlock.number;
-
       await timeTravel(130);
 
       await ThrottledExitFeatureInstance.exit();
@@ -306,16 +294,12 @@ describe('ThrottledExitFeature', () => {
     });
 
     it('Should complete succesfully', async () => {
-      const currentBlock = await ethers.provider.getBlock('latest');
-      const blocksDelta = endBlock - currentBlock.number;
-
       await timeTravel(130);
 
       const userInitialBalanceStaking = await stakingTokenInstance.balanceOf(aliceAccount.address);
       const userInfoInitial = await ThrottledExitFeatureInstance.userInfo(aliceAccount.address);
       const initialTotalStakedAmount = await ThrottledExitFeatureInstance.totalStaked();
       const userInitialBalanceRewards = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
-      const userRewards = await ThrottledExitFeatureInstance.getUserAccumulatedReward(aliceAccount.address, 0);
 
       await ThrottledExitFeatureInstance.exit();
 

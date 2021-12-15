@@ -11,21 +11,10 @@ contract StakeTransfererRewardsPoolMock is OnlyExitRewardsPoolMock, StakeTransfe
         uint256 _startBlock,
         uint256 _endBlock,
         address[] memory _rewardsTokens,
-        uint256[] memory _rewardPerBlock,
         uint256 _stakeLimit,
-        uint256 _contractStakeLimit,
-        uint256 _virtualBlockTime
+        uint256 _contractStakeLimit
     )
-        OnlyExitRewardsPoolMock(
-            _stakingToken,
-            _startBlock,
-            _endBlock,
-            _rewardsTokens,
-            _rewardPerBlock,
-            _stakeLimit,
-            _contractStakeLimit,
-            _virtualBlockTime
-        )
+        OnlyExitRewardsPoolMock(_stakingToken, _startBlock, _endBlock, _rewardsTokens, _stakeLimit, _contractStakeLimit)
     {}
 
     function withdraw(uint256 _tokenAmount) public override(OnlyExitRewardsPoolMock, OnlyExitFeature) {

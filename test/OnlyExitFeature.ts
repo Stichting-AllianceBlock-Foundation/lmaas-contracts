@@ -5,7 +5,7 @@ import { BigNumber, BigNumberish } from 'ethers';
 
 import { TestERC20 } from '../typechain-types/TestERC20';
 import { OnlyExitRewardsPoolMock } from '../typechain-types/OnlyExitRewardsPoolMock';
-import { timeTravel } from './utils';
+import { getTime, timeTravel } from './utils';
 
 describe('OnlyExitFeature', () => {
   let aliceAccount: SignerWithAddress;
@@ -17,10 +17,7 @@ describe('OnlyExitFeature', () => {
 
   let rewardTokensInstances: TestERC20[];
   let rewardTokensAddresses: string[];
-  let rewardPerBlock: BigNumber[];
-
-  let startBlock: number;
-  let endBlock: number;
+  let rewardPerSecond: BigNumber[];
 
   const rewardTokensCount = 1; // 5 rewards tokens for tests
   const day = 60 * 24 * 60;
@@ -30,15 +27,14 @@ describe('OnlyExitFeature', () => {
   const standardStakingAmount = ethers.utils.parseEther('5'); // 5 tokens
   const contractStakeLimit = ethers.utils.parseEther('10'); // 10 tokens
 
-  let startTimestmap: number;
+  let startTimestamp: number;
   let endTimestamp: number;
-  const virtualBlocksTime = 10; // 10s == 10000ms
   const oneMinute = 60;
 
   const setupRewardsPoolParameters = async () => {
     rewardTokensInstances = [];
     rewardTokensAddresses = [];
-    rewardPerBlock = [];
+    rewardPerSecond = [];
     for (let i = 0; i < rewardTokensCount; i++) {
       const TestERC20 = await ethers.getContractFactory('TestERC20');
       const tknInst = (await TestERC20.deploy(amount)) as TestERC20;
@@ -49,14 +45,12 @@ describe('OnlyExitFeature', () => {
 
       // populate amounts
       let parsedReward = await ethers.utils.parseEther(`${i + 1}`);
-      rewardPerBlock.push(parsedReward);
+      rewardPerSecond.push(parsedReward);
     }
 
     const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestmap = currentBlock.timestamp + oneMinute;
-    endTimestamp = startTimestmap + oneMinute * 2;
-    startBlock = Math.trunc(startTimestmap / virtualBlocksTime);
-    endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
+    startTimestamp = currentBlock.timestamp + oneMinute;
+    endTimestamp = startTimestamp + oneMinute * 2;
   };
 
   beforeEach(async () => {
@@ -74,16 +68,16 @@ describe('OnlyExitFeature', () => {
     const OnlyExitRewardsPoolMock = await ethers.getContractFactory('OnlyExitRewardsPoolMock');
     OnlyExitFeatureInstance = (await OnlyExitRewardsPoolMock.deploy(
       stakingTokenAddress,
-      startTimestmap,
+      startTimestamp,
       endTimestamp,
       rewardTokensAddresses,
-      rewardPerBlock,
       stakeLimit,
-      contractStakeLimit,
-      virtualBlocksTime
+      contractStakeLimit
     )) as OnlyExitRewardsPoolMock;
 
     await rewardTokensInstances[0].mint(OnlyExitFeatureInstance.address, amount);
+
+    await OnlyExitFeatureInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
 
     await stakingTokenInstance.approve(OnlyExitFeatureInstance.address, standardStakingAmount);
     await stakingTokenInstance.connect(bobAccount).approve(OnlyExitFeatureInstance.address, standardStakingAmount);
@@ -112,7 +106,11 @@ describe('OnlyExitFeature', () => {
     const userInfoInitial = await OnlyExitFeatureInstance.userInfo(aliceAccount.address);
     const initialTotalStakedAmount = await OnlyExitFeatureInstance.totalStaked();
     const userInitialBalanceRewards = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
-    const userRewards = await OnlyExitFeatureInstance.getUserAccumulatedReward(aliceAccount.address, 0);
+    const userRewards = await OnlyExitFeatureInstance.getUserAccumulatedReward(
+      aliceAccount.address,
+      0,
+      await getTime()
+    );
 
     await OnlyExitFeatureInstance.exit();
 

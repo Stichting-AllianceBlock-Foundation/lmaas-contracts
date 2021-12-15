@@ -1,27 +1,24 @@
 import { expect } from 'chai';
-import { ethers, network } from 'hardhat';
+import { ethers } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { BigNumber, BigNumberish } from 'ethers';
+import { BigNumber } from 'ethers';
 
 import { TestERC20 } from '../typechain-types/TestERC20';
-import { OneStakerRewardsPoolMock } from '../typechain-types/OneStakerRewardsPoolMock';
-import { timeTravel } from './utils';
+import { getTime, timeTravel } from './utils';
+import { CompoundingRewardsPool } from '../typechain-types/CompoundingRewardsPool';
 
 describe('OneStakerRewardsPool', () => {
   let aliceAccount: SignerWithAddress;
   let bobAccount: SignerWithAddress;
   let staker: SignerWithAddress;
 
-  let OneStakerRewardsPoolInstance: OneStakerRewardsPoolMock;
+  let OneStakerRewardsPoolInstance: CompoundingRewardsPool;
   let stakingTokenInstance: TestERC20;
   let stakingTokenAddress: string;
 
   let rewardTokensInstances: TestERC20[];
   let rewardTokensAddresses: string[];
-  let rewardPerBlock: BigNumber[];
-
-  let startBlock: number;
-  let endBlock: number;
+  let rewardPerSecond: BigNumber[];
 
   const rewardTokensCount = 1; // 5 rewards tokens for tests
   const day = 60 * 24 * 60;
@@ -31,15 +28,14 @@ describe('OneStakerRewardsPool', () => {
   const standardStakingAmount = ethers.utils.parseEther('5'); // 5 tokens
   const contractStakeLimit = ethers.utils.parseEther('10'); // 10 tokens
 
-  let startTimestmap: number;
+  let startTimestamp: number;
   let endTimestamp: number;
-  const virtualBlocksTime = 10; // 10s == 10000ms
   const oneMinute = 60;
 
   const setupRewardsPoolParameters = async () => {
     rewardTokensInstances = [];
     rewardTokensAddresses = [];
-    rewardPerBlock = [];
+    rewardPerSecond = [];
     for (let i = 0; i < rewardTokensCount; i++) {
       const TestERC20 = await ethers.getContractFactory('TestERC20');
       const tknInst = (await TestERC20.deploy(amount)) as TestERC20;
@@ -50,14 +46,12 @@ describe('OneStakerRewardsPool', () => {
 
       // populate amounts
       let parsedReward = await ethers.utils.parseEther(`${i + 1}`);
-      rewardPerBlock.push(parsedReward);
+      rewardPerSecond.push(parsedReward);
     }
 
     const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestmap = currentBlock.timestamp + oneMinute;
-    endTimestamp = startTimestmap + oneMinute * 2;
-    startBlock = Math.trunc(startTimestmap / virtualBlocksTime);
-    endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
+    startTimestamp = currentBlock.timestamp + oneMinute;
+    endTimestamp = startTimestamp + oneMinute * 2;
   };
 
   beforeEach(async () => {
@@ -73,20 +67,18 @@ describe('OneStakerRewardsPool', () => {
 
     await setupRewardsPoolParameters();
 
-    const OneStakerRewardsPoolMock = await ethers.getContractFactory('OneStakerRewardsPoolMock');
-    OneStakerRewardsPoolInstance = (await OneStakerRewardsPoolMock.deploy(
+    const CompoundingRewardsPoolInstance = await ethers.getContractFactory('CompoundingRewardsPool');
+    OneStakerRewardsPoolInstance = (await CompoundingRewardsPoolInstance.deploy(
       stakingTokenAddress,
-      startTimestmap,
-      endTimestamp,
       rewardTokensAddresses,
-      rewardPerBlock,
-      stakeLimit,
       staker.address,
-      contractStakeLimit,
-      virtualBlocksTime
-    )) as OneStakerRewardsPoolMock;
+      startTimestamp,
+      endTimestamp
+    )) as CompoundingRewardsPool;
 
     await rewardTokensInstances[0].mint(OneStakerRewardsPoolInstance.address, amount);
+
+    await OneStakerRewardsPoolInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
   });
 
   it('Should deploy the OneStakerRewardsPool properly', async () => {
@@ -102,13 +94,16 @@ describe('OneStakerRewardsPool', () => {
         .connect(bobAccount)
         .approve(OneStakerRewardsPoolInstance.address, standardStakingAmount);
       const currentBlock = await ethers.provider.getBlock('latest');
-      const blocksDelta = startBlock - currentBlock.number;
+      const blocksDelta = startTimestamp - currentBlock.number;
 
       await timeTravel(70);
     });
 
     it('Should successfully stake and accumulate reward', async () => {
       await OneStakerRewardsPoolInstance.connect(staker).stake(standardStakingAmount);
+
+      const currentTime = await getTime();
+
       const totalStakedAmount = await OneStakerRewardsPoolInstance.totalStaked();
       const userInfo = await OneStakerRewardsPoolInstance.userInfo(aliceAccount.address);
       const userRewardDebt = await OneStakerRewardsPoolInstance.getUserRewardDebt(aliceAccount.address, 0);
@@ -116,14 +111,18 @@ describe('OneStakerRewardsPool', () => {
 
       expect(totalStakedAmount).to.equal(standardStakingAmount, 'The stake was not successful');
       expect(userInfo.amountStaked).to.equal(standardStakingAmount, "User's staked amount is not correct");
-      expect(userInfo.firstStakedBlockNumber).to.equal(startBlock + 1, "User's first block is not correct");
+      expect(userInfo.firstStakedTimestamp).to.equal(currentTime, "User's first block is not correct");
       expect(userRewardDebt).to.equal(0, "User's reward debt is not correct");
       expect(userOwedToken).to.equal(0, "User's reward debt is not correct");
 
       await timeTravel(10);
 
-      const accumulatedReward = await OneStakerRewardsPoolInstance.getUserAccumulatedReward(staker.address, 0);
-      expect(accumulatedReward).to.equal(bOne, 'The reward accrued was not 1 token');
+      const accumulatedReward = await OneStakerRewardsPoolInstance.getUserAccumulatedReward(
+        staker.address,
+        0,
+        await getTime()
+      );
+      expect(accumulatedReward).to.equal(bOne.mul(10), 'The reward accrued was not 1 token');
     });
 
     it('Should fail if amount to stake is not greater than zero', async () => {
