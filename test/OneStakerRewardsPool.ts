@@ -122,7 +122,7 @@ describe('OneStakerRewardsPool', () => {
         0,
         await getTime()
       );
-      expect(accumulatedReward).to.equal(bOne, 'The reward accrued was not 1 token');
+      expect(accumulatedReward).to.equal(bOne.mul(10), 'The reward accrued was not 1 token');
     });
 
     it('Should fail if amount to stake is not greater than zero', async () => {

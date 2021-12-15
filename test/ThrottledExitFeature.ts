@@ -19,7 +19,7 @@ describe('ThrottledExitFeature', () => {
   let rewardTokensAddresses: string[];
   let rewardPerSecond: BigNumber[];
 
-  let throttleRoundSeconds = 10;
+  let throttleRoundSeconds = 100;
   let throttleRoundCap = ethers.utils.parseEther('1');
 
   const rewardTokensCount = 1; // 5 rewards tokens for tests
@@ -105,7 +105,7 @@ describe('ThrottledExitFeature', () => {
     });
 
     it('Should request exit successfully', async () => {
-      await timeTravel(13);
+      await timeTravel(130);
       const userInitialBalanceStaking = await stakingTokenInstance.balanceOf(aliceAccount.address);
       const userInfoInitial = await ThrottledExitFeatureInstance.userInfo(aliceAccount.address);
       const initialTotalStakedAmount = await ThrottledExitFeatureInstance.totalStaked();
@@ -142,7 +142,7 @@ describe('ThrottledExitFeature', () => {
     });
 
     it('Should not get twice reward on exit twice', async () => {
-      await timeTravel(13);
+      await timeTravel(130);
 
       const userInitialBalanceStaking = await stakingTokenInstance.balanceOf(aliceAccount.address);
       const userInfoInitial = await ThrottledExitFeatureInstance.userInfo(aliceAccount.address);
@@ -195,11 +195,11 @@ describe('ThrottledExitFeature', () => {
     });
 
     it('Should not change nextAvailableExitTimestamp before cap', async () => {
-      const _throttleRoundSeconds = 10;
+      const _throttleRoundSeconds = 100;
       const _throttleRoundCap = standardStakingAmount.mul(2);
       await stake(_throttleRoundSeconds, _throttleRoundCap);
 
-      await timeTravel(13);
+      await timeTravel(130);
 
       await ThrottledExitFeatureInstance.exit();
 
@@ -217,14 +217,14 @@ describe('ThrottledExitFeature', () => {
     });
 
     it('Should change nextAvailableExitTimestamp if cap is hit', async () => {
-      const _throttleRoundSeconds = 10;
+      const _throttleRoundSeconds = 100;
       const _throttleRoundCap = standardStakingAmount.mul(2);
 
       await stake(_throttleRoundSeconds, _throttleRoundCap);
 
       await ThrottledExitFeatureInstance.connect(bobAccount).stake(standardStakingAmount);
 
-      await timeTravel(13);
+      await timeTravel(130);
 
       await ThrottledExitFeatureInstance.exit();
       await ThrottledExitFeatureInstance.connect(bobAccount).exit();
@@ -243,14 +243,14 @@ describe('ThrottledExitFeature', () => {
     });
 
     it('Should find next available', async () => {
-      const _throttleRoundSeconds = 10;
+      const _throttleRoundSeconds = 100;
       const _throttleRoundCap = standardStakingAmount.mul(2);
 
       await stake(_throttleRoundSeconds, _throttleRoundCap);
 
       await ThrottledExitFeatureInstance.connect(bobAccount).stake(standardStakingAmount);
 
-      await timeTravel(13);
+      await timeTravel(130);
 
       await ThrottledExitFeatureInstance.exit();
 
@@ -284,7 +284,7 @@ describe('ThrottledExitFeature', () => {
     });
 
     it('Should not complete early', async () => {
-      await timeTravel(13);
+      await timeTravel(130);
 
       await ThrottledExitFeatureInstance.exit();
 
@@ -294,7 +294,7 @@ describe('ThrottledExitFeature', () => {
     });
 
     it('Should complete succesfully', async () => {
-      await timeTravel(13);
+      await timeTravel(130);
 
       const userInitialBalanceStaking = await stakingTokenInstance.balanceOf(aliceAccount.address);
       const userInfoInitial = await ThrottledExitFeatureInstance.userInfo(aliceAccount.address);
@@ -303,7 +303,7 @@ describe('ThrottledExitFeature', () => {
 
       await ThrottledExitFeatureInstance.exit();
 
-      await timeTravel(13);
+      await timeTravel(130);
 
       await ThrottledExitFeatureInstance.completeExit();
 

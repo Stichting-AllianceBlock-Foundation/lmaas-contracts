@@ -154,6 +154,7 @@ describe('AutoStake', () => {
 
     it('[Should accumulate reward]:', async () => {
       await AutoStakingInstance.connect(staker).stake(standardStakingAmount);
+      const stakeTime = await getTime();
 
       await timeTravel(10);
       const accumulatedReward = await CompoundingRewardsPoolInstance.getUserAccumulatedReward(
@@ -162,13 +163,15 @@ describe('AutoStake', () => {
         await getTime()
       );
 
-      expect(accumulatedReward).to.equal(bOne);
+      expect(accumulatedReward).to.equal(bOne.mul(10));
       await timeTravel(10);
+
       await AutoStakingInstance.refreshAutoStake();
+      const refreshTime = await getTime();
 
       const userBalance = await AutoStakingInstance.balanceOf(staker.address);
       const userShares = await AutoStakingInstance.share(staker.address);
-      expect(userBalance).to.equal(standardStakingAmount.add(bOne.mul(2)));
+      expect(userBalance).to.equal(standardStakingAmount.add(bOne.mul(refreshTime - stakeTime)));
       expect(userShares).to.equal(standardStakingAmount);
     });
 
@@ -213,7 +216,7 @@ describe('AutoStake', () => {
           await AutoStakingInstance.exit();
           const userBalanceAfter = await AutoStakingInstance.balanceOf(staker.address);
           const userExitInfo = await AutoStakingInstance.exitInfo(staker.address);
-          expect(userExitInfo.exitStake).to.equal(standardStakingAmount.add(bOne.mul(10)));
+          expect(userExitInfo.exitStake).to.equal(standardStakingAmount.add(bOne.mul(100)));
           expect(userBalanceAfter).to.equal(0);
         });
 
@@ -226,7 +229,7 @@ describe('AutoStake', () => {
           const userBalanceAfter = await AutoStakingInstance.balanceOf(staker.address);
           const userExitInfo = await AutoStakingInstance.exitInfo(staker.address);
 
-          expect(userExitInfo.exitStake).to.equal(standardStakingAmount.add(bOne.mul(10)));
+          expect(userExitInfo.exitStake).to.equal(standardStakingAmount.add(bOne.mul(100)));
           expect(userBalanceAfter).to.equal(0);
         });
       });
@@ -257,7 +260,7 @@ describe('AutoStake', () => {
           const userExitInfo = await AutoStakingInstance.exitInfo(staker.address);
 
           expect(userExitInfo.exitStake).to.equal(0);
-          expect(userBalanceAfter).to.equal(userBalanceBefore.add(standardStakingAmount.add(bOne.mul(10))));
+          expect(userBalanceAfter).to.equal(userBalanceBefore.add(standardStakingAmount.add(bOne.mul(100))));
         });
       });
     });

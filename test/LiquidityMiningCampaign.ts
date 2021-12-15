@@ -11,7 +11,7 @@ import { NonCompoundingRewardsPool } from '../typechain-types/NonCompoundingRewa
 import { TestERC20 } from '../typechain-types/TestERC20';
 import { PercentageCalculator } from '../typechain-types/PercentageCalculator';
 import { LiquidityMiningCampaign } from '../typechain-types/LiquidityMiningCampaign';
-import { getTime, timeTravel } from './utils';
+import { getTime, timeTravel, timeTravelTo } from './utils';
 
 describe('Liquidity mining campaign', () => {
   let accounts: SignerWithAddress[];
@@ -148,28 +148,29 @@ describe('Liquidity mining campaign', () => {
       expect(userFinalBalance).to.equal(userInitialBalance.sub(bTen));
 
       const accumulatedReward = await LmcInstance.getUserAccumulatedReward(testAccount.address, 0, await getTime());
-      expect(accumulatedReward).to.equal(bOne);
+      expect(accumulatedReward).to.equal(bOne.mul(10));
     });
 
     it("[Should stake and lock sucessfully in two different lmc's]:", async () => {
-      let currentBlock = await ethers.provider.getBlock('latest');
       let contractInitialBalance = await stakingTokenInstance.balanceOf(LmcInstance.address);
 
       await LmcInstance.stake(bTen);
+      const stakeTime = await getTime();
+
       await LmcInstance.stake(bTwenty);
 
-      await timeTravel(80);
-      const accumulatedReward = await LmcInstance.getUserAccumulatedReward(testAccount.address, 0, await getTime());
+      const checkTime = startTimestamp + oneMinute;
+      await timeTravelTo(checkTime);
+
+      const accumulatedReward = await LmcInstance.getUserAccumulatedReward(testAccount.address, 0, checkTime);
       let contractFinalBalance = await stakingTokenInstance.balanceOf(LmcInstance.address);
       const totalStakedAmount = await LmcInstance.totalStaked();
       const userInfo = await LmcInstance.userInfo(testAccount.address);
 
-      currentBlock = await ethers.provider.getBlock('latest');
-
       expect(contractFinalBalance).to.equal(contractInitialBalance.add(bTen).add(bTwenty));
       expect(totalStakedAmount).to.equal(bTen.add(bTwenty));
       expect(userInfo.amountStaked).to.equal(bTen.add(bTwenty));
-      expect(accumulatedReward).to.equal(bOne.mul(8).sub(20));
+      expect(accumulatedReward).to.equal(bOne.mul(checkTime - stakeTime));
     });
 
     it('[Should fail staking and locking with zero amount]:', async () => {
@@ -192,9 +193,13 @@ describe('Liquidity mining campaign', () => {
       const userInfoInitial = await LmcInstance.userInfo(testAccount.address);
       const initialTotalStakedAmount = await LmcInstance.totalStaked();
       const userInitialBalanceRewards = await rewardTokensInstances[0].balanceOf(testAccount.address);
-      const userRewards = await LmcInstance.getUserAccumulatedReward(testAccount.address, 0, await getTime());
 
+      const exitTime = (await getTime()) + 10;
+      const userRewards = await LmcInstance.getUserAccumulatedReward(testAccount.address, 0, exitTime);
+
+      await timeTravelTo(exitTime);
       await LmcInstance.exit();
+
       const userFinalBalanceRewards = await rewardTokensInstances[0].balanceOf(testAccount.address);
 
       const userTokensOwed = await LmcInstance.getUserOwedTokens(testAccount.address, 0);

@@ -31,7 +31,7 @@ describe('NonCompoundingRewardsPool', () => {
   let rewardTokensAddresses: string[];
   let rewardPerSecond: BigNumber[];
 
-  let throttleRoundSeconds = 10;
+  let throttleRoundSeconds = 100;
   let throttleRoundCap = ethers.utils.parseEther('1');
 
   const rewardTokensCount = 1; // 5 rewards tokens for tests
@@ -211,7 +211,7 @@ describe('NonCompoundingRewardsPool', () => {
     });
 
     it('[Should not change nextAvailableExitTimestamp before cap]:', async () => {
-      const _throttleRoundSeconds = 10;
+      const _throttleRoundSeconds = 100;
       const _throttleRoundCap = standardStakingAmount.mul(2);
 
       await stake(_throttleRoundSeconds, _throttleRoundCap);
@@ -230,7 +230,7 @@ describe('NonCompoundingRewardsPool', () => {
     });
 
     it('[Should change nextAvailableExitTimestamp if cap is hit]:', async () => {
-      const _throttleRoundSeconds = 10;
+      const _throttleRoundSeconds = 100;
       const _throttleRoundCap = standardStakingAmount.mul(2);
 
       await stake(_throttleRoundSeconds, _throttleRoundCap);
@@ -260,7 +260,7 @@ describe('NonCompoundingRewardsPool', () => {
     });
 
     it('[Should find next available]:', async () => {
-      const _throttleRoundSeconds = 10;
+      const _throttleRoundSeconds = 100;
       const _throttleRoundCap = standardStakingAmount.mul(2);
 
       await stake(_throttleRoundSeconds, _throttleRoundCap);

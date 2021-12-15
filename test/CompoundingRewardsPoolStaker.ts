@@ -110,7 +110,7 @@ describe('CompoundingRewardsPoolStaker', () => {
   });
 
   it('[Should exit correctly]:', async () => {
-    await StakeTransfererAutoStakeInstance.connect(test2Account).stake(standardStakingAmount.div(10));
+    await StakeTransfererAutoStakeInstance.connect(test2Account).stake(standardStakingAmount.div(100));
     await timeTravel(130);
 
     const userBalance = await StakeTransfererAutoStakeInstance.balanceOf(test2Account.address);
