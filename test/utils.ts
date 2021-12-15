@@ -11,10 +11,6 @@ export async function timeTravelTo(time: number) {
   await network.provider.send('evm_setNextBlockTimestamp', [time]);
 }
 
-export async function getBlockNumber(virtualBlockTime: number) {
-  return Math.trunc((await getTime()) / virtualBlockTime);
-}
-
 export async function getTime() {
   return (await ethers.provider.getBlock('latest')).timestamp;
 }

@@ -28,15 +28,12 @@ describe('AutoStakeTransfer', () => {
     [testAccount, test1Account, test2Account] = accounts;
   });
 
-  let startBlock: number;
-  let endBlock: number;
   let startTimestamp: number;
   let endTimestamp: number;
 
-  const virtualBlocksTime: number = 10; // 10s == 10000ms
   const oneMinute: number = 60;
 
-  let throttleRoundBlocks: number = 20;
+  let throttleRoundSeconds: number = 20;
 
   const amount = ethers.utils.parseEther('5184000');
   const bOne = ethers.utils.parseEther('1');
@@ -48,14 +45,12 @@ describe('AutoStakeTransfer', () => {
     const currentBlock = await ethers.provider.getBlock('latest');
     startTimestamp = currentBlock.timestamp + oneMinute;
     endTimestamp = startTimestamp + oneMinute * 2;
-    endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
 
     StakeTransfererAutoStakeInstance = (await deployContract(testAccount, StakeTransfererAutoStakeArtifact, [
       stakingTokenInstance.address,
-      throttleRoundBlocks,
+      throttleRoundSeconds,
       bOne,
       endTimestamp,
-      virtualBlocksTime,
     ])) as StakeTransfererAutoStake;
 
     CompoundingRewardsPoolInstance = (await deployContract(testAccount, CompoundingRewardsPoolArtifact, [
@@ -64,7 +59,6 @@ describe('AutoStakeTransfer', () => {
       StakeTransfererAutoStakeInstance.address,
       startTimestamp,
       endTimestamp,
-      virtualBlocksTime,
     ])) as CompoundingRewardsPool;
 
     await StakeTransfererAutoStakeInstance.setPool(CompoundingRewardsPoolInstance.address);
@@ -74,10 +68,9 @@ describe('AutoStakeTransfer', () => {
 
     StakeReceiverAutoStakeInstance = (await deployContract(testAccount, StakeReceiverAutoStakeArtifact, [
       stakingTokenInstance.address,
-      throttleRoundBlocks,
+      throttleRoundSeconds,
       bOne,
       endTimestamp + oneMinute,
-      virtualBlocksTime,
     ])) as StakeReceiverAutoStake;
 
     CompoundingRewardsPoolInstance = (await deployContract(testAccount, CompoundingRewardsPoolArtifact, [
@@ -86,7 +79,6 @@ describe('AutoStakeTransfer', () => {
       StakeReceiverAutoStakeInstance.address,
       startTimestamp,
       endTimestamp,
-      virtualBlocksTime,
     ])) as CompoundingRewardsPool;
 
     await StakeReceiverAutoStakeInstance.setPool(CompoundingRewardsPoolInstance.address);

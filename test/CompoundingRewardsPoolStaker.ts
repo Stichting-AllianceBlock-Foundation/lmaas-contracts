@@ -27,14 +27,12 @@ describe('CompoundingRewardsPoolStaker', () => {
   let stakingTokenInstance: TestERC20;
   let externalRewardsTokenInstance: TestERC20;
 
-  let endBlock;
   let startTimestamp: number;
   let endTimestamp: number;
 
-  const virtualBlocksTime: number = 10; // 10s == 10000ms
   const oneMinute: number = 60;
 
-  let throttleRoundBlocks: number = 20;
+  let throttleRoundSeconds: number = 20;
 
   const day = 60 * 24 * 60;
   const amount = ethers.utils.parseEther('5184000');
@@ -52,15 +50,13 @@ describe('CompoundingRewardsPoolStaker', () => {
     const currentBlock = await ethers.provider.getBlock('latest');
     startTimestamp = currentBlock.timestamp + oneMinute;
     endTimestamp = startTimestamp + oneMinute * 2;
-    endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
 
     StakeTransfererAutoStakeInstance = (await deployContract(testAccount, CompoundingRewardsPoolStakerArtifact, [
       stakingTokenInstance.address,
-      throttleRoundBlocks,
+      throttleRoundSeconds,
       bOne,
       endTimestamp,
       contractStakeLimit,
-      virtualBlocksTime,
     ])) as CompoundingRewardsPoolStaker;
 
     CompoundingRewardsPoolInstance = (await deployContract(testAccount, CompoundingRewardsPoolArtifact, [
@@ -69,7 +65,6 @@ describe('CompoundingRewardsPoolStaker', () => {
       StakeTransfererAutoStakeInstance.address,
       startTimestamp,
       endTimestamp,
-      virtualBlocksTime,
     ])) as CompoundingRewardsPool;
 
     await StakeTransfererAutoStakeInstance.setPool(CompoundingRewardsPoolInstance.address);
@@ -80,11 +75,10 @@ describe('CompoundingRewardsPoolStaker', () => {
 
     StakeReceiverAutoStakeInstance = (await deployContract(testAccount, CompoundingRewardsPoolStakerArtifact, [
       stakingTokenInstance.address,
-      throttleRoundBlocks,
+      throttleRoundSeconds,
       bOne,
       endTimestamp + oneMinute,
       standardStakingAmount,
-      virtualBlocksTime,
     ])) as CompoundingRewardsPoolStaker;
 
     CompoundingRewardsPoolInstance = (await deployContract(testAccount, CompoundingRewardsPoolArtifact, [
@@ -93,7 +87,6 @@ describe('CompoundingRewardsPoolStaker', () => {
       StakeReceiverAutoStakeInstance.address,
       startTimestamp,
       endTimestamp + oneMinute,
-      virtualBlocksTime,
     ])) as CompoundingRewardsPool;
 
     await StakeReceiverAutoStakeInstance.setPool(CompoundingRewardsPoolInstance.address);
@@ -117,7 +110,7 @@ describe('CompoundingRewardsPoolStaker', () => {
   });
 
   it('[Should exit correctly]:', async () => {
-    await StakeTransfererAutoStakeInstance.connect(test2Account).stake(standardStakingAmount.div(10));
+    await StakeTransfererAutoStakeInstance.connect(test2Account).stake(standardStakingAmount.div(100));
     await timeTravel(130);
 
     const userBalance = await StakeTransfererAutoStakeInstance.balanceOf(test2Account.address);

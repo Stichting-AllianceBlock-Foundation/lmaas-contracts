@@ -18,10 +18,7 @@ describe('StakeLockingFeature', () => {
 
   let rewardTokensInstances: TestERC20[];
   let rewardTokensAddresses: string[];
-  let rewardPerBlock: BigNumber[];
-
-  let startBlock: number;
-  let endBlock: number;
+  let rewardPerSecond: BigNumber[];
 
   const rewardTokensCount = 1; // 5 rewards tokens for tests
   const day = 60 * 24 * 60;
@@ -33,13 +30,12 @@ describe('StakeLockingFeature', () => {
 
   let startTimestamp: number;
   let endTimestamp: number;
-  const virtualBlocksTime = 10; // 10s == 10000ms
   const oneMinute = 60;
 
   const setupRewardsPoolParameters = async () => {
     rewardTokensInstances = [];
     rewardTokensAddresses = [];
-    rewardPerBlock = [];
+    rewardPerSecond = [];
     for (let i = 0; i < rewardTokensCount; i++) {
       const TestERC20 = await ethers.getContractFactory('TestERC20');
       const tknInst = (await TestERC20.deploy(amount)) as TestERC20;
@@ -50,14 +46,12 @@ describe('StakeLockingFeature', () => {
 
       // populate amounts
       let parsedReward = await ethers.utils.parseEther(`${i + 1}`);
-      rewardPerBlock.push(parsedReward);
+      rewardPerSecond.push(parsedReward);
     }
 
     const currentBlock = await ethers.provider.getBlock('latest');
     startTimestamp = currentBlock.timestamp + oneMinute;
     endTimestamp = startTimestamp + oneMinute * 2;
-    startBlock = Math.trunc(startTimestamp / virtualBlocksTime);
-    endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
   };
 
   beforeEach(async () => {
@@ -79,13 +73,12 @@ describe('StakeLockingFeature', () => {
       endTimestamp,
       rewardTokensAddresses,
       stakeLimit,
-      contractStakeLimit,
-      virtualBlocksTime
+      contractStakeLimit
     )) as StakeLockingRewardsPoolMock;
 
     await rewardTokensInstances[0].mint(StakeLockingFeatureInstance.address, amount);
 
-    await StakeLockingFeatureInstance.start(startTimestamp, endTimestamp, rewardPerBlock);
+    await StakeLockingFeatureInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
 
     await stakingTokenInstance.approve(StakeLockingFeatureInstance.address, standardStakingAmount);
     await stakingTokenInstance.connect(bobAccount).approve(StakeLockingFeatureInstance.address, standardStakingAmount);
@@ -112,7 +105,7 @@ describe('StakeLockingFeature', () => {
 
   it('Should exit successfully from the RewardsPool', async () => {
     const currentBlock = await ethers.provider.getBlock('latest');
-    const blocksDelta = endBlock - currentBlock.number;
+    const blocksDelta = endTimestamp - currentBlock.number;
 
     await timeTravel(130);
 

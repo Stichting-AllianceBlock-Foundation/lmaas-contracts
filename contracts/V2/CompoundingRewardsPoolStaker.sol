@@ -12,9 +12,8 @@ contract CompoundingRewardsPoolStaker is LimitedAutoStake, StakeTransfererAutoSt
         uint256 _throttleRoundBlocks,
         uint256 _throttleRoundCap,
         uint256 stakeEnd,
-        uint256 _stakeLimit,
-        uint256 _virtualBlockTime
-    ) LimitedAutoStake(token, _throttleRoundBlocks, _throttleRoundCap, stakeEnd, _stakeLimit, _virtualBlockTime) {}
+        uint256 _stakeLimit
+    ) LimitedAutoStake(token, _throttleRoundBlocks, _throttleRoundCap, stakeEnd, _stakeLimit) {}
 
     function stake(uint256 amount) public virtual override(AutoStake, LimitedAutoStake) {
         LimitedAutoStake.stake(amount);

@@ -18,10 +18,7 @@ describe('OneStakerRewardsPool', () => {
 
   let rewardTokensInstances: TestERC20[];
   let rewardTokensAddresses: string[];
-  let rewardPerBlock: BigNumber[];
-
-  let startBlock: number;
-  let endBlock: number;
+  let rewardPerSecond: BigNumber[];
 
   const rewardTokensCount = 1; // 5 rewards tokens for tests
   const day = 60 * 24 * 60;
@@ -33,13 +30,12 @@ describe('OneStakerRewardsPool', () => {
 
   let startTimestamp: number;
   let endTimestamp: number;
-  const virtualBlocksTime = 10; // 10s == 10000ms
   const oneMinute = 60;
 
   const setupRewardsPoolParameters = async () => {
     rewardTokensInstances = [];
     rewardTokensAddresses = [];
-    rewardPerBlock = [];
+    rewardPerSecond = [];
     for (let i = 0; i < rewardTokensCount; i++) {
       const TestERC20 = await ethers.getContractFactory('TestERC20');
       const tknInst = (await TestERC20.deploy(amount)) as TestERC20;
@@ -50,14 +46,12 @@ describe('OneStakerRewardsPool', () => {
 
       // populate amounts
       let parsedReward = await ethers.utils.parseEther(`${i + 1}`);
-      rewardPerBlock.push(parsedReward);
+      rewardPerSecond.push(parsedReward);
     }
 
     const currentBlock = await ethers.provider.getBlock('latest');
     startTimestamp = currentBlock.timestamp + oneMinute;
     endTimestamp = startTimestamp + oneMinute * 2;
-    startBlock = Math.trunc(startTimestamp / virtualBlocksTime);
-    endBlock = Math.trunc(endTimestamp / virtualBlocksTime);
   };
 
   beforeEach(async () => {
@@ -79,13 +73,12 @@ describe('OneStakerRewardsPool', () => {
       rewardTokensAddresses,
       staker.address,
       startTimestamp,
-      endTimestamp,
-      virtualBlocksTime
+      endTimestamp
     )) as CompoundingRewardsPool;
 
     await rewardTokensInstances[0].mint(OneStakerRewardsPoolInstance.address, amount);
 
-    await OneStakerRewardsPoolInstance.start(startTimestamp, endTimestamp, rewardPerBlock);
+    await OneStakerRewardsPoolInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
   });
 
   it('Should deploy the OneStakerRewardsPool properly', async () => {
@@ -101,7 +94,7 @@ describe('OneStakerRewardsPool', () => {
         .connect(bobAccount)
         .approve(OneStakerRewardsPoolInstance.address, standardStakingAmount);
       const currentBlock = await ethers.provider.getBlock('latest');
-      const blocksDelta = startBlock - currentBlock.number;
+      const blocksDelta = startTimestamp - currentBlock.number;
 
       await timeTravel(70);
     });
@@ -109,7 +102,7 @@ describe('OneStakerRewardsPool', () => {
     it('Should successfully stake and accumulate reward', async () => {
       await OneStakerRewardsPoolInstance.connect(staker).stake(standardStakingAmount);
 
-      const blockNumber = Math.floor((await ethers.provider.getBlock('latest')).timestamp / virtualBlocksTime);
+      const currentTime = await getTime();
 
       const totalStakedAmount = await OneStakerRewardsPoolInstance.totalStaked();
       const userInfo = await OneStakerRewardsPoolInstance.userInfo(aliceAccount.address);
@@ -118,7 +111,7 @@ describe('OneStakerRewardsPool', () => {
 
       expect(totalStakedAmount).to.equal(standardStakingAmount, 'The stake was not successful');
       expect(userInfo.amountStaked).to.equal(standardStakingAmount, "User's staked amount is not correct");
-      expect(userInfo.firstStakedBlockNumber).to.equal(blockNumber, "User's first block is not correct");
+      expect(userInfo.firstStakedTimestamp).to.equal(currentTime, "User's first block is not correct");
       expect(userRewardDebt).to.equal(0, "User's reward debt is not correct");
       expect(userOwedToken).to.equal(0, "User's reward debt is not correct");
 
@@ -129,7 +122,7 @@ describe('OneStakerRewardsPool', () => {
         0,
         await getTime()
       );
-      expect(accumulatedReward).to.equal(bOne, 'The reward accrued was not 1 token');
+      expect(accumulatedReward).to.equal(bOne.mul(10), 'The reward accrued was not 1 token');
     });
 
     it('Should fail if amount to stake is not greater than zero', async () => {
