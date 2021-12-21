@@ -2,12 +2,10 @@
 
 pragma solidity 0.8.4;
 
-import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import './SafeERC20Detailed.sol';
 import './interfaces/IERC20Detailed.sol';
 
 abstract contract TreasuryOperated {
-    using SafeMath for uint256;
     using SafeERC20Detailed for IERC20Detailed;
 
     mapping(address => uint256) public externalRewards;
@@ -33,7 +31,7 @@ abstract contract TreasuryOperated {
 
     function notifyExternalReward(address token, uint256 reward) internal virtual {
         IERC20Detailed(token).safeTransferFrom(msg.sender, address(this), reward);
-        externalRewards[token] = externalRewards[token].add(reward);
+        externalRewards[token] = externalRewards[token] + reward;
         emit ExternalRewardsAdded(msg.sender, token, reward);
     }
 

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.4;
 
-import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import './interfaces/IERC20Detailed.sol';
@@ -53,14 +52,11 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         uint256 _stakeLimit,
         uint256 _contractStakeLimit
     ) {
-        require(address(_stakingToken) != address(0), 'Constructor::Invalid staking token address');
+        require(address(_stakingToken) != address(0), 'RewardsPoolBase: invalid staking token');
 
-        require(
-            _stakeLimit != 0 && _contractStakeLimit != 0,
-            'Constructor::Stake limit and contract stake limit needs to be more than 0'
-        );
+        require(_stakeLimit != 0 && _contractStakeLimit != 0, 'RewardsPoolBase: invalid stake limit');
 
-        require(_rewardsTokens.length > 0, 'Constructor::Rewards tokens array should not be empty');
+        require(_rewardsTokens.length > 0, 'RewardsPoolBase: empty rewardsTokens');
 
         stakingToken = _stakingToken;
         rewardsTokens = _rewardsTokens;
@@ -78,7 +74,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         uint256 currentTimestamp = block.timestamp;
         require(
             (startTimestamp > 0 && currentTimestamp > startTimestamp) && (currentTimestamp <= endTimestamp),
-            'Stake::Staking has not started or is finished'
+            'RewardsPoolBase: staking is not started or is finished'
         );
         _;
     }
@@ -95,18 +91,23 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     function start(
         uint256 _startTimestamp,
         uint256 _endTimestamp,
-        uint256[] memory _rewardPerSecond
-    ) public onlyOwner {
-        require(startTimestamp == 0, 'start::Pool is already started');
+        uint256[] calldata _rewardPerSecond
+    ) public virtual onlyOwner {
+        _start(_startTimestamp, _endTimestamp, _rewardPerSecond);
+    }
+
+    function _start(
+        uint256 _startTimestamp,
+        uint256 _endTimestamp,
+        uint256[] calldata _rewardPerSecond
+    ) internal {
+        require(startTimestamp == 0, 'RewardsPoolBase: already started');
         require(
             _startTimestamp >= block.timestamp && _endTimestamp > _startTimestamp,
-            'start::The start & end timestamp must be in the future.'
+            'RewardsPoolBase: invalid start or end'
         );
 
-        require(
-            _rewardPerSecond.length == rewardsTokens.length,
-            'Start::Rewards per block and rewards tokens must be with the same length.'
-        );
+        require(_rewardPerSecond.length == rewardsTokens.length, 'RewardsPoolBase: invalid rewardPerSecond');
         rewardPerSecond = _rewardPerSecond;
 
         for (uint256 i = 0; i < rewardsTokens.length; i++) {
@@ -114,7 +115,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 
             uint256 balance = IERC20Detailed(rewardsTokens[i]).balanceOf(address(this));
 
-            require(balance >= rewardsAmount, 'Start::Rewards pool does not have enough rewards');
+            require(balance >= rewardsAmount, 'RewardsPoolBase: not enough rewards');
         }
 
         startTimestamp = _startTimestamp;
@@ -141,7 +142,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         address staker,
         bool chargeStaker
     ) internal onlyInsideBounds onlyUnderStakeLimit(staker, _tokenAmount) {
-        require(_tokenAmount > 0, 'Stake::Cannot stake 0');
+        require(_tokenAmount > 0, 'RewardsPoolBase: cannot stake 0');
 
         UserInfo storage user = userInfo[staker];
 
@@ -199,7 +200,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     }
 
     function _withdraw(uint256 _tokenAmount, address withdrawer) internal {
-        require(_tokenAmount > 0, 'Withdraw::Cannot withdraw 0');
+        require(_tokenAmount > 0, 'RewardsPoolBase: cannot withdraw 0');
 
         UserInfo storage user = userInfo[withdrawer];
 
@@ -364,17 +365,14 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 		@param _endTimestamp  new end block for the rewards
 		@param _rewardPerSecond array with new rewards per block for each token 
 	 */
-    function extend(uint256 _endTimestamp, uint256[] memory _rewardPerSecond) external virtual onlyOwner {
+    function extend(uint256 _endTimestamp, uint256[] calldata _rewardPerSecond) external virtual onlyOwner {
         uint256 currentTimestamp = block.timestamp;
 
         require(
             _endTimestamp > currentTimestamp && _endTimestamp > endTimestamp,
-            'Extend::End timestamp must be in the future and after current'
+            'RewardsPoolBase: invalid endTimestamp'
         );
-        require(
-            _rewardPerSecond.length == rewardsTokens.length,
-            'Extend::Rewards amounts length is less than expected'
-        );
+        require(_rewardPerSecond.length == rewardsTokens.length, 'RewardsPoolBase: invalid rewardPerSecond');
 
         updateRewardMultipliers();
 
@@ -395,7 +393,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
                 // We need to check if we have enough balance available in the contract to pay for the extension
                 uint256 availableBalance = getAvailableBalance(i, block.timestamp);
 
-                require(availableBalance >= newRemainingRewards, 'Extend:: Not enough rewards in the pool to extend');
+                require(availableBalance >= newRemainingRewards, 'RewardsPoolBase: not enough rewards to extend');
 
                 uint256 spentRewards = calculateRewardsAmount(startTimestamp, campaignTime, rewardPerSecond[i]);
                 totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
@@ -437,15 +435,16 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
      */
     function withdrawLPRewards(address recipient, address lpTokenContract) external nonReentrant onlyOwner {
         uint256 currentReward = IERC20Detailed(lpTokenContract).balanceOf(address(this));
-        require(currentReward > 0, 'WithdrawLPRewards::There are no rewards from liquidity pools');
+        require(currentReward > 0, 'RewardsPoolBase: no rewards');
 
-        require(lpTokenContract != address(stakingToken), 'WithdrawLPRewards:: cannot withdraw from the LP tokens');
+        require(lpTokenContract != address(stakingToken), 'RewardsPoolBase: cannot withdraw staking token');
 
         uint256 rewardsTokensLength = rewardsTokens.length;
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
-            require(lpTokenContract != rewardsTokens[i], 'WithdrawLPRewards::Cannot withdraw from token rewards');
+            require(lpTokenContract != rewardsTokens[i], 'RewardsPoolBase: cannot withdraw reward token');
         }
+
         IERC20Detailed(lpTokenContract).safeTransfer(recipient, currentReward);
         emit WithdrawLPRewards(currentReward, recipient);
     }
@@ -456,7 +455,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         uint256 _startTimestamp,
         uint256 _endTimestamp,
         uint256 _rewardPerSecond
-    ) internal view returns (uint256) {
+    ) internal pure returns (uint256) {
         uint256 rewardsPeriodSeconds = _endTimestamp - _startTimestamp;
         return _rewardPerSecond * rewardsPeriodSeconds;
     }

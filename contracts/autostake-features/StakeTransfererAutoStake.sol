@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.4;
 
-import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import './../interfaces/IERC20Detailed.sol';
 import './../SafeERC20Detailed.sol';
 import './AutoStake.sol';
@@ -10,7 +9,6 @@ import './../StakeTransferer.sol';
 import './../StakeReceiver.sol';
 
 abstract contract StakeTransfererAutoStake is AutoStake, StakeTransferer {
-    using SafeMath for uint256;
     using SafeERC20Detailed for IERC20Detailed;
 
     function setReceiverWhitelisted(address receiver, bool whitelisted) public override(StakeTransferer) onlyOwner {
@@ -36,7 +34,7 @@ abstract contract StakeTransfererAutoStake is AutoStake, StakeTransferer {
             return;
         }
 
-        totalShares = totalShares.sub(share[msg.sender]);
+        totalShares = totalShares - share[msg.sender];
         share[msg.sender] = 0;
 
         stakingToken.safeApprove(transferTo, userStake);

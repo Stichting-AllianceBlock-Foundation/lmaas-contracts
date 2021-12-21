@@ -157,13 +157,14 @@ describe('AutoStake', () => {
       const stakeTime = await getTime();
 
       await timeTravel(10);
+      const checkTime = await getTime();
       const accumulatedReward = await CompoundingRewardsPoolInstance.getUserAccumulatedReward(
         AutoStakingInstance.address,
         0,
-        await getTime()
+        checkTime
       );
 
-      expect(accumulatedReward).to.equal(bOne.mul(10));
+      expect(accumulatedReward).to.equal(bOne.mul(checkTime - stakeTime));
       await timeTravel(10);
 
       await AutoStakingInstance.refreshAutoStake();

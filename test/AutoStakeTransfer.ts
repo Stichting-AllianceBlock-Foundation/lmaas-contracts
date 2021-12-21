@@ -101,7 +101,7 @@ describe('AutoStakeTransfer', () => {
   });
 
   it('[Should exit to another contract]:', async () => {
-    await timeTravel(130);
+    await timeTravel(140);
 
     const userBalance = await StakeTransfererAutoStakeInstance.balanceOf(testAccount.address);
     const userShares = await StakeTransfererAutoStakeInstance.share(testAccount.address);

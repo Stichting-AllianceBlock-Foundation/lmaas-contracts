@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.4;
 
-import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import '@openzeppelin/contracts/utils/Address.sol';
 
 import './interfaces/IERC20Detailed.sol';
@@ -16,7 +15,6 @@ import './interfaces/IERC20Detailed.sol';
  * which allows you to call the safe operations as `token.safeTransfer(...)`, etc.
  */
 library SafeERC20Detailed {
-    using SafeMath for uint256;
     using Address for address;
 
     function safeTransfer(
@@ -57,7 +55,7 @@ library SafeERC20Detailed {
         address spender,
         uint256 value
     ) internal {
-        uint256 newAllowance = token.allowance(address(this), spender).add(value);
+        uint256 newAllowance = token.allowance(address(this), spender) + value;
         callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, newAllowance));
     }
 
@@ -66,7 +64,7 @@ library SafeERC20Detailed {
         address spender,
         uint256 value
     ) internal {
-        uint256 newAllowance = token.allowance(address(this), spender).sub(value);
+        uint256 newAllowance = token.allowance(address(this), spender) - value;
         callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, newAllowance));
     }
 

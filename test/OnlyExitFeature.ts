@@ -100,7 +100,7 @@ describe('OnlyExitFeature', () => {
   });
 
   it('Should exit successfully from the RewardsPool', async () => {
-    await timeTravel(130);
+    await timeTravel(140);
 
     const userInitialBalanceStaking = await stakingTokenInstance.balanceOf(aliceAccount.address);
     const userInfoInitial = await OnlyExitFeatureInstance.userInfo(aliceAccount.address);

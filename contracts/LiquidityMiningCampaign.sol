@@ -6,9 +6,8 @@ import './SafeERC20Detailed.sol';
 import './RewardsPoolBase.sol';
 import './StakeTransferer.sol';
 import './StakeReceiver.sol';
-import './pool-features/OnlyExitFeature.sol';
 
-contract LiquidityMiningCampaign is StakeTransferer, OnlyExitFeature {
+contract LiquidityMiningCampaign is StakeTransferer, RewardsPoolBase {
     using SafeERC20Detailed for IERC20Detailed;
     address public immutable rewardToken;
     string public campaignName;
@@ -16,12 +15,10 @@ contract LiquidityMiningCampaign is StakeTransferer, OnlyExitFeature {
     constructor(
         IERC20Detailed _stakingToken,
         address[] memory _rewardsTokens,
-        address _albtAddress,
         uint256 _stakeLimit,
         uint256 _contractStakeLimit,
         string memory _campaingName
     ) RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit) {
-        require(_albtAddress == _rewardsTokens[0], 'constructor:: The first reward address is different from the ALBT');
         rewardToken = _rewardsTokens[0];
         campaignName = _campaingName;
     }
@@ -60,6 +57,6 @@ contract LiquidityMiningCampaign is StakeTransferer, OnlyExitFeature {
     }
 
     function exitAndTransfer(address) public pure override {
-        revert('LiquidityMiningCampaign::exit and transfer is forbidden');
+        revert('LiquidityMiningCampaign: exitAndTransfer is forbidden');
     }
 }

@@ -126,13 +126,13 @@ describe('RewardsPoolBase', () => {
     const RewardsPoolBase = await ethers.getContractFactory('RewardsPoolBase');
     await expect(
       RewardsPoolBase.deploy(ethers.constants.AddressZero, rewardTokensAddresses, stakeLimit, contractStakeLimit)
-    ).to.be.revertedWith('Constructor::Invalid staking token address');
+    ).to.be.revertedWith('RewardsPoolBase: invalid staking token');
   });
 
   it('Should fail to deploy RewardsPoolBase with empty rewards token addresses array', async () => {
     const RewardsPoolBase = await ethers.getContractFactory('RewardsPoolBase');
     await expect(RewardsPoolBase.deploy(stakingTokenAddress, [], stakeLimit, contractStakeLimit)).to.be.revertedWith(
-      'Constructor::Rewards tokens array should not be empty'
+      'RewardsPoolBase: empty rewardsTokens'
     );
   });
 
@@ -140,13 +140,13 @@ describe('RewardsPoolBase', () => {
     const RewardsPoolBase = await ethers.getContractFactory('RewardsPoolBase');
     await expect(
       RewardsPoolBase.deploy(stakingTokenAddress, rewardTokensAddresses, 0, contractStakeLimit)
-    ).to.be.revertedWith('Constructor::Stake limit and contract stake limit needs to be more than 0');
+    ).to.be.revertedWith('RewardsPoolBase: invalid stake limit');
   });
 
   it('Should fail to deploy RewardsPoolBase with 0 contract staking limit', async () => {
     const RewardsPoolBase = await ethers.getContractFactory('RewardsPoolBase');
     await expect(RewardsPoolBase.deploy(stakingTokenAddress, rewardTokensAddresses, stakeLimit, 0)).to.be.revertedWith(
-      'Constructor::Stake limit and contract stake limit needs to be more than 0'
+      'RewardsPoolBase: invalid stake limit'
     );
   });
 
@@ -155,7 +155,7 @@ describe('RewardsPoolBase', () => {
       const instance = await createPool();
 
       await expect(instance.start(startTimestamp, endTimestamp, [])).to.be.revertedWith(
-        'Start::Rewards per block and rewards tokens must be with the same length.'
+        'RewardsPoolBase: invalid rewardPerSecond'
       );
     });
 
@@ -163,7 +163,7 @@ describe('RewardsPoolBase', () => {
       const instance = await createPool();
 
       await expect(instance.start(startTimestamp, endTimestamp, rewardPerSecond.slice(1))).to.be.revertedWith(
-        'Start::Rewards per block and rewards tokens must be with the same length.'
+        'RewardsPoolBase: invalid rewardPerSecond'
       );
     });
 
@@ -172,14 +172,14 @@ describe('RewardsPoolBase', () => {
 
       await expect(
         instance.start(startTimestamp, endTimestamp, [...rewardPerSecond, BigNumber.from(1)])
-      ).to.be.revertedWith('Start::Rewards per block and rewards tokens must be with the same length.');
+      ).to.be.revertedWith('RewardsPoolBase: invalid rewardPerSecond');
     });
 
     it('Should fail if the start timestamp is not in the future', async () => {
       const instance = await createPool();
 
       await expect(instance.start(0, endTimestamp, rewardPerSecond)).to.be.revertedWith(
-        'start::The start & end timestamp must be in the future.'
+        'RewardsPoolBase: invalid start or end'
       );
     });
 
@@ -189,7 +189,7 @@ describe('RewardsPoolBase', () => {
       await instance.start(startTimestamp, endTimestamp, rewardPerSecond);
 
       await expect(instance.start(startTimestamp, endTimestamp, rewardPerSecond)).to.be.revertedWith(
-        'start::Pool is already started'
+        'RewardsPoolBase: already started'
       );
     });
 
@@ -197,7 +197,7 @@ describe('RewardsPoolBase', () => {
       const instance = await createPool();
 
       await expect(instance.start(startTimestamp, 0, rewardPerSecond)).to.be.revertedWith(
-        'start::The start & end timestamp must be in the future.'
+        'RewardsPoolBase: invalid start or end'
       );
     });
 
@@ -205,7 +205,7 @@ describe('RewardsPoolBase', () => {
       const instance = await createPool();
 
       await expect(instance.start(startTimestamp, startTimestamp - 1, rewardPerSecond)).to.be.revertedWith(
-        'start::The start & end timestamp must be in the future.'
+        'RewardsPoolBase: invalid start or end'
       );
     });
 
@@ -218,7 +218,7 @@ describe('RewardsPoolBase', () => {
           endTimestamp,
           rewardPerSecond.map((r) => r.add(1))
         )
-      ).to.be.revertedWith('Start::Rewards pool does not have enough rewards');
+      ).to.be.revertedWith('RewardsPoolBase: not enough rewards');
     });
   });
 
@@ -226,7 +226,7 @@ describe('RewardsPoolBase', () => {
     it('Should not stake before staking start', async () => {
       await stakingTokenInstance.approve(RewardsPoolBaseInstance.address, standardStakingAmount);
       await expect(RewardsPoolBaseInstance.stake(standardStakingAmount)).to.be.revertedWith(
-        'Stake::Staking has not started or is finished'
+        'RewardsPoolBase: staking is not started or is finished'
       );
     });
 
@@ -337,7 +337,7 @@ describe('RewardsPoolBase', () => {
       });
 
       it('Should fail if amount to stake is not greater than zero', async () => {
-        await expect(RewardsPoolBaseInstance.stake(0)).to.be.revertedWith('Stake::Cannot stake 0');
+        await expect(RewardsPoolBaseInstance.stake(0)).to.be.revertedWith('RewardsPoolBase: cannot stake 0');
       });
 
       it('Should fail if amount to stake is more than limit', async () => {
@@ -359,7 +359,7 @@ describe('RewardsPoolBase', () => {
       await timeTravel(70000);
 
       await expect(RewardsPoolBaseInstance.stake(standardStakingAmount)).to.be.revertedWith(
-        'Stake::Staking has not started or is finished'
+        'RewardsPoolBase: staking is not started or is finished'
       );
     });
   });
@@ -472,7 +472,7 @@ describe('RewardsPoolBase', () => {
     });
 
     it('Should fail withdrawing if the amount to withraw is not greater than zero', async () => {
-      expect(RewardsPoolBaseInstance.withdraw(0)).to.be.revertedWith('Withdraw::Cannot withdraw 0');
+      expect(RewardsPoolBaseInstance.withdraw(0)).to.be.revertedWith('RewardsPoolBase: cannot withdraw 0');
     });
 
     async function extend() {
@@ -568,7 +568,7 @@ describe('RewardsPoolBase', () => {
       }
 
       await expect(RewardsPoolBaseInstance.extend(newEndTimestamp, newRewardsPerBlock)).to.be.revertedWith(
-        'Extend:: Not enough rewards in the pool to extend'
+        'RewardsPoolBase: not enough rewards to extend'
       );
     });
 
@@ -600,7 +600,7 @@ describe('RewardsPoolBase', () => {
 
     it('Should fail extending the rewards pool if the end block is not in the future', async () => {
       await expect(RewardsPoolBaseInstance.extend(0, rewardPerSecond)).to.be.revertedWith(
-        'Extend::End timestamp must be in the future and after current'
+        'RewardsPoolBase: invalid endTimestamp'
       );
     });
 
@@ -609,7 +609,7 @@ describe('RewardsPoolBase', () => {
       let newendTimestamp = currentEndTimestamp.sub(1);
 
       await expect(RewardsPoolBaseInstance.extend(newendTimestamp, rewardPerSecond)).to.be.revertedWith(
-        'Extend::End timestamp must be in the future and after current'
+        'RewardsPoolBase: invalid endTimestamp'
       );
     });
 
@@ -625,7 +625,7 @@ describe('RewardsPoolBase', () => {
       }
 
       await expect(RewardsPoolBaseInstance.extend(newendTimestamp, newRewardsPerBlock)).to.be.revertedWith(
-        'Extend::Rewards amounts length is less than expected'
+        'RewardsPoolBase: invalid rewardPerSecond'
       );
     });
 

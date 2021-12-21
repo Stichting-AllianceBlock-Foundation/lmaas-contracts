@@ -3,7 +3,6 @@
 pragma solidity 0.8.4;
 
 import '@openzeppelin/contracts/utils/math/Math.sol';
-import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import './../interfaces/IRewardsPoolBase.sol';
@@ -15,7 +14,6 @@ import './../ThrottledExit.sol';
 // Based on ideas here: https://github.com/harvest-finance/harvest/blob/7a455967e40e980d4cfb2115bd000fbd6b201cc1/contracts/AutoStake.sol
 
 contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
-    using SafeMath for uint256;
     using SafeERC20Detailed for IERC20Detailed;
 
     IRewardsPoolBase public rewardPool;
@@ -42,10 +40,12 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
         uint256 _throttleRoundBlocks,
         uint256 _throttleRoundCap,
         uint256 stakeEnd
-    ) StakeLock(stakeEnd) {
+    ) {
         factory = msg.sender;
         stakingToken = IERC20Detailed(token);
-        setThrottleParams(_throttleRoundBlocks, _throttleRoundCap, stakeEnd);
+        setThrottleParams(_throttleRoundBlocks, _throttleRoundCap);
+        startThrottle(stakeEnd);
+        lock(stakeEnd);
     }
 
     function setPool(address pool) public onlyOwner {
@@ -73,9 +73,9 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
 
         // now we can issue shares
         stakingToken.safeTransferFrom(chargeStaker ? staker : msg.sender, address(this), amount);
-        uint256 sharesToIssue = amount.mul(unit).div(valuePerShare);
-        totalShares = totalShares.add(sharesToIssue);
-        share[staker] = share[staker].add(sharesToIssue);
+        uint256 sharesToIssue = (amount * unit) / valuePerShare;
+        totalShares = totalShares + sharesToIssue;
+        share[staker] = share[staker] + sharesToIssue;
 
         uint256 oldValuePerShare = valuePerShare;
 
@@ -100,16 +100,16 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
         // now we can transfer funds and burn shares
         initiateExit(userStake, 0, new uint256[](0));
 
-        totalShares = totalShares.sub(share[msg.sender]);
+        totalShares = totalShares - share[msg.sender];
         share[msg.sender] = 0;
-        exitStake = exitStake.add(userStake);
+        exitStake = exitStake + userStake;
 
         updateValuePerShare();
     }
 
     function completeExit() public virtual onlyUnlocked nonReentrant {
         ExitInfo storage info = exitInfo[msg.sender];
-        exitStake = exitStake.sub(info.exitStake);
+        exitStake = exitStake - info.exitStake;
 
         finalizeExit(address(stakingToken), new address[](0));
 
@@ -117,7 +117,7 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
     }
 
     function balanceOf(address who) public view returns (uint256) {
-        return valuePerShare.mul(share[who]).div(unit);
+        return (valuePerShare * share[who]) / unit;
     }
 
     function updateValuePerShare() internal {
@@ -126,8 +126,8 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
             valuePerShare = unit;
             return;
         }
-        totalValue = stakingToken.balanceOf(address(this)).sub(exitStake);
-        valuePerShare = totalValue.mul(unit).div(totalShares);
+        totalValue = stakingToken.balanceOf(address(this)) - exitStake;
+        valuePerShare = (totalValue * unit) / totalShares;
     }
 
     function exitRewardPool() internal {
@@ -141,7 +141,7 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
         if (stakingToken.balanceOf(address(this)) != 0) {
             // stake back to the pool
 
-            uint256 balanceToRestake = stakingToken.balanceOf(address(this)).sub(exitStake);
+            uint256 balanceToRestake = stakingToken.balanceOf(address(this)) - exitStake;
 
             stakingToken.safeApprove(address(rewardPool), 0);
             stakingToken.safeApprove(address(rewardPool), balanceToRestake);
