@@ -204,7 +204,7 @@ describe('ThrottledExitFeature', () => {
       await ThrottledExitFeatureInstance.exit();
 
       const nextBlock = await ThrottledExitFeatureInstance.nextAvailableExitTimestamp();
-      expect(nextBlock).to.equal(endTimestamp + throttleRoundSeconds, 'End block has changed but it should not have');
+      expect(nextBlock).to.equal(endTimestamp + _throttleRoundSeconds, 'End block has changed but it should not have');
 
       const volume = await ThrottledExitFeatureInstance.nextAvailableRoundExitVolume();
       expect(volume).to.equal(standardStakingAmount, 'Exit volume was incorrect');
@@ -230,17 +230,14 @@ describe('ThrottledExitFeature', () => {
       await ThrottledExitFeatureInstance.connect(bobAccount).exit();
 
       const nextBlock = await ThrottledExitFeatureInstance.nextAvailableExitTimestamp();
-      expect(nextBlock).to.equal(
-        endTimestamp + throttleRoundSeconds * 2 - (endTimestamp % throttleRoundSeconds),
-        'End block has changed incorrectly'
-      );
+      expect(nextBlock).to.equal(endTimestamp + throttleRoundSeconds * 2, 'End block has changed incorrectly');
 
       const volume = await ThrottledExitFeatureInstance.nextAvailableRoundExitVolume();
       expect(volume).to.equal(0, 'Exit volume was incorrect');
 
       const userExitInfo = await ThrottledExitFeatureInstance.exitInfo(bobAccount.address);
       expect(userExitInfo.exitTimestamp).to.equal(
-        endTimestamp + throttleRoundSeconds - (endTimestamp % throttleRoundSeconds),
+        endTimestamp + throttleRoundSeconds,
         'The exit block for the user was not set for the current block'
       );
     });
@@ -258,10 +255,7 @@ describe('ThrottledExitFeature', () => {
       await ThrottledExitFeatureInstance.exit();
 
       const nextBlock = await ThrottledExitFeatureInstance.nextAvailableExitTimestamp();
-      expect(nextBlock).to.equal(
-        endTimestamp + throttleRoundSeconds - (endTimestamp % throttleRoundSeconds),
-        'End block has changed incorrectly'
-      );
+      expect(nextBlock).to.equal(endTimestamp + throttleRoundSeconds, 'End block has changed incorrectly');
 
       const volume = await ThrottledExitFeatureInstance.nextAvailableRoundExitVolume();
       expect(volume).to.equal(standardStakingAmount, 'Exit volume was incorrect');

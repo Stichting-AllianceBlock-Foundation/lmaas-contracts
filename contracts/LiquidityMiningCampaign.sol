@@ -6,9 +6,8 @@ import './SafeERC20Detailed.sol';
 import './RewardsPoolBase.sol';
 import './StakeTransferer.sol';
 import './StakeReceiver.sol';
-import './pool-features/OnlyExitFeature.sol';
 
-contract LiquidityMiningCampaign is StakeTransferer, OnlyExitFeature {
+contract LiquidityMiningCampaign is StakeTransferer, RewardsPoolBase {
     using SafeERC20Detailed for IERC20Detailed;
     address public immutable rewardToken;
     string public campaignName;

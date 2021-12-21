@@ -118,6 +118,7 @@ describe('Liquidity mining campaign', () => {
       let userInitialBalance = await stakingTokenInstance.balanceOf(testAccount.address);
 
       await LmcInstance.stake(bTen);
+      const stakeTime = await getTime();
 
       let contractFinalBalance = await stakingTokenInstance.balanceOf(LmcInstance.address);
       let userFinalBalance = await stakingTokenInstance.balanceOf(testAccount.address);
@@ -135,8 +136,10 @@ describe('Liquidity mining campaign', () => {
       expect(userOwedToken).to.equal(0);
       expect(userFinalBalance).to.equal(userInitialBalance.sub(bTen));
 
-      const accumulatedReward = await LmcInstance.getUserAccumulatedReward(testAccount.address, 0, await getTime());
-      expect(accumulatedReward).to.equal(bOne.mul(10));
+      const checkTime = await getTime();
+      const accumulatedReward = await LmcInstance.getUserAccumulatedReward(testAccount.address, 0, checkTime);
+
+      expect(accumulatedReward).to.equal(bOne.mul(checkTime - stakeTime));
     });
 
     it("[Should stake and lock sucessfully in two different lmc's]:", async () => {
@@ -145,7 +148,7 @@ describe('Liquidity mining campaign', () => {
       await LmcInstance.stake(bTen);
       const stakeTime = await getTime();
 
-      await LmcInstance.stake(bTwenty);
+      await LmcInstance.stake(bTen);
 
       const checkTime = startTimestamp + oneMinute;
       await timeTravelTo(checkTime);
@@ -155,9 +158,9 @@ describe('Liquidity mining campaign', () => {
       const totalStakedAmount = await LmcInstance.totalStaked();
       const userInfo = await LmcInstance.userInfo(testAccount.address);
 
-      expect(contractFinalBalance).to.equal(contractInitialBalance.add(bTen).add(bTwenty));
-      expect(totalStakedAmount).to.equal(bTen.add(bTwenty));
-      expect(userInfo.amountStaked).to.equal(bTen.add(bTwenty));
+      expect(contractFinalBalance).to.equal(contractInitialBalance.add(bTwenty));
+      expect(totalStakedAmount).to.equal(bTwenty);
+      expect(userInfo.amountStaked).to.equal(bTwenty);
       expect(accumulatedReward).to.equal(bOne.mul(checkTime - stakeTime));
     });
 
@@ -305,12 +308,6 @@ describe('Liquidity mining campaign', () => {
       expect(finalBalance.eq(userTokensOwedInitial), 'User rewards were not calculated properly');
       expect(totalStakedAmount.eq(userTokensOwedInitial), 'Total Staked amount is not correct');
       expect(userInfo.amountStaked.eq(finalBalance), "User's staked amount is not correct");
-    });
-
-    it('[Should fail calling the claim function only]:', async () => {
-      await expect(LmcInstance.claim()).to.be.revertedWith(
-        'OnlyExitFeature::cannot claim from this contract. Only exit.'
-      );
     });
 
     it("[Should return from exit if the user hasn't locked]:", async () => {

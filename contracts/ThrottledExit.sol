@@ -34,11 +34,11 @@ abstract contract ThrottledExit {
         );
         throttleRoundSeconds = _throttleRoundSeconds;
         throttleRoundCap = _throttleRoundCap;
-        nextAvailableExitTimestamp = campaignEndTimestamp + throttleRoundSeconds;
     }
 
     function startThrottle(uint256 _throttleStart) internal {
         campaignEndTimestamp = _throttleStart;
+        nextAvailableExitTimestamp = campaignEndTimestamp + throttleRoundSeconds;
     }
 
     function initiateExit(

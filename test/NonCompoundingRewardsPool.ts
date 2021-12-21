@@ -218,7 +218,7 @@ describe('NonCompoundingRewardsPool', () => {
       await NonCompoundingRewardsPoolInstance.exit();
 
       const nextBlock = await NonCompoundingRewardsPoolInstance.nextAvailableExitTimestamp();
-      expect(nextBlock).to.equal(endTimestamp + throttleRoundSeconds);
+      expect(nextBlock).to.equal(endTimestamp + _throttleRoundSeconds);
 
       const volume = await NonCompoundingRewardsPoolInstance.nextAvailableRoundExitVolume();
       expect(volume.eq(standardStakingAmount), 'Exit volume was incorrect');
