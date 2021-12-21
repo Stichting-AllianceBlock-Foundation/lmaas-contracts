@@ -166,7 +166,7 @@ describe('LimitedAutoStake', () => {
         });
 
         it('[Should request exit successfully]:', async () => {
-          await timeTravel(130);
+          await timeTravel(140);
 
           await AutoStakingInstance.exit();
 
@@ -178,7 +178,7 @@ describe('LimitedAutoStake', () => {
         });
 
         it('[Should not get twice reward on exit twice]:', async () => {
-          await timeTravel(130);
+          await timeTravel(140);
 
           await AutoStakingInstance.exit();
           await AutoStakingInstance.exit();
@@ -197,13 +197,13 @@ describe('LimitedAutoStake', () => {
         });
 
         it('[Should not complete early]:', async () => {
-          await timeTravel(130);
+          await timeTravel(140);
           await AutoStakingInstance.exit();
           await expect(AutoStakingInstance.completeExit()).to.be.revertedWith('finalizeExit::Trying to exit too early');
         });
 
         it('[Should complete succesfully]:', async () => {
-          await timeTravel(130);
+          await timeTravel(140);
           await AutoStakingInstance.exit();
           await timeTravel(210);
 

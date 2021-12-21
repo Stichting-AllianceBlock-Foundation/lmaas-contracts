@@ -17,15 +17,23 @@ contract NonCompoundingRewardsPool is
 {
     constructor(
         IERC20Detailed _stakingToken,
-        uint256 _startTimestamp,
-        uint256 _endTimestamp,
         address[] memory _rewardsTokens,
         uint256 _stakeLimit,
         uint256 _throttleRoundBlocks,
         uint256 _throttleRoundCap,
         uint256 _contractStakeLimit
-    ) RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit) StakeLock(_endTimestamp) {
-        setThrottleParams(_throttleRoundBlocks, _throttleRoundCap, _endTimestamp);
+    ) RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit) {
+        setThrottleParams(_throttleRoundBlocks, _throttleRoundCap);
+    }
+
+    function start(
+        uint256 _startTimestamp,
+        uint256 _endTimestamp,
+        uint256[] calldata _rewardPerSecond
+    ) public override onlyOwner {
+        startThrottle(_endTimestamp);
+        lock(_endTimestamp);
+        _start(_startTimestamp, _endTimestamp, _rewardPerSecond);
     }
 
     function withdraw(uint256 _tokenAmount) public override(OnlyExitFeature, RewardsPoolBase) {

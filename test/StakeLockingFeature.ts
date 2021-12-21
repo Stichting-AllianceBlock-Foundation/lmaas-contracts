@@ -107,7 +107,7 @@ describe('StakeLockingFeature', () => {
     const currentBlock = await ethers.provider.getBlock('latest');
     const blocksDelta = endTimestamp - currentBlock.number;
 
-    await timeTravel(130);
+    await timeTravel(140);
 
     const userInitialBalanceStaking = await stakingTokenInstance.balanceOf(aliceAccount.address);
     const userInfoInitial = await StakeLockingFeatureInstance.userInfo(aliceAccount.address);

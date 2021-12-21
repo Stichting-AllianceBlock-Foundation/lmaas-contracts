@@ -27,11 +27,7 @@ abstract contract ThrottledExit {
     event ExitRequested(address user, uint256 exitTimestamp);
     event ExitCompleted(address user, uint256 stake);
 
-    function setThrottleParams(
-        uint256 _throttleRoundSeconds,
-        uint256 _throttleRoundCap,
-        uint256 _throttleStart
-    ) internal {
+    function setThrottleParams(uint256 _throttleRoundSeconds, uint256 _throttleRoundCap) internal {
         require(_throttleRoundSeconds > 0, 'setThrottle::throttle round blocks must be more than 0');
         require(_throttleRoundCap > 0, 'setThrottle::throttle round cap must be more than 0');
         require(
@@ -40,8 +36,11 @@ abstract contract ThrottledExit {
         );
         throttleRoundSeconds = _throttleRoundSeconds;
         throttleRoundCap = _throttleRoundCap;
-        campaignEndTimestamp = _throttleStart;
         nextAvailableExitTimestamp = campaignEndTimestamp.add(throttleRoundSeconds);
+    }
+
+    function startThrottle(uint256 _throttleStart) internal {
+        campaignEndTimestamp = _throttleStart;
     }
 
     function initiateExit(

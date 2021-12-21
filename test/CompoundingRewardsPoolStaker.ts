@@ -111,7 +111,7 @@ describe('CompoundingRewardsPoolStaker', () => {
 
   it('[Should exit correctly]:', async () => {
     await StakeTransfererAutoStakeInstance.connect(test2Account).stake(standardStakingAmount.div(100));
-    await timeTravel(130);
+    await timeTravel(140);
 
     const userBalance = await StakeTransfererAutoStakeInstance.balanceOf(test2Account.address);
     const userShares = await StakeTransfererAutoStakeInstance.share(test2Account.address);
@@ -136,7 +136,7 @@ describe('CompoundingRewardsPoolStaker', () => {
   it('[Should not exit to non whitelisted contract]:', async () => {
     await stakingTokenInstance.approve(StakeTransfererAutoStakeInstance.address, standardStakingAmount);
     await StakeTransfererAutoStakeInstance.stake(standardStakingAmount);
-    await timeTravel(130);
+    await timeTravel(140);
 
     await expect(StakeTransfererAutoStakeInstance.exitAndTransfer(test2Account.address)).to.be.revertedWith(
       'exitAndTransfer::receiver is not whitelisted'
@@ -148,7 +148,7 @@ describe('CompoundingRewardsPoolStaker', () => {
 
     await stakingTokenInstance.approve(StakeTransfererAutoStakeInstance.address, standardStakingAmount);
     await StakeTransfererAutoStakeInstance.stake(standardStakingAmount);
-    await timeTravel(130);
+    await timeTravel(140);
 
     await expect(
       StakeTransfererAutoStakeInstance.exitAndTransfer(StakeReceiverAutoStakeInstance.address)

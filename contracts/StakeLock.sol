@@ -3,10 +3,10 @@
 pragma solidity 0.8.4;
 
 abstract contract StakeLock {
-    uint256 public immutable lockEndTimestamp;
+    uint256 public lockEndTimestamp;
 
-    constructor(uint256 _lockEndTimestamp) {
-        require(_lockEndTimestamp > block.timestamp, 'setLockEnd::Lock end needs to be in the future');
+    function lock(uint256 _lockEndTimestamp) internal {
+        require(_lockEndTimestamp > block.timestamp, 'lock::Lock end needs to be in the future');
         lockEndTimestamp = _lockEndTimestamp;
     }
 

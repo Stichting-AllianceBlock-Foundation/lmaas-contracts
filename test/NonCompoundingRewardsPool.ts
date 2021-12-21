@@ -70,8 +70,6 @@ describe('NonCompoundingRewardsPool', () => {
   const stake = async (_throttleRoundSeconds: number, _throttleRoundCap: BigNumber) => {
     NonCompoundingRewardsPoolInstance = (await deployContract(testAccount, NonCompoundingRewardsPoolArtifact, [
       stakingTokenAddress,
-      startTimestamp,
-      endTimestamp,
       rewardTokensAddresses,
       stakeLimit,
       _throttleRoundSeconds,
@@ -128,7 +126,7 @@ describe('NonCompoundingRewardsPool', () => {
     });
 
     it('[Should request exit successfully]:', async () => {
-      await timeTravel(130);
+      await timeTravel(140);
 
       const userInitialBalanceStaking = await stakingTokenInstance.balanceOf(testAccount.address);
       const userInfoInitial = await NonCompoundingRewardsPoolInstance.userInfo(testAccount.address);
@@ -163,7 +161,7 @@ describe('NonCompoundingRewardsPool', () => {
     });
 
     it('[Should not get twice reward on exit twice]:', async () => {
-      await timeTravel(130);
+      await timeTravel(140);
 
       const userInitialBalanceStaking = await stakingTokenInstance.balanceOf(testAccount.address);
       const userInfoInitial = await NonCompoundingRewardsPoolInstance.userInfo(testAccount.address);
@@ -220,7 +218,7 @@ describe('NonCompoundingRewardsPool', () => {
       await NonCompoundingRewardsPoolInstance.exit();
 
       const nextBlock = await NonCompoundingRewardsPoolInstance.nextAvailableExitTimestamp();
-      expect(nextBlock).to.equal(endTimestamp + throttleRoundSeconds);
+      expect(nextBlock).to.equal(endTimestamp + throttleRoundSeconds - (endTimestamp % throttleRoundSeconds));
 
       const volume = await NonCompoundingRewardsPoolInstance.nextAvailableRoundExitVolume();
       expect(volume.eq(standardStakingAmount), 'Exit volume was incorrect');
@@ -306,7 +304,7 @@ describe('NonCompoundingRewardsPool', () => {
     });
 
     it('[Should not complete early]:', async () => {
-      await timeTravel(130);
+      await timeTravel(140);
       await NonCompoundingRewardsPoolInstance.exit();
 
       await expect(NonCompoundingRewardsPoolInstance.completeExit()).to.be.revertedWith(

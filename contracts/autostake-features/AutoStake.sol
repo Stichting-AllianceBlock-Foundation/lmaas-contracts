@@ -42,10 +42,12 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
         uint256 _throttleRoundBlocks,
         uint256 _throttleRoundCap,
         uint256 stakeEnd
-    ) StakeLock(stakeEnd) {
+    ) {
         factory = msg.sender;
         stakingToken = IERC20Detailed(token);
-        setThrottleParams(_throttleRoundBlocks, _throttleRoundCap, stakeEnd);
+        setThrottleParams(_throttleRoundBlocks, _throttleRoundCap);
+        startThrottle(stakeEnd);
+        lock(stakeEnd);
     }
 
     function setPool(address pool) public onlyOwner {
