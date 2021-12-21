@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.4;
 
-import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import './interfaces/IERC20Detailed.sol';
@@ -456,7 +455,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         uint256 _startTimestamp,
         uint256 _endTimestamp,
         uint256 _rewardPerSecond
-    ) internal view returns (uint256) {
+    ) internal pure returns (uint256) {
         uint256 rewardsPeriodSeconds = _endTimestamp - _startTimestamp;
         return _rewardPerSecond * rewardsPeriodSeconds;
     }

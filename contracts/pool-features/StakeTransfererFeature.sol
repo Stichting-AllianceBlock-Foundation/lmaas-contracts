@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.4;
 
-import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import './../interfaces/IERC20Detailed.sol';
 import './../SafeERC20Detailed.sol';
 import './OnlyExitFeature.sol';
@@ -10,7 +9,6 @@ import './../StakeTransferer.sol';
 import './../StakeReceiver.sol';
 
 abstract contract StakeTransfererFeature is OnlyExitFeature, StakeTransferer {
-    using SafeMath for uint256;
     using SafeERC20Detailed for IERC20Detailed;
 
     function setReceiverWhitelisted(address receiver, bool whitelisted) public override(StakeTransferer) onlyOwner {
@@ -46,7 +44,7 @@ abstract contract StakeTransfererFeature is OnlyExitFeature, StakeTransferer {
 
         StakeReceiver(transferTo).delegateStake(msg.sender, userStakedAmount);
 
-        totalStaked = totalStaked.sub(userStakedAmount);
+        totalStaked = totalStaked - userStakedAmount;
 
         for (uint256 i = 0; i < rewardsTokens.length; i++) {
             user.tokensOwed[i] = 0;

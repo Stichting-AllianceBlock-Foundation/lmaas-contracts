@@ -2,12 +2,9 @@
 
 pragma solidity 0.8.4;
 
-import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import './AutoStake.sol';
 
 contract LimitedAutoStake is AutoStake {
-    using SafeMath for uint256;
-
     uint256 public immutable stakeLimit;
 
     constructor(
@@ -23,7 +20,7 @@ contract LimitedAutoStake is AutoStake {
 
     modifier onlyUnderStakeLimit(address staker, uint256 newStake) {
         uint256 currentStake = balanceOf(staker);
-        require(currentStake.add(newStake) <= stakeLimit, 'onlyUnderStakeLimit::Stake limit reached');
+        require(currentStake + newStake <= stakeLimit, 'onlyUnderStakeLimit::Stake limit reached');
         _;
     }
 

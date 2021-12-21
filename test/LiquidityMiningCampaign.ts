@@ -247,6 +247,8 @@ describe('Liquidity mining campaign', () => {
     });
 
     it('[Should exit and stake sucessfully]:', async () => {
+      await setupRewardsPoolParameters();
+
       const _contractStakeLimit = amount;
 
       let NewLmcInstance: LiquidityMiningCampaign = (await deployContract(testAccount, LMCArtifact, [

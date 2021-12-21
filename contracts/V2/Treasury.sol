@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.4;
 
-import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import './../interfaces/IERC20Detailed.sol';
 import './../interfaces/ITreasuryOperated.sol';
@@ -11,7 +10,6 @@ import './../SafeERC20Detailed.sol';
 import './../interfaces/IUniswapV2Router.sol';
 
 contract Treasury is Ownable {
-    using SafeMath for uint256;
     using SafeERC20Detailed for IERC20Detailed;
 
     address public immutable externalRewardToken;
@@ -29,7 +27,7 @@ contract Treasury is Ownable {
     function withdrawLiquidity(address[] calldata rewardPools, uint256[] calldata amounts) public onlyOwner {
         require(rewardPools.length == amounts.length, 'withdrawLiquidity:: pools and amounts do not match');
         for (uint256 i = 0; i < rewardPools.length; i++) {
-            liquidityDrawn[rewardPools[i]] = liquidityDrawn[rewardPools[i]].add(amounts[i]);
+            liquidityDrawn[rewardPools[i]] = liquidityDrawn[rewardPools[i]] + amounts[i];
             ITreasuryOperated(rewardPools[i]).withdrawStake(amounts[i]);
         }
     }

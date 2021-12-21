@@ -2,12 +2,10 @@
 
 pragma solidity 0.8.4;
 
-import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import './interfaces/IERC20Detailed.sol';
 import './SafeERC20Detailed.sol';
 
 abstract contract ThrottledExit {
-    using SafeMath for uint256;
     using SafeERC20Detailed for IERC20Detailed;
 
     uint256 public nextAvailableExitTimestamp;
@@ -36,7 +34,7 @@ abstract contract ThrottledExit {
         );
         throttleRoundSeconds = _throttleRoundSeconds;
         throttleRoundCap = _throttleRoundCap;
-        nextAvailableExitTimestamp = campaignEndTimestamp.add(throttleRoundSeconds);
+        nextAvailableExitTimestamp = campaignEndTimestamp + throttleRoundSeconds;
     }
 
     function startThrottle(uint256 _throttleStart) internal {
@@ -52,10 +50,10 @@ abstract contract ThrottledExit {
 
         ExitInfo storage info = exitInfo[msg.sender];
         info.exitTimestamp = getAvailableExitTime(amountStaked);
-        info.exitStake = info.exitStake.add(amountStaked);
+        info.exitStake = info.exitStake + amountStaked;
 
         for (uint256 i = 0; i < _rewardsTokensLength; i++) {
-            info.rewards[i] = info.rewards[i].add(_tokensOwed[i]);
+            info.rewards[i] = info.rewards[i] + _tokensOwed[i];
         }
 
         emit ExitRequested(msg.sender, info.exitTimestamp);
@@ -85,19 +83,19 @@ abstract contract ThrottledExit {
         if (currentTimestamp > nextAvailableExitTimestamp) {
             // We've passed the next available block and need to readjust
             uint256 blocksFromCurrentRound = (currentTimestamp - nextAvailableExitTimestamp) % throttleRoundSeconds; // Find how many blocks have passed since last block should have started
-            nextAvailableExitTimestamp = currentTimestamp.sub(blocksFromCurrentRound).add(throttleRoundSeconds); // Find where the lst block should have started and add one round to find the next one
+            nextAvailableExitTimestamp = currentTimestamp - blocksFromCurrentRound + throttleRoundSeconds; // Find where the lst block should have started and add one round to find the next one
             nextAvailableRoundExitVolume = exitAmount; // Reset volume
             return nextAvailableExitTimestamp;
         } else {
             // We are still before the next available block
-            nextAvailableRoundExitVolume = nextAvailableRoundExitVolume.add(exitAmount); // Add volume
+            nextAvailableRoundExitVolume = nextAvailableRoundExitVolume + exitAmount; // Add volume
         }
 
         exitBlock = nextAvailableExitTimestamp;
 
         if (nextAvailableRoundExitVolume >= throttleRoundCap) {
             // If cap reached
-            nextAvailableExitTimestamp = nextAvailableExitTimestamp.add(throttleRoundSeconds); // update next exit block.
+            nextAvailableExitTimestamp = nextAvailableExitTimestamp + throttleRoundSeconds; // update next exit block.
             // Note we know that this behaviour will lead to people exiting a bit more than the cap when the last user does not hit perfectly the cap. This is OK
             nextAvailableRoundExitVolume = 0; // Reset volume
         }

@@ -209,7 +209,7 @@ describe('NonCompoundingRewardsPool', () => {
     });
 
     it('[Should not change nextAvailableExitTimestamp before cap]:', async () => {
-      const _throttleRoundSeconds = 100;
+      const _throttleRoundSeconds = 1000;
       const _throttleRoundCap = standardStakingAmount.mul(2);
 
       await stake(_throttleRoundSeconds, _throttleRoundCap);
@@ -218,7 +218,7 @@ describe('NonCompoundingRewardsPool', () => {
       await NonCompoundingRewardsPoolInstance.exit();
 
       const nextBlock = await NonCompoundingRewardsPoolInstance.nextAvailableExitTimestamp();
-      expect(nextBlock).to.equal(endTimestamp + throttleRoundSeconds - (endTimestamp % throttleRoundSeconds));
+      expect(nextBlock).to.equal(endTimestamp + throttleRoundSeconds);
 
       const volume = await NonCompoundingRewardsPoolInstance.nextAvailableRoundExitVolume();
       expect(volume.eq(standardStakingAmount), 'Exit volume was incorrect');
@@ -326,7 +326,7 @@ describe('NonCompoundingRewardsPool', () => {
       );
 
       await NonCompoundingRewardsPoolInstance.exit();
-      await timeTravel(40);
+      await timeTravel(400);
 
       await NonCompoundingRewardsPoolInstance.completeExit();
 

@@ -195,7 +195,7 @@ describe('ThrottledExitFeature', () => {
     });
 
     it('Should not change nextAvailableExitTimestamp before cap', async () => {
-      const _throttleRoundSeconds = 100;
+      const _throttleRoundSeconds = 1000;
       const _throttleRoundCap = standardStakingAmount.mul(2);
       await stake(_throttleRoundSeconds, _throttleRoundCap);
 
@@ -204,10 +204,7 @@ describe('ThrottledExitFeature', () => {
       await ThrottledExitFeatureInstance.exit();
 
       const nextBlock = await ThrottledExitFeatureInstance.nextAvailableExitTimestamp();
-      expect(nextBlock).to.equal(
-        endTimestamp + throttleRoundSeconds - (endTimestamp % throttleRoundSeconds),
-        'End block has changed but it should not have'
-      );
+      expect(nextBlock).to.equal(endTimestamp + throttleRoundSeconds, 'End block has changed but it should not have');
 
       const volume = await ThrottledExitFeatureInstance.nextAvailableRoundExitVolume();
       expect(volume).to.equal(standardStakingAmount, 'Exit volume was incorrect');

@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.4;
 
-import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import './../RewardsPoolBase.sol';
 import './StakeLockingFeature.sol';
 import './../interfaces/IERC20Detailed.sol';
@@ -10,7 +9,6 @@ import './../SafeERC20Detailed.sol';
 import './../ThrottledExit.sol';
 
 abstract contract ThrottledExitFeature is StakeLockingFeature, ThrottledExit {
-    using SafeMath for uint256;
     using SafeERC20Detailed for IERC20Detailed;
 
     function exit() public virtual override onlyUnlocked nonReentrant {
@@ -26,7 +24,7 @@ abstract contract ThrottledExitFeature is StakeLockingFeature, ThrottledExit {
 
         initiateExit(user.amountStaked, rewardsTokens.length, user.tokensOwed);
 
-        totalStaked = totalStaked.sub(user.amountStaked);
+        totalStaked = totalStaked - user.amountStaked;
         user.amountStaked = 0;
 
         for (uint256 i = 0; i < rewardsTokens.length; i++) {
