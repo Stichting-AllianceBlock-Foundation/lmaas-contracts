@@ -479,18 +479,16 @@ describe('RewardsPoolBase', () => {
     });
 
     async function extend() {
-      await timeTravel(10);
+      let newRewardsPerSecond: BigNumber[] = [];
 
-      let newRewardsPerBlock = [];
-
-      let startTime = (await getTime()) + 20000;
+      let startTime = await getTime();
       const newEndTimestamp = BigNumber.from(startTime + poolLength);
 
       const mintPromises = [];
 
       for (let i = 0; i < rewardTokensCount; i++) {
         let parsedReward = await ethers.utils.parseEther(`${(i + 1) * 2}`);
-        const availableBalance = await RewardsPoolBaseInstance.getAvailableBalance(i, startTime);
+        const availableBalance = await RewardsPoolBaseInstance.getAvailableBalance(i);
 
         // Send the required reward tokens to the RewardsPool
         mintPromises.push(
@@ -500,52 +498,90 @@ describe('RewardsPoolBase', () => {
           )
         );
 
-        newRewardsPerBlock.push(parsedReward);
+        newRewardsPerSecond.push(parsedReward);
       }
 
       await Promise.all(mintPromises);
 
-      await timeTravelTo(startTime);
-
-      await RewardsPoolBaseInstance.extend(newEndTimestamp, newRewardsPerBlock);
-
-      let endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
-
-      expect(endTimestamp).to.equal(newEndTimestamp, 'Extending the end block was not successfull');
-
-      for (let i = 0; i < rewardTokensCount; i++) {
-        let rewardPerSecond = await RewardsPoolBaseInstance.rewardPerSecond(i);
-        expect(rewardPerSecond).to.equal(newRewardsPerBlock[i], 'Extending the reward per block was not successfull');
-      }
+      await RewardsPoolBaseInstance.extend(newEndTimestamp, newRewardsPerSecond);
     }
 
-    it('Should extend correctly', async () => {
+    it.only('Should extend correctly and save the information', async () => {
       await extend();
     });
 
-    it('Should extend correctly when pool is already done', async () => {
-      await timeTravel(poolLength * 2);
-      await extend();
-    });
-
-    it('Should extend correctly multiple times', async () => {
-      await extend();
-
-      await timeTravel(poolLength / 2);
-      await extend();
-
-      await timeTravel(poolLength / 2);
-      await extend();
-
-      await timeTravel(poolLength / 2);
-      await extend();
-
-      // Wait for pool to end
-      await timeTravel(poolLength * 2);
-
+    it.only('Should extend correctly when pool is already done', async () => {
       for (let i = 0; i < rewardTokensCount; i++) {
-        expect(await RewardsPoolBaseInstance.getAvailableBalance(i, await getTime())).to.equal(0);
+        console.log(
+          String(
+            await (
+              await ethers.getContractAt('IERC20Detailed', await RewardsPoolBaseInstance.rewardsTokens(i))
+            ).balanceOf(RewardsPoolBaseInstance.address)
+          )
+        );
       }
+      await timeTravel(poolLength * 2);
+
+      await extend();
+    });
+
+    it.only('Should extend correctly multiple times', async () => {
+      await extend();
+      await timeTravel(poolLength * 2);
+      console.log('\nfirst:');
+      for (let i = 0; i < rewardTokensCount; i++) {
+        console.log(
+          String(
+            await (
+              await ethers.getContractAt('IERC20Detailed', await RewardsPoolBaseInstance.rewardsTokens(i))
+            ).balanceOf(RewardsPoolBaseInstance.address)
+          )
+        );
+      }
+
+      let extensionDuration = await (await RewardsPoolBaseInstance.extensionDuration()).toNumber();
+      await RewardsPoolBaseInstance.withdraw(bOne);
+      let endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
+      let currentTimestamp = await getTime();
+      expect(endTimestamp).to.equal(currentTimestamp + extensionDuration);
+
+      await extend();
+      await timeTravel(poolLength * 2);
+      console.log('\nsecond:');
+      for (let i = 0; i < rewardTokensCount; i++) {
+        console.log(
+          String(
+            await (
+              await ethers.getContractAt('IERC20Detailed', await RewardsPoolBaseInstance.rewardsTokens(i))
+            ).balanceOf(RewardsPoolBaseInstance.address)
+          )
+        );
+      }
+
+      extensionDuration = await (await RewardsPoolBaseInstance.extensionDuration()).toNumber();
+      await RewardsPoolBaseInstance.withdraw(bOne);
+      endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
+      currentTimestamp = await getTime();
+      expect(endTimestamp).to.equal(currentTimestamp + extensionDuration);
+
+      await extend();
+      await timeTravel(poolLength * 2);
+      console.log('\nthird:');
+      for (let i = 0; i < rewardTokensCount; i++) {
+        console.log(
+          String(
+            await (
+              await ethers.getContractAt('IERC20Detailed', await RewardsPoolBaseInstance.rewardsTokens(i))
+            ).balanceOf(RewardsPoolBaseInstance.address)
+          )
+        );
+      }
+
+      extensionDuration = await (await RewardsPoolBaseInstance.extensionDuration()).toNumber();
+      await RewardsPoolBaseInstance.withdraw(bOne);
+      endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
+      currentTimestamp = await getTime();
+      expect(endTimestamp).to.equal(currentTimestamp + extensionDuration);
     });
 
     it('Should fail extending if there are not enough rewards', async () => {
@@ -559,7 +595,7 @@ describe('RewardsPoolBase', () => {
 
       for (let i = 0; i < rewardTokensCount; i++) {
         let parsedReward = await ethers.utils.parseEther(`${(i + 1) * 2}`);
-        const availableBalance = await RewardsPoolBaseInstance.getAvailableBalance(i, await getTime());
+        const availableBalance = await RewardsPoolBaseInstance.getAvailableBalance(i);
 
         // Send 50% less then the required reward tokens to the RewardsPool
         await rewardTokensInstances[i].mint(
@@ -653,7 +689,7 @@ describe('RewardsPoolBase', () => {
       )) as RewardsPoolBase;
 
       for (let i = 0; i < rewardTokensCount; i++) {
-        expect(await instance.getAvailableBalance(i, await getTime())).to.equal(0);
+        expect(await instance.getAvailableBalance(i)).to.equal(0);
       }
     });
 
@@ -661,7 +697,7 @@ describe('RewardsPoolBase', () => {
       await timeTravel(poolLength * 2);
 
       for (let i = 0; i < rewardTokensCount; i++) {
-        expect(await RewardsPoolBaseInstance.getAvailableBalance(i, await getTime())).to.equal(0);
+        expect(await RewardsPoolBaseInstance.getAvailableBalance(i)).to.equal(0);
       }
     });
   });
