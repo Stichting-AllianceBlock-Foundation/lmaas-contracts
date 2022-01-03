@@ -213,8 +213,6 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
             uint256 reward = user.tokensOwed[i];
-            console.log('1R: ', reward);
-            console.log('2B: ', IERC20Detailed(rewardsTokens[i]).balanceOf(address(this)));
             user.tokensOwed[i] = 0;
 
             IERC20Detailed(rewardsTokens[i]).safeTransfer(_claimer, reward);
@@ -424,6 +422,12 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         updateRewardMultipliers();
     }
 
+    /**
+		@dev Extends the rewards period and updates the rates, (this is just the internal function, that does the actual extends)
+		@param _currentTimestamp current timestamp for the rewards
+		@param _endTimestamp new end timestamp for the rewards
+		@param _rewardPerSecond array with new rewards per second for each token 
+	 */
     function _extend(
         uint256 _currentTimestamp,
         uint256 _endTimestamp,
