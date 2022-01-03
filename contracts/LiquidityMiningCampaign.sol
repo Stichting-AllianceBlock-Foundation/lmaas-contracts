@@ -9,7 +9,6 @@ import './StakeReceiver.sol';
 
 contract LiquidityMiningCampaign is StakeTransferer, RewardsPoolBase {
     using SafeERC20Detailed for IERC20Detailed;
-    address public immutable rewardToken;
     string public campaignName;
 
     constructor(
@@ -19,7 +18,6 @@ contract LiquidityMiningCampaign is StakeTransferer, RewardsPoolBase {
         uint256 _contractStakeLimit,
         string memory _campaingName
     ) RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit) {
-        rewardToken = _rewardsTokens[0];
         campaignName = _campaingName;
     }
 
@@ -46,14 +44,18 @@ contract LiquidityMiningCampaign is StakeTransferer, RewardsPoolBase {
         updateRewardMultipliers();
         updateUserAccruedReward(_userAddress);
 
-        uint256 finalRewards = user.tokensOwed[0];
+        uint256[] memory finalRewards = user.tokensOwed;
 
         _withdraw(user.amountStaked, _userAddress);
-        user.tokensOwed[0] = 0;
         _claim(_userAddress);
 
-        IERC20Detailed(rewardToken).safeApprove(_stakePool, finalRewards);
-        StakeReceiver(_stakePool).delegateStake(_userAddress, finalRewards);
+        uint256 rewardsTokensLength = rewardsTokens.length;
+
+        for (uint256 i = 0; i < rewardsTokensLength; i++) {
+            user.tokensOwed[i] = 0;
+            IERC20Detailed(rewardsTokens[i]).safeApprove(_stakePool, finalRewards[i]);
+            StakeReceiver(_stakePool).delegateStake(_userAddress, finalRewards[i]);
+        }
     }
 
     function exitAndTransfer(address) public pure override {

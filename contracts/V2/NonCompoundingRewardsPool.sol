@@ -55,4 +55,8 @@ contract NonCompoundingRewardsPool is
     function exitAndTransfer(address transferTo) public virtual override(StakeTransfererFeature) onlyUnlocked {
         StakeTransfererFeature.exitAndTransfer(transferTo);
     }
+
+    function extend(uint256, uint256[] calldata) external virtual override(RewardsPoolBase) {
+        revert('NonCompoundingRewardsPool::cannot extend this pool.');
+    }
 }

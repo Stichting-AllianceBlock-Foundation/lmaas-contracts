@@ -119,6 +119,12 @@ describe('NonCompoundingRewardsPool', () => {
       );
     });
 
+    it('[Should not allow extending]:', async () => {
+      await expect(NonCompoundingRewardsPoolInstance.extend(0, [])).to.be.revertedWith(
+        'NonCompoundingRewardsPool::cannot extend this pool.'
+      );
+    });
+
     it('[Should not exit before end of campaign]:', async () => {
       await expect(NonCompoundingRewardsPoolInstance.exit()).to.be.revertedWith(
         'onlyUnlocked::cannot perform this action until the end of the lock'
