@@ -5,6 +5,7 @@ import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import './interfaces/IERC20Detailed.sol';
 import './SafeERC20Detailed.sol';
+import 'hardhat/console.sol';
 
 /** @dev Base pool contract used in all other pools. 
 Users can stake tokens and get rewards based on the percentage of total staked tokens.
@@ -38,6 +39,9 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     uint256 public startTimestamp;
     uint256 public endTimestamp;
     uint256 private lastRewardTimestamp;
+
+    uint256 public extensionDuration;
+    uint256[] public extensionRewardPerSecond;
 
     uint256[] public accumulatedRewardMultiplier;
 
@@ -209,6 +213,8 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
             uint256 reward = user.tokensOwed[i];
+            console.log('1R: ', reward);
+            console.log('2B: ', IERC20Detailed(rewardsTokens[i]).balanceOf(address(this)));
             user.tokensOwed[i] = 0;
 
             IERC20Detailed(rewardsTokens[i]).safeTransfer(_claimer, reward);
@@ -301,6 +307,10 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         }
 
         lastRewardTimestamp = applicableTimestamp;
+
+        if (currentTimestamp > endTimestamp && extensionDuration > 0 && extensionRewardPerSecond.length > 0) {
+            _extend(currentTimestamp, currentTimestamp + extensionDuration, extensionRewardPerSecond);
+        }
     }
 
     /** @dev Updates the accumulated reward for the user
@@ -408,45 +418,43 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         );
         require(_rewardPerSecond.length == rewardsTokens.length, 'RewardsPoolBase: invalid rewardPerSecond');
 
+        extensionDuration = _endTimestamp - currentTimestamp;
+        extensionRewardPerSecond = _rewardPerSecond;
+
         updateRewardMultipliers();
+    }
 
-        uint256 campaignTime = currentTimestamp > endTimestamp ? endTimestamp : currentTimestamp;
-
+    function _extend(
+        uint256 _currentTimestamp,
+        uint256 _endTimestamp,
+        uint256[] memory _rewardPerSecond
+    ) internal {
         for (uint256 i = 0; i < _rewardPerSecond.length; i++) {
-            uint256 currentRemainingRewards = calculateRewardsAmount(campaignTime, endTimestamp, rewardPerSecond[i]);
-            uint256 newRemainingRewards = calculateRewardsAmount(currentTimestamp, _endTimestamp, _rewardPerSecond[i]);
+            uint256 newRewards = calculateRewardsAmount(_currentTimestamp, _endTimestamp, _rewardPerSecond[i]);
 
-            if (currentRemainingRewards > newRemainingRewards) {
-                // Some reward leftover needs to be returned
+            // We need to check if we have enough balance available in the contract to pay for the extension
+            uint256 availableBalance = getAvailableBalance(i);
 
-                IERC20Detailed(rewardsTokens[i]).safeTransfer(
-                    msg.sender,
-                    (currentRemainingRewards - newRemainingRewards)
-                );
-            } else {
-                // We need to check if we have enough balance available in the contract to pay for the extension
-                uint256 availableBalance = getAvailableBalance(i, block.timestamp);
+            require(availableBalance >= newRewards, 'RewardsPoolBase: not enough rewards to extend');
 
-                require(availableBalance >= newRemainingRewards, 'RewardsPoolBase: not enough rewards to extend');
-
-                uint256 spentRewards = calculateRewardsAmount(startTimestamp, campaignTime, rewardPerSecond[i]);
-                totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
-            }
+            uint256 spentRewards = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerSecond[i]);
+            totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
 
             rewardPerSecond[i] = _rewardPerSecond[i];
         }
 
-        startTimestamp = currentTimestamp;
+        startTimestamp = _currentTimestamp;
         endTimestamp = _endTimestamp;
+        extensionDuration = 0;
+        delete extensionRewardPerSecond;
 
         emit Extended(_endTimestamp, _rewardPerSecond);
     }
 
     /** @dev Calculates the available amount of reward tokens that are not locked
      * @param _rewardTokenIndex the index of the reward token to check
-     * @param _time the time to do the calculations at
      */
-    function getAvailableBalance(uint256 _rewardTokenIndex, uint256 _time) public view returns (uint256) {
+    function getAvailableBalance(uint256 _rewardTokenIndex) public view returns (uint256) {
         address rewardToken = rewardsTokens[_rewardTokenIndex];
         uint256 balance = IERC20Detailed(rewardToken).balanceOf(address(this));
 
@@ -454,9 +462,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
             return balance;
         }
 
-        uint256 campaignTime = _time > endTimestamp ? endTimestamp : _time;
-
-        uint256 spentRewards = calculateRewardsAmount(startTimestamp, campaignTime, rewardPerSecond[_rewardTokenIndex]);
+        uint256 spentRewards = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerSecond[_rewardTokenIndex]);
         uint256 availableBalance = balance -
             (totalSpentRewards[_rewardTokenIndex] + spentRewards - totalClaimed[_rewardTokenIndex]);
 
