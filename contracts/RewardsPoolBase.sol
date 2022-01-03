@@ -401,12 +401,14 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         return user.rewardDebt.length;
     }
 
-    /** @dev Extends the rewards period and changes the reward rate
-     * @param _endTimestamp  new end time for the reward period
-     * @param _rewardPerSecond array with new reward rates per second for each token
+    /**
+     * @dev Extends the rewards period and updates the rates
+     * @param _durationTime duration of the campaign (how many seconds the campaign will have)
+     * @param _rewardPerSecond array with new rewards per block for each token
      */
-    function extend(uint256 _endTimestamp, uint256[] calldata _rewardPerSecond) external virtual onlyOwner {
+    function extend(uint256 _durationTime, uint256[] memory _rewardPerSecond) external virtual onlyOwner {
         uint256 currentTimestamp = block.timestamp;
+        uint256 _endTimestamp = currentTimestamp + _durationTime;
 
         require(
             _endTimestamp > currentTimestamp && _endTimestamp > endTimestamp,
@@ -414,7 +416,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         );
         require(_rewardPerSecond.length == rewardsTokens.length, 'RewardsPoolBase: invalid rewardPerSecond');
 
-        extensionDuration = _endTimestamp - currentTimestamp;
+        extensionDuration = _durationTime;
         extensionRewardPerSecond = _rewardPerSecond;
 
         updateRewardMultipliers();
