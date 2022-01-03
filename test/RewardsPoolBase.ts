@@ -481,9 +481,6 @@ describe('RewardsPoolBase', () => {
     async function extend() {
       let newRewardsPerSecond: BigNumber[] = [];
 
-      let startTime = await getTime();
-      const newEndTimestamp = BigNumber.from(startTime + poolLength);
-
       const mintPromises = [];
 
       for (let i = 0; i < rewardTokensCount; i++) {
@@ -503,7 +500,7 @@ describe('RewardsPoolBase', () => {
 
       await Promise.all(mintPromises);
 
-      await RewardsPoolBaseInstance.extend(newEndTimestamp, newRewardsPerSecond);
+      await RewardsPoolBaseInstance.extend(poolLength, newRewardsPerSecond);
     }
 
     it.only('Should extend correctly and save the information', async () => {
