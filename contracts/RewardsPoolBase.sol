@@ -282,9 +282,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
             return;
         }
 
-        uint256 applicableTimestamp = (currentTimestamp < endTimestamp) ? currentTimestamp : endTimestamp;
-
-        uint256 secondsSinceLastReward = applicableTimestamp - lastRewardTimestamp;
+        uint256 secondsSinceLastReward = currentTimestamp - lastRewardTimestamp;
 
         if (secondsSinceLastReward == 0) {
             // Nothing to update
@@ -292,7 +290,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         }
 
         if (totalStaked == 0) {
-            lastRewardTimestamp = applicableTimestamp;
+            lastRewardTimestamp = currentTimestamp;
             return;
         }
 
@@ -304,7 +302,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
             accumulatedRewardMultiplier[i] = accumulatedRewardMultiplier[i] + rewardMultiplierIncrease; // Add the multiplier increase to the accumulated multiplier
         }
 
-        lastRewardTimestamp = applicableTimestamp;
+        lastRewardTimestamp = currentTimestamp;
 
         if (currentTimestamp > endTimestamp && extensionDuration > 0 && extensionRewardPerSecond.length > 0) {
             _extend(currentTimestamp, currentTimestamp + extensionDuration, extensionRewardPerSecond);
