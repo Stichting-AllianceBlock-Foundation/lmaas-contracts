@@ -1,9 +1,5 @@
 ## StakeTransferer
 
-
-
-
-
 ### Inheritance
 
 ```
@@ -20,24 +16,16 @@ mapping(address => bool) receiversWhitelist;
 
 #### setReceiverWhitelisted
 
-
-
 Change whitelist status of a receiver pool to receive transfers.
-
 
 ```Solidity
 address _receiver; // The pool address to whitelist
 
 bool _whitelisted; // If it should be whitelisted or not
 ```
+
 #### exitAndTransfer
 
-
-
-
-
 ```Solidity
-address transferTo; 
+address transferTo;
 ```
-
-

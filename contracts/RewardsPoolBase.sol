@@ -272,7 +272,9 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         return user.amountStaked;
     }
 
-    /// @dev Updates the accumulated reward multipliers for everyone and each token
+    /**
+		@dev Updates the accumulated reward multipliers for everyone and each token
+	 */
     function updateRewardMultipliers() public {
         uint256 currentTimestamp = block.timestamp;
 
@@ -458,8 +460,9 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         emit Extended(_endTimestamp, _rewardPerSecond);
     }
 
-    /** @dev Calculates the available amount of reward tokens that are not locked
-     * @param _rewardTokenIndex the index of the reward token to check
+    /**
+     *@dev Calculates the available amount of reward tokens that are not locked
+     *@param _rewardTokenIndex the index of the reward token to check
      */
     function getAvailableBalance(uint256 _rewardTokenIndex) public view returns (uint256) {
         address rewardToken = rewardsTokens[_rewardTokenIndex];

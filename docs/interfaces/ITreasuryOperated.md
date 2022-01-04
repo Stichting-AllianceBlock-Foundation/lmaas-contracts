@@ -1,17 +1,9 @@
 ## ITreasuryOperated
 
-
-
-
-
 ### Inheritance
 
 ```
 ITreasuryOperated
 ```
 
-
 ### Functions
-
-
-

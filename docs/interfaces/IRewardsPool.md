@@ -1,17 +1,9 @@
 ## IRewardsPool
 
-
-
-
-
 ### Inheritance
 
 ```
 IRewardsPool
 ```
 
-
 ### Functions
-
-
-

@@ -1,17 +1,9 @@
 ## IStakeTransferer
 
-
-
-
-
 ### Inheritance
 
 ```
 IStakeTransferer
 ```
 
-
 ### Functions
-
-
-

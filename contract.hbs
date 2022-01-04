@@ -7,6 +7,7 @@
 {{#if inheritance}}
 ### Inheritance
 
+<<<<<<< HEAD
 ```
 {{#each inheritance}}
 {{#unless (eq name ../name)}}{{name}}{{/unless}}
@@ -22,6 +23,19 @@
 {{type}} {{name}};
 {{/each}}
 ```
+=======
+{{#each inheritance}}
+    {{#unless (eq name ../name)}}{{name}}{{/unless}}
+{{/each}}
+{{/if}}
+
+{{#if ownVariables}}
+### Variables
+
+{{#each ownVariables}}
+    {{type}} {{name}}
+{{/each}}
+>>>>>>> ff41345 (Docs)
 {{/if}}
 
 {{#if functions}}
@@ -29,6 +43,7 @@
 
 {{#each functions}}
 {{#if (eq visibility "public")}}
+<<<<<<< HEAD
 #### {{name}}{{#if outputs}} → {{outputs}}{{/if}}
 
 {{{natspec.userdoc}}}
@@ -42,10 +57,22 @@
 {{/each}}
 ```
 {{/if}}
+=======
+  #### {{name}}{{#if outputs}} → {{outputs}}{{/if}}
+
+  {{{natspec.userdoc}}}
+
+  {{{natspec.devdoc}}}
+
+  {{#each args}}
+    {{typeName}} {{name}} {{#each ../natspec.params}}{{#if (eq param ../name)}}// {{{description}}}{{/if}}{{/each}}
+  {{/each}}
+>>>>>>> ff41345 (Docs)
 {{/if}}
 {{/each}}
 {{/if}}
 
+<<<<<<< HEAD
 {{#if events}}
 ### Events
 
@@ -77,5 +104,33 @@
 {{type}} {{name}};
 {{/each}}
 ```
+=======
+{{#if ownEvents}}
+### Events
+
+{{#each ownEvents}}
+  #### {{name}}
+
+  {{{natspec.userdoc}}}
+
+  {{{natspec.devdoc}}}
+
+  {{#each args}}
+    {{typeName}} {{name}}
+  {{/each}}
+{{/each}}
+{{/if}}
+
+{{#if ownStructs}}
+### Structs
+
+{{#each ownStructs}}
+  #### {{name}}
+
+  {{#each members}}
+    {{type}} {{name}}
+  {{/each}}
+
+>>>>>>> ff41345 (Docs)
 {{/each}}
 {{/if}}

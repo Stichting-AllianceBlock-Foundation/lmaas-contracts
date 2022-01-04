@@ -1,9 +1,5 @@
 ## UniswapV2RouterMock
 
-
-
-
-
 ### Inheritance
 
 ```
@@ -18,6 +14,3 @@ address lpToken;
 ```
 
 ### Functions
-
-
-
