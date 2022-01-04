@@ -32,6 +32,8 @@ describe('StakeLockingFeature', () => {
   let endTimestamp: number;
   const oneMinute = 60;
 
+  const name = 'ABC';
+
   const setupRewardsPoolParameters = async () => {
     rewardTokensInstances = [];
     rewardTokensAddresses = [];
@@ -73,7 +75,8 @@ describe('StakeLockingFeature', () => {
       endTimestamp,
       rewardTokensAddresses,
       stakeLimit,
-      contractStakeLimit
+      contractStakeLimit,
+      name
     )) as StakeLockingRewardsPoolMock;
 
     await rewardTokensInstances[0].mint(StakeLockingFeatureInstance.address, amount);

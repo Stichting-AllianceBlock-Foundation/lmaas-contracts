@@ -34,6 +34,8 @@ describe('StakeTransfer', () => {
   let endTimestamp: number;
   const oneMinute = 60;
 
+  const name = 'ABC';
+
   const setupRewardsPoolParameters = async () => {
     rewardTokensInstances = [];
     rewardTokensAddresses = [];
@@ -75,7 +77,8 @@ describe('StakeTransfer', () => {
       endTimestamp,
       rewardTokensAddresses,
       stakeLimit,
-      contractStakeLimit
+      contractStakeLimit,
+      name
     )) as StakeTransfererRewardsPoolMock;
 
     const StakeReceiverRewardsPoolMock = await ethers.getContractFactory('StakeReceiverRewardsPoolMock');
@@ -85,7 +88,8 @@ describe('StakeTransfer', () => {
       endTimestamp + oneMinute,
       rewardTokensAddresses,
       stakeLimit,
-      contractStakeLimit
+      contractStakeLimit,
+      name
     )) as StakeReceiverRewardsPoolMock;
 
     await StakeTransfererInstance.setReceiverWhitelisted(StakeReceiverInstance.address, true);

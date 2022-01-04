@@ -32,6 +32,8 @@ describe('OneStakerRewardsPool', () => {
   let endTimestamp: number;
   const oneMinute = 60;
 
+  const name = 'ABC';
+
   const setupRewardsPoolParameters = async () => {
     rewardTokensInstances = [];
     rewardTokensAddresses = [];
@@ -73,7 +75,8 @@ describe('OneStakerRewardsPool', () => {
       rewardTokensAddresses,
       staker.address,
       startTimestamp,
-      endTimestamp
+      endTimestamp,
+      name
     )) as CompoundingRewardsPool;
 
     await rewardTokensInstances[0].mint(OneStakerRewardsPoolInstance.address, amount);

@@ -32,6 +32,8 @@ describe('RewardsPoolBase', () => {
   const standardStakingAmount = ethers.utils.parseEther('5'); // 5 tokens
   const contractStakeLimit = ethers.utils.parseEther('10'); // 10 tokens
 
+  const name = 'ABC';
+
   const setupRewardsPoolParameters = async () => {
     rewardTokensInstances = [];
     rewardTokensAddresses = [];
@@ -61,7 +63,8 @@ describe('RewardsPoolBase', () => {
       stakingTokenAddress,
       rewardTokensAddresses,
       stakeLimit,
-      contractStakeLimit
+      contractStakeLimit,
+      name
     )) as RewardsPoolBase;
 
     // Send the required amount of tokens to the contract
@@ -125,29 +128,29 @@ describe('RewardsPoolBase', () => {
   it('Should fail to deploy RewardsPoolBase with zero staking token address', async () => {
     const RewardsPoolBase = await ethers.getContractFactory('RewardsPoolBase');
     await expect(
-      RewardsPoolBase.deploy(ethers.constants.AddressZero, rewardTokensAddresses, stakeLimit, contractStakeLimit)
+      RewardsPoolBase.deploy(ethers.constants.AddressZero, rewardTokensAddresses, stakeLimit, contractStakeLimit, name)
     ).to.be.revertedWith('RewardsPoolBase: invalid staking token');
   });
 
   it('Should fail to deploy RewardsPoolBase with empty rewards token addresses array', async () => {
     const RewardsPoolBase = await ethers.getContractFactory('RewardsPoolBase');
-    await expect(RewardsPoolBase.deploy(stakingTokenAddress, [], stakeLimit, contractStakeLimit)).to.be.revertedWith(
-      'RewardsPoolBase: empty rewardsTokens'
-    );
+    await expect(
+      RewardsPoolBase.deploy(stakingTokenAddress, [], stakeLimit, contractStakeLimit, name)
+    ).to.be.revertedWith('RewardsPoolBase: empty rewardsTokens');
   });
 
   it('Should fail to deploy RewardsPoolBase with 0 staking limit', async () => {
     const RewardsPoolBase = await ethers.getContractFactory('RewardsPoolBase');
     await expect(
-      RewardsPoolBase.deploy(stakingTokenAddress, rewardTokensAddresses, 0, contractStakeLimit)
+      RewardsPoolBase.deploy(stakingTokenAddress, rewardTokensAddresses, 0, contractStakeLimit, name)
     ).to.be.revertedWith('RewardsPoolBase: invalid stake limit');
   });
 
   it('Should fail to deploy RewardsPoolBase with 0 contract staking limit', async () => {
     const RewardsPoolBase = await ethers.getContractFactory('RewardsPoolBase');
-    await expect(RewardsPoolBase.deploy(stakingTokenAddress, rewardTokensAddresses, stakeLimit, 0)).to.be.revertedWith(
-      'RewardsPoolBase: invalid stake limit'
-    );
+    await expect(
+      RewardsPoolBase.deploy(stakingTokenAddress, rewardTokensAddresses, stakeLimit, 0, name)
+    ).to.be.revertedWith('RewardsPoolBase: invalid stake limit');
   });
 
   describe('Start', function () {
@@ -645,7 +648,8 @@ describe('RewardsPoolBase', () => {
         stakingTokenAddress,
         rewardTokensAddresses,
         stakeLimit,
-        contractStakeLimit
+        contractStakeLimit,
+        name
       )) as RewardsPoolBase;
 
       for (let i = 0; i < rewardTokensCount; i++) {
