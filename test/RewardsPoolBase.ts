@@ -551,7 +551,7 @@ describe('RewardsPoolBase', () => {
       expect(endTimestamp).to.equal(currentTimestamp + extensionDuration);
     });
 
-    it.only('Should fail extending if there are not enough rewards', async () => {
+    it('Should fail extending if there are not enough rewards', async () => {
       let newRewardsPerBlock = [];
 
       for (let i = 0; i < rewardTokensCount; i++) {
@@ -576,32 +576,6 @@ describe('RewardsPoolBase', () => {
       );
     });
 
-    it('Should send back rewards when extending if there are more than enough rewards', async () => {
-      await timeTravel(10);
-
-      let currentEndTimestamp = await RewardsPoolBaseInstance.endTimestamp();
-      let newRewardsPerBlock = [];
-
-      const newEndTimestamp = currentEndTimestamp.add(poolLength);
-
-      for (let i = 0; i < rewardTokensCount; i++) {
-        let parsedReward = await ethers.utils.parseEther(`${(i + 1) * 0.1}`);
-        newRewardsPerBlock.push(parsedReward);
-      }
-
-      const beforeBalances = [];
-      for (let i = 0; i < rewardTokensCount; i++) {
-        beforeBalances.push(await rewardTokensInstances[i].balanceOf(aliceAccount.address));
-      }
-
-      await RewardsPoolBaseInstance.extend(newEndTimestamp, newRewardsPerBlock);
-
-      for (let i = 0; i < rewardTokensCount; i++) {
-        const afterBalance = await rewardTokensInstances[i].balanceOf(aliceAccount.address);
-        expect(afterBalance.gt(beforeBalances[i])).to.equal(true, 'Extending the reward per block was not successfull');
-      }
-    });
-
     it('Should fail extending the rewards pool if the end block is not in the future', async () => {
       await expect(RewardsPoolBaseInstance.extend(0, rewardPerSecond)).to.be.revertedWith(
         'RewardsPoolBase: invalid endTimestamp'
@@ -609,26 +583,20 @@ describe('RewardsPoolBase', () => {
     });
 
     it('Should fail extending the rewards pool if the end block is not greater than the previous', async () => {
-      let currentEndTimestamp = await RewardsPoolBaseInstance.endTimestamp();
-      let newendTimestamp = currentEndTimestamp.sub(1);
-
-      await expect(RewardsPoolBaseInstance.extend(newendTimestamp, rewardPerSecond)).to.be.revertedWith(
+      await expect(RewardsPoolBaseInstance.extend(0, rewardPerSecond)).to.be.revertedWith(
         'RewardsPoolBase: invalid endTimestamp'
       );
     });
 
-    it('Should fail extending the rewards pool if the rewards per block arrays is with different length', async () => {
-      let currentEndTimestamp = await RewardsPoolBaseInstance.endTimestamp();
+    it('Should fail extending the rewards pool if the rewards per second arrays is with different length', async () => {
       let newRewardsPerBlock = [];
-
-      const newendTimestamp = currentEndTimestamp.add(20);
 
       for (let i = 0; i <= rewardTokensCount; i++) {
         let parsedReward = await ethers.utils.parseEther(`${i + 2}`);
         newRewardsPerBlock.push(parsedReward);
       }
 
-      await expect(RewardsPoolBaseInstance.extend(newendTimestamp, newRewardsPerBlock)).to.be.revertedWith(
+      await expect(RewardsPoolBaseInstance.extend(poolLength, newRewardsPerBlock)).to.be.revertedWith(
         'RewardsPoolBase: invalid rewardPerSecond'
       );
     });
