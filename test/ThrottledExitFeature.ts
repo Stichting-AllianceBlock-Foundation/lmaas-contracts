@@ -34,6 +34,8 @@ describe('ThrottledExitFeature', () => {
   let endTimestamp: number;
   const oneMinute = 60;
 
+  const name = 'ABC';
+
   const setupRewardsPoolParameters = async () => {
     rewardTokensInstances = [];
     rewardTokensAddresses = [];
@@ -66,7 +68,8 @@ describe('ThrottledExitFeature', () => {
       stakeLimit,
       _throttleRoundSeconds,
       _throttleRoundCap,
-      contractStakeLimit
+      contractStakeLimit,
+      name
     )) as ThrottledExitRewardsPoolMock;
 
     await rewardTokensInstances[0].mint(ThrottledExitFeatureInstance.address, amount);

@@ -31,6 +31,8 @@ describe('OnlyExitFeature', () => {
   let endTimestamp: number;
   const oneMinute = 60;
 
+  const name = 'ABC';
+
   const setupRewardsPoolParameters = async () => {
     rewardTokensInstances = [];
     rewardTokensAddresses = [];
@@ -72,7 +74,8 @@ describe('OnlyExitFeature', () => {
       endTimestamp,
       rewardTokensAddresses,
       stakeLimit,
-      contractStakeLimit
+      contractStakeLimit,
+      name
     )) as OnlyExitRewardsPoolMock;
 
     await rewardTokensInstances[0].mint(OnlyExitFeatureInstance.address, amount);
