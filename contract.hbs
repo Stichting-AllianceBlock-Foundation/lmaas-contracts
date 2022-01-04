@@ -1,0 +1,68 @@
+## {{name}}
+
+{{{natspec.userdoc}}}
+
+{{{natspec.devdoc}}}
+
+{{#if inheritance}}
+### Inheritance
+
+{{#each inheritance}}
+    {{#unless (eq name ../name)}}{{name}}{{/unless}}
+{{/each}}
+{{/if}}
+
+{{#if ownVariables}}
+### Variables
+
+{{#each ownVariables}}
+    {{type}} {{name}}
+{{/each}}
+{{/if}}
+
+{{#if functions}}
+### Functions
+
+{{#each functions}}
+{{#if (eq visibility "public")}}
+  #### {{name}}{{#if outputs}} → {{outputs}}{{/if}}
+
+  {{{natspec.userdoc}}}
+
+  {{{natspec.devdoc}}}
+
+  {{#each args}}
+    {{typeName}} {{name}} {{#each ../natspec.params}}{{#if (eq param ../name)}}// {{{description}}}{{/if}}{{/each}}
+  {{/each}}
+{{/if}}
+{{/each}}
+{{/if}}
+
+{{#if ownEvents}}
+### Events
+
+{{#each ownEvents}}
+  #### {{name}}
+
+  {{{natspec.userdoc}}}
+
+  {{{natspec.devdoc}}}
+
+  {{#each args}}
+    {{typeName}} {{name}}
+  {{/each}}
+{{/each}}
+{{/if}}
+
+{{#if ownStructs}}
+### Structs
+
+{{#each ownStructs}}
+  #### {{name}}
+
+  {{#each members}}
+    {{type}} {{name}}
+  {{/each}}
+
+{{/each}}
+{{/if}}

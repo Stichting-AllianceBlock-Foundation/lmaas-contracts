@@ -1,0 +1,15 @@
+## ITreasuryOperated
+
+
+
+
+
+### Inheritance
+
+    ITreasuryOperated
+
+
+### Functions
+
+
+

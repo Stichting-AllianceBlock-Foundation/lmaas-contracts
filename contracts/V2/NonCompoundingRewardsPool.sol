@@ -26,6 +26,11 @@ contract NonCompoundingRewardsPool is
         setThrottleParams(_throttleRoundBlocks, _throttleRoundCap);
     }
 
+    /** @dev Start the pool and set locking and throttling parameters.
+     * @param _startTimestamp The start time of the pool
+     * @param _endTimestamp The end time of the pool
+     * @param _rewardPerSecond Amount of rewards given per second
+     */
     function start(
         uint256 _startTimestamp,
         uint256 _endTimestamp,
@@ -36,18 +41,22 @@ contract NonCompoundingRewardsPool is
         _start(_startTimestamp, _endTimestamp, _rewardPerSecond);
     }
 
+    /// @dev Not allowed
     function withdraw(uint256 _tokenAmount) public override(OnlyExitFeature, RewardsPoolBase) {
         OnlyExitFeature.withdraw(_tokenAmount);
     }
 
+    /// @dev Not allowed
     function claim() public override(OnlyExitFeature, RewardsPoolBase) {
         OnlyExitFeature.claim();
     }
 
+    /// @dev Requests a throttled exit from the pool and gives you a time from which you can withdraw your stake and rewards.
     function exit() public override(ThrottledExitFeature, RewardsPoolBase) {
         ThrottledExitFeature.exit();
     }
 
+    /// @dev Completes the throttled exit from the pool.
     function completeExit() public virtual override(ThrottledExitFeature) {
         ThrottledExitFeature.completeExit();
     }
@@ -56,6 +65,7 @@ contract NonCompoundingRewardsPool is
         StakeTransfererFeature.exitAndTransfer(transferTo);
     }
 
+    /// @dev Not allowed
     function extend(uint256, uint256[] calldata) external virtual override(RewardsPoolBase) {
         revert('NonCompoundingRewardsPool::cannot extend this pool.');
     }

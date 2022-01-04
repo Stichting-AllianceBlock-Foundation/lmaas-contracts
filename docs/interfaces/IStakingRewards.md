@@ -1,0 +1,15 @@
+## IStakingRewards
+
+
+
+
+
+### Inheritance
+
+    IStakingRewards
+
+
+### Functions
+
+
+

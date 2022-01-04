@@ -12,3 +12,10 @@ yarn hardhat test
 yarn hardhat node
 yarn hardhat help
 ```
+
+## Documentation
+
+- [Rewards pool base](docs/RewardsPoolBase.md)
+- [Liquidity mining campaign](docs/LiquidityMiningCampaign.md)
+- [Staking pool](docs/NonCompoundingRewardsPool.md)
+- [Auto staking pool](docs/V2/CompoundingRewardsPool.md)

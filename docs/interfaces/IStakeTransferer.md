@@ -1,0 +1,15 @@
+## IStakeTransferer
+
+
+
+
+
+### Inheritance
+
+    IStakeTransferer
+
+
+### Functions
+
+
+
