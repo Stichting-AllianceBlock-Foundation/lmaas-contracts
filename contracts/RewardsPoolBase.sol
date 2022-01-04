@@ -438,6 +438,8 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 
             // We need to check if we have enough balance available in the contract to pay for the extension
             uint256 availableBalance = getAvailableBalance(i);
+            console.log('1N: ', newRewards);
+            console.log('2A: ', availableBalance);
 
             require(availableBalance >= newRewards, 'RewardsPoolBase: not enough rewards to extend');
 

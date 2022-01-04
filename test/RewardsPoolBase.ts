@@ -367,7 +367,7 @@ describe('RewardsPoolBase', () => {
     });
   });
 
-  describe('Rewards', function () {
+  describe.only('Rewards', function () {
     beforeEach(async () => {
       await stakingTokenInstance.approve(RewardsPoolBaseInstance.address, standardStakingAmount);
       await stakingTokenInstance.connect(bobAccount).approve(RewardsPoolBaseInstance.address, standardStakingAmount);
@@ -503,38 +503,28 @@ describe('RewardsPoolBase', () => {
       await RewardsPoolBaseInstance.extend(poolLength, newRewardsPerSecond);
     }
 
-    it.only('Should extend correctly and save the information', async () => {
+    it('Should extend correctly and save the information', async () => {
       await extend();
     });
 
-    it.only('Should extend correctly when pool is already done', async () => {
-      for (let i = 0; i < rewardTokensCount; i++) {
-        console.log(
-          String(
-            await (
-              await ethers.getContractAt('IERC20Detailed', await RewardsPoolBaseInstance.rewardsTokens(i))
-            ).balanceOf(RewardsPoolBaseInstance.address)
-          )
-        );
-      }
+    it('Should extend correctly when pool is already done', async () => {
+      // for (let i = 0; i < rewardTokensCount; i++) {
+      //   console.log(
+      //     String(
+      //       await (
+      //         await ethers.getContractAt('IERC20Detailed', await RewardsPoolBaseInstance.rewardsTokens(i))
+      //       ).balanceOf(RewardsPoolBaseInstance.address)
+      //     )
+      //   );
+      // }
       await timeTravel(poolLength * 2);
 
       await extend();
     });
 
-    it.only('Should extend correctly multiple times', async () => {
+    it('Should extend correctly multiple times', async () => {
       await extend();
       await timeTravel(poolLength * 2);
-      console.log('\nfirst:');
-      for (let i = 0; i < rewardTokensCount; i++) {
-        console.log(
-          String(
-            await (
-              await ethers.getContractAt('IERC20Detailed', await RewardsPoolBaseInstance.rewardsTokens(i))
-            ).balanceOf(RewardsPoolBaseInstance.address)
-          )
-        );
-      }
 
       let extensionDuration = await (await RewardsPoolBaseInstance.extensionDuration()).toNumber();
       await RewardsPoolBaseInstance.withdraw(bOne);
@@ -544,16 +534,6 @@ describe('RewardsPoolBase', () => {
 
       await extend();
       await timeTravel(poolLength * 2);
-      console.log('\nsecond:');
-      for (let i = 0; i < rewardTokensCount; i++) {
-        console.log(
-          String(
-            await (
-              await ethers.getContractAt('IERC20Detailed', await RewardsPoolBaseInstance.rewardsTokens(i))
-            ).balanceOf(RewardsPoolBaseInstance.address)
-          )
-        );
-      }
 
       extensionDuration = await (await RewardsPoolBaseInstance.extensionDuration()).toNumber();
       await RewardsPoolBaseInstance.withdraw(bOne);
@@ -563,16 +543,6 @@ describe('RewardsPoolBase', () => {
 
       await extend();
       await timeTravel(poolLength * 2);
-      console.log('\nthird:');
-      for (let i = 0; i < rewardTokensCount; i++) {
-        console.log(
-          String(
-            await (
-              await ethers.getContractAt('IERC20Detailed', await RewardsPoolBaseInstance.rewardsTokens(i))
-            ).balanceOf(RewardsPoolBaseInstance.address)
-          )
-        );
-      }
 
       extensionDuration = await (await RewardsPoolBaseInstance.extensionDuration()).toNumber();
       await RewardsPoolBaseInstance.withdraw(bOne);
@@ -581,14 +551,8 @@ describe('RewardsPoolBase', () => {
       expect(endTimestamp).to.equal(currentTimestamp + extensionDuration);
     });
 
-    it('Should fail extending if there are not enough rewards', async () => {
-      await timeTravel(10);
-
-      let currentEndTimestamp = await RewardsPoolBaseInstance.endTimestamp();
+    it.only('Should fail extending if there are not enough rewards', async () => {
       let newRewardsPerBlock = [];
-
-      const newEndTimestamp = currentEndTimestamp.add(poolLength);
-      let currentTime = await getTime();
 
       for (let i = 0; i < rewardTokensCount; i++) {
         let parsedReward = await ethers.utils.parseEther(`${(i + 1) * 2}`);
@@ -597,13 +561,17 @@ describe('RewardsPoolBase', () => {
         // Send 50% less then the required reward tokens to the RewardsPool
         await rewardTokensInstances[i].mint(
           RewardsPoolBaseInstance.address,
-          parsedReward.mul(newEndTimestamp.sub(currentTime)).sub(availableBalance).div(2)
+          parsedReward.mul(poolLength).sub(availableBalance).div(2)
         );
 
         newRewardsPerBlock.push(parsedReward);
       }
 
-      await expect(RewardsPoolBaseInstance.extend(newEndTimestamp, newRewardsPerBlock)).to.be.revertedWith(
+      await RewardsPoolBaseInstance.extend(poolLength, newRewardsPerBlock);
+
+      await timeTravel(poolLength * 2);
+
+      await expect(RewardsPoolBaseInstance.extend(poolLength, newRewardsPerBlock)).to.be.revertedWith(
         'RewardsPoolBase: not enough rewards to extend'
       );
     });
