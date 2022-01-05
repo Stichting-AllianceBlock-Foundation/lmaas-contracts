@@ -12,7 +12,8 @@
     "m:verify": "hardhat --network mainnet etherscan-verify --sleep",
     "prettier": "prettier --write 'contracts/**/*.sol'",
     "clean:hardhat": "hardhat clean",
-    "size": "hardhat compile && hardhat size-contracts"
+    "size": "hardhat compile && hardhat size-contracts",
+    "docs": "solidity-docgen --solc-module solc -t ./"
   },
   "keywords": [],
   "author": "AllianceBlock",
