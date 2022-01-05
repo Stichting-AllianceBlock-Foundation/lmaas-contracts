@@ -31,11 +31,11 @@ uint256 stakeLimit
 
 
 ```Solidity
-address token 
-uint256 _throttleRoundBlocks 
-uint256 _throttleRoundCap 
-uint256 stakeEnd 
-uint256 _stakeLimit 
+address token; 
+uint256 _throttleRoundBlocks; 
+uint256 _throttleRoundCap; 
+uint256 stakeEnd; 
+uint256 _stakeLimit; 
 ```
 #### stake
 
@@ -44,7 +44,7 @@ uint256 _stakeLimit
 
 
 ```Solidity
-uint256 amount 
+uint256 amount; 
 ```
 #### setPool
 
@@ -53,7 +53,7 @@ uint256 amount
 
 
 ```Solidity
-address pool 
+address pool; 
 ```
 #### exit
 
@@ -78,7 +78,7 @@ address pool
 
 
 ```Solidity
-address who 
+address who; 
 ```
 #### owner → address
 
@@ -107,7 +107,7 @@ Transfers ownership of the contract to a new account (`newOwner`).
 Can only be called by the current owner.
 
 ```Solidity
-address newOwner 
+address newOwner; 
 ```
 #### getPendingReward → uint256
 
@@ -116,7 +116,7 @@ address newOwner
 
 
 ```Solidity
-uint256 tokenIndex 
+uint256 tokenIndex; 
 ```
 
 

@@ -28,10 +28,10 @@ ReentrancyGuard
 
 
 ```Solidity
-address token 
-uint256 _throttleRoundBlocks 
-uint256 _throttleRoundCap 
-uint256 stakeEnd 
+address token; 
+uint256 _throttleRoundBlocks; 
+uint256 _throttleRoundCap; 
+uint256 stakeEnd; 
 ```
 #### setReceiverWhitelisted
 
@@ -40,8 +40,8 @@ uint256 stakeEnd
 
 
 ```Solidity
-address receiver 
-bool whitelisted 
+address receiver; 
+bool whitelisted; 
 ```
 #### exitAndTransfer
 
@@ -51,7 +51,7 @@ exits the current campaign and trasnfers the stake to another whitelisted campai
 		@param transferTo address of the receiver to transfer the stake to
 
 ```Solidity
-address transferTo 
+address transferTo; 
 ```
 #### setPool
 
@@ -60,7 +60,7 @@ address transferTo
 
 
 ```Solidity
-address pool 
+address pool; 
 ```
 #### stake
 
@@ -69,7 +69,7 @@ address pool
 
 
 ```Solidity
-uint256 amount 
+uint256 amount; 
 ```
 #### exit
 
@@ -94,7 +94,7 @@ uint256 amount
 
 
 ```Solidity
-address who 
+address who; 
 ```
 #### owner → address
 
@@ -123,7 +123,7 @@ Transfers ownership of the contract to a new account (`newOwner`).
 Can only be called by the current owner.
 
 ```Solidity
-address newOwner 
+address newOwner; 
 ```
 #### getPendingReward → uint256
 
@@ -132,7 +132,7 @@ address newOwner
 
 
 ```Solidity
-uint256 tokenIndex 
+uint256 tokenIndex; 
 ```
 
 

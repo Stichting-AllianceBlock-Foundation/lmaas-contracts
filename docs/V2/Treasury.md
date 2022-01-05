@@ -29,8 +29,8 @@ contract IUniswapV2Router uniswapRouter
 
 
 ```Solidity
-address _uniswapRouter 
-address _externalRewardToken 
+address _uniswapRouter; 
+address _externalRewardToken; 
 ```
 #### withdrawLiquidity
 
@@ -39,8 +39,8 @@ address _externalRewardToken
 
 
 ```Solidity
-address[] rewardPools 
-uint256[] amounts 
+address[] rewardPools; 
+uint256[] amounts; 
 ```
 #### returnLiquidity
 
@@ -49,8 +49,8 @@ uint256[] amounts
 
 
 ```Solidity
-address[] rewardPools 
-uint256[] externalRewards 
+address[] rewardPools; 
+uint256[] externalRewards; 
 ```
 #### owner → address
 
@@ -79,7 +79,7 @@ Transfers ownership of the contract to a new account (`newOwner`).
 Can only be called by the current owner.
 
 ```Solidity
-address newOwner 
+address newOwner; 
 ```
 
 

@@ -30,7 +30,7 @@ mapping(address => struct ThrottledExit.ExitInfo) exitInfo
 
 
 ```Solidity
-uint256 tokenIndex 
+uint256 tokenIndex; 
 ```
 
 ### Events

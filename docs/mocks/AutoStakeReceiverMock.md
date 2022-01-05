@@ -28,10 +28,10 @@ ReentrancyGuard
 
 
 ```Solidity
-address token 
-uint256 _throttleRoundBlocks 
-uint256 _throttleRoundCap 
-uint256 stakeEnd 
+address token; 
+uint256 _throttleRoundBlocks; 
+uint256 _throttleRoundCap; 
+uint256 stakeEnd; 
 ```
 #### delegateStake
 
@@ -41,9 +41,9 @@ Receives a stake from another pool
 
 
 ```Solidity
-address _staker // The address who will own the stake
+address _staker; // The address who will own the stake
 
-uint256 _amount // The amount to stake
+uint256 _amount; // The amount to stake
 ```
 #### setPool
 
@@ -52,7 +52,7 @@ uint256 _amount // The amount to stake
 
 
 ```Solidity
-address pool 
+address pool; 
 ```
 #### stake
 
@@ -61,7 +61,7 @@ address pool
 
 
 ```Solidity
-uint256 amount 
+uint256 amount; 
 ```
 #### exit
 
@@ -86,7 +86,7 @@ uint256 amount
 
 
 ```Solidity
-address who 
+address who; 
 ```
 #### owner → address
 
@@ -115,7 +115,7 @@ Transfers ownership of the contract to a new account (`newOwner`).
 Can only be called by the current owner.
 
 ```Solidity
-address newOwner 
+address newOwner; 
 ```
 #### getPendingReward → uint256
 
@@ -124,7 +124,7 @@ address newOwner
 
 
 ```Solidity
-uint256 tokenIndex 
+uint256 tokenIndex; 
 ```
 
 

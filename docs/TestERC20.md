@@ -34,7 +34,7 @@ Context
 
 
 ```Solidity
-uint256 amount 
+uint256 amount; 
 ```
 #### setDecimals
 
@@ -43,7 +43,7 @@ uint256 amount
 
 
 ```Solidity
-uint8 _d 
+uint8 _d; 
 ```
 #### decimals → uint8
 
@@ -63,8 +63,8 @@ Requirements:
 - the caller must have the `MINTER_ROLE`.
 
 ```Solidity
-address to 
-uint256 amount 
+address to; 
+uint256 amount; 
 ```
 #### pause
 
@@ -104,7 +104,7 @@ Destroys `amount` tokens from the caller.
 See {ERC20-_burn}.
 
 ```Solidity
-uint256 amount 
+uint256 amount; 
 ```
 #### burnFrom
 
@@ -118,8 +118,8 @@ Requirements:
 `amount`.
 
 ```Solidity
-address account 
-uint256 amount 
+address account; 
+uint256 amount; 
 ```
 #### name → string
 
@@ -153,7 +153,7 @@ See {IERC20-totalSupply}.
 See {IERC20-balanceOf}.
 
 ```Solidity
-address account 
+address account; 
 ```
 #### transfer → bool
 
@@ -165,8 +165,8 @@ Requirements:
 - the caller must have a balance of at least `amount`.
 
 ```Solidity
-address recipient 
-uint256 amount 
+address recipient; 
+uint256 amount; 
 ```
 #### allowance → uint256
 
@@ -175,8 +175,8 @@ uint256 amount
 See {IERC20-allowance}.
 
 ```Solidity
-address owner 
-address spender 
+address owner; 
+address spender; 
 ```
 #### approve → bool
 
@@ -187,8 +187,8 @@ Requirements:
 - `spender` cannot be the zero address.
 
 ```Solidity
-address spender 
-uint256 amount 
+address spender; 
+uint256 amount; 
 ```
 #### transferFrom → bool
 
@@ -204,9 +204,9 @@ Requirements:
 `amount`.
 
 ```Solidity
-address sender 
-address recipient 
-uint256 amount 
+address sender; 
+address recipient; 
+uint256 amount; 
 ```
 #### increaseAllowance → bool
 
@@ -220,8 +220,8 @@ Requirements:
 - `spender` cannot be the zero address.
 
 ```Solidity
-address spender 
-uint256 addedValue 
+address spender; 
+uint256 addedValue; 
 ```
 #### decreaseAllowance → bool
 
@@ -237,8 +237,8 @@ Requirements:
 `subtractedValue`.
 
 ```Solidity
-address spender 
-uint256 subtractedValue 
+address spender; 
+uint256 subtractedValue; 
 ```
 #### supportsInterface → bool
 
@@ -247,7 +247,7 @@ uint256 subtractedValue
 See {IERC165-supportsInterface}.
 
 ```Solidity
-bytes4 interfaceId 
+bytes4 interfaceId; 
 ```
 #### getRoleMember → address
 
@@ -263,8 +263,8 @@ https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-ope
 for more information.
 
 ```Solidity
-bytes32 role 
-uint256 index 
+bytes32 role; 
+uint256 index; 
 ```
 #### getRoleMemberCount → uint256
 
@@ -274,7 +274,7 @@ Returns the number of accounts that have `role`. Can be used
 together with {getRoleMember} to enumerate all bearers of a role.
 
 ```Solidity
-bytes32 role 
+bytes32 role; 
 ```
 #### grantRole
 
@@ -283,8 +283,8 @@ bytes32 role
 Overload {grantRole} to track enumerable memberships
 
 ```Solidity
-bytes32 role 
-address account 
+bytes32 role; 
+address account; 
 ```
 #### revokeRole
 
@@ -293,8 +293,8 @@ address account
 Overload {revokeRole} to track enumerable memberships
 
 ```Solidity
-bytes32 role 
-address account 
+bytes32 role; 
+address account; 
 ```
 #### renounceRole
 
@@ -303,8 +303,8 @@ address account
 Overload {renounceRole} to track enumerable memberships
 
 ```Solidity
-bytes32 role 
-address account 
+bytes32 role; 
+address account; 
 ```
 #### hasRole → bool
 
@@ -313,8 +313,8 @@ address account
 Returns `true` if `account` has been granted `role`.
 
 ```Solidity
-bytes32 role 
-address account 
+bytes32 role; 
+address account; 
 ```
 #### getRoleAdmin → bytes32
 
@@ -325,7 +325,7 @@ Returns the admin role that controls `role`. See {grantRole} and
 To change a role's admin, use {_setRoleAdmin}.
 
 ```Solidity
-bytes32 role 
+bytes32 role; 
 ```
 
 

@@ -20,8 +20,8 @@ StakeReceiver
 
 
 ```Solidity
-address staker 
-uint256 stake 
+address staker; 
+uint256 stake; 
 ```
 
 

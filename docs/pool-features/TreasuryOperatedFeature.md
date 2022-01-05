@@ -30,7 +30,7 @@ address externalRewardToken
 
 
 ```Solidity
-uint256 amount 
+uint256 amount; 
 ```
 #### notifyExternalReward
 
@@ -39,7 +39,7 @@ uint256 amount
 
 
 ```Solidity
-uint256 reward 
+uint256 reward; 
 ```
 #### start
 
@@ -49,11 +49,11 @@ Start the pool. Funds for rewards will be checked and staking will be opened.
 
 
 ```Solidity
-uint256 _startTimestamp // The start time of the pool
+uint256 _startTimestamp; // The start time of the pool
 
-uint256 _endTimestamp // The end time of the pool
+uint256 _endTimestamp; // The end time of the pool
 
-uint256[] _rewardPerSecond // Amount of rewards given per second
+uint256[] _rewardPerSecond; // Amount of rewards given per second
 ```
 #### stake
 
@@ -63,7 +63,7 @@ Stake an amount of tokens
 
 
 ```Solidity
-uint256 _tokenAmount // The amount to be staked
+uint256 _tokenAmount; // The amount to be staked
 ```
 #### claim
 
@@ -81,7 +81,7 @@ Withdrawing a portion or all of staked tokens. This will not claim your rewards
 
 
 ```Solidity
-uint256 _tokenAmount // The amount to be withdrawn
+uint256 _tokenAmount; // The amount to be withdrawn
 ```
 #### exit
 
@@ -99,7 +99,7 @@ Returns the amount of tokens the user has staked
 
 
 ```Solidity
-address _userAddress // The user to get the balance of
+address _userAddress; // The user to get the balance of
 ```
 #### updateRewardMultipliers
 
@@ -127,9 +127,9 @@ Calculates the reward at a specific time
         @param _time the time to check the reward at
 
 ```Solidity
-address _userAddress 
-uint256 _tokenIndex 
-uint256 _time 
+address _userAddress; 
+uint256 _tokenIndex; 
+uint256 _time; 
 ```
 #### getAvailableBalance → uint256
 
@@ -140,8 +140,8 @@ Calculates the available amount of reward tokens that are not locked
 		@param _time the time to do the calculations at
 
 ```Solidity
-uint256 _rewardTokenIndex 
-uint256 _time 
+uint256 _rewardTokenIndex; 
+uint256 _time; 
 ```
 #### owner → address
 
@@ -170,7 +170,7 @@ Transfers ownership of the contract to a new account (`newOwner`).
 Can only be called by the current owner.
 
 ```Solidity
-address newOwner 
+address newOwner; 
 ```
 
 

@@ -25,8 +25,8 @@ mapping(address => bool) receiversWhitelist
 
 
 ```Solidity
-address receiver 
-bool whitelisted 
+address receiver; 
+bool whitelisted; 
 ```
 #### exitAndTransfer
 
@@ -35,7 +35,7 @@ bool whitelisted
 
 
 ```Solidity
-address transferTo 
+address transferTo; 
 ```
 
 

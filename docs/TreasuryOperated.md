@@ -26,7 +26,7 @@ address treasury
 
 
 ```Solidity
-uint256 amount 
+uint256 amount; 
 ```
 
 ### Events
