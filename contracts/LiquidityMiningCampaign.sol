@@ -7,6 +7,10 @@ import './RewardsPoolBase.sol';
 import './StakeTransferer.sol';
 import './StakeReceiver.sol';
 
+/** @dev Staking pool without any time locks or throttling 
+    Inherits all staking logic from RewardsPoolBase.
+    Allows to transfer staked tokens to another whitelisted pool
+*/
 contract LiquidityMiningCampaign is StakeTransferer, RewardsPoolBase {
     using SafeERC20Detailed for IERC20Detailed;
     string public campaignName;
@@ -21,19 +25,22 @@ contract LiquidityMiningCampaign is StakeTransferer, RewardsPoolBase {
         campaignName = _campaingName;
     }
 
-    function setReceiverWhitelisted(address receiver, bool whitelisted) public override(StakeTransferer) onlyOwner {
-        StakeTransferer.setReceiverWhitelisted(receiver, whitelisted);
+    /** @dev Change whitelist status of a receiver pool to receive transfers.
+     * @param _receiver The pool address to whitelist
+     * @param _whitelisted If it should be whitelisted or not
+     */
+    function setReceiverWhitelisted(address _receiver, bool _whitelisted) public override(StakeTransferer) onlyOwner {
+        StakeTransferer.setReceiverWhitelisted(_receiver, _whitelisted);
     }
 
+    /**
+     @dev Exits the current campaing, claims the bonus and stake all rewards in another pool
+	   @param _stakePool the address of the pool where the tokens will be staked
+	  */
     function exitAndStake(address _stakePool) external nonReentrant {
         _exitAndStake(msg.sender, _stakePool);
     }
 
-    /**
-     @dev Exits the current campaing, claims the bonus and stake all rewards to ALBT staking contract
-	   @param _userAddress the address of the staker
-	   @param _stakePool the address of the pool where the tokens will be staked
-	  */
     function _exitAndStake(address _userAddress, address _stakePool) internal onlyWhitelistedReceiver(_stakePool) {
         UserInfo storage user = userInfo[_userAddress];
 
@@ -58,6 +65,7 @@ contract LiquidityMiningCampaign is StakeTransferer, RewardsPoolBase {
         }
     }
 
+    /// @dev Not allowed
     function exitAndTransfer(address) public pure override {
         revert('LiquidityMiningCampaign: exitAndTransfer is forbidden');
     }

@@ -2,7 +2,9 @@
 
 
 
-
+Staking pool without any time locks or throttling 
+    Inherits all staking logic from RewardsPoolBase.
+    Allows to transfer staked tokens to another whitelisted pool
 
 ### Inheritance
 
@@ -52,17 +54,19 @@ string _campaingName;
 
 
 
+Change whitelist status of a receiver pool to receive transfers.
 
 
 ```Solidity
-address receiver; 
-bool whitelisted; 
+address _receiver; // The pool address to whitelist
+
+bool _whitelisted; // If it should be whitelisted or not
 ```
 #### exitAndTransfer
 
 
 
-
+Not allowed
 
 ```Solidity
 address ; 

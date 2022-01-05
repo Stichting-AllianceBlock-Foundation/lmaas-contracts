@@ -66,10 +66,11 @@ uint256 amount;
 
 
 
+Sets the underlying reward pool. Can only be set once.
 
 
 ```Solidity
-address _pool; 
+address _pool; // The reward pool
 ```
 #### exit
 

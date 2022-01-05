@@ -85,30 +85,33 @@ uint256 amount;
 
 
 
+Change whitelist status of a receiver pool to receive transfers.
 
 
 ```Solidity
-address receiver; 
-bool whitelisted; 
+address _receiver; // The pool address to whitelist
+
+bool _whitelisted; // If it should be whitelisted or not
 ```
 #### exitAndTransfer
 
 
 
 exits the current campaign and trasnfers the stake to another whitelisted campaign
-		@param transferTo address of the receiver to transfer the stake to
+		@param _transferTo address of the receiver to transfer the stake to
 
 ```Solidity
-address transferTo; 
+address _transferTo; 
 ```
 #### setPool
 
 
 
+Sets the underlying reward pool. Can only be set once.
 
 
 ```Solidity
-address _pool; 
+address _pool; // The reward pool
 ```
 #### exit
 

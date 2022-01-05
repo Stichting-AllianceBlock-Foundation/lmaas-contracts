@@ -68,10 +68,11 @@ uint256 _stakeEnd;
 
 
 
+Sets the underlying reward pool. Can only be set once.
 
 
 ```Solidity
-address _pool; 
+address _pool; // The reward pool
 ```
 #### stake
 
