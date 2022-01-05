@@ -12,6 +12,14 @@ import './SafeERC20Detailed.sol';
     When it's started a check is done to verify enough rewards are available. 
     Users can claim their rewards at any point, as well as withdraw their stake.
     The owner can extend the pool by setting a new end time and sending more rewards if needed.
+
+    Rewards are kept track of using the accumulatedRewardMultiplier.
+    This variable represents the accumulated reward per token staked from the start until now.
+    Based on the difference between the accumulatedRewardMultiplier at the time of your stake and withdrawal, 
+    we calculate the amount of tokens you can claim.
+    
+    For example, you enter when the accumulatedRewardMultiplier is 5 and exit at 20. You staked 100 tokens.
+    Your reward is (20 - 5) * 100 = 400 tokens.
 */
 contract RewardsPoolBase is ReentrancyGuard, Ownable {
     using SafeERC20Detailed for IERC20Detailed;
