@@ -6,119 +6,147 @@
 
 ### Inheritance
 
-    CompoundingRewardsPoolStaker
-    StakeReceiverAutoStake
-    StakeReceiver
-    StakeTransfererAutoStake
-    StakeTransferer
-    LimitedAutoStake
-    AutoStake
-    Ownable
-    Context
-    ThrottledExit
-    StakeLock
-    ReentrancyGuard
+```
+CompoundingRewardsPoolStaker
+StakeReceiverAutoStake
+StakeReceiver
+StakeTransfererAutoStake
+StakeTransferer
+LimitedAutoStake
+AutoStake
+Ownable
+Context
+ThrottledExit
+StakeLock
+ReentrancyGuard
+```
 
 
 ### Functions
 
-  #### constructor
+#### constructor
 
-  
 
-  
 
-    address token 
-    uint256 _throttleRoundBlocks 
-    uint256 _throttleRoundCap 
-    uint256 stakeEnd 
-    uint256 _stakeLimit 
-  #### stake
 
-  
 
-  
+```Solidity
+address token 
+uint256 _throttleRoundBlocks 
+uint256 _throttleRoundCap 
+uint256 stakeEnd 
+uint256 _stakeLimit 
+```
+#### stake
 
-    uint256 amount 
-  #### delegateStake
 
-  
 
-  
 
-    address staker 
-    uint256 amount 
-  #### setReceiverWhitelisted
 
-  
+```Solidity
+uint256 amount 
+```
+#### delegateStake
 
-  
 
-    address receiver 
-    bool whitelisted 
-  #### exitAndTransfer
 
-  
 
-  exits the current campaign and trasnfers the stake to another whitelisted campaign
+
+```Solidity
+address staker 
+uint256 amount 
+```
+#### setReceiverWhitelisted
+
+
+
+
+
+```Solidity
+address receiver 
+bool whitelisted 
+```
+#### exitAndTransfer
+
+
+
+exits the current campaign and trasnfers the stake to another whitelisted campaign
 		@param transferTo address of the receiver to transfer the stake to
 
-    address transferTo 
-  #### setPool
+```Solidity
+address transferTo 
+```
+#### setPool
 
-  
 
-  
 
-    address pool 
-  #### exit
 
-  
 
-  
+```Solidity
+address pool 
+```
+#### exit
 
-  #### completeExit
 
-  
 
-  
 
-  #### balanceOf → uint256
 
-  
+```Solidity
+```
+#### completeExit
 
-  
 
-    address who 
-  #### owner → address
 
-  
 
-  Returns the address of the current owner.
 
-  #### renounceOwnership
+```Solidity
+```
+#### balanceOf → uint256
 
-  
 
-  Leaves the contract without owner. It will not be possible to call
+
+
+
+```Solidity
+address who 
+```
+#### owner → address
+
+
+
+Returns the address of the current owner.
+
+```Solidity
+```
+#### renounceOwnership
+
+
+
+Leaves the contract without owner. It will not be possible to call
 `onlyOwner` functions anymore. Can only be called by the current owner.
 NOTE: Renouncing ownership will leave the contract without an owner,
 thereby removing any functionality that is only available to the owner.
 
-  #### transferOwnership
+```Solidity
+```
+#### transferOwnership
 
-  
 
-  Transfers ownership of the contract to a new account (`newOwner`).
+
+Transfers ownership of the contract to a new account (`newOwner`).
 Can only be called by the current owner.
 
-    address newOwner 
-  #### getPendingReward → uint256
+```Solidity
+address newOwner 
+```
+#### getPendingReward → uint256
 
-  
 
-  
 
-    uint256 tokenIndex 
+
+
+```Solidity
+uint256 tokenIndex 
+```
 
 

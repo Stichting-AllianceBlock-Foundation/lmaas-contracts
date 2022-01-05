@@ -6,18 +6,22 @@
 
 ### Inheritance
 
-    StakeReceiver
+```
+StakeReceiver
+```
 
 
 ### Functions
 
-  #### delegateStake
+#### delegateStake
 
-  
 
-  
 
-    address staker 
-    uint256 stake 
+
+
+```Solidity
+address staker 
+uint256 stake 
+```
 
 

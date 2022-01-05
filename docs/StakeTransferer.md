@@ -6,28 +6,36 @@
 
 ### Inheritance
 
-    StakeTransferer
+```
+StakeTransferer
+```
 
 ### Variables
 
-    mapping(address => bool) receiversWhitelist
+```Solidity
+mapping(address => bool) receiversWhitelist
+```
 
 ### Functions
 
-  #### setReceiverWhitelisted
+#### setReceiverWhitelisted
 
-  
 
-  
 
-    address receiver 
-    bool whitelisted 
-  #### exitAndTransfer
 
-  
 
-  
+```Solidity
+address receiver 
+bool whitelisted 
+```
+#### exitAndTransfer
 
-    address transferTo 
+
+
+
+
+```Solidity
+address transferTo 
+```
 
 

@@ -61,6 +61,9 @@ contract NonCompoundingRewardsPool is
         ThrottledExitFeature.completeExit();
     }
 
+    /** @dev Exits the pool and tranfer to another pool
+     * @param transferTo The new pool to tranfer to
+     */
     function exitAndTransfer(address transferTo) public virtual override(StakeTransfererFeature) onlyUnlocked {
         StakeTransfererFeature.exitAndTransfer(transferTo);
     }

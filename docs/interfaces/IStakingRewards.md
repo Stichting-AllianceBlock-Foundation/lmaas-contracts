@@ -6,7 +6,9 @@
 
 ### Inheritance
 
-    IStakingRewards
+```
+IStakingRewards
+```
 
 
 ### Functions

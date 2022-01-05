@@ -7,17 +7,21 @@
 {{#if inheritance}}
 ### Inheritance
 
+```
 {{#each inheritance}}
-    {{#unless (eq name ../name)}}{{name}}{{/unless}}
+{{#unless (eq name ../name)}}{{name}}{{/unless}}
 {{/each}}
+```
 {{/if}}
 
 {{#if ownVariables}}
 ### Variables
 
+```Solidity
 {{#each ownVariables}}
-    {{type}} {{name}}
+{{type}} {{name}}
 {{/each}}
+```
 {{/if}}
 
 {{#if functions}}
@@ -25,15 +29,17 @@
 
 {{#each functions}}
 {{#if (eq visibility "public")}}
-  #### {{name}}{{#if outputs}} → {{outputs}}{{/if}}
+#### {{name}}{{#if outputs}} → {{outputs}}{{/if}}
 
-  {{{natspec.userdoc}}}
+{{{natspec.userdoc}}}
 
-  {{{natspec.devdoc}}}
+{{{natspec.devdoc}}}
 
-  {{#each args}}
-    {{typeName}} {{name}} {{#each ../natspec.params}}{{#if (eq param ../name)}}// {{{description}}}{{/if}}{{/each}}
-  {{/each}}
+```Solidity
+{{#each args}}
+{{typeName}} {{name}} {{#each ../natspec.params}}{{#if (eq param ../name)}}// {{{description}}}{{/if}}{{/each}}
+{{/each}}
+```
 {{/if}}
 {{/each}}
 {{/if}}
@@ -42,15 +48,17 @@
 ### Events
 
 {{#each ownEvents}}
-  #### {{name}}
+#### {{name}}
 
-  {{{natspec.userdoc}}}
+{{{natspec.userdoc}}}
 
-  {{{natspec.devdoc}}}
+{{{natspec.devdoc}}}
 
-  {{#each args}}
-    {{typeName}} {{name}}
-  {{/each}}
+```Solidity
+{{#each args}}
+  {{typeName}} {{name}}
+{{/each}}
+```
 {{/each}}
 {{/if}}
 
@@ -58,11 +66,12 @@
 ### Structs
 
 {{#each ownStructs}}
-  #### {{name}}
+#### {{name}}
 
-  {{#each members}}
-    {{type}} {{name}}
-  {{/each}}
-
+```Solidity
+{{#each members}}
+{{type}} {{name}}
+{{/each}}
+```
 {{/each}}
 {{/if}}

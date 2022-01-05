@@ -6,11 +6,15 @@
 
 ### Inheritance
 
-    StakeLock
+```
+StakeLock
+```
 
 ### Variables
 
-    uint256 lockEndTimestamp
+```Solidity
+uint256 lockEndTimestamp
+```
 
 ### Functions
 

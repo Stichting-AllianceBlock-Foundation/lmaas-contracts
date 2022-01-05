@@ -8,9 +8,13 @@ import './AutoStake.sol';
 import './../StakeReceiver.sol';
 
 abstract contract StakeReceiverAutoStake is AutoStake, StakeReceiver {
-    function delegateStake(address staker, uint256 stake) public virtual override {
-        require(stake > 0, 'delegateStake::No stake sent');
-        require(staker != address(0x0), 'delegateStake::Invalid staker');
-        _stake(stake, staker, false);
+    /** @dev Receives a stake from another pool
+     * @param _staker The address who will own the stake
+     * @param _amount The amount to stake
+     */
+    function delegateStake(address _staker, uint256 _amount) public virtual override {
+        require(_amount > 0, 'StakeReceiverAutoStake: No stake sent');
+        require(_staker != address(0x0), 'StakeReceiverAutoStake: Invalid staker');
+        _stake(_amount, _staker, false);
     }
 }

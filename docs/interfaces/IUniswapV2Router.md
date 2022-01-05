@@ -6,7 +6,9 @@
 
 ### Inheritance
 
-    IUniswapV2Router
+```
+IUniswapV2Router
+```
 
 
 ### Functions

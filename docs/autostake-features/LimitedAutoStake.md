@@ -6,93 +6,117 @@
 
 ### Inheritance
 
-    LimitedAutoStake
-    AutoStake
-    Ownable
-    Context
-    ThrottledExit
-    StakeLock
-    ReentrancyGuard
+```
+LimitedAutoStake
+AutoStake
+Ownable
+Context
+ThrottledExit
+StakeLock
+ReentrancyGuard
+```
 
 ### Variables
 
-    uint256 stakeLimit
+```Solidity
+uint256 stakeLimit
+```
 
 ### Functions
 
-  #### constructor
+#### constructor
 
-  
 
-  
 
-    address token 
-    uint256 _throttleRoundBlocks 
-    uint256 _throttleRoundCap 
-    uint256 stakeEnd 
-    uint256 _stakeLimit 
-  #### stake
 
-  
 
-  
+```Solidity
+address token 
+uint256 _throttleRoundBlocks 
+uint256 _throttleRoundCap 
+uint256 stakeEnd 
+uint256 _stakeLimit 
+```
+#### stake
 
-    uint256 amount 
-  #### setPool
 
-  
 
-  
 
-    address pool 
-  #### exit
 
-  
+```Solidity
+uint256 amount 
+```
+#### setPool
 
-  
 
-  #### completeExit
 
-  
 
-  
 
-  #### balanceOf → uint256
+```Solidity
+address pool 
+```
+#### exit
 
-  
 
-  
 
-    address who 
-  #### owner → address
 
-  
 
-  Returns the address of the current owner.
+```Solidity
+```
+#### completeExit
 
-  #### renounceOwnership
 
-  
 
-  Leaves the contract without owner. It will not be possible to call
+
+
+```Solidity
+```
+#### balanceOf → uint256
+
+
+
+
+
+```Solidity
+address who 
+```
+#### owner → address
+
+
+
+Returns the address of the current owner.
+
+```Solidity
+```
+#### renounceOwnership
+
+
+
+Leaves the contract without owner. It will not be possible to call
 `onlyOwner` functions anymore. Can only be called by the current owner.
 NOTE: Renouncing ownership will leave the contract without an owner,
 thereby removing any functionality that is only available to the owner.
 
-  #### transferOwnership
+```Solidity
+```
+#### transferOwnership
 
-  
 
-  Transfers ownership of the contract to a new account (`newOwner`).
+
+Transfers ownership of the contract to a new account (`newOwner`).
 Can only be called by the current owner.
 
-    address newOwner 
-  #### getPendingReward → uint256
+```Solidity
+address newOwner 
+```
+#### getPendingReward → uint256
 
-  
 
-  
 
-    uint256 tokenIndex 
+
+
+```Solidity
+uint256 tokenIndex 
+```
 
 

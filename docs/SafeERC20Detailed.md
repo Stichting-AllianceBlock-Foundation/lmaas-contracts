@@ -11,7 +11,9 @@ which allows you to call the safe operations as `token.safeTransfer(...)`, etc.
 
 ### Inheritance
 
-    SafeERC20Detailed
+```
+SafeERC20Detailed
+```
 
 
 ### Functions

@@ -6,12 +6,16 @@
 
 ### Inheritance
 
-    UniswapV2RouterMock
-    IUniswapV2Router
+```
+UniswapV2RouterMock
+IUniswapV2Router
+```
 
 ### Variables
 
-    address lpToken
+```Solidity
+address lpToken
+```
 
 ### Functions
 

@@ -7,7 +7,9 @@ the optional functions; to access them see `ERC20Detailed`.
 
 ### Inheritance
 
-    IERC20Detailed
+```
+IERC20Detailed
+```
 
 
 ### Functions
@@ -15,26 +17,30 @@ the optional functions; to access them see `ERC20Detailed`.
 
 ### Events
 
-  #### Transfer
+#### Transfer
 
-  
 
-  Emitted when `value` tokens are moved from one account (`from`) to
+
+Emitted when `value` tokens are moved from one account (`from`) to
 another (`to`).
 
 Note that `value` may be zero.
 
-    address from
-    address to
-    uint256 value
-  #### Approval
+```Solidity
+  address from
+  address to
+  uint256 value
+```
+#### Approval
 
-  
 
-  Emitted when the allowance of a `spender` for an `owner` is set by
+
+Emitted when the allowance of a `spender` for an `owner` is set by
 a call to `approve`. `value` is the new allowance.
 
-    address owner
-    address spender
-    uint256 value
+```Solidity
+  address owner
+  address spender
+  uint256 value
+```
 

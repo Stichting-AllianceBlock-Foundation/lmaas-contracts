@@ -6,7 +6,9 @@
 
 ### Inheritance
 
-    IStakeTransferer
+```
+IStakeTransferer
+```
 
 
 ### Functions

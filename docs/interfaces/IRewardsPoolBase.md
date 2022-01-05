@@ -6,7 +6,9 @@
 
 ### Inheritance
 
-    IRewardsPoolBase
+```
+IRewardsPoolBase
+```
 
 
 ### Functions

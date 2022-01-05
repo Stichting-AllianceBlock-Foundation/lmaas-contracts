@@ -6,46 +6,58 @@
 
 ### Inheritance
 
-    TreasuryOperated
+```
+TreasuryOperated
+```
 
 ### Variables
 
-    mapping(address => uint256) externalRewards
-    address treasury
+```Solidity
+mapping(address => uint256) externalRewards
+address treasury
+```
 
 ### Functions
 
-  #### withdrawStake
+#### withdrawStake
 
-  
 
-  
 
-    uint256 amount 
+
+
+```Solidity
+uint256 amount 
+```
 
 ### Events
 
-  #### StakeWithdrawn
+#### StakeWithdrawn
 
-  
 
-  
 
-    uint256 amount
-  #### ExternalRewardsAdded
 
-  
 
-  
+```Solidity
+  uint256 amount
+```
+#### ExternalRewardsAdded
 
-    address from
-    address token
-    uint256 reward
-  #### ExternalRewardsClaimed
 
-  
 
-  
 
-    address receiver
+
+```Solidity
+  address from
+  address token
+  uint256 reward
+```
+#### ExternalRewardsClaimed
+
+
+
+
+
+```Solidity
+  address receiver
+```
 

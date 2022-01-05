@@ -6,106 +6,132 @@
 
 ### Inheritance
 
-    StakeTransfererAutoStake
-    StakeTransferer
-    AutoStake
-    Ownable
-    Context
-    ThrottledExit
-    StakeLock
-    ReentrancyGuard
+```
+StakeTransfererAutoStake
+StakeTransferer
+AutoStake
+Ownable
+Context
+ThrottledExit
+StakeLock
+ReentrancyGuard
+```
 
 
 ### Functions
 
-  #### setReceiverWhitelisted
+#### setReceiverWhitelisted
 
-  
 
-  
 
-    address receiver 
-    bool whitelisted 
-  #### exitAndTransfer
 
-  
 
-  exits the current campaign and trasnfers the stake to another whitelisted campaign
+```Solidity
+address receiver 
+bool whitelisted 
+```
+#### exitAndTransfer
+
+
+
+exits the current campaign and trasnfers the stake to another whitelisted campaign
 		@param transferTo address of the receiver to transfer the stake to
 
-    address transferTo 
-  #### constructor
+```Solidity
+address transferTo 
+```
+#### constructor
 
-  
 
-  
 
-    address token 
-    uint256 _throttleRoundBlocks 
-    uint256 _throttleRoundCap 
-    uint256 stakeEnd 
-  #### setPool
 
-  
 
-  
+```Solidity
+address token 
+uint256 _throttleRoundBlocks 
+uint256 _throttleRoundCap 
+uint256 stakeEnd 
+```
+#### setPool
 
-    address pool 
-  #### stake
 
-  
 
-  
 
-    uint256 amount 
-  #### exit
 
-  
+```Solidity
+address pool 
+```
+#### stake
 
-  
 
-  #### completeExit
 
-  
 
-  
 
-  #### balanceOf → uint256
+```Solidity
+uint256 amount 
+```
+#### exit
 
-  
 
-  
 
-    address who 
-  #### owner → address
 
-  
 
-  Returns the address of the current owner.
+```Solidity
+```
+#### completeExit
 
-  #### renounceOwnership
 
-  
 
-  Leaves the contract without owner. It will not be possible to call
+
+
+```Solidity
+```
+#### balanceOf → uint256
+
+
+
+
+
+```Solidity
+address who 
+```
+#### owner → address
+
+
+
+Returns the address of the current owner.
+
+```Solidity
+```
+#### renounceOwnership
+
+
+
+Leaves the contract without owner. It will not be possible to call
 `onlyOwner` functions anymore. Can only be called by the current owner.
 NOTE: Renouncing ownership will leave the contract without an owner,
 thereby removing any functionality that is only available to the owner.
 
-  #### transferOwnership
+```Solidity
+```
+#### transferOwnership
 
-  
 
-  Transfers ownership of the contract to a new account (`newOwner`).
+
+Transfers ownership of the contract to a new account (`newOwner`).
 Can only be called by the current owner.
 
-    address newOwner 
-  #### getPendingReward → uint256
+```Solidity
+address newOwner 
+```
+#### getPendingReward → uint256
 
-  
 
-  
 
-    uint256 tokenIndex 
+
+
+```Solidity
+uint256 tokenIndex 
+```
 
 

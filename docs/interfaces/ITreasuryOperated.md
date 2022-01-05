@@ -6,7 +6,9 @@
 
 ### Inheritance
 
-    ITreasuryOperated
+```
+ITreasuryOperated
+```
 
 
 ### Functions
