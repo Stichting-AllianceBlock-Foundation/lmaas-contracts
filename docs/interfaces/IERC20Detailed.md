@@ -27,9 +27,9 @@ another (`to`).
 Note that `value` may be zero.
 
 ```Solidity
-  address from
-  address to
-  uint256 value
+address from;
+address to;
+uint256 value;
 ```
 #### Approval
 
@@ -39,8 +39,8 @@ Emitted when the allowance of a `spender` for an `owner` is set by
 a call to `approve`. `value` is the new allowance.
 
 ```Solidity
-  address owner
-  address spender
-  uint256 value
+address owner;
+address spender;
+uint256 value;
 ```
 

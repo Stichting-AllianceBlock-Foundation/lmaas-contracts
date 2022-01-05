@@ -17,7 +17,7 @@ ReentrancyGuard
 ### Variables
 
 ```Solidity
-address staker
+address staker;
 ```
 
 ### Functions

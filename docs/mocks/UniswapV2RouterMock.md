@@ -14,7 +14,7 @@ IUniswapV2Router
 ### Variables
 
 ```Solidity
-address lpToken
+address lpToken;
 ```
 
 ### Functions

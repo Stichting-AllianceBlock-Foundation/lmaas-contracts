@@ -13,7 +13,7 @@ StakeTransferer
 ### Variables
 
 ```Solidity
-mapping(address => bool) receiversWhitelist
+mapping(address => bool) receiversWhitelist;
 ```
 
 ### Functions

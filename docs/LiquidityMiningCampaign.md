@@ -18,7 +18,7 @@ StakeTransferer
 ### Variables
 
 ```Solidity
-string campaignName
+string campaignName;
 ```
 
 ### Functions

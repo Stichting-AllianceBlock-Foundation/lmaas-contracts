@@ -18,15 +18,15 @@ ReentrancyGuard
 ### Variables
 
 ```Solidity
-contract IRewardsPoolBase rewardPool
-contract IERC20Detailed stakingToken
-address factory
-uint256 unit
-uint256 valuePerShare
-uint256 totalShares
-uint256 totalValue
-uint256 exitStake
-mapping(address => uint256) share
+contract IRewardsPoolBase rewardPool;
+contract IERC20Detailed stakingToken;
+address factory;
+uint256 unit;
+uint256 valuePerShare;
+uint256 totalShares;
+uint256 totalValue;
+uint256 exitStake;
+mapping(address => uint256) share;
 ```
 
 ### Functions
@@ -134,11 +134,11 @@ uint256 tokenIndex;
 
 
 ```Solidity
-  address user
-  uint256 amount
-  uint256 sharesIssued
-  uint256 oldShareVaule
-  uint256 newShareValue
-  uint256 balanceOf
+address user;
+uint256 amount;
+uint256 sharesIssued;
+uint256 oldShareVaule;
+uint256 newShareValue;
+uint256 balanceOf;
 ```
 

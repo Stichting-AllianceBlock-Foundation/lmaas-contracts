@@ -21,17 +21,17 @@ ReentrancyGuard
 ### Variables
 
 ```Solidity
-uint256 PRECISION
-uint256 totalStaked
-uint256[] rewardPerSecond
-address[] rewardsTokens
-contract IERC20Detailed stakingToken
-uint256 startTimestamp
-uint256 endTimestamp
-uint256[] accumulatedRewardMultiplier
-uint256 stakeLimit
-uint256 contractStakeLimit
-mapping(address => struct RewardsPoolBase.UserInfo) userInfo
+uint256 PRECISION;
+uint256 totalStaked;
+uint256[] rewardPerSecond;
+address[] rewardsTokens;
+contract IERC20Detailed stakingToken;
+uint256 startTimestamp;
+uint256 endTimestamp;
+uint256[] accumulatedRewardMultiplier;
+uint256 stakeLimit;
+uint256 contractStakeLimit;
+mapping(address => struct RewardsPoolBase.UserInfo) userInfo;
 ```
 
 ### Functions
@@ -197,8 +197,8 @@ address newOwner;
 
 
 ```Solidity
-  address user
-  uint256 amount
+address user;
+uint256 amount;
 ```
 #### Claimed
 
@@ -207,9 +207,9 @@ address newOwner;
 
 
 ```Solidity
-  address user
-  uint256 amount
-  address token
+address user;
+uint256 amount;
+address token;
 ```
 #### Withdrawn
 
@@ -218,8 +218,8 @@ address newOwner;
 
 
 ```Solidity
-  address user
-  uint256 amount
+address user;
+uint256 amount;
 ```
 #### Exited
 
@@ -228,8 +228,8 @@ address newOwner;
 
 
 ```Solidity
-  address user
-  uint256 amount
+address user;
+uint256 amount;
 ```
 #### Extended
 
@@ -238,8 +238,8 @@ address newOwner;
 
 
 ```Solidity
-  uint256 newEndTimestamp
-  uint256[] newRewardsPerSecond
+uint256 newEndTimestamp;
+uint256[] newRewardsPerSecond;
 ```
 #### WithdrawLPRewards
 
@@ -248,8 +248,8 @@ address newOwner;
 
 
 ```Solidity
-  uint256 rewardsAmount
-  address recipient
+uint256 rewardsAmount;
+address recipient;
 ```
 
 ### Structs
@@ -257,8 +257,8 @@ address newOwner;
 #### UserInfo
 
 ```Solidity
-uint256 firstStakedTimestamp
-uint256 amountStaked
-uint256[] rewardDebt
-uint256[] tokensOwed
+uint256 firstStakedTimestamp;
+uint256 amountStaked;
+uint256[] rewardDebt;
+uint256[] tokensOwed;
 ```

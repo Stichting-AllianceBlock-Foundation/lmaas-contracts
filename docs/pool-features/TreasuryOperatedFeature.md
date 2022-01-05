@@ -18,7 +18,7 @@ ReentrancyGuard
 ### Variables
 
 ```Solidity
-address externalRewardToken
+address externalRewardToken;
 ```
 
 ### Functions

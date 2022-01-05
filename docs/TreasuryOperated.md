@@ -13,8 +13,8 @@ TreasuryOperated
 ### Variables
 
 ```Solidity
-mapping(address => uint256) externalRewards
-address treasury
+mapping(address => uint256) externalRewards;
+address treasury;
 ```
 
 ### Functions
@@ -38,7 +38,7 @@ uint256 amount;
 
 
 ```Solidity
-  uint256 amount
+uint256 amount;
 ```
 #### ExternalRewardsAdded
 
@@ -47,9 +47,9 @@ uint256 amount;
 
 
 ```Solidity
-  address from
-  address token
-  uint256 reward
+address from;
+address token;
+uint256 reward;
 ```
 #### ExternalRewardsClaimed
 
@@ -58,6 +58,6 @@ uint256 amount;
 
 
 ```Solidity
-  address receiver
+address receiver;
 ```
 

@@ -15,9 +15,9 @@ Context
 ### Variables
 
 ```Solidity
-address externalRewardToken
-mapping(address => uint256) liquidityDrawn
-contract IUniswapV2Router uniswapRouter
+address externalRewardToken;
+mapping(address => uint256) liquidityDrawn;
+contract IUniswapV2Router uniswapRouter;
 ```
 
 ### Functions

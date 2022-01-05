@@ -13,12 +13,12 @@ ThrottledExit
 ### Variables
 
 ```Solidity
-uint256 nextAvailableExitTimestamp
-uint256 nextAvailableRoundExitVolume
-uint256 throttleRoundSeconds
-uint256 throttleRoundCap
-uint256 campaignEndTimestamp
-mapping(address => struct ThrottledExit.ExitInfo) exitInfo
+uint256 nextAvailableExitTimestamp;
+uint256 nextAvailableRoundExitVolume;
+uint256 throttleRoundSeconds;
+uint256 throttleRoundCap;
+uint256 campaignEndTimestamp;
+mapping(address => struct ThrottledExit.ExitInfo) exitInfo;
 ```
 
 ### Functions
@@ -42,8 +42,8 @@ uint256 tokenIndex;
 
 
 ```Solidity
-  address user
-  uint256 exitTimestamp
+address user;
+uint256 exitTimestamp;
 ```
 #### ExitCompleted
 
@@ -52,8 +52,8 @@ uint256 tokenIndex;
 
 
 ```Solidity
-  address user
-  uint256 stake
+address user;
+uint256 stake;
 ```
 
 ### Structs
@@ -61,7 +61,7 @@ uint256 tokenIndex;
 #### ExitInfo
 
 ```Solidity
-uint256 exitTimestamp
-uint256 exitStake
-uint256[] rewards
+uint256 exitTimestamp;
+uint256 exitStake;
+uint256[] rewards;
 ```

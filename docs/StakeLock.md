@@ -13,7 +13,7 @@ StakeLock
 ### Variables
 
 ```Solidity
-uint256 lockEndTimestamp
+uint256 lockEndTimestamp;
 ```
 
 ### Functions

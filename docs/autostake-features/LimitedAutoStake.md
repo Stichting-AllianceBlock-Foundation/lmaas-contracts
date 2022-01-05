@@ -19,7 +19,7 @@ ReentrancyGuard
 ### Variables
 
 ```Solidity
-uint256 stakeLimit
+uint256 stakeLimit;
 ```
 
 ### Functions
