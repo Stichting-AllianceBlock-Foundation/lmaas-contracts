@@ -19,7 +19,7 @@ Based on the difference between the accumulatedRewardMultiplier at the time of y
 we calculate the amount of tokens you can claim.
 
 For example, you enter when the accumulatedRewardMultiplier is 5 and exit at 20. You staked 100 tokens.
-Your reward is (20 - 5) * 100 = 400 tokens.
+Your reward is (20 - 5) * 100 = 1500 tokens.
 */
 contract RewardsPoolBase is ReentrancyGuard, Ownable {
     using SafeERC20Detailed for IERC20Detailed;
