@@ -28,6 +28,7 @@ uint256 endTimestamp;
 uint256[] accumulatedRewardMultiplier;
 uint256 stakeLimit;
 uint256 contractStakeLimit;
+string name;
 mapping(address => struct RewardsPoolBase.UserInfo) userInfo;
 ```
 

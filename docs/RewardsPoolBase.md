@@ -39,6 +39,7 @@ uint256 endTimestamp;
 uint256[] accumulatedRewardMultiplier;
 uint256 stakeLimit;
 uint256 contractStakeLimit;
+string name;
 mapping(address => struct RewardsPoolBase.UserInfo) userInfo;
 ```
 
@@ -58,6 +59,8 @@ address[] _rewardsTokens; // The reward tokens
 uint256 _stakeLimit; // Maximum amount of tokens that can be staked per user
 
 uint256 _contractStakeLimit; // Maximum amount of tokens that can be staked in total
+
+string _name; // Name of the pool
 ```
 #### start
 

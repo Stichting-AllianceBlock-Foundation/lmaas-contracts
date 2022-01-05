@@ -46,6 +46,7 @@ uint256 endTimestamp;
 uint256[] accumulatedRewardMultiplier;
 uint256 stakeLimit;
 uint256 contractStakeLimit;
+string name;
 mapping(address => struct RewardsPoolBase.UserInfo) userInfo;
 ```
 
@@ -69,6 +70,8 @@ uint256 _throttleRoundSeconds; // Seconds per throttle round
 uint256 _throttleRoundCap; // Maximum tokens withdrawn per throttle round
 
 uint256 _contractStakeLimit; // Maximum amount of tokens that can be staked in total
+
+string _name; // Name of the pool
 ```
 #### start
 

@@ -20,7 +20,6 @@ StakeTransferer
 ### Variables
 
 ```Solidity
-string campaignName;
 uint256 PRECISION;
 uint256 totalStaked;
 uint256[] rewardPerSecond;
@@ -31,6 +30,7 @@ uint256 endTimestamp;
 uint256[] accumulatedRewardMultiplier;
 uint256 stakeLimit;
 uint256 contractStakeLimit;
+string name;
 mapping(address => struct RewardsPoolBase.UserInfo) userInfo;
 mapping(address => bool) receiversWhitelist;
 ```
@@ -48,7 +48,7 @@ contract IERC20Detailed _stakingToken;
 address[] _rewardsTokens; 
 uint256 _stakeLimit; 
 uint256 _contractStakeLimit; 
-string _campaingName; 
+string _name; 
 ```
 #### setReceiverWhitelisted
 

@@ -39,6 +39,7 @@ uint256 endTimestamp;
 uint256[] accumulatedRewardMultiplier;
 uint256 stakeLimit;
 uint256 contractStakeLimit;
+string name;
 mapping(address => struct RewardsPoolBase.UserInfo) userInfo;
 ```
 
@@ -59,6 +60,7 @@ uint256 _stakeLimit;
 uint256 throttleRoundBlocks; 
 uint256 throttleRoundCap; 
 uint256 _contractStakeLimit; 
+string _name; 
 ```
 #### withdraw
 

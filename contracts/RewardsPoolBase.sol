@@ -67,6 +67,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
      * @param _rewardsTokens The reward tokens
      * @param _stakeLimit Maximum amount of tokens that can be staked per user
      * @param _contractStakeLimit Maximum amount of tokens that can be staked in total
+     * @param _name Name of the pool
      */
     constructor(
         IERC20Detailed _stakingToken,
