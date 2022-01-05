@@ -10,5 +10,5 @@ Run `yarn compile` to compile the contracts and generate typing files.
 
 - [Rewards pool base](docs/RewardsPoolBase.md)
 - [Liquidity mining campaign](docs/LiquidityMiningCampaign.md)
-- [Staking pool](docs/NonCompoundingRewardsPool.md)
+- [Staking pool](docs/V2/NonCompoundingRewardsPool.md)
 - [Auto staking pool](docs/V2/CompoundingRewardsPoolStaker.md)
