@@ -58,7 +58,14 @@ uint256 _amount; // The amount to stake
 
 #### setPool
 
+<<<<<<< HEAD
 Sets the underlying reward pool. Can only be set once.
+=======
+
+
+Sets the underlying reward pool. Can only be set once.
+
+>>>>>>> 990819d (Update docs)
 
 ```Solidity
 address _pool; // The reward pool

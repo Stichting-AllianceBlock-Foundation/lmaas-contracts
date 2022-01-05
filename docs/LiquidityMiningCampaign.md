@@ -1,8 +1,16 @@
 ## LiquidityMiningCampaign
 
+<<<<<<< HEAD
 Staking pool without any time locks or throttling
 Inherits all staking logic from RewardsPoolBase.
 Allows to transfer staked tokens to another whitelisted pool
+=======
+
+
+Staking pool without any time locks or throttling 
+    Inherits all staking logic from RewardsPoolBase.
+    Allows to transfer staked tokens to another whitelisted pool
+>>>>>>> 990819d (Update docs)
 
 ### Inheritance
 
@@ -47,7 +55,14 @@ string _name;
 
 #### setReceiverWhitelisted
 
+<<<<<<< HEAD
 Change whitelist status of a receiver pool to receive transfers.
+=======
+
+
+Change whitelist status of a receiver pool to receive transfers.
+
+>>>>>>> 990819d (Update docs)
 
 ```Solidity
 address _receiver; // The pool address to whitelist
@@ -57,6 +72,11 @@ bool _whitelisted; // If it should be whitelisted or not
 
 #### exitAndTransfer
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 990819d (Update docs)
 Not allowed
 
 ```Solidity

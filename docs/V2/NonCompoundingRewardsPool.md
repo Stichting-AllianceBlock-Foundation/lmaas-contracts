@@ -120,7 +120,14 @@ uint256 _amount; // The amount to stake
 
 #### setReceiverWhitelisted
 
+<<<<<<< HEAD
 Change whitelist status of a receiver pool to receive transfers.
+=======
+
+
+Change whitelist status of a receiver pool to receive transfers.
+
+>>>>>>> 990819d (Update docs)
 
 ```Solidity
 address _receiver; // The pool address to whitelist

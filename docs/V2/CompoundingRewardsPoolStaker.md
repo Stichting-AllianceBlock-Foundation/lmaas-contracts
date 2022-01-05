@@ -73,7 +73,14 @@ uint256 amount;
 
 #### setReceiverWhitelisted
 
+<<<<<<< HEAD
 Change whitelist status of a receiver pool to receive transfers.
+=======
+
+
+Change whitelist status of a receiver pool to receive transfers.
+
+>>>>>>> 990819d (Update docs)
 
 ```Solidity
 address _receiver; // The pool address to whitelist
@@ -84,15 +91,29 @@ bool _whitelisted; // If it should be whitelisted or not
 #### exitAndTransfer
 
 exits the current campaign and trasnfers the stake to another whitelisted campaign
+<<<<<<< HEAD
 @param \_transferTo address of the receiver to transfer the stake to
 
 ```Solidity
 address _transferTo;
+=======
+		@param _transferTo address of the receiver to transfer the stake to
+
+```Solidity
+address _transferTo; 
+>>>>>>> 990819d (Update docs)
 ```
 
 #### setPool
 
+<<<<<<< HEAD
 Sets the underlying reward pool. Can only be set once.
+=======
+
+
+Sets the underlying reward pool. Can only be set once.
+
+>>>>>>> 990819d (Update docs)
 
 ```Solidity
 address _pool; // The reward pool

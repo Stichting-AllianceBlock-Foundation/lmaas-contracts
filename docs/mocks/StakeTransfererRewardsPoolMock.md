@@ -56,7 +56,14 @@ uint256 _tokenAmount;
 
 #### setReceiverWhitelisted
 
+<<<<<<< HEAD
 Change whitelist status of a receiver pool to receive transfers.
+=======
+
+
+Change whitelist status of a receiver pool to receive transfers.
+
+>>>>>>> 990819d (Update docs)
 
 ```Solidity
 address _receiver; // The pool address to whitelist
