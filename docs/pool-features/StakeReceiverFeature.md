@@ -15,6 +15,21 @@ Context
 ReentrancyGuard
 ```
 
+### Variables
+
+```Solidity
+uint256 PRECISION;
+uint256 totalStaked;
+uint256[] rewardPerSecond;
+address[] rewardsTokens;
+contract IERC20Detailed stakingToken;
+uint256 startTimestamp;
+uint256 endTimestamp;
+uint256[] accumulatedRewardMultiplier;
+uint256 stakeLimit;
+uint256 contractStakeLimit;
+mapping(address => struct RewardsPoolBase.UserInfo) userInfo;
+```
 
 ### Functions
 
@@ -37,10 +52,13 @@ uint256 _amount; // The amount to stake
 
 
 ```Solidity
-contract IERC20Detailed _stakingToken; 
-address[] _rewardsTokens; 
-uint256 _stakeLimit; 
-uint256 _contractStakeLimit; 
+contract IERC20Detailed _stakingToken; // The token to stake
+
+address[] _rewardsTokens; // The reward tokens
+
+uint256 _stakeLimit; // Maximum amount of tokens that can be staked per user
+
+uint256 _contractStakeLimit; // Maximum amount of tokens that can be staked in total
 ```
 #### start
 
@@ -72,8 +90,6 @@ uint256 _tokenAmount; // The amount to be staked
 
 Claim all your rewards, this will not remove your stake
 
-```Solidity
-```
 #### withdraw
 
 
@@ -90,8 +106,6 @@ uint256 _tokenAmount; // The amount to be withdrawn
 
 Claim all rewards and withdraw all staked tokens. Exits from the rewards pool
 
-```Solidity
-```
 #### balanceOf → uint256
 
 
@@ -108,41 +122,37 @@ address _userAddress; // The user to get the balance of
 
 Updates the accumulated reward multipliers for everyone and each token
 
-```Solidity
-```
 #### hasStakingStarted → bool
 
 
 
 Checks if the staking has started
 
-```Solidity
-```
 #### getUserAccumulatedReward → uint256
 
 
 
 Calculates the reward at a specific time
-		@param _userAddress the address of the user
-		@param _tokenIndex the index of the reward token you are interested
-        @param _time the time to check the reward at
+
 
 ```Solidity
-address _userAddress; 
-uint256 _tokenIndex; 
-uint256 _time; 
+address _userAddress; // the address of the user
+
+uint256 _tokenIndex; // the index of the reward token you are interested
+
+uint256 _time; // the time to check the reward at
 ```
 #### getAvailableBalance → uint256
 
 
 
 Calculates the available amount of reward tokens that are not locked
-		@param _rewardTokenIndex the index of the reward token to check
-		@param _time the time to do the calculations at
+
 
 ```Solidity
-uint256 _rewardTokenIndex; 
-uint256 _time; 
+uint256 _rewardTokenIndex; // the index of the reward token to check
+
+uint256 _time; // the time to do the calculations at
 ```
 #### owner → address
 
@@ -150,8 +160,6 @@ uint256 _time;
 
 Returns the address of the current owner.
 
-```Solidity
-```
 #### renounceOwnership
 
 
@@ -161,8 +169,6 @@ Leaves the contract without owner. It will not be possible to call
 NOTE: Renouncing ownership will leave the contract without an owner,
 thereby removing any functionality that is only available to the owner.
 
-```Solidity
-```
 #### transferOwnership
 
 
@@ -174,4 +180,93 @@ Can only be called by the current owner.
 address newOwner; 
 ```
 
+### Events
 
+#### Started
+
+
+
+
+
+#### Staked
+
+
+
+
+
+```Solidity
+address user;
+uint256 amount;
+```
+#### Claimed
+
+
+
+
+
+```Solidity
+address user;
+uint256 amount;
+address token;
+```
+#### Withdrawn
+
+
+
+
+
+```Solidity
+address user;
+uint256 amount;
+```
+#### Exited
+
+
+
+
+
+```Solidity
+address user;
+uint256 amount;
+```
+#### Extended
+
+
+
+
+
+```Solidity
+uint256 newEndTimestamp;
+uint256[] newRewardsPerSecond;
+```
+#### WithdrawLPRewards
+
+
+
+
+
+```Solidity
+uint256 rewardsAmount;
+address recipient;
+```
+#### OwnershipTransferred
+
+
+
+
+
+```Solidity
+address previousOwner;
+address newOwner;
+```
+
+### Structs
+
+#### UserInfo
+
+```Solidity
+uint256 firstStakedTimestamp;
+uint256 amountStaked;
+uint256[] rewardDebt;
+uint256[] tokensOwed;
+```

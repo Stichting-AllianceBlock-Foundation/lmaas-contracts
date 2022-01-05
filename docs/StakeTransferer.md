@@ -22,11 +22,13 @@ mapping(address => bool) receiversWhitelist;
 
 
 
+Change whitelist status of a receiver pool to receive transfers.
 
 
 ```Solidity
-address receiver; 
-bool whitelisted; 
+address _receiver; // The pool address to whitelist
+
+bool _whitelisted; // If it should be whitelisted or not
 ```
 #### exitAndTransfer
 

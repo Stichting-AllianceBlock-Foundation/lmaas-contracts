@@ -8,6 +8,10 @@ import './../pool-features/ThrottledExitFeature.sol';
 import './../pool-features/StakeTransfererFeature.sol';
 import './../pool-features/StakeReceiverFeature.sol';
 
+/** @dev Staking pool with a time lock and throttled exit. 
+    Inherits all staking logic from RewardsPoolBase.
+    Only allows exit at the end of the time lock and via the throttling mechanism.
+*/
 contract NonCompoundingRewardsPool is
     RewardsPoolBase,
     OnlyExitFeature,
@@ -15,15 +19,22 @@ contract NonCompoundingRewardsPool is
     StakeTransfererFeature,
     StakeReceiverFeature
 {
+    /** @param _stakingToken The token to stake
+     * @param _rewardsTokens The reward tokens
+     * @param _stakeLimit Maximum amount of tokens that can be staked per user
+     * @param _throttleRoundSeconds Seconds per throttle round
+     * @param _throttleRoundCap Maximum tokens withdrawn per throttle round
+     * @param _contractStakeLimit Maximum amount of tokens that can be staked in total
+     */
     constructor(
         IERC20Detailed _stakingToken,
         address[] memory _rewardsTokens,
         uint256 _stakeLimit,
-        uint256 _throttleRoundBlocks,
+        uint256 _throttleRoundSeconds,
         uint256 _throttleRoundCap,
         uint256 _contractStakeLimit
     ) RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit) {
-        setThrottleParams(_throttleRoundBlocks, _throttleRoundCap);
+        setThrottleParams(_throttleRoundSeconds, _throttleRoundCap);
     }
 
     /** @dev Start the pool and set locking and throttling parameters.

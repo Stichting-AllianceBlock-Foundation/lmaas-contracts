@@ -18,4 +18,4 @@ yarn hardhat help
 - [Rewards pool base](docs/RewardsPoolBase.md)
 - [Liquidity mining campaign](docs/LiquidityMiningCampaign.md)
 - [Staking pool](docs/NonCompoundingRewardsPool.md)
-- [Auto staking pool](docs/V2/CompoundingRewardsPool.md)
+- [Auto staking pool](docs/V2/CompoundingRewardsPoolStaker.md)

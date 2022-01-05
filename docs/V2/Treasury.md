@@ -58,8 +58,6 @@ uint256[] externalRewards;
 
 Returns the address of the current owner.
 
-```Solidity
-```
 #### renounceOwnership
 
 
@@ -69,8 +67,6 @@ Leaves the contract without owner. It will not be possible to call
 NOTE: Renouncing ownership will leave the contract without an owner,
 thereby removing any functionality that is only available to the owner.
 
-```Solidity
-```
 #### transferOwnership
 
 
@@ -82,4 +78,16 @@ Can only be called by the current owner.
 address newOwner; 
 ```
 
+### Events
+
+#### OwnershipTransferred
+
+
+
+
+
+```Solidity
+address previousOwner;
+address newOwner;
+```
 

@@ -14,11 +14,11 @@
 ```
 {{/if}}
 
-{{#if ownVariables}}
+{{#if variables}}
 ### Variables
 
 ```Solidity
-{{#each ownVariables}}
+{{#each variables}}
 {{type}} {{name}};
 {{/each}}
 ```
@@ -35,37 +35,41 @@
 
 {{{natspec.devdoc}}}
 
+{{#if args}}
 ```Solidity
 {{#each args}}
-{{typeName}} {{name}}; {{#each ../natspec.params}}{{#if (eq param ../name)}}// {{{description}}}{{/if}}{{/each}}
+{{typeName}} {{name}}; {{#each ../natspec.params}}{{#if (eq param ../name)}}// {{description}}{{/if}}{{/each}}
 {{/each}}
 ```
 {{/if}}
+{{/if}}
 {{/each}}
 {{/if}}
 
-{{#if ownEvents}}
+{{#if events}}
 ### Events
 
-{{#each ownEvents}}
+{{#each events}}
 #### {{name}}
 
 {{{natspec.userdoc}}}
 
 {{{natspec.devdoc}}}
 
+{{#if args}}
 ```Solidity
 {{#each args}}
 {{typeName}} {{name}};
 {{/each}}
 ```
+{{/if}}
 {{/each}}
 {{/if}}
 
-{{#if ownStructs}}
+{{#if structs}}
 ### Structs
 
-{{#each ownStructs}}
+{{#each structs}}
 #### {{name}}
 
 ```Solidity

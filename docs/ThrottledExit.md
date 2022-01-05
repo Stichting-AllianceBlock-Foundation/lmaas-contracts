@@ -27,10 +27,11 @@ mapping(address => struct ThrottledExit.ExitInfo) exitInfo;
 
 
 
+Returns the amount of reward tokens that are pending for exit for this user
 
 
 ```Solidity
-uint256 tokenIndex; 
+uint256 _tokenIndex; // The index of the reward to check
 ```
 
 ### Events

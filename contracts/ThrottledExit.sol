@@ -101,9 +101,12 @@ abstract contract ThrottledExit {
         }
     }
 
-    function getPendingReward(uint256 tokenIndex) public view returns (uint256) {
+    /** @dev Returns the amount of reward tokens that are pending for exit for this user
+     * @param _tokenIndex The index of the reward to check
+     */
+    function getPendingReward(uint256 _tokenIndex) public view returns (uint256) {
         ExitInfo storage info = exitInfo[msg.sender];
-        return info.rewards[tokenIndex];
+        return info.rewards[_tokenIndex];
     }
 
     function initialiseExitInfo(address _userAddress, uint256 tokensLength) private {

@@ -24,6 +24,13 @@ IAccessControl
 Context
 ```
 
+### Variables
+
+```Solidity
+bytes32 MINTER_ROLE;
+bytes32 PAUSER_ROLE;
+bytes32 DEFAULT_ADMIN_ROLE;
+```
 
 ### Functions
 
@@ -51,8 +58,6 @@ uint8 _d;
 
 
 
-```Solidity
-```
 #### mint
 
 
@@ -75,8 +80,6 @@ See {ERC20Pausable} and {Pausable-_pause}.
 Requirements:
 - the caller must have the `PAUSER_ROLE`.
 
-```Solidity
-```
 #### unpause
 
 
@@ -86,16 +89,12 @@ See {ERC20Pausable} and {Pausable-_unpause}.
 Requirements:
 - the caller must have the `PAUSER_ROLE`.
 
-```Solidity
-```
 #### paused → bool
 
 
 
 Returns true if the contract is paused, and false otherwise.
 
-```Solidity
-```
 #### burn
 
 
@@ -127,8 +126,6 @@ uint256 amount;
 
 Returns the name of the token.
 
-```Solidity
-```
 #### symbol → string
 
 
@@ -136,16 +133,12 @@ Returns the name of the token.
 Returns the symbol of the token, usually a shorter version of the
 name.
 
-```Solidity
-```
 #### totalSupply → uint256
 
 
 
 See {IERC20-totalSupply}.
 
-```Solidity
-```
 #### balanceOf → uint256
 
 
@@ -328,4 +321,98 @@ To change a role's admin, use {_setRoleAdmin}.
 bytes32 role; 
 ```
 
+### Events
 
+#### Paused
+
+
+
+Emitted when the pause is triggered by `account`.
+
+```Solidity
+address account;
+```
+#### Unpaused
+
+
+
+Emitted when the pause is lifted by `account`.
+
+```Solidity
+address account;
+```
+#### Transfer
+
+
+
+Emitted when `value` tokens are moved from one account (`from`) to
+another (`to`).
+Note that `value` may be zero.
+
+```Solidity
+address from;
+address to;
+uint256 value;
+```
+#### Approval
+
+
+
+Emitted when the allowance of a `spender` for an `owner` is set by
+a call to {approve}. `value` is the new allowance.
+
+```Solidity
+address owner;
+address spender;
+uint256 value;
+```
+#### RoleAdminChanged
+
+
+
+Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole`
+`DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite
+{RoleAdminChanged} not being emitted signaling this.
+_Available since v3.1._
+
+```Solidity
+bytes32 role;
+bytes32 previousAdminRole;
+bytes32 newAdminRole;
+```
+#### RoleGranted
+
+
+
+Emitted when `account` is granted `role`.
+`sender` is the account that originated the contract call, an admin role
+bearer except when using {AccessControl-_setupRole}.
+
+```Solidity
+bytes32 role;
+address account;
+address sender;
+```
+#### RoleRevoked
+
+
+
+Emitted when `account` is revoked `role`.
+`sender` is the account that originated the contract call:
+  - if using `revokeRole`, it is the admin role bearer
+  - if using `renounceRole`, it is the role bearer (i.e. `account`)
+
+```Solidity
+bytes32 role;
+address account;
+address sender;
+```
+
+### Structs
+
+#### RoleData
+
+```Solidity
+mapping(address => bool) members;
+bytes32 adminRole;
+```
