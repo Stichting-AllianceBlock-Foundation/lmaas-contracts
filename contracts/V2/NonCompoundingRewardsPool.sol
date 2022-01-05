@@ -25,6 +25,7 @@ contract NonCompoundingRewardsPool is
      * @param _throttleRoundSeconds Seconds per throttle round
      * @param _throttleRoundCap Maximum tokens withdrawn per throttle round
      * @param _contractStakeLimit Maximum amount of tokens that can be staked in total
+     * @param _name Name of the pool
      */
     constructor(
         IERC20Detailed _stakingToken,
@@ -32,8 +33,9 @@ contract NonCompoundingRewardsPool is
         uint256 _stakeLimit,
         uint256 _throttleRoundSeconds,
         uint256 _throttleRoundCap,
-        uint256 _contractStakeLimit
-    ) RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit) {
+        uint256 _contractStakeLimit,
+        string memory _name
+    ) RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _name) {
         setThrottleParams(_throttleRoundSeconds, _throttleRoundCap);
     }
 

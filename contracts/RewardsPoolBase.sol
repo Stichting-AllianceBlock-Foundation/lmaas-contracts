@@ -44,6 +44,8 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     uint256 public stakeLimit;
     uint256 public contractStakeLimit;
 
+    string public name;
+
     struct UserInfo {
         uint256 firstStakedTimestamp;
         uint256 amountStaked; // How many tokens the user has staked.
@@ -70,7 +72,8 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         IERC20Detailed _stakingToken,
         address[] memory _rewardsTokens,
         uint256 _stakeLimit,
-        uint256 _contractStakeLimit
+        uint256 _contractStakeLimit,
+        string memory _name
     ) {
         require(address(_stakingToken) != address(0), 'RewardsPoolBase: invalid staking token');
 
@@ -88,6 +91,8 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
             totalClaimed.push(0);
             totalSpentRewards.push(0);
         }
+
+        name = _name;
     }
 
     modifier onlyInsideBounds() {

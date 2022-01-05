@@ -13,17 +13,14 @@ import './StakeReceiver.sol';
 */
 contract LiquidityMiningCampaign is StakeTransferer, RewardsPoolBase {
     using SafeERC20Detailed for IERC20Detailed;
-    string public campaignName;
 
     constructor(
         IERC20Detailed _stakingToken,
         address[] memory _rewardsTokens,
         uint256 _stakeLimit,
         uint256 _contractStakeLimit,
-        string memory _campaingName
-    ) RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit) {
-        campaignName = _campaingName;
-    }
+        string memory _name
+    ) RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _name) {}
 
     /** @dev Change whitelist status of a receiver pool to receive transfers.
      * @param _receiver The pool address to whitelist

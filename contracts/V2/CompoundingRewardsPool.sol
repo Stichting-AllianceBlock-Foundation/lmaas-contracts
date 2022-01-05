@@ -11,8 +11,12 @@ contract CompoundingRewardsPool is RewardsPoolBase, OneStakerFeature {
         address[] memory _rewardsTokens,
         address _staker,
         uint256 _startTimestamp,
-        uint256 _endTimestamp
-    ) RewardsPoolBase(_stakingToken, _rewardsTokens, type(uint256).max, type(uint256).max) OneStakerFeature(_staker) {}
+        uint256 _endTimestamp,
+        string memory _name
+    )
+        RewardsPoolBase(_stakingToken, _rewardsTokens, type(uint256).max, type(uint256).max, _name)
+        OneStakerFeature(_staker)
+    {}
 
     /** @dev Stake an amount of tokens
      * @param _tokenAmount The amount to be staked

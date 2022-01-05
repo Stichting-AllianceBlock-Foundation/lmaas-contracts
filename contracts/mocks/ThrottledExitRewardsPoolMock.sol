@@ -13,8 +13,9 @@ contract ThrottledExitRewardsPoolMock is RewardsPoolBase, OnlyExitFeature, Throt
         uint256 _stakeLimit,
         uint256 throttleRoundBlocks,
         uint256 throttleRoundCap,
-        uint256 _contractStakeLimit
-    ) RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit) {
+        uint256 _contractStakeLimit,
+        string memory _name
+    ) RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _name) {
         setThrottleParams(throttleRoundBlocks, throttleRoundCap);
         startThrottle(_endBlock);
         lock(_endBlock);
