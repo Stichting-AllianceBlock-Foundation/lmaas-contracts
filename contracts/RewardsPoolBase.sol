@@ -209,9 +209,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         updateRewardMultipliers();
         updateUserAccruedReward(_claimer);
 
-        uint256 rewardsTokensLength = rewardsTokens.length;
-
-        for (uint256 i = 0; i < rewardsTokensLength; i++) {
+        for (uint256 i = 0; i < rewardsTokens.length; i++) {
             uint256 reward = user.tokensOwed[i];
             user.tokensOwed[i] = 0;
 
@@ -278,19 +276,31 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     function updateRewardMultipliers() public {
         uint256 currentTimestamp = block.timestamp;
 
-        if (currentTimestamp <= lastRewardTimestamp) {
+        if (currentTimestamp > endTimestamp && extensionDuration > 0 && extensionRewardPerSecond.length > 0) {
+            _updateRewardMultipliers(endTimestamp);
+            _extend(currentTimestamp, currentTimestamp + extensionDuration, extensionRewardPerSecond);
+            _updateRewardMultipliers(currentTimestamp);
+        } else {
+            _updateRewardMultipliers(currentTimestamp);
+        }
+    }
+
+    /**
+		@dev updates the accumulated reward multipliers for everyone and each token
+	 */
+    function _updateRewardMultipliers(uint256 _currentTimestamp) internal {
+        if (_currentTimestamp <= lastRewardTimestamp) {
             return;
         }
 
-        uint256 secondsSinceLastReward = currentTimestamp - lastRewardTimestamp;
+        uint256 secondsSinceLastReward = _currentTimestamp - lastRewardTimestamp;
 
         if (secondsSinceLastReward == 0) {
-            // Nothing to update
             return;
         }
 
         if (totalStaked == 0) {
-            lastRewardTimestamp = currentTimestamp;
+            lastRewardTimestamp = _currentTimestamp;
             return;
         }
 
@@ -302,11 +312,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
             accumulatedRewardMultiplier[i] = accumulatedRewardMultiplier[i] + rewardMultiplierIncrease; // Add the multiplier increase to the accumulated multiplier
         }
 
-        lastRewardTimestamp = currentTimestamp;
-
-        if (currentTimestamp > endTimestamp && extensionDuration > 0 && extensionRewardPerSecond.length > 0) {
-            _extend(currentTimestamp, currentTimestamp + extensionDuration, extensionRewardPerSecond);
-        }
+        lastRewardTimestamp = _currentTimestamp;
     }
 
     /** @dev Updates the accumulated reward for the user
@@ -315,12 +321,10 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     function updateUserAccruedReward(address _userAddress) internal {
         UserInfo storage user = userInfo[_userAddress];
 
-        uint256 rewardsTokensLength = rewardsTokens.length;
-
         if (user.rewardDebt.length == 0) {
             // Initialize user struct
 
-            for (uint256 i = 0; i < rewardsTokensLength; i++) {
+            for (uint256 i = 0; i < rewardsTokens.length; i++) {
                 user.rewardDebt.push(0);
                 user.tokensOwed.push(0);
             }
@@ -330,7 +334,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
             return;
         }
 
-        for (uint256 tokenIndex = 0; tokenIndex < rewardsTokensLength; tokenIndex++) {
+        for (uint256 tokenIndex = 0; tokenIndex < rewardsTokens.length; tokenIndex++) {
             uint256 totalDebt = (user.amountStaked * accumulatedRewardMultiplier[tokenIndex]) / PRECISION;
             uint256 pendingDebt = totalDebt - user.rewardDebt[tokenIndex];
 
@@ -415,6 +419,17 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
             'RewardsPoolBase: invalid endTimestamp'
         );
         require(_rewardPerSecond.length == rewardsTokens.length, 'RewardsPoolBase: invalid rewardPerSecond');
+        for (uint256 i = 0; i < _rewardPerSecond.length; i++) {
+            uint256 newRewards = calculateRewardsAmount(currentTimestamp, _endTimestamp, _rewardPerSecond[i]);
+
+            // We need to check if we have enough balance available in the contract to pay for the extension
+            uint256 availableBalance = getAvailableBalance(i);
+
+            require(availableBalance >= newRewards, 'RewardsPoolBase: not enough rewards to extend');
+
+            uint256 spentRewards = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerSecond[i]);
+            totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
+        }
 
         extensionDuration = _durationTime;
         extensionRewardPerSecond = _rewardPerSecond;
@@ -433,19 +448,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         uint256 _endTimestamp,
         uint256[] memory _rewardPerSecond
     ) internal {
-        for (uint256 i = 0; i < _rewardPerSecond.length; i++) {
-            uint256 newRewards = calculateRewardsAmount(_currentTimestamp, _endTimestamp, _rewardPerSecond[i]);
-
-            // We need to check if we have enough balance available in the contract to pay for the extension
-            uint256 availableBalance = getAvailableBalance(i);
-
-            require(availableBalance >= newRewards, 'RewardsPoolBase: not enough rewards to extend');
-
-            uint256 spentRewards = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerSecond[i]);
-            totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
-
-            rewardPerSecond[i] = _rewardPerSecond[i];
-        }
+        rewardPerSecond = _rewardPerSecond;
 
         startTimestamp = _currentTimestamp;
         endTimestamp = _endTimestamp;

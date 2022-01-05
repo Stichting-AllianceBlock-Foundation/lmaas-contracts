@@ -369,12 +369,12 @@ describe('RewardsPoolBase', () => {
 
   describe.only('Rewards', function () {
     beforeEach(async () => {
-      await stakingTokenInstance.approve(RewardsPoolBaseInstance.address, standardStakingAmount);
-      await stakingTokenInstance.connect(bobAccount).approve(RewardsPoolBaseInstance.address, standardStakingAmount);
+      await stakingTokenInstance.approve(RewardsPoolBaseInstance.address, amount);
 
       await timeTravel(70);
 
       await RewardsPoolBaseInstance.stake(standardStakingAmount);
+      // await RewardsPoolBaseInstance.connect(bobAccount).stake(standardStakingAmount);
     });
 
     it('Should claim the rewards successfully', async () => {
@@ -485,15 +485,9 @@ describe('RewardsPoolBase', () => {
 
       for (let i = 0; i < rewardTokensCount; i++) {
         let parsedReward = await ethers.utils.parseEther(`${(i + 1) * 2}`);
-        const availableBalance = await RewardsPoolBaseInstance.getAvailableBalance(i);
 
         // Send the required reward tokens to the RewardsPool
-        mintPromises.push(
-          rewardTokensInstances[i].mint(
-            RewardsPoolBaseInstance.address,
-            parsedReward.mul(Math.floor(poolLength)).sub(availableBalance)
-          )
-        );
+        mintPromises.push(rewardTokensInstances[i].mint(RewardsPoolBaseInstance.address, parsedReward.mul(poolLength)));
 
         newRewardsPerSecond.push(parsedReward);
       }
@@ -504,48 +498,41 @@ describe('RewardsPoolBase', () => {
     }
 
     it('Should extend correctly and save the information', async () => {
+      await timeTravel(poolLength);
       await extend();
     });
 
     it('Should extend correctly when pool is already done', async () => {
-      // for (let i = 0; i < rewardTokensCount; i++) {
-      //   console.log(
-      //     String(
-      //       await (
-      //         await ethers.getContractAt('IERC20Detailed', await RewardsPoolBaseInstance.rewardsTokens(i))
-      //       ).balanceOf(RewardsPoolBaseInstance.address)
-      //     )
-      //   );
-      // }
-      await timeTravel(poolLength * 2);
+      await timeTravel(poolLength);
 
       await extend();
+      await RewardsPoolBaseInstance.claim();
     });
 
     it('Should extend correctly multiple times', async () => {
       await extend();
-      await timeTravel(poolLength * 2);
+      await timeTravel(poolLength);
 
       let extensionDuration = await (await RewardsPoolBaseInstance.extensionDuration()).toNumber();
-      await RewardsPoolBaseInstance.withdraw(bOne);
+      await RewardsPoolBaseInstance.claim();
       let endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
       let currentTimestamp = await getTime();
       expect(endTimestamp).to.equal(currentTimestamp + extensionDuration);
 
       await extend();
-      await timeTravel(poolLength * 2);
+      await timeTravel(poolLength);
 
       extensionDuration = await (await RewardsPoolBaseInstance.extensionDuration()).toNumber();
-      await RewardsPoolBaseInstance.withdraw(bOne);
+      await RewardsPoolBaseInstance.claim();
       endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
       currentTimestamp = await getTime();
       expect(endTimestamp).to.equal(currentTimestamp + extensionDuration);
 
       await extend();
-      await timeTravel(poolLength * 2);
+      await timeTravel(poolLength);
 
       extensionDuration = await (await RewardsPoolBaseInstance.extensionDuration()).toNumber();
-      await RewardsPoolBaseInstance.withdraw(bOne);
+      await RewardsPoolBaseInstance.claim();
       endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
       currentTimestamp = await getTime();
       expect(endTimestamp).to.equal(currentTimestamp + extensionDuration);
@@ -566,10 +553,6 @@ describe('RewardsPoolBase', () => {
 
         newRewardsPerBlock.push(parsedReward);
       }
-
-      await RewardsPoolBaseInstance.extend(poolLength, newRewardsPerBlock);
-
-      await timeTravel(poolLength * 2);
 
       await expect(RewardsPoolBaseInstance.extend(poolLength, newRewardsPerBlock)).to.be.revertedWith(
         'RewardsPoolBase: not enough rewards to extend'
