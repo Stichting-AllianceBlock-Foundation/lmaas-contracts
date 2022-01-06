@@ -9,11 +9,11 @@ contract LimitedAutoStake is AutoStake {
 
     constructor(
         address token,
-        uint256 _throttleRoundBlocks,
+        uint256 _throttleRoundSeconds,
         uint256 _throttleRoundCap,
         uint256 stakeEnd,
         uint256 _stakeLimit
-    ) AutoStake(token, _throttleRoundBlocks, _throttleRoundCap, stakeEnd) {
+    ) AutoStake(token, _throttleRoundSeconds, _throttleRoundCap, stakeEnd) {
         require(_stakeLimit != 0, 'LimitedAutoStake:constructor::stake limit should not be 0');
         stakeLimit = _stakeLimit;
     }

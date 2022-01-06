@@ -9,7 +9,7 @@ import './../pool-features/StakeLockingFeature.sol';
 contract StakeLockingRewardsPoolMock is RewardsPoolBase, OnlyExitFeature, StakeLockingFeature {
     constructor(
         IERC20Detailed _stakingToken,
-        uint256 _startBlock,
+        uint256, // _startBlock,
         uint256 _endBlock,
         address[] memory _rewardsTokens,
         uint256 _stakeLimit,

@@ -6,17 +6,24 @@ import './../autostake-features/StakeTransfererAutoStake.sol';
 import './../autostake-features/StakeReceiverAutoStake.sol';
 import './../autostake-features/LimitedAutoStake.sol';
 
+/** @dev Staking pool with automatic compounding, a time lock and throttled exit. 
+    Uses shares to track share in the pool to auto compound the reward.
+    Only allows exit at the end of the time lock and via the throttling mechanism.
+*/
 contract CompoundingRewardsPoolStaker is LimitedAutoStake, StakeTransfererAutoStake, StakeReceiverAutoStake {
     constructor(
         address token,
-        uint256 _throttleRoundBlocks,
+        uint256 _throttleRoundSeconds,
         uint256 _throttleRoundCap,
         uint256 stakeEnd,
         uint256 _stakeLimit
-    ) LimitedAutoStake(token, _throttleRoundBlocks, _throttleRoundCap, stakeEnd, _stakeLimit) {}
+    ) LimitedAutoStake(token, _throttleRoundSeconds, _throttleRoundCap, stakeEnd, _stakeLimit) {}
 
-    function stake(uint256 amount) public virtual override(AutoStake, LimitedAutoStake) {
-        LimitedAutoStake.stake(amount);
+    /** @dev Stake an amount of tokens
+     * @param _tokenAmount The amount to be staked
+     */
+    function stake(uint256 _tokenAmount) public virtual override(AutoStake, LimitedAutoStake) {
+        LimitedAutoStake.stake(_tokenAmount);
     }
 
     function delegateStake(address staker, uint256 amount)

@@ -1,0 +1,17 @@
+## IRewardsPoolBase
+
+
+
+
+
+### Inheritance
+
+```
+IRewardsPoolBase
+```
+
+
+### Functions
+
+
+

@@ -7,8 +7,8 @@ import './../autostake-features/StakeTransfererAutoStake.sol';
 contract AutoStakeTransfererMock is StakeTransfererAutoStake {
     constructor(
         address token,
-        uint256 _throttleRoundBlocks,
+        uint256 _throttleRoundSeconds,
         uint256 _throttleRoundCap,
         uint256 stakeEnd
-    ) AutoStake(token, _throttleRoundBlocks, _throttleRoundCap, stakeEnd) {}
+    ) AutoStake(token, _throttleRoundSeconds, _throttleRoundCap, stakeEnd) {}
 }
