@@ -280,7 +280,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 
         if (currentTimestamp > endTimestamp && extensionDuration > 0 && extensionRewardPerSecond.length > 0) {
             _updateRewardMultipliers(endTimestamp);
-            _extend(currentTimestamp, currentTimestamp + extensionDuration, extensionRewardPerSecond);
+            _extend(endTimestamp, endTimestamp + extensionDuration, extensionRewardPerSecond);
             _updateRewardMultipliers(currentTimestamp);
         } else {
             _updateRewardMultipliers(currentTimestamp);
@@ -288,21 +288,23 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     }
 
     /**
-		@dev updates the accumulated reward multipliers for everyone and each token
-	 */
+     * @dev updates the accumulated reward multipliers for everyone and each token
+     */
     function _updateRewardMultipliers(uint256 _currentTimestamp) internal {
         if (_currentTimestamp <= lastRewardTimestamp) {
             return;
         }
 
-        uint256 secondsSinceLastReward = _currentTimestamp - lastRewardTimestamp;
+        uint256 applicableTimestamp = (_currentTimestamp < endTimestamp) ? _currentTimestamp : endTimestamp;
+
+        uint256 secondsSinceLastReward = applicableTimestamp - lastRewardTimestamp;
 
         if (secondsSinceLastReward == 0) {
             return;
         }
 
         if (totalStaked == 0) {
-            lastRewardTimestamp = _currentTimestamp;
+            lastRewardTimestamp = applicableTimestamp;
             return;
         }
 
@@ -314,7 +316,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
             accumulatedRewardMultiplier[i] = accumulatedRewardMultiplier[i] + rewardMultiplierIncrease; // Add the multiplier increase to the accumulated multiplier
         }
 
-        lastRewardTimestamp = _currentTimestamp;
+        lastRewardTimestamp = applicableTimestamp;
     }
 
     /** @dev Updates the accumulated reward for the user
@@ -336,7 +338,9 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
             return;
         }
 
-        for (uint256 tokenIndex = 0; tokenIndex < rewardsTokens.length; tokenIndex++) {
+        uint256 rewardsTokensLength = rewardsTokens.length;
+
+        for (uint256 tokenIndex = 0; tokenIndex < rewardsTokensLength; tokenIndex++) {
             uint256 totalDebt = (user.amountStaked * accumulatedRewardMultiplier[tokenIndex]) / PRECISION;
             uint256 pendingDebt = totalDebt - user.rewardDebt[tokenIndex];
 
@@ -383,7 +387,6 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         uint256 _time
     ) public view returns (uint256) {
         uint256 applicableTimestamp = (_time < endTimestamp) ? _time : endTimestamp;
-
         uint256 secondsSinceLastReward = applicableTimestamp - lastRewardTimestamp;
 
         uint256 newReward = secondsSinceLastReward * rewardPerSecond[_tokenIndex]; // Get newly accumulated reward
@@ -440,19 +443,19 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     }
 
     /**
-		@dev Extends the rewards period and updates the rates, (this is just the internal function, that does the actual extends)
-		@param _currentTimestamp current timestamp for the rewards
-		@param _endTimestamp new end timestamp for the rewards
-		@param _rewardPerSecond array with new rewards per second for each token 
-	 */
+     * @dev Extends the rewards period and updates the rates, (this is just the internal function, that does the actual extends)
+     * @param _startTimestamp current timestamp for the rewards
+     * @param _endTimestamp new end timestamp for the rewards
+     * @param _rewardPerSecond array with new rewards per second for each token
+     */
     function _extend(
-        uint256 _currentTimestamp,
+        uint256 _startTimestamp,
         uint256 _endTimestamp,
         uint256[] memory _rewardPerSecond
     ) internal {
         rewardPerSecond = _rewardPerSecond;
 
-        startTimestamp = _currentTimestamp;
+        startTimestamp = _startTimestamp;
         endTimestamp = _endTimestamp;
         extensionDuration = 0;
         delete extensionRewardPerSecond;
