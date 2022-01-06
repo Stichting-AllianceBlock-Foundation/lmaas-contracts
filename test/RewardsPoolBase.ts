@@ -498,12 +498,12 @@ describe('RewardsPoolBase', () => {
     }
 
     it('Should extend correctly and save the information', async () => {
-      await timeTravel(poolLength);
+      await timeTravel(poolLength + 500);
       await extend();
     });
 
     it('Should extend correctly when pool is already done', async () => {
-      await timeTravel(poolLength);
+      await timeTravel(poolLength + 500);
 
       await extend();
       await RewardsPoolBaseInstance.claim();
@@ -511,7 +511,7 @@ describe('RewardsPoolBase', () => {
 
     it('Should extend correctly multiple times', async () => {
       await extend();
-      await timeTravel(poolLength);
+      await timeTravel(poolLength + 500);
 
       let extensionDuration = await (await RewardsPoolBaseInstance.extensionDuration()).toNumber();
       await RewardsPoolBaseInstance.claim();
@@ -520,7 +520,7 @@ describe('RewardsPoolBase', () => {
       expect(endTimestamp).to.equal(currentTimestamp + extensionDuration);
 
       await extend();
-      await timeTravel(poolLength);
+      await timeTravel(poolLength + 500);
 
       extensionDuration = await (await RewardsPoolBaseInstance.extensionDuration()).toNumber();
       await RewardsPoolBaseInstance.claim();
@@ -529,7 +529,7 @@ describe('RewardsPoolBase', () => {
       expect(endTimestamp).to.equal(currentTimestamp + extensionDuration);
 
       await extend();
-      await timeTravel(poolLength);
+      await timeTravel(poolLength + 500);
 
       extensionDuration = await (await RewardsPoolBaseInstance.extensionDuration()).toNumber();
       await RewardsPoolBaseInstance.claim();
