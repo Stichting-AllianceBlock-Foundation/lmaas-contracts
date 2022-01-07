@@ -30,7 +30,7 @@ describe('RewardsPoolBase', () => {
   const stakeLimit = amount;
   const bOne = ethers.utils.parseEther('1');
   const standardStakingAmount = ethers.utils.parseEther('5'); // 5 tokens
-  const contractStakeLimit = ethers.utils.parseEther('10'); // 10 tokens
+  const contractStakeLimit = amount;
 
   const name = 'ABC';
 
@@ -582,6 +582,35 @@ describe('RewardsPoolBase', () => {
 
       extensionDuration = await (await RewardsPoolBaseInstance.extensionDuration()).toNumber();
       await RewardsPoolBaseInstance.withdraw(bOne);
+      endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
+      expect(endTimestamp).to.equal(oldEndTimestamp.add(extensionDuration));
+    });
+
+    it('[Should extend correctly multiple times correclty with stake]:', async () => {
+      let oldEndTimestamp = await RewardsPoolBaseInstance.endTimestamp();
+      await extend();
+      await timeTravel(poolLength + 1000);
+
+      let extensionDuration = await (await RewardsPoolBaseInstance.extensionDuration()).toNumber();
+      await RewardsPoolBaseInstance.stake(standardStakingAmount);
+      let endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
+      expect(endTimestamp).to.equal(oldEndTimestamp.add(extensionDuration));
+
+      oldEndTimestamp = await RewardsPoolBaseInstance.endTimestamp();
+      await extend();
+      await timeTravel(poolLength + 1000);
+
+      extensionDuration = await (await RewardsPoolBaseInstance.extensionDuration()).toNumber();
+      await RewardsPoolBaseInstance.stake(standardStakingAmount);
+      endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
+      expect(endTimestamp).to.equal(oldEndTimestamp.add(extensionDuration));
+
+      oldEndTimestamp = await RewardsPoolBaseInstance.endTimestamp();
+      await extend();
+      await timeTravel(poolLength + 1000);
+
+      extensionDuration = await (await RewardsPoolBaseInstance.extensionDuration()).toNumber();
+      await RewardsPoolBaseInstance.stake(standardStakingAmount);
       endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
       expect(endTimestamp).to.equal(oldEndTimestamp.add(extensionDuration));
     });
