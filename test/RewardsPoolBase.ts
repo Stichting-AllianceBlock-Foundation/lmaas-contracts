@@ -229,7 +229,7 @@ describe('RewardsPoolBase', () => {
     it('[Should not stake before staking start]:', async () => {
       await stakingTokenInstance.approve(RewardsPoolBaseInstance.address, standardStakingAmount);
       await expect(RewardsPoolBaseInstance.stake(standardStakingAmount)).to.be.revertedWith(
-        'RewardsPoolBase: staking is not started'
+        'RewardsPoolBase: staking is not started or is finished'
       );
     });
 
@@ -354,6 +354,16 @@ describe('RewardsPoolBase', () => {
           'onlyUnderStakeLimit::Stake limit reached'
         );
       });
+    });
+
+    it('[Should not after staking end if there is no extension taking in place]:', async () => {
+      await stakingTokenInstance.approve(RewardsPoolBaseInstance.address, standardStakingAmount);
+
+      await timeTravel(70000);
+
+      await expect(RewardsPoolBaseInstance.stake(standardStakingAmount)).to.be.revertedWith(
+        'RewardsPoolBase: staking is not started or is finished or no extension taking in place'
+      );
     });
   });
 
@@ -504,11 +514,75 @@ describe('RewardsPoolBase', () => {
       expect(extensionDuration).to.equal(poolLength);
     });
 
+    it('[Should extend correctly if the pool is not done and extend with claim]:', async () => {
+      await extend();
+      const extensionDuration = await RewardsPoolBaseInstance.extensionDuration();
+      await timeTravel(poolLength + 1000);
+
+      await RewardsPoolBaseInstance.claim();
+      const startTimestamp = await RewardsPoolBaseInstance.startTimestamp();
+      const endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
+
+      for (let i = 0; i < rewardTokensCount; i++) {
+        const userDebt = await RewardsPoolBaseInstance.getUserRewardDebt(aliceAccount.address, i);
+        expect(userDebt).to.be.gt(0);
+      }
+
+      expect(endTimestamp.sub(startTimestamp)).to.equal(poolLength);
+      expect(extensionDuration).to.equal(poolLength);
+    });
+
+    it('[Should extend correctly if the pool is not done and extend with stake]:', async () => {
+      await extend();
+      const extensionDuration = await RewardsPoolBaseInstance.extensionDuration();
+      await timeTravel(poolLength + 1000);
+
+      await RewardsPoolBaseInstance.stake(standardStakingAmount);
+      const startTimestamp = await RewardsPoolBaseInstance.startTimestamp();
+      const endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
+
+      for (let i = 0; i < rewardTokensCount; i++) {
+        const userDebt = await RewardsPoolBaseInstance.getUserRewardDebt(aliceAccount.address, i);
+        expect(userDebt).to.be.gt(0);
+      }
+
+      expect(endTimestamp.sub(startTimestamp)).to.equal(poolLength);
+      expect(extensionDuration).to.equal(poolLength);
+    });
+
     it('[Should extend correctly when pool is already done and also do a claim ]:', async () => {
       await timeTravel(poolLength + 1000);
 
       await extend();
       await RewardsPoolBaseInstance.claim();
+      for (let i = 0; i < rewardTokensCount; i++) {
+        const userDebt = await RewardsPoolBaseInstance.getUserRewardDebt(aliceAccount.address, i);
+        expect(userDebt).to.be.gt(0);
+      }
+      const startTimestamp = await RewardsPoolBaseInstance.startTimestamp();
+      const endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
+      expect(endTimestamp.sub(startTimestamp)).to.equal(poolLength);
+    });
+
+    it('[Should extend correctly when pool is already done and also do a withdraw ]:', async () => {
+      await timeTravel(poolLength + 1000);
+
+      await extend();
+      await RewardsPoolBaseInstance.withdraw(bOne);
+      for (let i = 0; i < rewardTokensCount; i++) {
+        const userDebt = await RewardsPoolBaseInstance.getUserRewardDebt(aliceAccount.address, i);
+        expect(userDebt).to.be.gt(0);
+      }
+      const startTimestamp = await RewardsPoolBaseInstance.startTimestamp();
+      const endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
+      expect(endTimestamp.sub(startTimestamp)).to.equal(poolLength);
+    });
+
+    it('[Should extend correctly when pool is already done and also do a stake]:', async () => {
+      await timeTravel(poolLength + 1000);
+
+      await extend();
+      await RewardsPoolBaseInstance.stake(standardStakingAmount);
       for (let i = 0; i < rewardTokensCount; i++) {
         const userDebt = await RewardsPoolBaseInstance.getUserRewardDebt(aliceAccount.address, i);
         expect(userDebt).to.be.gt(0);
