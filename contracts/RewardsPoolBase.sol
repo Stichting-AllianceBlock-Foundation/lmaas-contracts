@@ -104,7 +104,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         uint256 currentTimestamp = block.timestamp;
         require(
             (startTimestamp > 0 && currentTimestamp > startTimestamp) &&
-                ((currentTimestamp <= endTimestamp) || extensionDuration > 0),
+                (currentTimestamp <= endTimestamp + extensionDuration),
             'RewardsPoolBase: staking is not started or is finished or no extension taking in place'
         );
         _;
