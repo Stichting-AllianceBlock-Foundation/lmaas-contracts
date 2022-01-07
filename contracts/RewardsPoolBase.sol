@@ -417,30 +417,34 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
      * @param _rewardPerSecond array with new rewards per block for each token
      */
     function extend(uint256 _durationTime, uint256[] memory _rewardPerSecond) external virtual onlyOwner {
-        uint256 currentTimestamp = block.timestamp;
-        uint256 _endTimestamp = currentTimestamp + _durationTime;
+        if (extensionDuration == 0 && extensionRewardPerSecond.length == 0) {
+            uint256 currentTimestamp = block.timestamp;
+            uint256 _endTimestamp = currentTimestamp + _durationTime;
 
-        require(
-            _endTimestamp > currentTimestamp && _endTimestamp > endTimestamp,
-            'RewardsPoolBase: invalid endTimestamp'
-        );
-        require(_rewardPerSecond.length == rewardsTokens.length, 'RewardsPoolBase: invalid rewardPerSecond');
-        for (uint256 i = 0; i < _rewardPerSecond.length; i++) {
-            uint256 newRewards = calculateRewardsAmount(currentTimestamp, _endTimestamp, _rewardPerSecond[i]);
+            require(
+                _endTimestamp > currentTimestamp && _endTimestamp > endTimestamp,
+                'RewardsPoolBase: invalid endTimestamp'
+            );
+            require(_rewardPerSecond.length == rewardsTokens.length, 'RewardsPoolBase: invalid rewardPerSecond');
+            for (uint256 i = 0; i < _rewardPerSecond.length; i++) {
+                uint256 newRewards = calculateRewardsAmount(currentTimestamp, _endTimestamp, _rewardPerSecond[i]);
 
-            // We need to check if we have enough balance available in the contract to pay for the extension
-            uint256 availableBalance = getAvailableBalance(i);
+                // We need to check if we have enough balance available in the contract to pay for the extension
+                uint256 availableBalance = getAvailableBalance(i);
 
-            require(availableBalance >= newRewards, 'RewardsPoolBase: not enough rewards to extend');
+                require(availableBalance >= newRewards, 'RewardsPoolBase: not enough rewards to extend');
 
-            uint256 spentRewards = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerSecond[i]);
-            totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
+                uint256 spentRewards = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerSecond[i]);
+                totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
+            }
+
+            extensionDuration = _durationTime;
+            extensionRewardPerSecond = _rewardPerSecond;
+
+            updateRewardMultipliers();
+        } else {
+            updateRewardMultipliers();
         }
-
-        extensionDuration = _durationTime;
-        extensionRewardPerSecond = _rewardPerSecond;
-
-        updateRewardMultipliers();
     }
 
     /**
