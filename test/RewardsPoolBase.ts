@@ -367,7 +367,7 @@ describe('RewardsPoolBase', () => {
     });
   });
 
-  describe.only('Rewards', function () {
+  describe('Rewards', function () {
     beforeEach(async () => {
       await stakingTokenInstance.approve(RewardsPoolBaseInstance.address, amount);
 
