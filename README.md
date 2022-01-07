@@ -1,6 +1,7 @@
 # LMaaS smart contracts
 
 This project contains all smart contracts for LMaaS.
+See the [Requirements](https://allianceblockprotocol.atlassian.net/wiki/spaces/LMAAS/pages/299040784/V3+contract+requirements) for a detailed explanation of all features.
 
 ## Getting started
 
