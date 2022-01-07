@@ -229,7 +229,7 @@ describe('RewardsPoolBase', () => {
     it('[Should not stake before staking start]:', async () => {
       await stakingTokenInstance.approve(RewardsPoolBaseInstance.address, standardStakingAmount);
       await expect(RewardsPoolBaseInstance.stake(standardStakingAmount)).to.be.revertedWith(
-        'RewardsPoolBase: staking is not started or is finished'
+        'RewardsPoolBase: staking is not started'
       );
     });
 
@@ -354,16 +354,6 @@ describe('RewardsPoolBase', () => {
           'onlyUnderStakeLimit::Stake limit reached'
         );
       });
-    });
-
-    it('[Should not after staking end]:', async () => {
-      await stakingTokenInstance.approve(RewardsPoolBaseInstance.address, standardStakingAmount);
-
-      await timeTravel(70000);
-
-      await expect(RewardsPoolBaseInstance.stake(standardStakingAmount)).to.be.revertedWith(
-        'RewardsPoolBase: staking is not started or is finished'
-      );
     });
   });
 
