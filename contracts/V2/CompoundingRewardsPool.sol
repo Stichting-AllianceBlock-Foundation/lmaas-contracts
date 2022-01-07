@@ -24,4 +24,9 @@ contract CompoundingRewardsPool is RewardsPoolBase, OneStakerFeature {
     function stake(uint256 _tokenAmount) public override(RewardsPoolBase, OneStakerFeature) {
         OneStakerFeature.stake(_tokenAmount);
     }
+
+    /// @dev Not allowed
+    function extend(uint256, uint256[] calldata) external virtual override(RewardsPoolBase) {
+        revert('NonCompoundingRewardsPool::cannot extend this pool.');
+    }
 }
