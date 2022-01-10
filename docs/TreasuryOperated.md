@@ -1,5 +1,9 @@
 ## TreasuryOperated
 
+
+
+
+
 ### Inheritance
 
 ```
@@ -17,28 +21,43 @@ address treasury;
 
 #### withdrawStake
 
+
+
+
+
 ```Solidity
-uint256 amount;
+uint256 amount; 
 ```
 
 ### Events
 
 #### StakeWithdrawn
 
+
+
+
+
 ```Solidity
 uint256 amount;
 ```
-
 #### ExternalRewardsAdded
+
+
+
+
 
 ```Solidity
 address from;
 address token;
 uint256 reward;
 ```
-
 #### ExternalRewardsClaimed
+
+
+
+
 
 ```Solidity
 address receiver;
 ```
+

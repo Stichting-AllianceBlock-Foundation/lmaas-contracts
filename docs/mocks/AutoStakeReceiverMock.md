@@ -1,5 +1,9 @@
 ## AutoStakeReceiverMock
 
+
+
+
+
 ### Inheritance
 
 ```
@@ -39,65 +43,67 @@ uint256 lockEndTimestamp;
 
 #### constructor
 
-```Solidity
-address token;
-uint256 _throttleRoundSeconds;
-uint256 _throttleRoundCap;
-uint256 stakeEnd;
-```
 
+
+
+
+```Solidity
+address token; 
+uint256 _throttleRoundSeconds; 
+uint256 _throttleRoundCap; 
+```
 #### delegateStake
 
+
+
 Receives a stake from another pool
+
 
 ```Solidity
 address _staker; // The address who will own the stake
 
 uint256 _amount; // The amount to stake
 ```
-
-#### setPool
-
-<<<<<<< HEAD
-Sets the underlying reward pool. Can only be set once.
-=======
-
-
-Sets the underlying reward pool. Can only be set once.
-
->>>>>>> 990819d (Update docs)
-
-```Solidity
-address _pool; // The reward pool
-```
-
 #### stake
 
+
+
 Stake an amount of tokens
+
 
 ```Solidity
 uint256 _tokenAmount; // The amount to be staked
 ```
-
 #### exit
+
+
 
 Requests a throttled exit from the pool and gives you a time from which you can withdraw your stake and rewards.
 
 #### completeExit
 
+
+
 Completes the throttled exit from the pool.
 
 #### balanceOf → uint256
 
-```Solidity
-address _staker;
-```
 
+
+
+
+```Solidity
+address _staker; 
+```
 #### owner → address
+
+
 
 Returns the address of the current owner.
 
 #### renounceOwnership
+
+
 
 Leaves the contract without owner. It will not be possible to call
 `onlyOwner` functions anymore. Can only be called by the current owner.
@@ -106,16 +112,20 @@ thereby removing any functionality that is only available to the owner.
 
 #### transferOwnership
 
+
+
 Transfers ownership of the contract to a new account (`newOwner`).
 Can only be called by the current owner.
 
 ```Solidity
-address newOwner;
+address newOwner; 
 ```
-
 #### getPendingReward → uint256
 
+
+
 Returns the amount of reward tokens that are pending for exit for this user
+
 
 ```Solidity
 uint256 _tokenIndex; // The index of the reward to check
@@ -125,6 +135,10 @@ uint256 _tokenIndex; // The index of the reward to check
 
 #### Staked
 
+
+
+
+
 ```Solidity
 address user;
 uint256 amount;
@@ -133,22 +147,31 @@ uint256 oldShareVaule;
 uint256 newShareValue;
 uint256 balanceOf;
 ```
-
 #### OwnershipTransferred
+
+
+
+
 
 ```Solidity
 address previousOwner;
 address newOwner;
 ```
-
 #### ExitRequested
+
+
+
+
 
 ```Solidity
 address user;
 uint256 exitTimestamp;
 ```
-
 #### ExitCompleted
+
+
+
+
 
 ```Solidity
 address user;

@@ -1,9 +1,17 @@
 ## IStakingRewards
 
+
+
+
+
 ### Inheritance
 
 ```
 IStakingRewards
 ```
 
+
 ### Functions
+
+
+

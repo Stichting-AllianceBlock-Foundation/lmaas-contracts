@@ -1,5 +1,9 @@
 ## Treasury
 
+
+
+
+
 ### Inheritance
 
 ```
@@ -20,30 +24,43 @@ contract IUniswapV2Router uniswapRouter;
 
 #### constructor
 
-```Solidity
-address _uniswapRouter;
-address _externalRewardToken;
-```
 
+
+
+
+```Solidity
+address _uniswapRouter; 
+address _externalRewardToken; 
+```
 #### withdrawLiquidity
 
-```Solidity
-address[] rewardPools;
-uint256[] amounts;
-```
 
+
+
+
+```Solidity
+address[] rewardPools; 
+uint256[] amounts; 
+```
 #### returnLiquidity
 
-```Solidity
-address[] rewardPools;
-uint256[] externalRewards;
-```
 
+
+
+
+```Solidity
+address[] rewardPools; 
+uint256[] externalRewards; 
+```
 #### owner → address
+
+
 
 Returns the address of the current owner.
 
 #### renounceOwnership
+
+
 
 Leaves the contract without owner. It will not be possible to call
 `onlyOwner` functions anymore. Can only be called by the current owner.
@@ -52,18 +69,25 @@ thereby removing any functionality that is only available to the owner.
 
 #### transferOwnership
 
+
+
 Transfers ownership of the contract to a new account (`newOwner`).
 Can only be called by the current owner.
 
 ```Solidity
-address newOwner;
+address newOwner; 
 ```
 
 ### Events
 
 #### OwnershipTransferred
 
+
+
+
+
 ```Solidity
 address previousOwner;
 address newOwner;
 ```
+
