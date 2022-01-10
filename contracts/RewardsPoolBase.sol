@@ -419,16 +419,16 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
      */
     function extend(uint256 _durationTime, uint256[] memory _rewardPerSecond) external virtual onlyOwner {
         if (extensionDuration == 0 && extensionRewardPerSecond.length == 0) {
-            uint256 currentTimestamp = block.timestamp;
-            uint256 _endTimestamp = currentTimestamp + _durationTime;
+            uint256 newStartTimestamp = endTimestamp;
+            uint256 newEndTimestamp = newStartTimestamp + _durationTime;
 
             require(
-                _endTimestamp > currentTimestamp && _endTimestamp > endTimestamp,
+                newEndTimestamp > newStartTimestamp && newEndTimestamp > endTimestamp,
                 'RewardsPoolBase: invalid endTimestamp'
             );
             require(_rewardPerSecond.length == rewardsTokens.length, 'RewardsPoolBase: invalid rewardPerSecond');
             for (uint256 i = 0; i < _rewardPerSecond.length; i++) {
-                uint256 newRewards = calculateRewardsAmount(currentTimestamp, _endTimestamp, _rewardPerSecond[i]);
+                uint256 newRewards = calculateRewardsAmount(newStartTimestamp, newEndTimestamp, _rewardPerSecond[i]);
 
                 // We need to check if we have enough balance available in the contract to pay for the extension
                 uint256 availableBalance = getAvailableBalance(i);
