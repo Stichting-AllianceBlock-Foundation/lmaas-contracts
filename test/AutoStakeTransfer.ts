@@ -80,7 +80,7 @@ describe('AutoStakeTransfer', () => {
     await stakingTokenInstance.mint(CompoundingRewardsPoolInstance.address, amount);
 
     await CompoundingRewardsPoolInstance.start(startTimestamp, endTimestamp + oneMinute, [bOne]);
-    await StakeReceiverAutoStakeInstance.start(endTimestamp);
+    await StakeReceiverAutoStakeInstance.start(endTimestamp + oneMinute);
 
     await StakeTransfererAutoStakeInstance.setReceiverWhitelisted(StakeReceiverAutoStakeInstance.address, true);
 

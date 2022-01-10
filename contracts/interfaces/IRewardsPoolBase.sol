@@ -33,6 +33,8 @@ interface IRewardsPoolBase {
 
     function name() external view returns (string memory);
 
+    function endTimestamp() external view returns (uint256);
+
     //Public/external
     function start(
         uint256 _startTimestamp,

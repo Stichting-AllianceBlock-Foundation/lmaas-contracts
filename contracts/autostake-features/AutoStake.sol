@@ -46,6 +46,7 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
     }
 
     function start(uint256 _endTimestamp) external virtual onlyOwner {
+        require(rewardPool.endTimestamp() == _endTimestamp, 'End timestamp is not the same as rewards pool');
         startThrottle(_endTimestamp);
         lock(_endTimestamp);
     }
