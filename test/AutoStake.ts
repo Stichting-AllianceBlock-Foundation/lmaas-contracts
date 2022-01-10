@@ -52,15 +52,12 @@ describe('AutoStake', () => {
         stakingTokenInstance.address,
         throttleRoundSeconds,
         bOne,
-        endTimestamp,
       ])) as AutoStake;
 
       CompoundingRewardsPoolInstance = (await deployContract(staker, CompoundingRewardsPoolArtifact, [
         stakingTokenInstance.address,
         [stakingTokenInstance.address],
         AutoStakingInstance.address,
-        startTimestamp,
-        endTimestamp,
       ])) as CompoundingRewardsPool;
 
       await AutoStakingInstance.setPool(CompoundingRewardsPoolInstance.address);
@@ -77,19 +74,12 @@ describe('AutoStake', () => {
         stakingTokenInstance.address,
         throttleRoundSeconds,
         bOne,
-        endTimestamp,
       ])) as AutoStake;
 
       let CompoundingRewardsPoolInstanceNew: CompoundingRewardsPool = (await deployContract(
         staker,
         CompoundingRewardsPoolArtifact,
-        [
-          stakingTokenInstance.address,
-          [stakingTokenInstance.address],
-          AutoStakingInstance.address,
-          startTimestamp,
-          endTimestamp,
-        ]
+        [stakingTokenInstance.address, [stakingTokenInstance.address], AutoStakingInstance.address]
       )) as CompoundingRewardsPool;
 
       await expect(
@@ -110,15 +100,12 @@ describe('AutoStake', () => {
         stakingTokenInstance.address,
         throttleRoundSeconds,
         bOne,
-        endTimestamp,
       ])) as AutoStake;
 
       CompoundingRewardsPoolInstance = (await deployContract(staker, CompoundingRewardsPoolArtifact, [
         stakingTokenInstance.address,
         [stakingTokenInstance.address],
         AutoStakingInstance.address,
-        startTimestamp,
-        endTimestamp,
       ])) as CompoundingRewardsPool;
 
       await AutoStakingInstance.setPool(CompoundingRewardsPoolInstance.address);
@@ -128,10 +115,11 @@ describe('AutoStake', () => {
       await stakingTokenInstance.mint(CompoundingRewardsPoolInstance.address, amount);
 
       await CompoundingRewardsPoolInstance.start(startTimestamp, endTimestamp, [bOne]);
+      await AutoStakingInstance.start(endTimestamp);
 
       await stakingTokenInstance.connect(staker).approve(AutoStakingInstance.address, standardStakingAmount);
       await stakingTokenInstance.connect(test1Account).approve(AutoStakingInstance.address, standardStakingAmount);
-      await timeTravel(70);
+      await timeTravel(69);
     });
 
     it('[Should successfully stake]:', async () => {

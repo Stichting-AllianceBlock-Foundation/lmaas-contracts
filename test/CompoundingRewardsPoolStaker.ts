@@ -55,7 +55,6 @@ describe('CompoundingRewardsPoolStaker', () => {
       stakingTokenInstance.address,
       throttleRoundSeconds,
       bOne,
-      endTimestamp,
       contractStakeLimit,
     ])) as CompoundingRewardsPoolStaker;
 
@@ -63,8 +62,6 @@ describe('CompoundingRewardsPoolStaker', () => {
       stakingTokenInstance.address,
       [stakingTokenInstance.address],
       StakeTransfererAutoStakeInstance.address,
-      startTimestamp,
-      endTimestamp,
     ])) as CompoundingRewardsPool;
 
     await StakeTransfererAutoStakeInstance.setPool(CompoundingRewardsPoolInstance.address);
@@ -72,12 +69,12 @@ describe('CompoundingRewardsPoolStaker', () => {
     await stakingTokenInstance.mint(CompoundingRewardsPoolInstance.address, amount);
 
     await CompoundingRewardsPoolInstance.start(startTimestamp, endTimestamp, [bOne]);
+    await StakeTransfererAutoStakeInstance.start(endTimestamp);
 
     StakeReceiverAutoStakeInstance = (await deployContract(testAccount, CompoundingRewardsPoolStakerArtifact, [
       stakingTokenInstance.address,
       throttleRoundSeconds,
       bOne,
-      endTimestamp + oneMinute,
       standardStakingAmount,
     ])) as CompoundingRewardsPoolStaker;
 
@@ -85,8 +82,6 @@ describe('CompoundingRewardsPoolStaker', () => {
       stakingTokenInstance.address,
       [stakingTokenInstance.address],
       StakeReceiverAutoStakeInstance.address,
-      startTimestamp,
-      endTimestamp + oneMinute,
     ])) as CompoundingRewardsPool;
 
     await StakeReceiverAutoStakeInstance.setPool(CompoundingRewardsPoolInstance.address);
@@ -94,6 +89,7 @@ describe('CompoundingRewardsPoolStaker', () => {
     await stakingTokenInstance.mint(CompoundingRewardsPoolInstance.address, amount);
 
     await CompoundingRewardsPoolInstance.start(startTimestamp, endTimestamp + oneMinute, [bOne]);
+    await StakeReceiverAutoStakeInstance.start(endTimestamp + oneMinute);
 
     await StakeTransfererAutoStakeInstance.setReceiverWhitelisted(StakeReceiverAutoStakeInstance.address, true);
 

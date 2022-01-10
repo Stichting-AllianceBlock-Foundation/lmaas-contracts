@@ -53,7 +53,6 @@ describe('LimitedAutoStake', () => {
         stakingTokenInstance.address,
         throttleRoundSeconds,
         bOne,
-        endTimestamp,
         stakeLimit,
       ])) as LimitedAutoStake;
 
@@ -61,8 +60,6 @@ describe('LimitedAutoStake', () => {
         stakingTokenInstance.address,
         [stakingTokenInstance.address],
         AutoStakingInstance.address,
-        startTimestamp,
-        endTimestamp,
       ])) as CompoundingRewardsPool;
 
       await AutoStakingInstance.setPool(CompoundingRewardsPoolInstance.address);
@@ -81,7 +78,6 @@ describe('LimitedAutoStake', () => {
           stakingTokenInstance.address,
           throttleRoundSeconds,
           bOne,
-          endTimestamp,
           0,
         ])
       ).to.be.revertedWith('LimitedAutoStake:constructor::stake limit should not be 0');
@@ -100,7 +96,6 @@ describe('LimitedAutoStake', () => {
         stakingTokenInstance.address,
         throttleRoundSeconds,
         bOne,
-        endTimestamp,
         stakeLimit,
       ])) as LimitedAutoStake;
 
@@ -108,8 +103,6 @@ describe('LimitedAutoStake', () => {
         stakingTokenInstance.address,
         [stakingTokenInstance.address],
         AutoStakingInstance.address,
-        startTimestamp,
-        endTimestamp,
       ])) as CompoundingRewardsPool;
 
       await AutoStakingInstance.setPool(CompoundingRewardsPoolInstance.address);
@@ -119,11 +112,12 @@ describe('LimitedAutoStake', () => {
       await stakingTokenInstance.mint(CompoundingRewardsPoolInstance.address, amount);
 
       await CompoundingRewardsPoolInstance.start(startTimestamp, endTimestamp, [bOne]);
+      await AutoStakingInstance.start(endTimestamp);
 
       await stakingTokenInstance.approve(AutoStakingInstance.address, standardStakingAmount);
       await stakingTokenInstance.connect(test2Account).approve(AutoStakingInstance.address, standardStakingAmount);
 
-      await timeTravel(70);
+      await timeTravel(69);
     });
 
     it('[Should successfully stake]:', async () => {
@@ -166,7 +160,7 @@ describe('LimitedAutoStake', () => {
         });
 
         it('[Should request exit successfully]:', async () => {
-          await timeTravel(140);
+          await timeTravel(130);
 
           await AutoStakingInstance.exit();
 
@@ -178,7 +172,7 @@ describe('LimitedAutoStake', () => {
         });
 
         it('[Should not get twice reward on exit twice]:', async () => {
-          await timeTravel(140);
+          await timeTravel(130);
 
           await AutoStakingInstance.exit();
           await AutoStakingInstance.exit();
@@ -197,13 +191,13 @@ describe('LimitedAutoStake', () => {
         });
 
         it('[Should not complete early]:', async () => {
-          await timeTravel(140);
+          await timeTravel(130);
           await AutoStakingInstance.exit();
           await expect(AutoStakingInstance.completeExit()).to.be.revertedWith('finalizeExit::Trying to exit too early');
         });
 
         it('[Should complete succesfully]:', async () => {
-          await timeTravel(140);
+          await timeTravel(130);
           await AutoStakingInstance.exit();
           await timeTravel(210);
 

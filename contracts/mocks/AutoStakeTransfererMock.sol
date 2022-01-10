@@ -8,7 +8,6 @@ contract AutoStakeTransfererMock is StakeTransfererAutoStake {
     constructor(
         address token,
         uint256 _throttleRoundBlocks,
-        uint256 _throttleRoundCap,
-        uint256 stakeEnd
-    ) AutoStake(token, _throttleRoundBlocks, _throttleRoundCap, stakeEnd) {}
+        uint256 _throttleRoundCap
+    ) AutoStake(token, _throttleRoundBlocks, _throttleRoundCap) {}
 }
