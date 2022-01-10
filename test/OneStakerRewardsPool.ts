@@ -74,8 +74,6 @@ describe('OneStakerRewardsPool', () => {
       stakingTokenAddress,
       rewardTokensAddresses,
       staker.address,
-      startTimestamp,
-      endTimestamp,
       name
     )) as CompoundingRewardsPool;
 

@@ -31,7 +31,17 @@ interface IRewardsPoolBase {
 
     function updateUserAccruedReward(address _userAddress) external;
 
+    function name() external view returns (string memory);
+
+    function endTimestamp() external view returns (uint256);
+
     //Public/external
+    function start(
+        uint256 _startTimestamp,
+        uint256 _endTimestamp,
+        uint256[] calldata _rewardPerSecond
+    ) external;
+
     function stake(uint256 _tokenAmount) external;
 
     function withdraw(uint256 _tokenAmount) external;
