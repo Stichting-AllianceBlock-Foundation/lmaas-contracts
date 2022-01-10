@@ -11,18 +11,22 @@ import './../StakeReceiver.sol';
 abstract contract StakeTransfererAutoStake is AutoStake, StakeTransferer {
     using SafeERC20Detailed for IERC20Detailed;
 
-    function setReceiverWhitelisted(address receiver, bool whitelisted) public override(StakeTransferer) onlyOwner {
-        StakeTransferer.setReceiverWhitelisted(receiver, whitelisted);
+    /** @dev Change whitelist status of a receiver pool to receive transfers.
+     * @param _receiver The pool address to whitelist
+     * @param _whitelisted If it should be whitelisted or not
+     */
+    function setReceiverWhitelisted(address _receiver, bool _whitelisted) public override(StakeTransferer) onlyOwner {
+        StakeTransferer.setReceiverWhitelisted(_receiver, _whitelisted);
     }
 
     /** @dev exits the current campaign and trasnfers the stake to another whitelisted campaign
-		@param transferTo address of the receiver to transfer the stake to
+		@param _transferTo address of the receiver to transfer the stake to
 	 */
-    function exitAndTransfer(address transferTo)
+    function exitAndTransfer(address _transferTo)
         public
         virtual
         override
-        onlyWhitelistedReceiver(transferTo)
+        onlyWhitelistedReceiver(_transferTo)
         onlyUnlocked
         nonReentrant
     {
@@ -37,9 +41,9 @@ abstract contract StakeTransfererAutoStake is AutoStake, StakeTransferer {
         totalShares = totalShares - share[msg.sender];
         share[msg.sender] = 0;
 
-        stakingToken.safeApprove(transferTo, userStake);
+        stakingToken.safeApprove(_transferTo, userStake);
 
-        StakeReceiver(transferTo).delegateStake(msg.sender, userStake);
+        StakeReceiver(_transferTo).delegateStake(msg.sender, userStake);
 
         updateValuePerShare();
     }

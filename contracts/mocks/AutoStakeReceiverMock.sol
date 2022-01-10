@@ -7,7 +7,7 @@ import './../autostake-features/StakeReceiverAutoStake.sol';
 contract AutoStakeReceiverMock is StakeReceiverAutoStake {
     constructor(
         address token,
-        uint256 _throttleRoundBlocks,
+        uint256 _throttleRoundSeconds,
         uint256 _throttleRoundCap
-    ) AutoStake(token, _throttleRoundBlocks, _throttleRoundCap) {}
+    ) AutoStake(token, _throttleRoundSeconds, _throttleRoundCap) {}
 }

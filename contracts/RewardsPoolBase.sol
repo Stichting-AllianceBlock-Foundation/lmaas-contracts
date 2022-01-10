@@ -6,10 +6,25 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 import './interfaces/IERC20Detailed.sol';
 import './SafeERC20Detailed.sol';
 
+/** @dev Base pool contract used in all other pools. 
+Users can stake tokens and get rewards based on the percentage of total staked tokens.
+After deployment, owner can send funds and then start the pool. 
+When it's started a check is done to verify enough rewards are available. 
+Users can claim their rewards at any point, as well as withdraw their stake.
+The owner can extend the pool by setting a new end time and sending more rewards if needed.
+
+Rewards are kept track of using the accumulatedRewardMultiplier.
+This variable represents the accumulated reward per token staked from the start until now.
+Based on the difference between the accumulatedRewardMultiplier at the time of your stake and withdrawal, 
+we calculate the amount of tokens you can claim.
+
+For example, you enter when the accumulatedRewardMultiplier is 5 and exit at 20. You staked 100 tokens.
+Your reward is (20 - 5) * 100 = 1500 tokens.
+*/
 contract RewardsPoolBase is ReentrancyGuard, Ownable {
     using SafeERC20Detailed for IERC20Detailed;
 
-    uint256 constant PRECISION = 1000000000000000000;
+    uint256 internal constant PRECISION = 1000000000000000000;
 
     uint256 public totalStaked;
     uint256[] private totalClaimed;
@@ -48,6 +63,12 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     event Extended(uint256 newEndTimestamp, uint256[] newRewardsPerSecond);
     event WithdrawLPRewards(uint256 indexed rewardsAmount, address indexed recipient);
 
+    /** @param _stakingToken The token to stake
+     * @param _rewardsTokens The reward tokens
+     * @param _stakeLimit Maximum amount of tokens that can be staked per user
+     * @param _contractStakeLimit Maximum amount of tokens that can be staked in total
+     * @param _name Name of the pool
+     */
     constructor(
         IERC20Detailed _stakingToken,
         address[] memory _rewardsTokens,
@@ -93,6 +114,11 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         _;
     }
 
+    /** @dev Start the pool. Funds for rewards will be checked and staking will be opened.
+     * @param _startTimestamp The start time of the pool
+     * @param _endTimestamp The end time of the pool
+     * @param _rewardPerSecond Amount of rewards given per second
+     */
     function start(
         uint256 _startTimestamp,
         uint256 _endTimestamp,
@@ -130,26 +156,21 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         emit Started();
     }
 
-    /** @dev Providing LP tokens to stake, update rewards.
+    /** @dev Stake an amount of tokens
      * @param _tokenAmount The amount to be staked
      */
     function stake(uint256 _tokenAmount) public virtual nonReentrant {
         _stake(_tokenAmount, msg.sender, true);
     }
 
-    /** @dev Providing LP tokens to stake, update rewards.
-     * @param _tokenAmount The amount to be staked
-     * @param staker The staker to be associated with the stake
-     * @param chargeStaker Whether to draw from the staker or from the msg.sender
-     */
     function _stake(
         uint256 _tokenAmount,
-        address staker,
-        bool chargeStaker
-    ) internal onlyInsideBounds onlyUnderStakeLimit(staker, _tokenAmount) {
+        address _staker,
+        bool _chargeStaker
+    ) internal onlyInsideBounds onlyUnderStakeLimit(_staker, _tokenAmount) {
         require(_tokenAmount > 0, 'RewardsPoolBase: cannot stake 0');
 
-        UserInfo storage user = userInfo[staker];
+        UserInfo storage user = userInfo[_staker];
 
         // if no amount has been staked this is considered the initial stake
         if (user.amountStaked == 0) {
@@ -157,7 +178,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         }
 
         updateRewardMultipliers(); // Update the accumulated multipliers for everyone
-        updateUserAccruedReward(staker); // Update the accrued reward for this specific user
+        updateUserAccruedReward(_staker); // Update the accrued reward for this specific user
 
         user.amountStaked = user.amountStaked + _tokenAmount;
         totalStaked = totalStaked + _tokenAmount;
@@ -168,21 +189,21 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
             user.rewardDebt[i] = (user.amountStaked * accumulatedRewardMultiplier[i]) / PRECISION; // Update user reward debt for each token
         }
 
-        stakingToken.safeTransferFrom(address(chargeStaker ? staker : msg.sender), address(this), _tokenAmount);
+        stakingToken.safeTransferFrom(address(_chargeStaker ? _staker : msg.sender), address(this), _tokenAmount);
 
-        emit Staked(staker, _tokenAmount);
+        emit Staked(_staker, _tokenAmount);
     }
 
-    /** @dev Claiming accrued rewards
+    /** @dev Claim all your rewards, this will not remove your stake
      */
     function claim() public virtual nonReentrant {
         _claim(msg.sender);
     }
 
-    function _claim(address claimer) internal {
-        UserInfo storage user = userInfo[claimer];
+    function _claim(address _claimer) internal {
+        UserInfo storage user = userInfo[_claimer];
         updateRewardMultipliers();
-        updateUserAccruedReward(claimer);
+        updateUserAccruedReward(_claimer);
 
         uint256 rewardsTokensLength = rewardsTokens.length;
 
@@ -190,27 +211,27 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
             uint256 reward = user.tokensOwed[i];
             user.tokensOwed[i] = 0;
 
-            IERC20Detailed(rewardsTokens[i]).safeTransfer(claimer, reward);
+            IERC20Detailed(rewardsTokens[i]).safeTransfer(_claimer, reward);
             totalClaimed[i] = totalClaimed[i] + reward;
 
-            emit Claimed(claimer, reward, rewardsTokens[i]);
+            emit Claimed(_claimer, reward, rewardsTokens[i]);
         }
     }
 
-    /** @dev Withdrawing portion of staked tokens.
+    /** @dev Withdrawing a portion or all of staked tokens. This will not claim your rewards
      * @param _tokenAmount The amount to be withdrawn
      */
     function withdraw(uint256 _tokenAmount) public virtual nonReentrant {
         _withdraw(_tokenAmount, msg.sender);
     }
 
-    function _withdraw(uint256 _tokenAmount, address withdrawer) internal {
+    function _withdraw(uint256 _tokenAmount, address _withdrawer) internal {
         require(_tokenAmount > 0, 'RewardsPoolBase: cannot withdraw 0');
 
-        UserInfo storage user = userInfo[withdrawer];
+        UserInfo storage user = userInfo[_withdrawer];
 
         updateRewardMultipliers(); // Update the accumulated multipliers for everyone
-        updateUserAccruedReward(withdrawer); // Update the accrued reward for this specific user
+        updateUserAccruedReward(_withdrawer); // Update the accrued reward for this specific user
 
         user.amountStaked = user.amountStaked - _tokenAmount;
         totalStaked = totalStaked - _tokenAmount;
@@ -222,12 +243,12 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
             user.rewardDebt[i] = totalDebt;
         }
 
-        stakingToken.safeTransfer(address(withdrawer), _tokenAmount);
+        stakingToken.safeTransfer(address(_withdrawer), _tokenAmount);
 
-        emit Withdrawn(withdrawer, _tokenAmount);
+        emit Withdrawn(_withdrawer, _tokenAmount);
     }
 
-    /** @dev Claiming all rewards and withdrawing all staked tokens. Exits from the rewards pool
+    /** @dev Claim all rewards and withdraw all staked tokens. Exits from the rewards pool
      */
     function exit() public virtual nonReentrant {
         _exit(msg.sender);
@@ -242,15 +263,14 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     }
 
     /** @dev Returns the amount of tokens the user has staked
+     * @param _userAddress The user to get the balance of
      */
     function balanceOf(address _userAddress) public view returns (uint256) {
         UserInfo storage user = userInfo[_userAddress];
         return user.amountStaked;
     }
 
-    /**
-		@dev updates the accumulated reward multipliers for everyone and each token
-	 */
+    /// @dev Updates the accumulated reward multipliers for everyone and each token
     function updateRewardMultipliers() public {
         uint256 currentTimestamp = block.timestamp;
 
@@ -283,10 +303,9 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         lastRewardTimestamp = applicableTimestamp;
     }
 
-    /**
-		@dev updates the accumulated reward for the user with the _userAddress address
-		@param _userAddress the address of the updated user
-	 */
+    /** @dev Updates the accumulated reward for the user
+     * @param _userAddress the address of the updated user
+     */
     function updateUserAccruedReward(address _userAddress) internal {
         UserInfo storage user = userInfo[_userAddress];
 
@@ -316,43 +335,54 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         }
     }
 
+    /**
+		@dev Checks if the staking has started
+	 */
     function hasStakingStarted() public view returns (bool) {
         return (startTimestamp > 0 && block.timestamp >= startTimestamp);
     }
 
+    /** @dev Returns the amount of reward debt of a specific token and user
+     * @param _userAddress the address of the updated user
+     * @param _index index of the reward token to check
+     */
     function getUserRewardDebt(address _userAddress, uint256 _index) external view returns (uint256) {
         UserInfo storage user = userInfo[_userAddress];
         return user.rewardDebt[_index];
     }
 
+    /** @dev Returns the amount of reward owed of a specific token and user
+     * @param _userAddress the address of the updated user
+     * @param _index index of the reward token to check
+     */
     function getUserOwedTokens(address _userAddress, uint256 _index) external view returns (uint256) {
         UserInfo storage user = userInfo[_userAddress];
         return user.tokensOwed[_index];
     }
 
-    /**
-		@dev Simulate all conditions in order to calculate the calculated reward at the moment
-		@param _userAddress the address of the user
-		@param tokenIndex the index of the reward token you are interested
-	 */
+    /** @dev Calculates the reward at a specific time
+     * @param _userAddress the address of the user
+     * @param _tokenIndex the index of the reward token you are interested
+     * @param _time the time to check the reward at
+     */
     function getUserAccumulatedReward(
         address _userAddress,
-        uint256 tokenIndex,
-        uint256 _currentTimestamp
+        uint256 _tokenIndex,
+        uint256 _time
     ) public view returns (uint256) {
-        uint256 applicableTimestamp = (_currentTimestamp < endTimestamp) ? _currentTimestamp : endTimestamp;
+        uint256 applicableTimestamp = (_time < endTimestamp) ? _time : endTimestamp;
 
         uint256 secondsSinceLastReward = applicableTimestamp - lastRewardTimestamp;
 
-        uint256 newReward = secondsSinceLastReward * rewardPerSecond[tokenIndex]; // Get newly accumulated reward
+        uint256 newReward = secondsSinceLastReward * rewardPerSecond[_tokenIndex]; // Get newly accumulated reward
         uint256 rewardMultiplierIncrease = (newReward * PRECISION) / totalStaked; // Calculate the multiplier increase
-        uint256 currentMultiplier = accumulatedRewardMultiplier[tokenIndex] + rewardMultiplierIncrease; // Simulate the multiplier increase to the accumulated multiplier
+        uint256 currentMultiplier = accumulatedRewardMultiplier[_tokenIndex] + rewardMultiplierIncrease; // Simulate the multiplier increase to the accumulated multiplier
 
         UserInfo storage user = userInfo[_userAddress];
 
         uint256 totalDebt = (user.amountStaked * currentMultiplier) / PRECISION; // Simulate the current debt
-        uint256 pendingDebt = totalDebt - user.rewardDebt[tokenIndex]; // Simulate the pending debt
-        return user.tokensOwed[tokenIndex] + pendingDebt;
+        uint256 pendingDebt = totalDebt - user.rewardDebt[_tokenIndex]; // Simulate the pending debt
+        return user.tokensOwed[_tokenIndex] + pendingDebt;
     }
 
     function getUserTokensOwedLength(address _userAddress) external view returns (uint256) {
@@ -365,11 +395,10 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         return user.rewardDebt.length;
     }
 
-    /**
-		@dev Extends the rewards period and updates the rates
-		@param _endTimestamp  new end block for the rewards
-		@param _rewardPerSecond array with new rewards per block for each token 
-	 */
+    /** @dev Extends the rewards period and changes the reward rate
+     * @param _endTimestamp  new end time for the reward period
+     * @param _rewardPerSecond array with new reward rates per second for each token
+     */
     function extend(uint256 _endTimestamp, uint256[] calldata _rewardPerSecond) external virtual onlyOwner {
         uint256 currentTimestamp = block.timestamp;
 
@@ -413,7 +442,11 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         emit Extended(_endTimestamp, _rewardPerSecond);
     }
 
-    function getAvailableBalance(uint256 _rewardTokenIndex, uint256 time) public view returns (uint256) {
+    /** @dev Calculates the available amount of reward tokens that are not locked
+     * @param _rewardTokenIndex the index of the reward token to check
+     * @param _time the time to do the calculations at
+     */
+    function getAvailableBalance(uint256 _rewardTokenIndex, uint256 _time) public view returns (uint256) {
         address rewardToken = rewardsTokens[_rewardTokenIndex];
         uint256 balance = IERC20Detailed(rewardToken).balanceOf(address(this));
 
@@ -421,7 +454,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
             return balance;
         }
 
-        uint256 campaignTime = time > endTimestamp ? endTimestamp : time;
+        uint256 campaignTime = _time > endTimestamp ? endTimestamp : _time;
 
         uint256 spentRewards = calculateRewardsAmount(startTimestamp, campaignTime, rewardPerSecond[_rewardTokenIndex]);
         uint256 availableBalance = balance -
@@ -434,27 +467,30 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         return availableBalance;
     }
 
-    /** @dev Withdrawing rewards acumulated from different pools for providing liquidity
-     * @param recipient The address to whom the rewards will be trasferred
-     * @param lpTokenContract The address of the rewards contract
+    /** @dev Withdraw rewards acumulated from different pools for providing liquidity
+     * @param _recipient The address to whom the rewards will be trasferred
+     * @param _lpTokenContract The address of the rewards contract
      */
-    function withdrawLPRewards(address recipient, address lpTokenContract) external nonReentrant onlyOwner {
-        uint256 currentReward = IERC20Detailed(lpTokenContract).balanceOf(address(this));
+    function withdrawLPRewards(address _recipient, address _lpTokenContract) external nonReentrant onlyOwner {
+        uint256 currentReward = IERC20Detailed(_lpTokenContract).balanceOf(address(this));
         require(currentReward > 0, 'RewardsPoolBase: no rewards');
 
-        require(lpTokenContract != address(stakingToken), 'RewardsPoolBase: cannot withdraw staking token');
+        require(_lpTokenContract != address(stakingToken), 'RewardsPoolBase: cannot withdraw staking token');
 
         uint256 rewardsTokensLength = rewardsTokens.length;
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
-            require(lpTokenContract != rewardsTokens[i], 'RewardsPoolBase: cannot withdraw reward token');
+            require(_lpTokenContract != rewardsTokens[i], 'RewardsPoolBase: cannot withdraw reward token');
         }
 
-        IERC20Detailed(lpTokenContract).safeTransfer(recipient, currentReward);
-        emit WithdrawLPRewards(currentReward, recipient);
+        IERC20Detailed(_lpTokenContract).safeTransfer(_recipient, currentReward);
+        emit WithdrawLPRewards(currentReward, _recipient);
     }
 
-    /** @dev Helper function to calculate how much tokens should be transffered to a rewards pool.
+    /** @dev Calculates the amount of rewards given in a specific period
+     * @param _startTimestamp The start time of the period
+     * @param _endTimestamp The end time of the period
+     * @param _rewardPerSecond The reward per second
      */
     function calculateRewardsAmount(
         uint256 _startTimestamp,

@@ -11,8 +11,12 @@ import './../StakeReceiver.sol';
 abstract contract StakeTransfererFeature is OnlyExitFeature, StakeTransferer {
     using SafeERC20Detailed for IERC20Detailed;
 
-    function setReceiverWhitelisted(address receiver, bool whitelisted) public override(StakeTransferer) onlyOwner {
-        StakeTransferer.setReceiverWhitelisted(receiver, whitelisted);
+    /** @dev Change whitelist status of a receiver pool to receive transfers.
+     * @param _receiver The pool address to whitelist
+     * @param _whitelisted If it should be whitelisted or not
+     */
+    function setReceiverWhitelisted(address _receiver, bool _whitelisted) public override(StakeTransferer) onlyOwner {
+        StakeTransferer.setReceiverWhitelisted(_receiver, _whitelisted);
     }
 
     /** @dev exits the current campaign and trasnfers the stake to another whitelisted campaign

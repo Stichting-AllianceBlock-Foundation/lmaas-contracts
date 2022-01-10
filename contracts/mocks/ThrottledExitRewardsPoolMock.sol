@@ -7,7 +7,7 @@ import './../pool-features/ThrottledExitFeature.sol';
 contract ThrottledExitRewardsPoolMock is RewardsPoolBase, OnlyExitFeature, ThrottledExitFeature {
     constructor(
         IERC20Detailed _stakingToken,
-        uint256,
+        uint256, // _startBlock,
         uint256 _endBlock,
         address[] memory _rewardsTokens,
         uint256 _stakeLimit,

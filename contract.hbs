@@ -1,0 +1,81 @@
+## {{name}}
+
+{{{natspec.userdoc}}}
+
+{{{natspec.devdoc}}}
+
+{{#if inheritance}}
+### Inheritance
+
+```
+{{#each inheritance}}
+{{#unless (eq name ../name)}}{{name}}{{/unless}}
+{{/each}}
+```
+{{/if}}
+
+{{#if variables}}
+### Variables
+
+```Solidity
+{{#each variables}}
+{{type}} {{name}};
+{{/each}}
+```
+{{/if}}
+
+{{#if functions}}
+### Functions
+
+{{#each functions}}
+{{#if (eq visibility "public")}}
+#### {{name}}{{#if outputs}} → {{outputs}}{{/if}}
+
+{{{natspec.userdoc}}}
+
+{{{natspec.devdoc}}}
+
+{{#if args}}
+```Solidity
+{{#each args}}
+{{typeName}} {{name}}; {{#each ../natspec.params}}{{#if (eq param ../name)}}// {{description}}{{/if}}{{/each}}
+{{/each}}
+```
+{{/if}}
+{{/if}}
+{{/each}}
+{{/if}}
+
+{{#if events}}
+### Events
+
+{{#each events}}
+#### {{name}}
+
+{{{natspec.userdoc}}}
+
+{{{natspec.devdoc}}}
+
+{{#if args}}
+```Solidity
+{{#each args}}
+{{typeName}} {{name}};
+{{/each}}
+```
+{{/if}}
+{{/each}}
+{{/if}}
+
+{{#if structs}}
+### Structs
+
+{{#each structs}}
+#### {{name}}
+
+```Solidity
+{{#each members}}
+{{type}} {{name}};
+{{/each}}
+```
+{{/each}}
+{{/if}}
