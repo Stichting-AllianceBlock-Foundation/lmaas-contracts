@@ -5,7 +5,6 @@ import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import './interfaces/IERC20Detailed.sol';
 import './SafeERC20Detailed.sol';
-import 'hardhat/console.sol';
 
 /** @dev Base pool contract used in all other pools. 
 Users can stake tokens and get rewards based on the percentage of total staked tokens.
@@ -146,7 +145,9 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         require(_rewardPerSecond.length == rewardsTokens.length, 'RewardsPoolBase: invalid rewardPerSecond');
         rewardPerSecond = _rewardPerSecond;
 
-        for (uint256 i = 0; i < rewardsTokens.length; i++) {
+        uint256 rewardsTokensLength = rewardsTokens.length;
+
+        for (uint256 i = 0; i < rewardsTokensLength; i++) {
             uint256 rewardsAmount = calculateRewardsAmount(_startTimestamp, _endTimestamp, rewardPerSecond[i]);
 
             uint256 balance = IERC20Detailed(rewardsTokens[i]).balanceOf(address(this));
@@ -279,7 +280,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     function updateRewardMultipliers() public {
         uint256 currentTimestamp = block.timestamp;
 
-        if (currentTimestamp > endTimestamp && extensionDuration > 0 && extensionRewardPerSecond.length > 0) {
+        if (currentTimestamp > endTimestamp && extensionDuration > 0) {
             _updateRewardMultipliers(endTimestamp);
             _extend(endTimestamp, endTimestamp + extensionDuration, extensionRewardPerSecond);
             _updateRewardMultipliers(currentTimestamp);
