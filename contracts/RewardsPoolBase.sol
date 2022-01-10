@@ -327,10 +327,12 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     function updateUserAccruedReward(address _userAddress) internal {
         UserInfo storage user = userInfo[_userAddress];
 
+        uint256 rewardsTokensLength = rewardsTokens.length;
+
         if (user.rewardDebt.length == 0) {
             // Initialize user struct
 
-            for (uint256 i = 0; i < rewardsTokens.length; i++) {
+            for (uint256 i = 0; i < rewardsTokensLength; i++) {
                 user.rewardDebt.push(0);
                 user.tokensOwed.push(0);
             }
@@ -339,8 +341,6 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         if (user.amountStaked == 0) {
             return;
         }
-
-        uint256 rewardsTokensLength = rewardsTokens.length;
 
         for (uint256 tokenIndex = 0; tokenIndex < rewardsTokensLength; tokenIndex++) {
             uint256 totalDebt = (user.amountStaked * accumulatedRewardMultiplier[tokenIndex]) / PRECISION;
