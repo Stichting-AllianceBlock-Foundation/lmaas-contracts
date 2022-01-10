@@ -439,10 +439,18 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
                 totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
             }
 
-            extensionDuration = _durationTime;
-            extensionRewardPerSecond = _rewardPerSecond;
+            uint256 currentTimestamp = block.timestamp;
 
-            updateRewardMultipliers();
+            if (currentTimestamp > endTimestamp) {
+                _updateRewardMultipliers(endTimestamp);
+                _extend(newStartTimestamp, newEndTimestamp, _rewardPerSecond);
+                _updateRewardMultipliers(currentTimestamp);
+            } else {
+                extensionDuration = _durationTime;
+                extensionRewardPerSecond = _rewardPerSecond;
+
+                updateRewardMultipliers();
+            }
         } else {
             updateRewardMultipliers();
         }
