@@ -496,12 +496,12 @@ describe('RewardsPoolBase', () => {
       await RewardsPoolBaseInstance.extend(poolLength, newRewardsPerSecond);
     }
 
-    it('[Should extend correctly if the pool is not done and extend with extend]:', async () => {
+    it('[Should extend correctly if the pool is not done and extend with updateRewardMultipliers]:', async () => {
       await extend();
       const extensionDuration = await RewardsPoolBaseInstance.extensionDuration();
       await timeTravel(poolLength + 1000);
 
-      await RewardsPoolBaseInstance.extend(1, [1]);
+      await RewardsPoolBaseInstance.updateRewardMultipliers();
       const startTimestamp = await RewardsPoolBaseInstance.startTimestamp();
       const endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
 
@@ -563,6 +563,15 @@ describe('RewardsPoolBase', () => {
       expect(extensionDuration).to.equal(poolLength);
     });
 
+    it('[Should extend correctly when pool is already done]:', async () => {
+      await timeTravel(poolLength + 1000);
+
+      await extend();
+      const startTimestamp = await RewardsPoolBaseInstance.startTimestamp();
+      const endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
+      expect(endTimestamp.sub(startTimestamp)).to.equal(poolLength);
+    });
+
     it('[Should extend correctly when pool is already done and also do a claim ]:', async () => {
       await timeTravel(poolLength + 1000);
 
@@ -605,13 +614,13 @@ describe('RewardsPoolBase', () => {
       expect(endTimestamp.sub(startTimestamp)).to.equal(poolLength);
     });
 
-    it('[Should extend correctly multiple times with extend]:', async () => {
+    it('[Should extend correctly multiple times with updateRewardMultipliers]:', async () => {
       let oldEndTimestamp = await RewardsPoolBaseInstance.endTimestamp();
       await extend();
       await timeTravel(poolLength + 1000);
 
       let extensionDuration = await (await RewardsPoolBaseInstance.extensionDuration()).toNumber();
-      await RewardsPoolBaseInstance.extend(1, [1]);
+      await RewardsPoolBaseInstance.updateRewardMultipliers();
       let endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
       expect(endTimestamp).to.equal(oldEndTimestamp.add(extensionDuration));
 
@@ -620,7 +629,7 @@ describe('RewardsPoolBase', () => {
       await timeTravel(poolLength + 1000);
 
       extensionDuration = await (await RewardsPoolBaseInstance.extensionDuration()).toNumber();
-      await RewardsPoolBaseInstance.extend(1, [1]);
+      await RewardsPoolBaseInstance.updateRewardMultipliers();
       endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
       expect(endTimestamp).to.equal(oldEndTimestamp.add(extensionDuration));
 
@@ -629,7 +638,7 @@ describe('RewardsPoolBase', () => {
       await timeTravel(poolLength + 1000);
 
       extensionDuration = await (await RewardsPoolBaseInstance.extensionDuration()).toNumber();
-      await RewardsPoolBaseInstance.extend(1, [1]);
+      await RewardsPoolBaseInstance.updateRewardMultipliers();
       endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
       expect(endTimestamp).to.equal(oldEndTimestamp.add(extensionDuration));
     });
@@ -727,6 +736,13 @@ describe('RewardsPoolBase', () => {
 
       expect(RewardsPoolBaseInstance.stake(standardStakingAmount)).to.be.revertedWith(
         'RewardsPoolBase: staking is not started or is finished or no extension taking in place'
+      );
+    });
+
+    it('[Should fail if try to extend again if a extension is taking in place]:', async () => {
+      await extend();
+      expect(RewardsPoolBaseInstance.extend(1, [1])).to.be.revertedWith(
+        'RewardsPoolBase: there is already an extension'
       );
     });
 
