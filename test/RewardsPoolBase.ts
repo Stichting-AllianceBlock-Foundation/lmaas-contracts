@@ -246,6 +246,13 @@ describe('RewardsPoolBase', () => {
       );
     });
 
+    it('[Should be able to restart after cancel]:', async () => {
+      await RewardsPoolBaseInstance.cancel();
+
+      await RewardsPoolBaseInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
+      expect(await RewardsPoolBaseInstance.startTimestamp()).to.equal(startTimestamp, 'Was not able to restart');
+    });
+
     describe('Inside bounds', function () {
       beforeEach(async () => {
         await stakingTokenInstance.approve(RewardsPoolBaseInstance.address, standardStakingAmount);
