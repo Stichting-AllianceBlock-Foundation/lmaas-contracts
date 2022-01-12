@@ -73,7 +73,7 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
     /** @dev Stake an amount of tokens
      * @param _tokenAmount The amount to be staked
      */
-    function stake(uint256 _tokenAmount) public virtual {
+    function stake(uint256 _tokenAmount) public virtual nonReentrant {
         _stake(_tokenAmount, msg.sender, true);
     }
 
@@ -81,7 +81,7 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
         uint256 _amount,
         address _staker,
         bool _chargeStaker
-    ) internal nonReentrant {
+    ) internal {
         exitRewardPool();
         updateValuePerShare();
 

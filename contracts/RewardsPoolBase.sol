@@ -202,11 +202,11 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 
     /** @dev Claim all your rewards, this will not remove your stake
      */
-    function claim() public virtual {
+    function claim() public virtual nonReentrant {
         _claim(msg.sender);
     }
 
-    function _claim(address _claimer) internal nonReentrant {
+    function _claim(address _claimer) internal {
         UserInfo storage user = userInfo[_claimer];
         updateRewardMultipliers();
         _updateUserAccruedReward(_claimer);
@@ -227,11 +227,11 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     /** @dev Withdrawing a portion or all of staked tokens. This will not claim your rewards
      * @param _tokenAmount The amount to be withdrawn
      */
-    function withdraw(uint256 _tokenAmount) public virtual {
+    function withdraw(uint256 _tokenAmount) public virtual nonReentrant {
         _withdraw(_tokenAmount, msg.sender);
     }
 
-    function _withdraw(uint256 _tokenAmount, address _withdrawer) internal nonReentrant {
+    function _withdraw(uint256 _tokenAmount, address _withdrawer) internal {
         require(_tokenAmount > 0, 'RewardsPoolBase: cannot withdraw 0');
 
         UserInfo storage user = userInfo[_withdrawer];
@@ -260,7 +260,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         _exit(msg.sender);
     }
 
-    function _exit(address exiter) internal nonReentrant {
+    function _exit(address exiter) internal {
         UserInfo storage user = userInfo[exiter];
         _claim(exiter);
         _withdraw(user.amountStaked, exiter);

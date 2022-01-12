@@ -34,15 +34,11 @@ contract LiquidityMiningCampaign is StakeTransferer, RewardsPoolBase {
      @dev Exits the current campaing, claims the bonus and stake all rewards in another pool
 	   @param _stakePool the address of the pool where the tokens will be staked
 	  */
-    function exitAndStake(address _stakePool) external {
+    function exitAndStake(address _stakePool) external nonReentrant {
         _exitAndStake(msg.sender, _stakePool);
     }
 
-    function _exitAndStake(address _userAddress, address _stakePool)
-        internal
-        onlyWhitelistedReceiver(_stakePool)
-        nonReentrant
-    {
+    function _exitAndStake(address _userAddress, address _stakePool) internal onlyWhitelistedReceiver(_stakePool) {
         UserInfo storage user = userInfo[_userAddress];
 
         if (user.amountStaked == 0) {
