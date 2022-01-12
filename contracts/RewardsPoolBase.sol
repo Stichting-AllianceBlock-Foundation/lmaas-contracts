@@ -99,25 +99,6 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         name = _name;
     }
 
-    modifier onlyInsideBounds() {
-        uint256 currentTimestamp = block.timestamp;
-        require(
-            (startTimestamp > 0 && currentTimestamp > startTimestamp) &&
-                (currentTimestamp <= endTimestamp + extensionDuration),
-            'RewardsPoolBase: staking is not started or is finished or no extension taking in place'
-        );
-        _;
-    }
-
-    modifier onlyUnderStakeLimit(address staker, uint256 newStake) {
-        UserInfo storage user = userInfo[staker];
-        require(
-            (user.amountStaked + newStake <= stakeLimit) && (totalStaked + newStake <= contractStakeLimit),
-            'onlyUnderStakeLimit::Stake limit reached'
-        );
-        _;
-    }
-
     /** @dev Start the pool. Funds for rewards will be checked and staking will be opened.
      * @param _startTimestamp The start time of the pool
      * @param _endTimestamp The end time of the pool
@@ -181,14 +162,25 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         uint256 _tokenAmount,
         address _staker,
         bool _chargeStaker
-    ) internal onlyInsideBounds onlyUnderStakeLimit(_staker, _tokenAmount) {
-        require(_tokenAmount > 0, 'RewardsPoolBase: cannot stake 0');
+    ) internal {
+        uint256 currentTimestamp = block.timestamp;
+        require(
+            (startTimestamp > 0 && currentTimestamp > startTimestamp) &&
+                (currentTimestamp <= endTimestamp + extensionDuration),
+            'RewardsPoolBase: staking is not started or is finished or no extension taking in place'
+        );
 
         UserInfo storage user = userInfo[_staker];
+        require(
+            (user.amountStaked + _tokenAmount <= stakeLimit) && (totalStaked + _tokenAmount <= contractStakeLimit),
+            'RewardsPoolBase: stake limit reached'
+        );
+
+        require(_tokenAmount > 0, 'RewardsPoolBase: cannot stake 0');
 
         // if no amount has been staked this is considered the initial stake
         if (user.amountStaked == 0) {
-            user.firstStakedTimestamp = block.timestamp;
+            user.firstStakedTimestamp = currentTimestamp;
         }
 
         updateRewardMultipliers(); // Update the accumulated multipliers for everyone
