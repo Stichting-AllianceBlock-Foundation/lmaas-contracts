@@ -162,6 +162,14 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         emit Started();
     }
 
+    function cancel() public onlyOwner {
+        require(startTimestamp > block.timestamp, 'RewardsPoolBase: No start scheduled or already started');
+
+        startTimestamp = 0;
+        endTimestamp = 0;
+        lastRewardTimestamp = 0;
+    }
+
     /** @dev Stake an amount of tokens
      * @param _tokenAmount The amount to be staked
      */
@@ -412,6 +420,10 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     function getUserRewardDebtLength(address _userAddress) external view returns (uint256) {
         UserInfo storage user = userInfo[_userAddress];
         return user.rewardDebt.length;
+    }
+
+    function getRewardTokensCount() external view returns (uint256) {
+        return rewardsTokens.length;
     }
 
     /**
