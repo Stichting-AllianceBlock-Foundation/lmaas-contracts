@@ -20,10 +20,10 @@ ReentrancyGuard
 
 ```Solidity
 uint256 stakeLimit;
+uint256 UNIT;
 contract IRewardsPoolBase rewardPool;
 contract IERC20Detailed stakingToken;
 address factory;
-uint256 unit;
 uint256 valuePerShare;
 uint256 totalShares;
 uint256 totalValue;
@@ -61,18 +61,6 @@ uint256 _stakeLimit;
 ```Solidity
 uint256 amount; 
 ```
-#### exit
-
-
-
-Requests a throttled exit from the pool and gives you a time from which you can withdraw your stake and rewards.
-
-#### completeExit
-
-
-
-Completes the throttled exit from the pool.
-
 #### balanceOf → uint256
 
 
@@ -106,16 +94,6 @@ Can only be called by the current owner.
 
 ```Solidity
 address newOwner; 
-```
-#### getPendingReward → uint256
-
-
-
-Returns the amount of reward tokens that are pending for exit for this user
-
-
-```Solidity
-uint256 _tokenIndex; // The index of the reward to check
 ```
 
 ### Events

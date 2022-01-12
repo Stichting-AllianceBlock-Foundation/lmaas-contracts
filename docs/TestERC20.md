@@ -43,15 +43,6 @@ bytes32 DEFAULT_ADMIN_ROLE;
 ```Solidity
 uint256 amount; 
 ```
-#### setDecimals
-
-
-
-
-
-```Solidity
-uint8 _d; 
-```
 #### decimals → uint8
 
 
@@ -269,36 +260,6 @@ together with {getRoleMember} to enumerate all bearers of a role.
 ```Solidity
 bytes32 role; 
 ```
-#### grantRole
-
-
-
-Overload {grantRole} to track enumerable memberships
-
-```Solidity
-bytes32 role; 
-address account; 
-```
-#### revokeRole
-
-
-
-Overload {revokeRole} to track enumerable memberships
-
-```Solidity
-bytes32 role; 
-address account; 
-```
-#### renounceRole
-
-
-
-Overload {renounceRole} to track enumerable memberships
-
-```Solidity
-bytes32 role; 
-address account; 
-```
 #### hasRole → bool
 
 
@@ -319,6 +280,50 @@ To change a role's admin, use {_setRoleAdmin}.
 
 ```Solidity
 bytes32 role; 
+```
+#### grantRole
+
+
+
+Grants `role` to `account`.
+If `account` had not been already granted `role`, emits a {RoleGranted}
+event.
+Requirements:
+- the caller must have ``role``'s admin role.
+
+```Solidity
+bytes32 role; 
+address account; 
+```
+#### revokeRole
+
+
+
+Revokes `role` from `account`.
+If `account` had been granted `role`, emits a {RoleRevoked} event.
+Requirements:
+- the caller must have ``role``'s admin role.
+
+```Solidity
+bytes32 role; 
+address account; 
+```
+#### renounceRole
+
+
+
+Revokes `role` from the calling account.
+Roles are often managed via {grantRole} and {revokeRole}: this function's
+purpose is to provide a mechanism for accounts to lose their privileges
+if they are compromised (such as when a trusted device is misplaced).
+If the calling account had been revoked `role`, emits a {RoleRevoked}
+event.
+Requirements:
+- the caller must be `account`.
+
+```Solidity
+bytes32 role; 
+address account; 
 ```
 
 ### Events
