@@ -51,7 +51,6 @@ uint256 lockEndTimestamp;
 address token; 
 uint256 _throttleRoundSeconds; 
 uint256 _throttleRoundCap; 
-uint256 stakeEnd; 
 ```
 #### delegateStake
 
@@ -64,16 +63,6 @@ Receives a stake from another pool
 address _staker; // The address who will own the stake
 
 uint256 _amount; // The amount to stake
-```
-#### setPool
-
-
-
-Sets the underlying reward pool. Can only be set once.
-
-
-```Solidity
-address _pool; // The reward pool
 ```
 #### stake
 

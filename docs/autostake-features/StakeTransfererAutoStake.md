@@ -70,20 +70,9 @@ address _transferTo;
 
 
 ```Solidity
-address _token; 
-uint256 _throttleRoundSeconds; 
+address token; 
+uint256 _throttleRoundBlocks; 
 uint256 _throttleRoundCap; 
-uint256 _stakeEnd; 
-```
-#### setPool
-
-
-
-Sets the underlying reward pool. Can only be set once.
-
-
-```Solidity
-address _pool; // The reward pool
 ```
 #### stake
 

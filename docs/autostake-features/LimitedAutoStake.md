@@ -50,7 +50,6 @@ uint256 lockEndTimestamp;
 address token; 
 uint256 _throttleRoundSeconds; 
 uint256 _throttleRoundCap; 
-uint256 stakeEnd; 
 uint256 _stakeLimit; 
 ```
 #### stake
@@ -61,16 +60,6 @@ uint256 _stakeLimit;
 
 ```Solidity
 uint256 amount; 
-```
-#### setPool
-
-
-
-Sets the underlying reward pool. Can only be set once.
-
-
-```Solidity
-address _pool; // The reward pool
 ```
 #### exit
 

@@ -52,7 +52,6 @@ uint256 lockEndTimestamp;
 address token; 
 uint256 _throttleRoundSeconds; 
 uint256 _throttleRoundCap; 
-uint256 stakeEnd; 
 ```
 #### setReceiverWhitelisted
 
@@ -75,16 +74,6 @@ exits the current campaign and trasnfers the stake to another whitelisted campai
 
 ```Solidity
 address _transferTo; 
-```
-#### setPool
-
-
-
-Sets the underlying reward pool. Can only be set once.
-
-
-```Solidity
-address _pool; // The reward pool
 ```
 #### stake
 

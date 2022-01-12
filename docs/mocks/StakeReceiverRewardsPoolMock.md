@@ -28,6 +28,8 @@ address[] rewardsTokens;
 contract IERC20Detailed stakingToken;
 uint256 startTimestamp;
 uint256 endTimestamp;
+uint256 extensionDuration;
+uint256[] extensionRewardPerSecond;
 uint256[] accumulatedRewardMultiplier;
 uint256 stakeLimit;
 uint256 contractStakeLimit;
@@ -154,8 +156,6 @@ Calculates the available amount of reward tokens that are not locked
 
 ```Solidity
 uint256 _rewardTokenIndex; // the index of the reward token to check
-
-uint256 _time; // the time to do the calculations at
 ```
 #### owner → address
 
