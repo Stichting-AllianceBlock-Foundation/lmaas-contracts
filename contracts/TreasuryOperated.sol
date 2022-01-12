@@ -34,8 +34,4 @@ abstract contract TreasuryOperated {
         externalRewards[token] = externalRewards[token] + reward;
         emit ExternalRewardsAdded(msg.sender, token, reward);
     }
-
-    function claimExternalRewards() internal virtual {
-        emit ExternalRewardsClaimed(msg.sender);
-    }
 }

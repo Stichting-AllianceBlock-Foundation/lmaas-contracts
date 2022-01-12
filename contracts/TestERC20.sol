@@ -9,7 +9,7 @@ contract TestERC20 is ERC20PresetMinterPauser {
         _mint(msg.sender, amount);
     }
 
-    function setDecimals(uint8 _d) public {
+    function setDecimals(uint8 _d) external {
         d = _d;
     }
 

@@ -24,7 +24,7 @@ contract Treasury is Ownable {
         externalRewardToken = _externalRewardToken;
     }
 
-    function withdrawLiquidity(address[] calldata rewardPools, uint256[] calldata amounts) public onlyOwner {
+    function withdrawLiquidity(address[] calldata rewardPools, uint256[] calldata amounts) external onlyOwner {
         require(rewardPools.length == amounts.length, 'withdrawLiquidity:: pools and amounts do not match');
         for (uint256 i = 0; i < rewardPools.length; i++) {
             liquidityDrawn[rewardPools[i]] = liquidityDrawn[rewardPools[i]] + amounts[i];
@@ -32,7 +32,7 @@ contract Treasury is Ownable {
         }
     }
 
-    function returnLiquidity(address[] calldata rewardPools, uint256[] calldata externalRewards) public onlyOwner {
+    function returnLiquidity(address[] calldata rewardPools, uint256[] calldata externalRewards) external onlyOwner {
         require(
             rewardPools.length == externalRewards.length,
             'returnLiquidity:: pools and external tokens do not match'

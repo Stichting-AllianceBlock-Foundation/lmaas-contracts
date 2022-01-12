@@ -38,7 +38,7 @@ abstract contract StakeTransfererFeature is OnlyExitFeature, StakeTransferer {
 
         uint256 userStakedAmount = user.amountStaked;
 
-        updateUserAccruedReward(msg.sender); // Update the accrued reward for this specific user
+        _updateUserAccruedReward(msg.sender); // Update the accrued reward for this specific user
 
         _claim(msg.sender);
 

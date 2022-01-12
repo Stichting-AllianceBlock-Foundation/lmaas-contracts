@@ -24,7 +24,7 @@ Your reward is (20 - 5) * 100 = 1500 tokens.
 contract RewardsPoolBase is ReentrancyGuard, Ownable {
     using SafeERC20Detailed for IERC20Detailed;
 
-    uint256 internal constant PRECISION = 1000000000000000000;
+    uint256 internal constant PRECISION = 1 ether;
 
     uint256 public totalStaked;
     uint256[] private totalClaimed;
@@ -108,7 +108,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         uint256 _startTimestamp,
         uint256 _endTimestamp,
         uint256[] calldata _rewardPerSecond
-    ) public virtual onlyOwner {
+    ) external virtual onlyOwner {
         _start(_startTimestamp, _endTimestamp, _rewardPerSecond);
     }
 
@@ -143,7 +143,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         emit Started();
     }
 
-    function cancel() public onlyOwner {
+    function cancel() external onlyOwner {
         require(startTimestamp > block.timestamp, 'RewardsPoolBase: No start scheduled or already started');
 
         startTimestamp = 0;
@@ -184,7 +184,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         }
 
         updateRewardMultipliers(); // Update the accumulated multipliers for everyone
-        updateUserAccruedReward(_staker); // Update the accrued reward for this specific user
+        _updateUserAccruedReward(_staker); // Update the accrued reward for this specific user
 
         user.amountStaked = user.amountStaked + _tokenAmount;
         totalStaked = totalStaked + _tokenAmount;
@@ -202,14 +202,14 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 
     /** @dev Claim all your rewards, this will not remove your stake
      */
-    function claim() public virtual nonReentrant {
+    function claim() public virtual {
         _claim(msg.sender);
     }
 
-    function _claim(address _claimer) internal {
+    function _claim(address _claimer) internal nonReentrant {
         UserInfo storage user = userInfo[_claimer];
         updateRewardMultipliers();
-        updateUserAccruedReward(_claimer);
+        _updateUserAccruedReward(_claimer);
 
         uint256 rewardsTokensLength = rewardsTokens.length;
 
@@ -227,17 +227,17 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     /** @dev Withdrawing a portion or all of staked tokens. This will not claim your rewards
      * @param _tokenAmount The amount to be withdrawn
      */
-    function withdraw(uint256 _tokenAmount) public virtual nonReentrant {
+    function withdraw(uint256 _tokenAmount) public virtual {
         _withdraw(_tokenAmount, msg.sender);
     }
 
-    function _withdraw(uint256 _tokenAmount, address _withdrawer) internal {
+    function _withdraw(uint256 _tokenAmount, address _withdrawer) internal nonReentrant {
         require(_tokenAmount > 0, 'RewardsPoolBase: cannot withdraw 0');
 
         UserInfo storage user = userInfo[_withdrawer];
 
         updateRewardMultipliers(); // Update the accumulated multipliers for everyone
-        updateUserAccruedReward(_withdrawer); // Update the accrued reward for this specific user
+        _updateUserAccruedReward(_withdrawer); // Update the accrued reward for this specific user
 
         user.amountStaked = user.amountStaked - _tokenAmount;
         totalStaked = totalStaked - _tokenAmount;
@@ -260,7 +260,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         _exit(msg.sender);
     }
 
-    function _exit(address exiter) internal {
+    function _exit(address exiter) internal nonReentrant {
         UserInfo storage user = userInfo[exiter];
         _claim(exiter);
         _withdraw(user.amountStaked, exiter);
@@ -271,7 +271,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     /** @dev Returns the amount of tokens the user has staked
      * @param _userAddress The user to get the balance of
      */
-    function balanceOf(address _userAddress) public view returns (uint256) {
+    function balanceOf(address _userAddress) external view returns (uint256) {
         UserInfo storage user = userInfo[_userAddress];
         return user.amountStaked;
     }
@@ -326,7 +326,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     /** @dev Updates the accumulated reward for the user
      * @param _userAddress the address of the updated user
      */
-    function updateUserAccruedReward(address _userAddress) internal {
+    function _updateUserAccruedReward(address _userAddress) internal {
         UserInfo storage user = userInfo[_userAddress];
 
         uint256 rewardsTokensLength = rewardsTokens.length;
@@ -358,7 +358,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     /**
 		@dev Checks if the staking has started
 	 */
-    function hasStakingStarted() public view returns (bool) {
+    function hasStakingStarted() external view returns (bool) {
         return (startTimestamp > 0 && block.timestamp >= startTimestamp);
     }
 
@@ -389,7 +389,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         address _userAddress,
         uint256 _tokenIndex,
         uint256 _time
-    ) public view returns (uint256) {
+    ) external view returns (uint256) {
         uint256 applicableTimestamp = (_time < endTimestamp) ? _time : endTimestamp;
         uint256 secondsSinceLastReward = applicableTimestamp - lastRewardTimestamp;
 
