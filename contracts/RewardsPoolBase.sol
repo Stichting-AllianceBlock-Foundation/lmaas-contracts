@@ -421,7 +421,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     /**
      * @dev Extends the rewards period and updates the rates
      * @param _durationTime duration of the campaign (how many seconds the campaign will have)
-     * @param _rewardPerSecond array with new rewards per block for each token
+     * @param _rewardPerSecond array with new rewards per second for each token
      */
     function extend(uint256 _durationTime, uint256[] memory _rewardPerSecond) external virtual onlyOwner {
         require(extensionDuration == 0, 'RewardsPoolBase: there is already an extension');

@@ -8,8 +8,8 @@ import './OnlyExitRewardsPoolMock.sol';
 contract StakeTransfererRewardsPoolMock is OnlyExitRewardsPoolMock, StakeTransfererFeature {
     constructor(
         IERC20Detailed _stakingToken,
-        uint256 _startBlock,
-        uint256 _endBlock,
+        uint256 _startTimestamp,
+        uint256 _endTimestamp,
         address[] memory _rewardsTokens,
         uint256 _stakeLimit,
         uint256 _contractStakeLimit,
@@ -17,8 +17,8 @@ contract StakeTransfererRewardsPoolMock is OnlyExitRewardsPoolMock, StakeTransfe
     )
         OnlyExitRewardsPoolMock(
             _stakingToken,
-            _startBlock,
-            _endBlock,
+            _startTimestamp,
+            _endTimestamp,
             _rewardsTokens,
             _stakeLimit,
             _contractStakeLimit,

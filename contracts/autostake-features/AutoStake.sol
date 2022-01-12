@@ -37,12 +37,12 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
 
     constructor(
         address token,
-        uint256 _throttleRoundBlocks,
+        uint256 _throttleRoundSeconds,
         uint256 _throttleRoundCap
     ) {
         factory = msg.sender;
         stakingToken = IERC20Detailed(token);
-        setThrottleParams(_throttleRoundBlocks, _throttleRoundCap);
+        setThrottleParams(_throttleRoundSeconds, _throttleRoundCap);
     }
 
     function start(uint256 _endTimestamp) external virtual onlyOwner {

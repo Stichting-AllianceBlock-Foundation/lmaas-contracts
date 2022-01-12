@@ -26,7 +26,7 @@ abstract contract ThrottledExit {
     event ExitCompleted(address user, uint256 stake);
 
     function setThrottleParams(uint256 _throttleRoundSeconds, uint256 _throttleRoundCap) internal {
-        require(_throttleRoundSeconds > 0, 'setThrottle::throttle round blocks must be more than 0');
+        require(_throttleRoundSeconds > 0, 'setThrottle::throttle round seconds must be more than 0');
         require(_throttleRoundCap > 0, 'setThrottle::throttle round cap must be more than 0');
         require(
             throttleRoundSeconds == 0 && throttleRoundCap == 0,
@@ -77,25 +77,25 @@ abstract contract ThrottledExit {
         emit ExitCompleted(msg.sender, infoExitStake);
     }
 
-    function getAvailableExitTime(uint256 exitAmount) internal returns (uint256 exitBlock) {
+    function getAvailableExitTime(uint256 exitAmount) internal returns (uint256 exitTimestamp) {
         uint256 currentTimestamp = block.timestamp;
 
         if (currentTimestamp > nextAvailableExitTimestamp) {
-            // We've passed the next available block and need to readjust
-            uint256 blocksFromCurrentRound = (currentTimestamp - nextAvailableExitTimestamp) % throttleRoundSeconds; // Find how many blocks have passed since last block should have started
-            nextAvailableExitTimestamp = currentTimestamp - blocksFromCurrentRound + throttleRoundSeconds; // Find where the lst block should have started and add one round to find the next one
+            // We've passed the next available timestamp and need to readjust
+            uint256 secondsFromCurrentRound = (currentTimestamp - nextAvailableExitTimestamp) % throttleRoundSeconds; // Find how many seconds have passed since last round should have started
+            nextAvailableExitTimestamp = currentTimestamp - secondsFromCurrentRound + throttleRoundSeconds; // Find where the lst round should have started and add one round to find the next one
             nextAvailableRoundExitVolume = exitAmount; // Reset volume
             return nextAvailableExitTimestamp;
         } else {
-            // We are still before the next available block
+            // We are still before the next available timestamp
             nextAvailableRoundExitVolume = nextAvailableRoundExitVolume + exitAmount; // Add volume
         }
 
-        exitBlock = nextAvailableExitTimestamp;
+        exitTimestamp = nextAvailableExitTimestamp;
 
         if (nextAvailableRoundExitVolume >= throttleRoundCap) {
             // If cap reached
-            nextAvailableExitTimestamp = nextAvailableExitTimestamp + throttleRoundSeconds; // update next exit block.
+            nextAvailableExitTimestamp = nextAvailableExitTimestamp + throttleRoundSeconds; // update next exit timestamp.
             // Note we know that this behaviour will lead to people exiting a bit more than the cap when the last user does not hit perfectly the cap. This is OK
             nextAvailableRoundExitVolume = 0; // Reset volume
         }

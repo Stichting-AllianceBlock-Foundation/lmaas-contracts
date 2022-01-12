@@ -27,15 +27,12 @@ describe('Liquidity mining campaign', () => {
   let stakingTokenAddress: string;
   let LmcInstance: LiquidityMiningCampaign;
 
-  let rampUpBlock: number;
-  let lockBlock: number;
-  let secondLockBlock: number;
+  let lockTimestamp: number;
 
   let rewardTokensInstances: TestERC20[];
   let rewardTokensAddresses: string[];
   let rewardPerSecond: BigNumber[];
   let lockSchemеs;
-  let libraries;
 
   const rewardTokensCount = 1; // 5 rewards tokens for tests
   const bonusPercet = 10000; // In thousands
@@ -73,12 +70,10 @@ describe('Liquidity mining campaign', () => {
       rewardPerSecond.push(parsedReward);
     }
 
-    const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestamp = currentBlock.timestamp + oneMinute;
+    const currentTimestamp = await getTime();
+    startTimestamp = currentTimestamp + oneMinute;
     endTimestamp = startTimestamp + oneMinute * 2;
-    rampUpBlock = startTimestamp + 5;
-    lockBlock = endTimestamp + 30;
-    secondLockBlock = lockBlock + 5;
+    lockTimestamp = endTimestamp + 30;
   };
 
   beforeEach(async () => {

@@ -8,8 +8,8 @@ import './../pool-features/OnlyExitFeature.sol';
 contract OnlyExitRewardsPoolMock is RewardsPoolBase, OnlyExitFeature {
     constructor(
         IERC20Detailed _stakingToken,
-        uint256 _startBlock,
-        uint256 _endBlock,
+        uint256 _startTimestamp,
+        uint256 _endTimestamp,
         address[] memory _rewardsTokens,
         uint256 _stakeLimit,
         uint256 _contractStakeLimit,

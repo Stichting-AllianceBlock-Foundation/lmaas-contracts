@@ -7,18 +7,18 @@ import './../pool-features/ThrottledExitFeature.sol';
 contract ThrottledExitRewardsPoolMock is RewardsPoolBase, OnlyExitFeature, ThrottledExitFeature {
     constructor(
         IERC20Detailed _stakingToken,
-        uint256, // _startBlock,
-        uint256 _endBlock,
+        uint256, // _startTimestamp,
+        uint256 _endTimestamp,
         address[] memory _rewardsTokens,
         uint256 _stakeLimit,
-        uint256 throttleRoundBlocks,
-        uint256 throttleRoundCap,
+        uint256 _throttleRoundSeconds,
+        uint256 _throttleRoundCap,
         uint256 _contractStakeLimit,
         string memory _name
     ) RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _name) {
-        setThrottleParams(throttleRoundBlocks, throttleRoundCap);
-        startThrottle(_endBlock);
-        lock(_endBlock);
+        setThrottleParams(_throttleRoundSeconds, _throttleRoundCap);
+        startThrottle(_endTimestamp);
+        lock(_endTimestamp);
     }
 
     function withdraw(uint256 _tokenAmount) public override(OnlyExitFeature, RewardsPoolBase) {

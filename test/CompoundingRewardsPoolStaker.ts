@@ -8,7 +8,7 @@ import TestERC20Artifact from '../artifacts/contracts/TestERC20.sol/TestERC20.js
 import { CompoundingRewardsPoolStaker } from '../typechain-types/CompoundingRewardsPoolStaker';
 import { CompoundingRewardsPool } from '../typechain-types/CompoundingRewardsPool';
 import { TestERC20 } from '../typechain-types/TestERC20';
-import { timeTravel } from './utils';
+import { getTime, timeTravel } from './utils';
 
 describe('CompoundingRewardsPoolStaker', () => {
   let accounts: SignerWithAddress[];
@@ -47,8 +47,8 @@ describe('CompoundingRewardsPoolStaker', () => {
       ethers.utils.parseEther('300000'),
     ])) as TestERC20;
 
-    const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestamp = currentBlock.timestamp + oneMinute;
+    const currentTimestamp = await getTime();
+    startTimestamp = currentTimestamp + oneMinute;
     endTimestamp = startTimestamp + oneMinute * 2;
 
     StakeTransfererAutoStakeInstance = (await deployContract(testAccount, CompoundingRewardsPoolStakerArtifact, [

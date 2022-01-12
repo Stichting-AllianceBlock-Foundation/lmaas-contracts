@@ -10,7 +10,7 @@ import { CompoundingRewardsPool } from '../typechain-types/CompoundingRewardsPoo
 import { TestERC20 } from '../typechain-types/TestERC20';
 import { StakeTransfererAutoStake } from '../typechain-types/StakeTransfererAutoStake';
 import { StakeReceiverAutoStake } from '../typechain-types/StakeReceiverAutoStake';
-import { timeTravel } from './utils';
+import { getTime, timeTravel } from './utils';
 
 describe('AutoStakeTransfer', () => {
   let accounts: SignerWithAddress[];
@@ -42,8 +42,8 @@ describe('AutoStakeTransfer', () => {
   beforeEach(async () => {
     stakingTokenInstance = (await deployContract(testAccount, TestERC20Artifact, [amount])) as TestERC20;
 
-    const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestamp = currentBlock.timestamp + oneMinute;
+    const currentTimestamp = await getTime();
+    startTimestamp = currentTimestamp + oneMinute;
     endTimestamp = startTimestamp + oneMinute * 2;
 
     StakeTransfererAutoStakeInstance = (await deployContract(testAccount, StakeTransfererAutoStakeArtifact, [
