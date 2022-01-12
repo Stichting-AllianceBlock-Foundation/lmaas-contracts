@@ -8,7 +8,7 @@ export async function timeTravel(seconds: number) {
 }
 
 export async function timeTravelTo(time: number) {
-  await network.provider.send('evm_setnextTimestampTimestamp', [time]);
+  await network.provider.send('evm_setNextBlockTimestamp', [time]);
 }
 
 export async function getTime() {
