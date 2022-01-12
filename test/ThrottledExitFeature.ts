@@ -53,8 +53,8 @@ describe('ThrottledExitFeature', () => {
       rewardPerSecond.push(parsedReward);
     }
 
-    const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestamp = currentBlock.timestamp + oneMinute;
+    const currentTimestamp = await getTime();
+    startTimestamp = currentTimestamp + oneMinute;
     endTimestamp = startTimestamp + oneMinute * 2;
   };
 
@@ -206,16 +206,19 @@ describe('ThrottledExitFeature', () => {
 
       await ThrottledExitFeatureInstance.exit();
 
-      const nextBlock = await ThrottledExitFeatureInstance.nextAvailableExitTimestamp();
-      expect(nextBlock).to.equal(endTimestamp + _throttleRoundSeconds, 'End block has changed but it should not have');
+      const nextTimestamp = await ThrottledExitFeatureInstance.nextAvailableExitTimestamp();
+      expect(nextTimestamp).to.equal(
+        endTimestamp + _throttleRoundSeconds,
+        'End timestamp has changed but it should not have'
+      );
 
       const volume = await ThrottledExitFeatureInstance.nextAvailableRoundExitVolume();
       expect(volume).to.equal(standardStakingAmount, 'Exit volume was incorrect');
 
       const userExitInfo = await ThrottledExitFeatureInstance.exitInfo(aliceAccount.address);
       expect(userExitInfo.exitTimestamp).to.equal(
-        nextBlock,
-        'The exit block for the user was not set on the next block'
+        nextTimestamp,
+        'The exit timestamp for the user was not set on the next timestamp'
       );
     });
 
@@ -232,8 +235,8 @@ describe('ThrottledExitFeature', () => {
       await ThrottledExitFeatureInstance.exit();
       await ThrottledExitFeatureInstance.connect(bobAccount).exit();
 
-      const nextBlock = await ThrottledExitFeatureInstance.nextAvailableExitTimestamp();
-      expect(nextBlock).to.equal(endTimestamp + throttleRoundSeconds * 2, 'End block has changed incorrectly');
+      const nextTimestamp = await ThrottledExitFeatureInstance.nextAvailableExitTimestamp();
+      expect(nextTimestamp).to.equal(endTimestamp + throttleRoundSeconds * 2, 'End timestamp has changed incorrectly');
 
       const volume = await ThrottledExitFeatureInstance.nextAvailableRoundExitVolume();
       expect(volume).to.equal(0, 'Exit volume was incorrect');
@@ -241,7 +244,7 @@ describe('ThrottledExitFeature', () => {
       const userExitInfo = await ThrottledExitFeatureInstance.exitInfo(bobAccount.address);
       expect(userExitInfo.exitTimestamp).to.equal(
         endTimestamp + throttleRoundSeconds,
-        'The exit block for the user was not set for the current block'
+        'The exit timestamp for the user was not set for the current timestamp'
       );
     });
 
@@ -257,16 +260,16 @@ describe('ThrottledExitFeature', () => {
 
       await ThrottledExitFeatureInstance.exit();
 
-      const nextBlock = await ThrottledExitFeatureInstance.nextAvailableExitTimestamp();
-      expect(nextBlock).to.equal(endTimestamp + throttleRoundSeconds, 'End block has changed incorrectly');
+      const nextTimestamp = await ThrottledExitFeatureInstance.nextAvailableExitTimestamp();
+      expect(nextTimestamp).to.equal(endTimestamp + throttleRoundSeconds, 'End timestamp has changed incorrectly');
 
       const volume = await ThrottledExitFeatureInstance.nextAvailableRoundExitVolume();
       expect(volume).to.equal(standardStakingAmount, 'Exit volume was incorrect');
 
       const userExitInfo = await ThrottledExitFeatureInstance.exitInfo(aliceAccount.address);
       expect(userExitInfo.exitTimestamp).to.equal(
-        nextBlock,
-        'The exit block for the user was not set on the next block'
+        nextTimestamp,
+        'The exit timestamp for the user was not set on the next timestamp'
       );
     });
   });

@@ -67,20 +67,6 @@ uint256 _contractStakeLimit; // Maximum amount of tokens that can be staked in t
 
 string _name; // Name of the pool
 ```
-#### start
-
-
-
-Start the pool. Funds for rewards will be checked and staking will be opened.
-
-
-```Solidity
-uint256 _startTimestamp; // The start time of the pool
-
-uint256 _endTimestamp; // The end time of the pool
-
-uint256[] _rewardPerSecond; // Amount of rewards given per second
-```
 #### stake
 
 
@@ -97,42 +83,12 @@ uint256 _tokenAmount; // The amount to be staked
 
 Claim all rewards and withdraw all staked tokens. Exits from the rewards pool
 
-#### balanceOf → uint256
-
-
-
-Returns the amount of tokens the user has staked
-
-
-```Solidity
-address _userAddress; // The user to get the balance of
-```
 #### updateRewardMultipliers
 
 
 
 Updates the accumulated reward multipliers for everyone and each token
 
-#### hasStakingStarted → bool
-
-
-
-Checks if the staking has started
-
-#### getUserAccumulatedReward → uint256
-
-
-
-Calculates the reward at a specific time
-
-
-```Solidity
-address _userAddress; // the address of the user
-
-uint256 _tokenIndex; // the index of the reward token you are interested
-
-uint256 _time; // the time to check the reward at
-```
 #### getAvailableBalance → uint256
 
 

@@ -18,8 +18,8 @@ interface IRewardsPoolBase {
     function getUserRewardDebtLength(address _userAddress) external view returns (uint256);
 
     function calculateRewardsAmount(
-        uint256 _startBlock,
-        uint256 _endBlock,
+        uint256 _startTimestamp,
+        uint256 _endTimestamp,
         uint256 _rewardPerSecond
     ) external pure returns (uint256);
 
@@ -50,7 +50,7 @@ interface IRewardsPoolBase {
 
     function exit() external;
 
-    function extend(uint256 _endBlock, uint256[] memory _rewardsPerBlock) external;
+    function extend(uint256 _endTimestamp, uint256[] memory _rewardsPerSecond) external;
 
     function withdrawLPRewards(address recipient, address lpTokenContract) external;
 }

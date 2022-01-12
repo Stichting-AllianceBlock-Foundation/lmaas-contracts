@@ -53,8 +53,8 @@ describe('StakeTransfer', () => {
       rewardPerSecond.push(parsedReward);
     }
 
-    const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestamp = currentBlock.timestamp + oneMinute;
+    const currentTimestamp = await getTime();
+    startTimestamp = currentTimestamp + oneMinute;
     endTimestamp = startTimestamp + oneMinute * 2;
   };
 
@@ -102,8 +102,6 @@ describe('StakeTransfer', () => {
 
     await stakingTokenInstance.approve(StakeTransfererInstance.address, standardStakingAmount);
     await stakingTokenInstance.connect(bobAccount).approve(StakeTransfererInstance.address, standardStakingAmount);
-    const currentBlock = await ethers.provider.getBlock('latest');
-    const blocksDelta = startTimestamp - currentBlock.number;
 
     await timeTravel(70);
     await StakeTransfererInstance.stake(standardStakingAmount);
@@ -112,7 +110,6 @@ describe('StakeTransfer', () => {
   it('Should exit to another contract', async () => {
     await timeTravel(120);
 
-    const userInitialBalanceStaking = await stakingTokenInstance.balanceOf(aliceAccount.address);
     const userInfoInitial = await StakeTransfererInstance.userInfo(aliceAccount.address);
     const initialTotalStakedAmount = await StakeTransfererInstance.totalStaked();
     const userInitialBalanceRewards = await rewardTokensInstances[0].balanceOf(aliceAccount.address);

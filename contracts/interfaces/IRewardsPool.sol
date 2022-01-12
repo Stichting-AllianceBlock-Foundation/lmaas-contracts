@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.4.24;
+pragma solidity 0.8.4;
 
-
-interface IRewardsPool{
+interface IRewardsPool {
     // Views
     function lastTimeRewardApplicable(address rewardToken) external view returns (uint256);
 

@@ -51,8 +51,8 @@ describe('OneStakerRewardsPool', () => {
       rewardPerSecond.push(parsedReward);
     }
 
-    const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestamp = currentBlock.timestamp + oneMinute;
+    const currentTimestamp = await getTime();
+    startTimestamp = currentTimestamp + oneMinute;
     endTimestamp = startTimestamp + oneMinute * 2;
   };
 
@@ -94,8 +94,6 @@ describe('OneStakerRewardsPool', () => {
       await stakingTokenInstance
         .connect(bobAccount)
         .approve(OneStakerRewardsPoolInstance.address, standardStakingAmount);
-      const currentBlock = await ethers.provider.getBlock('latest');
-      const blocksDelta = startTimestamp - currentBlock.number;
 
       await timeTravel(70);
     });
@@ -112,7 +110,7 @@ describe('OneStakerRewardsPool', () => {
 
       expect(totalStakedAmount).to.equal(standardStakingAmount, 'The stake was not successful');
       expect(userInfo.amountStaked).to.equal(standardStakingAmount, "User's staked amount is not correct");
-      expect(userInfo.firstStakedTimestamp).to.equal(currentTime, "User's first block is not correct");
+      expect(userInfo.firstStakedTimestamp).to.equal(currentTime, "User's first timestamp is not correct");
       expect(userRewardDebt).to.equal(0, "User's reward debt is not correct");
       expect(userOwedToken).to.equal(0, "User's reward debt is not correct");
 

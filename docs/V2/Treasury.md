@@ -32,26 +32,6 @@ contract IUniswapV2Router uniswapRouter;
 address _uniswapRouter; 
 address _externalRewardToken; 
 ```
-#### withdrawLiquidity
-
-
-
-
-
-```Solidity
-address[] rewardPools; 
-uint256[] amounts; 
-```
-#### returnLiquidity
-
-
-
-
-
-```Solidity
-address[] rewardPools; 
-uint256[] externalRewards; 
-```
 #### owner → address
 
 

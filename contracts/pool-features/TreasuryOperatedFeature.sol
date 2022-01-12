@@ -6,8 +6,9 @@ import './../SafeERC20Detailed.sol';
 import './../interfaces/IERC20Detailed.sol';
 import './../RewardsPoolBase.sol';
 import './../TreasuryOperated.sol';
+import './../interfaces/ITreasuryOperated.sol';
 
-abstract contract TreasuryOperatedFeature is RewardsPoolBase, TreasuryOperated {
+abstract contract TreasuryOperatedFeature is ITreasuryOperated, RewardsPoolBase, TreasuryOperated {
     using SafeERC20Detailed for IERC20Detailed;
     address public immutable externalRewardToken;
 
@@ -15,20 +16,12 @@ abstract contract TreasuryOperatedFeature is RewardsPoolBase, TreasuryOperated {
         externalRewardToken = _externalRewardToken;
     }
 
-    function withdrawStake(uint256 amount) public virtual override(TreasuryOperated) onlyTreasury {
+    function withdrawStake(uint256 amount) public virtual override(ITreasuryOperated, TreasuryOperated) onlyTreasury {
         stakingToken.safeTransfer(treasury, amount);
         TreasuryOperated.withdrawStake(amount);
     }
 
-    function notifyExternalReward(uint256 reward) public virtual onlyTreasury {
+    function notifyExternalReward(uint256 reward) external virtual override onlyTreasury {
         TreasuryOperated.notifyExternalReward(externalRewardToken, reward);
-    }
-
-    function claimExternalRewards(uint256 exitReward, uint256 totalExitReward) internal virtual {
-        uint256 totalExternalReward = externalRewards[externalRewardToken];
-        uint256 externalReward = (exitReward * totalExternalReward) / totalExitReward;
-        externalRewards[externalRewardToken] = externalRewards[externalRewardToken] - externalReward;
-        IERC20Detailed(externalRewardToken).safeTransfer(msg.sender, externalReward);
-        TreasuryOperated.claimExternalRewards();
     }
 }

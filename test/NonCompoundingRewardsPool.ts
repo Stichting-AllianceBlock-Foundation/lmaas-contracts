@@ -62,8 +62,8 @@ describe('NonCompoundingRewardsPool', () => {
       rewardPerSecond.push(parsedReward);
     }
 
-    const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestamp = currentBlock.timestamp + oneMinute;
+    const currentTimestamp = await getTime();
+    startTimestamp = currentTimestamp + oneMinute;
     endTimestamp = startTimestamp + oneMinute * 2;
   };
 
@@ -223,14 +223,17 @@ describe('NonCompoundingRewardsPool', () => {
 
       await NonCompoundingRewardsPoolInstance.exit();
 
-      const nextBlock = await NonCompoundingRewardsPoolInstance.nextAvailableExitTimestamp();
-      expect(nextBlock).to.equal(endTimestamp + _throttleRoundSeconds);
+      const nextTimestamp = await NonCompoundingRewardsPoolInstance.nextAvailableExitTimestamp();
+      expect(nextTimestamp).to.equal(endTimestamp + _throttleRoundSeconds);
 
       const volume = await NonCompoundingRewardsPoolInstance.nextAvailableRoundExitVolume();
       expect(volume.eq(standardStakingAmount), 'Exit volume was incorrect');
 
       const userExitInfo = await NonCompoundingRewardsPoolInstance.exitInfo(testAccount.address);
-      expect(userExitInfo.exitTimestamp.eq(nextBlock), 'The exit block for the user was not set on the next block');
+      expect(
+        userExitInfo.exitTimestamp.eq(nextTimestamp),
+        'The exit timestamp for the user was not set on the next timestamp'
+      );
     });
 
     it('[Should change nextAvailableExitTimestamp if cap is hit]:', async () => {
@@ -241,17 +244,14 @@ describe('NonCompoundingRewardsPool', () => {
       await timeTravel(70);
       await NonCompoundingRewardsPoolInstance.connect(test2Account).stake(standardStakingAmount);
 
-      const currentBlock = await ethers.provider.getBlock('latest');
-      const blocksDelta = endTimestamp - currentBlock.number;
-
       await timeTravel(70);
 
       await NonCompoundingRewardsPoolInstance.exit();
       await timeTravel(10);
       await NonCompoundingRewardsPoolInstance.connect(test2Account).exit();
 
-      const nextBlock = await NonCompoundingRewardsPoolInstance.nextAvailableExitTimestamp();
-      expect(nextBlock.eq(endTimestamp + throttleRoundSeconds * 2), 'End block has changed incorrectly');
+      const nextTimestamp = await NonCompoundingRewardsPoolInstance.nextAvailableExitTimestamp();
+      expect(nextTimestamp.eq(endTimestamp + throttleRoundSeconds * 2), 'End timestamp has changed incorrectly');
 
       const volume = await NonCompoundingRewardsPoolInstance.nextAvailableRoundExitVolume();
       expect(volume.eq(0), 'Exit volume was incorrect');
@@ -259,7 +259,7 @@ describe('NonCompoundingRewardsPool', () => {
       const userExitInfo = await NonCompoundingRewardsPoolInstance.exitInfo(test2Account.address);
       expect(
         userExitInfo.exitTimestamp.eq(endTimestamp + throttleRoundSeconds),
-        'The exit block for the user was not set for the current block'
+        'The exit timestamp for the user was not set for the current timestamp'
       );
     });
 
@@ -271,22 +271,19 @@ describe('NonCompoundingRewardsPool', () => {
 
       await NonCompoundingRewardsPoolInstance.connect(test2Account).stake(standardStakingAmount);
 
-      const currentBlock = await ethers.provider.getBlock('latest');
-      const blocksDelta = endTimestamp - currentBlock.number;
-
       await timeTravel(120);
 
       await NonCompoundingRewardsPoolInstance.exit();
 
-      const nextBlock = await NonCompoundingRewardsPoolInstance.nextAvailableExitTimestamp();
+      const nextTimestamp = await NonCompoundingRewardsPoolInstance.nextAvailableExitTimestamp();
 
-      expect(nextBlock.eq(endTimestamp + throttleRoundSeconds), 'End block has changed incorrectly');
+      expect(nextTimestamp.eq(endTimestamp + throttleRoundSeconds), 'End timestamp has changed incorrectly');
 
       const volume = await NonCompoundingRewardsPoolInstance.nextAvailableRoundExitVolume();
       expect(volume).to.equal(standardStakingAmount);
 
       const userExitInfo = await NonCompoundingRewardsPoolInstance.exitInfo(testAccount.address);
-      expect(userExitInfo.exitTimestamp).to.equal(nextBlock);
+      expect(userExitInfo.exitTimestamp).to.equal(nextTimestamp);
     });
   });
 

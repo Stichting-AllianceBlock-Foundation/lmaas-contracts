@@ -48,7 +48,7 @@ contract NonCompoundingRewardsPool is
         uint256 _startTimestamp,
         uint256 _endTimestamp,
         uint256[] calldata _rewardPerSecond
-    ) public override onlyOwner {
+    ) external override onlyOwner {
         startThrottle(_endTimestamp);
         lock(_endTimestamp);
         _start(_startTimestamp, _endTimestamp, _rewardPerSecond);

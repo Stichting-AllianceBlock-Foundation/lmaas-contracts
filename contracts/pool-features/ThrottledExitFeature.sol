@@ -20,7 +20,7 @@ abstract contract ThrottledExitFeature is StakeLockingFeature, ThrottledExit {
             return;
         }
 
-        updateUserAccruedReward(msg.sender); // Update the accrued reward for this specific user
+        _updateUserAccruedReward(msg.sender); // Update the accrued reward for this specific user
 
         initiateExit(user.amountStaked, rewardsTokens.length, user.tokensOwed);
 

@@ -51,8 +51,8 @@ describe('StakeLockingFeature', () => {
       rewardPerSecond.push(parsedReward);
     }
 
-    const currentBlock = await ethers.provider.getBlock('latest');
-    startTimestamp = currentBlock.timestamp + oneMinute;
+    const currentTimestamp = await getTime();
+    startTimestamp = currentTimestamp + oneMinute;
     endTimestamp = startTimestamp + oneMinute * 2;
   };
 
@@ -85,7 +85,6 @@ describe('StakeLockingFeature', () => {
 
     await stakingTokenInstance.approve(StakeLockingFeatureInstance.address, standardStakingAmount);
     await stakingTokenInstance.connect(bobAccount).approve(StakeLockingFeatureInstance.address, standardStakingAmount);
-    const currentBlock = await ethers.provider.getBlock('latest');
 
     await timeTravel(70);
     await StakeLockingFeatureInstance.stake(standardStakingAmount);
@@ -107,20 +106,12 @@ describe('StakeLockingFeature', () => {
   });
 
   it('Should exit successfully from the RewardsPool', async () => {
-    const currentBlock = await ethers.provider.getBlock('latest');
-    const blocksDelta = endTimestamp - currentBlock.number;
-
     await timeTravel(140);
 
     const userInitialBalanceStaking = await stakingTokenInstance.balanceOf(aliceAccount.address);
     const userInfoInitial = await StakeLockingFeatureInstance.userInfo(aliceAccount.address);
     const initialTotalStakedAmount = await StakeLockingFeatureInstance.totalStaked();
     const userInitialBalanceRewards = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
-    const userRewards = await StakeLockingFeatureInstance.getUserAccumulatedReward(
-      aliceAccount.address,
-      0,
-      await getTime()
-    );
 
     await StakeLockingFeatureInstance.exit();
 

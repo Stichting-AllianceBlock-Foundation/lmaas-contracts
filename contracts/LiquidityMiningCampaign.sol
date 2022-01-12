@@ -46,7 +46,7 @@ contract LiquidityMiningCampaign is StakeTransferer, RewardsPoolBase {
         }
 
         updateRewardMultipliers();
-        updateUserAccruedReward(_userAddress);
+        _updateUserAccruedReward(_userAddress);
 
         uint256[] memory finalRewards = user.tokensOwed;
 

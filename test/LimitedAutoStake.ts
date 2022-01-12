@@ -41,8 +41,8 @@ describe('LimitedAutoStake', () => {
 
   describe('Deploy and connect', async function () {
     beforeEach(async () => {
-      const currentBlock = await ethers.provider.getBlock('latest');
-      startTimestamp = currentBlock.timestamp + oneMinute;
+      const currentTimestamp = await getTime();
+      startTimestamp = currentTimestamp + oneMinute;
       endTimestamp = startTimestamp + oneMinute * 2;
     });
 
@@ -88,8 +88,8 @@ describe('LimitedAutoStake', () => {
     beforeEach(async () => {
       stakingTokenInstance = (await deployContract(testAccount, TestERC20Artifact, [amount])) as TestERC20;
 
-      const currentBlock = await ethers.provider.getBlock('latest');
-      startTimestamp = currentBlock.timestamp + oneMinute;
+      const currentTimestamp = await getTime();
+      startTimestamp = currentTimestamp + oneMinute;
       endTimestamp = startTimestamp + oneMinute * 2;
 
       AutoStakingInstance = (await deployContract(testAccount, LimitedAutoStakeArtifact, [

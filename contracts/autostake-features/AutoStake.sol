@@ -16,11 +16,12 @@ import './../ThrottledExit.sol';
 contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
     using SafeERC20Detailed for IERC20Detailed;
 
+    uint256 public constant UNIT = 1 ether;
+
     IRewardsPoolBase public rewardPool;
     IERC20Detailed public immutable stakingToken;
     address public immutable factory;
-    uint256 public constant unit = 1e18;
-    uint256 public valuePerShare = unit;
+    uint256 public valuePerShare = UNIT;
     uint256 public totalShares;
     uint256 public totalValue;
     uint256 public exitStake;
@@ -37,12 +38,12 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
 
     constructor(
         address token,
-        uint256 _throttleRoundBlocks,
+        uint256 _throttleRoundSeconds,
         uint256 _throttleRoundCap
     ) {
         factory = msg.sender;
         stakingToken = IERC20Detailed(token);
-        setThrottleParams(_throttleRoundBlocks, _throttleRoundCap);
+        setThrottleParams(_throttleRoundSeconds, _throttleRoundCap);
     }
 
     function start(uint256 _endTimestamp) external virtual onlyOwner {
@@ -72,7 +73,7 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
     /** @dev Stake an amount of tokens
      * @param _tokenAmount The amount to be staked
      */
-    function stake(uint256 _tokenAmount) public virtual {
+    function stake(uint256 _tokenAmount) public virtual nonReentrant {
         _stake(_tokenAmount, msg.sender, true);
     }
 
@@ -80,13 +81,13 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
         uint256 _amount,
         address _staker,
         bool _chargeStaker
-    ) internal nonReentrant {
+    ) internal {
         exitRewardPool();
         updateValuePerShare();
 
         // now we can issue shares
         stakingToken.safeTransferFrom(_chargeStaker ? _staker : msg.sender, address(this), _amount);
-        uint256 sharesToIssue = (_amount * unit) / valuePerShare;
+        uint256 sharesToIssue = (_amount * UNIT) / valuePerShare;
         totalShares = totalShares + sharesToIssue;
         share[_staker] = share[_staker] + sharesToIssue;
 
@@ -101,7 +102,7 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
     }
 
     /// @dev Requests a throttled exit from the pool and gives you a time from which you can withdraw your stake and rewards.
-    function exit() public virtual onlyUnlocked nonReentrant {
+    function exit() external virtual onlyUnlocked nonReentrant {
         exitRewardPool();
         updateValuePerShare();
 
@@ -122,7 +123,7 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
     }
 
     /// @dev Completes the throttled exit from the pool.
-    function completeExit() public virtual onlyUnlocked nonReentrant {
+    function completeExit() external virtual onlyUnlocked nonReentrant {
         ExitInfo storage info = exitInfo[msg.sender];
         exitStake = exitStake - info.exitStake;
 
@@ -132,17 +133,17 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
     }
 
     function balanceOf(address _staker) public view returns (uint256) {
-        return (valuePerShare * share[_staker]) / unit;
+        return (valuePerShare * share[_staker]) / UNIT;
     }
 
     function updateValuePerShare() internal {
         if (totalShares == 0) {
             totalValue = 0;
-            valuePerShare = unit;
+            valuePerShare = UNIT;
             return;
         }
         totalValue = stakingToken.balanceOf(address(this)) - exitStake;
-        valuePerShare = (totalValue * unit) / totalShares;
+        valuePerShare = (totalValue * UNIT) / totalShares;
     }
 
     function exitRewardPool() internal {

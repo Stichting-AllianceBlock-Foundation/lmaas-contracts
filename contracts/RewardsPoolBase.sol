@@ -24,7 +24,7 @@ Your reward is (20 - 5) * 100 = 1500 tokens.
 contract RewardsPoolBase is ReentrancyGuard, Ownable {
     using SafeERC20Detailed for IERC20Detailed;
 
-    uint256 internal constant PRECISION = 1000000000000000000;
+    uint256 internal constant PRECISION = 1 ether;
 
     uint256 public totalStaked;
     uint256[] private totalClaimed;
@@ -99,25 +99,6 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         name = _name;
     }
 
-    modifier onlyInsideBounds() {
-        uint256 currentTimestamp = block.timestamp;
-        require(
-            (startTimestamp > 0 && currentTimestamp > startTimestamp) &&
-                (currentTimestamp <= endTimestamp + extensionDuration),
-            'RewardsPoolBase: staking is not started or is finished or no extension taking in place'
-        );
-        _;
-    }
-
-    modifier onlyUnderStakeLimit(address staker, uint256 newStake) {
-        UserInfo storage user = userInfo[staker];
-        require(
-            (user.amountStaked + newStake <= stakeLimit) && (totalStaked + newStake <= contractStakeLimit),
-            'onlyUnderStakeLimit::Stake limit reached'
-        );
-        _;
-    }
-
     /** @dev Start the pool. Funds for rewards will be checked and staking will be opened.
      * @param _startTimestamp The start time of the pool
      * @param _endTimestamp The end time of the pool
@@ -127,7 +108,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         uint256 _startTimestamp,
         uint256 _endTimestamp,
         uint256[] calldata _rewardPerSecond
-    ) public virtual onlyOwner {
+    ) external virtual onlyOwner {
         _start(_startTimestamp, _endTimestamp, _rewardPerSecond);
     }
 
@@ -162,7 +143,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         emit Started();
     }
 
-    function cancel() public onlyOwner {
+    function cancel() external onlyOwner {
         require(startTimestamp > block.timestamp, 'RewardsPoolBase: No start scheduled or already started');
 
         startTimestamp = 0;
@@ -181,18 +162,29 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         uint256 _tokenAmount,
         address _staker,
         bool _chargeStaker
-    ) internal onlyInsideBounds onlyUnderStakeLimit(_staker, _tokenAmount) {
-        require(_tokenAmount > 0, 'RewardsPoolBase: cannot stake 0');
+    ) internal {
+        uint256 currentTimestamp = block.timestamp;
+        require(
+            (startTimestamp > 0 && currentTimestamp > startTimestamp) &&
+                (currentTimestamp <= endTimestamp + extensionDuration),
+            'RewardsPoolBase: staking is not started or is finished or no extension taking in place'
+        );
 
         UserInfo storage user = userInfo[_staker];
+        require(
+            (user.amountStaked + _tokenAmount <= stakeLimit) && (totalStaked + _tokenAmount <= contractStakeLimit),
+            'RewardsPoolBase: stake limit reached'
+        );
+
+        require(_tokenAmount > 0, 'RewardsPoolBase: cannot stake 0');
 
         // if no amount has been staked this is considered the initial stake
         if (user.amountStaked == 0) {
-            user.firstStakedTimestamp = block.timestamp;
+            user.firstStakedTimestamp = currentTimestamp;
         }
 
         updateRewardMultipliers(); // Update the accumulated multipliers for everyone
-        updateUserAccruedReward(_staker); // Update the accrued reward for this specific user
+        _updateUserAccruedReward(_staker); // Update the accrued reward for this specific user
 
         user.amountStaked = user.amountStaked + _tokenAmount;
         totalStaked = totalStaked + _tokenAmount;
@@ -217,7 +209,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     function _claim(address _claimer) internal {
         UserInfo storage user = userInfo[_claimer];
         updateRewardMultipliers();
-        updateUserAccruedReward(_claimer);
+        _updateUserAccruedReward(_claimer);
 
         uint256 rewardsTokensLength = rewardsTokens.length;
 
@@ -245,7 +237,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         UserInfo storage user = userInfo[_withdrawer];
 
         updateRewardMultipliers(); // Update the accumulated multipliers for everyone
-        updateUserAccruedReward(_withdrawer); // Update the accrued reward for this specific user
+        _updateUserAccruedReward(_withdrawer); // Update the accrued reward for this specific user
 
         user.amountStaked = user.amountStaked - _tokenAmount;
         totalStaked = totalStaked - _tokenAmount;
@@ -279,7 +271,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     /** @dev Returns the amount of tokens the user has staked
      * @param _userAddress The user to get the balance of
      */
-    function balanceOf(address _userAddress) public view returns (uint256) {
+    function balanceOf(address _userAddress) external view returns (uint256) {
         UserInfo storage user = userInfo[_userAddress];
         return user.amountStaked;
     }
@@ -334,7 +326,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     /** @dev Updates the accumulated reward for the user
      * @param _userAddress the address of the updated user
      */
-    function updateUserAccruedReward(address _userAddress) internal {
+    function _updateUserAccruedReward(address _userAddress) internal {
         UserInfo storage user = userInfo[_userAddress];
 
         uint256 rewardsTokensLength = rewardsTokens.length;
@@ -366,7 +358,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     /**
 		@dev Checks if the staking has started
 	 */
-    function hasStakingStarted() public view returns (bool) {
+    function hasStakingStarted() external view returns (bool) {
         return (startTimestamp > 0 && block.timestamp >= startTimestamp);
     }
 
@@ -397,7 +389,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         address _userAddress,
         uint256 _tokenIndex,
         uint256 _time
-    ) public view returns (uint256) {
+    ) external view returns (uint256) {
         uint256 applicableTimestamp = (_time < endTimestamp) ? _time : endTimestamp;
         uint256 secondsSinceLastReward = applicableTimestamp - lastRewardTimestamp;
 
@@ -429,7 +421,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     /**
      * @dev Extends the rewards period and updates the rates
      * @param _durationTime duration of the campaign (how many seconds the campaign will have)
-     * @param _rewardPerSecond array with new rewards per block for each token
+     * @param _rewardPerSecond array with new rewards per second for each token
      */
     function extend(uint256 _durationTime, uint256[] memory _rewardPerSecond) external virtual onlyOwner {
         require(extensionDuration == 0, 'RewardsPoolBase: there is already an extension');
