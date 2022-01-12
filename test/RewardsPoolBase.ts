@@ -233,12 +233,32 @@ describe('RewardsPoolBase', () => {
       );
     });
 
+    it('[Should cancel before staking start]:', async () => {
+      await RewardsPoolBaseInstance.cancel();
+      expect(await RewardsPoolBaseInstance.startTimestamp()).to.equal(0, 'The start timestamp was not reset');
+    });
+
+    it('[Should not cancel after staking start]:', async () => {
+      await timeTravel(70);
+
+      await expect(RewardsPoolBaseInstance.cancel()).to.be.revertedWith(
+        'RewardsPoolBase: No start scheduled or already started'
+      );
+    });
+
+    it('[Should be able to restart after cancel]:', async () => {
+      await RewardsPoolBaseInstance.cancel();
+
+      await RewardsPoolBaseInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
+      expect(await RewardsPoolBaseInstance.startTimestamp()).to.equal(startTimestamp, 'Was not able to restart');
+    });
+
     describe('Inside bounds', function () {
       beforeEach(async () => {
         await stakingTokenInstance.approve(RewardsPoolBaseInstance.address, standardStakingAmount);
         await stakingTokenInstance.connect(bobAccount).approve(RewardsPoolBaseInstance.address, standardStakingAmount);
 
-        //timetraveling 70 seconds from now  in order to start the campaign
+        //timetraveling 70 seconds from now in order to start the campaign
         await timeTravel(70);
       });
 
