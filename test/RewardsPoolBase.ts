@@ -727,13 +727,7 @@ describe('RewardsPoolBase', () => {
 
     it('[Should fail extending the rewards pool if the end timestamp is not in the future]:', async () => {
       await expect(RewardsPoolBaseInstance.extend(0, rewardPerSecond)).to.be.revertedWith(
-        'RewardsPoolBase: invalid endTimestamp'
-      );
-    });
-
-    it('[Should fail extending the rewards pool if the end timestamp is not greater than the previous]:', async () => {
-      await expect(RewardsPoolBaseInstance.extend(0, rewardPerSecond)).to.be.revertedWith(
-        'RewardsPoolBase: invalid endTimestamp'
+        'RewardsPoolBase: duration must be greater than 0'
       );
     });
 

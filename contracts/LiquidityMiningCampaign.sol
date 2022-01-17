@@ -34,7 +34,7 @@ contract LiquidityMiningCampaign is StakeTransferer, RewardsPoolBase {
      @dev Exits the current campaing, claims the bonus and stake all rewards in another pool
 	   @param _stakePool the address of the pool where the tokens will be staked
 	  */
-    function exitAndStake(address _stakePool) external nonReentrant {
+    function exitAndStake(address _stakePool) external {
         _exitAndStake(msg.sender, _stakePool);
     }
 

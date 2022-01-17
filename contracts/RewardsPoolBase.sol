@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.4;
 
-import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import './interfaces/IERC20Detailed.sol';
 import './SafeERC20Detailed.sol';
@@ -21,7 +20,7 @@ we calculate the amount of tokens you can claim.
 For example, you enter when the accumulatedRewardMultiplier is 5 and exit at 20. You staked 100 tokens.
 Your reward is (20 - 5) * 100 = 1500 tokens.
 */
-contract RewardsPoolBase is ReentrancyGuard, Ownable {
+contract RewardsPoolBase is Ownable {
     using SafeERC20Detailed for IERC20Detailed;
 
     uint256 internal constant PRECISION = 1 ether;
@@ -58,12 +57,12 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 
     mapping(address => UserInfo) public userInfo;
 
-    event Started();
+    event Started(uint256 startTimestamp, uint256 endTimestamp, uint256[] rewardsPerSecond);
     event Staked(address indexed user, uint256 amount);
     event Claimed(address indexed user, uint256 amount, address token);
     event Withdrawn(address indexed user, uint256 amount);
     event Exited(address indexed user, uint256 amount);
-    event Extended(uint256 newEndTimestamp, uint256[] newRewardsPerSecond);
+    event Extended(uint256 newStartTimestamp, uint256 newEndTimestamp, uint256[] newRewardsPerSecond);
     event WithdrawLPRewards(uint256 indexed rewardsAmount, address indexed recipient);
 
     /** @param _stakingToken The token to stake
@@ -140,7 +139,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         endTimestamp = _endTimestamp;
         lastRewardTimestamp = _startTimestamp;
 
-        emit Started();
+        emit Started(startTimestamp, endTimestamp, rewardPerSecond);
     }
 
     function cancel() external onlyOwner {
@@ -154,7 +153,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     /** @dev Stake an amount of tokens
      * @param _tokenAmount The amount to be staked
      */
-    function stake(uint256 _tokenAmount) public virtual nonReentrant {
+    function stake(uint256 _tokenAmount) public virtual {
         _stake(_tokenAmount, msg.sender, true);
     }
 
@@ -202,7 +201,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 
     /** @dev Claim all your rewards, this will not remove your stake
      */
-    function claim() public virtual nonReentrant {
+    function claim() public virtual {
         _claim(msg.sender);
     }
 
@@ -216,9 +215,9 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
             uint256 reward = user.tokensOwed[i];
             user.tokensOwed[i] = 0;
+            totalClaimed[i] = totalClaimed[i] + reward;
 
             IERC20Detailed(rewardsTokens[i]).safeTransfer(_claimer, reward);
-            totalClaimed[i] = totalClaimed[i] + reward;
 
             emit Claimed(_claimer, reward, rewardsTokens[i]);
         }
@@ -227,7 +226,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     /** @dev Withdrawing a portion or all of staked tokens. This will not claim your rewards
      * @param _tokenAmount The amount to be withdrawn
      */
-    function withdraw(uint256 _tokenAmount) public virtual nonReentrant {
+    function withdraw(uint256 _tokenAmount) public virtual {
         _withdraw(_tokenAmount, msg.sender);
     }
 
@@ -256,7 +255,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 
     /** @dev Claim all rewards and withdraw all staked tokens. Exits from the rewards pool
      */
-    function exit() public virtual nonReentrant {
+    function exit() public virtual {
         _exit(msg.sender);
     }
 
@@ -426,16 +425,15 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     function extend(uint256 _durationTime, uint256[] memory _rewardPerSecond) external virtual onlyOwner {
         require(extensionDuration == 0, 'RewardsPoolBase: there is already an extension');
 
+        require(_durationTime > 0, 'RewardsPoolBase: duration must be greater than 0');
+
+        uint256 rewardPerSecondLength = _rewardPerSecond.length;
+        require(rewardPerSecondLength == rewardsTokens.length, 'RewardsPoolBase: invalid rewardPerSecond');
+
         uint256 newStartTimestamp = endTimestamp;
         uint256 newEndTimestamp = newStartTimestamp + _durationTime;
-        uint256 _rewardPerSecondLength = _rewardPerSecond.length;
 
-        require(
-            newEndTimestamp > newStartTimestamp && newEndTimestamp > endTimestamp,
-            'RewardsPoolBase: invalid endTimestamp'
-        );
-        require(_rewardPerSecondLength == rewardsTokens.length, 'RewardsPoolBase: invalid rewardPerSecond');
-        for (uint256 i = 0; i < _rewardPerSecondLength; i++) {
+        for (uint256 i = 0; i < rewardPerSecondLength; i++) {
             uint256 newRewards = calculateRewardsAmount(newStartTimestamp, newEndTimestamp, _rewardPerSecond[i]);
 
             // We need to check if we have enough balance available in the contract to pay for the extension
@@ -447,17 +445,12 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
             totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
         }
 
-        uint256 currentTimestamp = block.timestamp;
-
-        if (currentTimestamp > endTimestamp) {
+        if (block.timestamp > endTimestamp) {
             _updateRewardMultipliers(endTimestamp);
             _extend(newStartTimestamp, newEndTimestamp, _rewardPerSecond);
-            _updateRewardMultipliers(currentTimestamp);
         } else {
             extensionDuration = _durationTime;
             extensionRewardPerSecond = _rewardPerSecond;
-
-            updateRewardMultipliers();
         }
     }
 
@@ -479,7 +472,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         extensionDuration = 0;
         delete extensionRewardPerSecond;
 
-        emit Extended(_endTimestamp, _rewardPerSecond);
+        emit Extended(_startTimestamp, _endTimestamp, _rewardPerSecond);
     }
 
     /**
@@ -509,7 +502,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
      * @param _recipient The address to whom the rewards will be trasferred
      * @param _lpTokenContract The address of the rewards contract
      */
-    function withdrawLPRewards(address _recipient, address _lpTokenContract) external nonReentrant onlyOwner {
+    function withdrawLPRewards(address _recipient, address _lpTokenContract) external onlyOwner {
         uint256 currentReward = IERC20Detailed(_lpTokenContract).balanceOf(address(this));
         require(currentReward > 0, 'RewardsPoolBase: no rewards');
 
@@ -522,6 +515,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         }
 
         IERC20Detailed(_lpTokenContract).safeTransfer(_recipient, currentReward);
+
         emit WithdrawLPRewards(currentReward, _recipient);
     }
 

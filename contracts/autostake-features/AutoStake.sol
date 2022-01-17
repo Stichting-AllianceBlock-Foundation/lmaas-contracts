@@ -3,7 +3,6 @@
 pragma solidity 0.8.4;
 
 import '@openzeppelin/contracts/utils/math/Math.sol';
-import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import './../interfaces/IRewardsPoolBase.sol';
 import './../interfaces/IERC20Detailed.sol';
@@ -13,7 +12,7 @@ import './../ThrottledExit.sol';
 
 // Based on ideas here: https://github.com/harvest-finance/harvest/blob/7a455967e40e980d4cfb2115bd000fbd6b201cc1/contracts/AutoStake.sol
 
-contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
+contract AutoStake is StakeLock, ThrottledExit, Ownable {
     using SafeERC20Detailed for IERC20Detailed;
 
     uint256 public constant UNIT = 1 ether;
@@ -73,7 +72,7 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
     /** @dev Stake an amount of tokens
      * @param _tokenAmount The amount to be staked
      */
-    function stake(uint256 _tokenAmount) public virtual nonReentrant {
+    function stake(uint256 _tokenAmount) public virtual {
         _stake(_tokenAmount, msg.sender, true);
     }
 
@@ -102,7 +101,7 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
     }
 
     /// @dev Requests a throttled exit from the pool and gives you a time from which you can withdraw your stake and rewards.
-    function exit() external virtual onlyUnlocked nonReentrant {
+    function exit() external virtual onlyUnlocked {
         exitRewardPool();
         updateValuePerShare();
 
@@ -112,18 +111,18 @@ contract AutoStake is ReentrancyGuard, StakeLock, ThrottledExit, Ownable {
             return;
         }
 
-        // now we can transfer funds and burn shares
-        initiateExit(userStake, 0, new uint256[](0));
-
         totalShares = totalShares - share[msg.sender];
         share[msg.sender] = 0;
         exitStake = exitStake + userStake;
+
+        // now we can transfer funds and burn shares
+        initiateExit(userStake, new uint256[](0));
 
         updateValuePerShare();
     }
 
     /// @dev Completes the throttled exit from the pool.
-    function completeExit() external virtual onlyUnlocked nonReentrant {
+    function completeExit() external virtual onlyUnlocked {
         ExitInfo storage info = exitInfo[msg.sender];
         exitStake = exitStake - info.exitStake;
 
