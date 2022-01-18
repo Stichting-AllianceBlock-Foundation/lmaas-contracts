@@ -63,7 +63,6 @@ contract RewardsPoolBase is Ownable {
     event Withdrawn(address indexed user, uint256 amount);
     event Exited(address indexed user, uint256 amount);
     event Extended(uint256 newStartTimestamp, uint256 newEndTimestamp, uint256[] newRewardsPerSecond);
-    event WithdrawLPRewards(uint256 indexed rewardsAmount, address indexed recipient);
 
     /** @param _stakingToken The token to stake
      * @param _rewardsTokens The reward tokens
@@ -488,6 +487,17 @@ contract RewardsPoolBase is Ownable {
         }
 
         uint256 spentRewards = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerSecond[_rewardTokenIndex]);
+
+        if (extensionDuration > 0) {
+            uint256 spentExtensionRewards = calculateRewardsAmount(
+                endTimestamp,
+                endTimestamp + extensionDuration,
+                extensionRewardPerSecond[_rewardTokenIndex]
+            );
+
+            spentRewards = spentRewards + spentExtensionRewards;
+        }
+
         uint256 availableBalance = balance -
             (totalSpentRewards[_rewardTokenIndex] + spentRewards - totalClaimed[_rewardTokenIndex]);
 
@@ -499,7 +509,7 @@ contract RewardsPoolBase is Ownable {
     }
 
     /** @dev Withdraw rewards acumulated from different pools for providing liquidity
-     * @param _recipient The address to whom the rewards will be trasferred
+     * @param _recipient The address to whom the rewards will be transferred
      * @param _lpTokenContract The address of the rewards contract
      */
     function withdrawLPRewards(address _recipient, address _lpTokenContract) external onlyOwner {
@@ -515,8 +525,21 @@ contract RewardsPoolBase is Ownable {
         }
 
         IERC20Detailed(_lpTokenContract).safeTransfer(_recipient, currentReward);
+    }
 
-        emit WithdrawLPRewards(currentReward, _recipient);
+    /** @dev Withdraw excess rewards not needed for rewards
+     * @param _recipient The address to whom the rewards will be transferred
+     */
+    function withdrawExcessRewards(address _recipient) external onlyOwner {
+        uint256 rewardsTokensLength = rewardsTokens.length;
+
+        for (uint256 i = 0; i < rewardsTokensLength; i++) {
+            uint256 balance = getAvailableBalance(i);
+
+            if (balance > 0) {
+                IERC20Detailed(rewardsTokens[i]).safeTransfer(_recipient, balance);
+            }
+        }
     }
 
     /** @dev Calculates the amount of rewards given in a specific period
