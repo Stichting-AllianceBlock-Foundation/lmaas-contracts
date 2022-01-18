@@ -475,6 +475,17 @@ contract RewardsPoolBase is Ownable {
     }
 
     /**
+     * @dev Cancels the schedules extension
+     */
+    function cancelExtension() public onlyOwner {
+        require(extensionDuration > 0, 'RewardsPoolBase: there is no extension scheduled');
+        require(block.timestamp < endTimestamp, 'RewardsPoolBase: cannot cancel extension after it has started');
+
+        extensionDuration = 0;
+        delete extensionRewardPerSecond;
+    }
+
+    /**
      *@dev Calculates the available amount of reward tokens that are not locked
      *@param _rewardTokenIndex the index of the reward token to check
      */
