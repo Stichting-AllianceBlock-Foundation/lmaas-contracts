@@ -52,6 +52,7 @@ address _receiver; // The pool address to whitelist
 
 bool _whitelisted; // If it should be whitelisted or not
 ```
+
 #### exitAndTransfer
 
 
@@ -62,6 +63,7 @@ exits the current campaign and trasnfers the stake to another whitelisted campai
 ```Solidity
 address _transferTo; 
 ```
+
 #### constructor
 
 
@@ -73,6 +75,42 @@ address token;
 uint256 _throttleRoundSeconds; 
 uint256 _throttleRoundCap; 
 ```
+
+
+#### start
+
+
+
+
+
+```Solidity
+uint256 _endTimestamp; 
+```
+
+#### setPool
+
+
+
+Sets the underlying reward pool. Can only be set once.
+
+
+```Solidity
+address _pool; // The reward pool
+```
+
+#### name → string
+
+
+
+
+
+
+#### refreshAutoStake
+
+
+
+
+
 #### stake
 
 
@@ -83,6 +121,22 @@ Stake an amount of tokens
 ```Solidity
 uint256 _tokenAmount; // The amount to be staked
 ```
+
+
+
+#### exit
+
+
+
+Requests a throttled exit from the pool and gives you a time from which you can withdraw your stake and rewards.
+
+
+#### completeExit
+
+
+
+Completes the throttled exit from the pool.
+
 #### balanceOf → uint256
 
 
@@ -92,11 +146,16 @@ uint256 _tokenAmount; // The amount to be staked
 ```Solidity
 address _staker; 
 ```
+
+
+
+
 #### owner → address
 
 
 
 Returns the address of the current owner.
+
 
 #### renounceOwnership
 
@@ -106,6 +165,7 @@ Leaves the contract without owner. It will not be possible to call
 `onlyOwner` functions anymore. Can only be called by the current owner.
 NOTE: Renouncing ownership will leave the contract without an owner,
 thereby removing any functionality that is only available to the owner.
+
 
 #### transferOwnership
 
@@ -117,6 +177,27 @@ Can only be called by the current owner.
 ```Solidity
 address newOwner; 
 ```
+
+
+
+
+
+
+
+
+
+
+#### getPendingReward → uint256
+
+
+
+Returns the amount of reward tokens that are pending for exit for this user
+
+
+```Solidity
+uint256 _tokenIndex; // The index of the reward to check
+```
+
 
 ### Events
 

@@ -74,6 +74,22 @@ uint256 _contractStakeLimit; // Maximum amount of tokens that can be staked in t
 
 string _name; // Name of the pool
 ```
+
+
+#### start
+
+
+
+Start the pool and set locking and throttling parameters.
+
+
+```Solidity
+uint256 _startTimestamp; // The start time of the pool
+
+uint256 _endTimestamp; // The end time of the pool
+
+uint256[] _rewardPerSecond; // Amount of rewards given per second
+```
 #### withdraw
 
 
@@ -83,11 +99,13 @@ Not allowed
 ```Solidity
 uint256 _tokenAmount; 
 ```
+
 #### claim
 
 
 
 Not allowed
+
 
 #### exit
 
@@ -95,11 +113,13 @@ Not allowed
 
 Requests a throttled exit from the pool and gives you a time from which you can withdraw your stake and rewards.
 
+
 #### completeExit
 
 
 
 Completes the throttled exit from the pool.
+
 
 #### exitAndTransfer
 
@@ -110,6 +130,18 @@ Exits the pool and tranfer to another pool
 
 ```Solidity
 address transferTo; // The new pool to tranfer to
+```
+
+
+#### extend
+
+
+
+Not allowed
+
+```Solidity
+uint256 ; 
+uint256[] ; 
 ```
 #### delegateStake
 
@@ -123,6 +155,7 @@ address _staker; // The address who will own the stake
 
 uint256 _amount; // The amount to stake
 ```
+
 #### setReceiverWhitelisted
 
 
@@ -135,6 +168,32 @@ address _receiver; // The pool address to whitelist
 
 bool _whitelisted; // If it should be whitelisted or not
 ```
+
+
+
+
+
+
+
+#### getPendingReward → uint256
+
+
+
+Returns the amount of reward tokens that are pending for exit for this user
+
+
+```Solidity
+uint256 _tokenIndex; // The index of the reward to check
+```
+
+
+
+#### cancel
+
+
+
+
+
 #### stake
 
 
@@ -145,11 +204,113 @@ Stake an amount of tokens
 ```Solidity
 uint256 _tokenAmount; // The amount to be staked
 ```
+
+
+
+
+
+
+#### balanceOf → uint256
+
+
+
+Returns the amount of tokens the user has staked
+
+
+```Solidity
+address _userAddress; // The user to get the balance of
+```
 #### updateRewardMultipliers
 
 
 
 Updates the accumulated reward multipliers for everyone and each token
+
+
+
+
+
+#### hasStakingStarted → bool
+
+
+
+Checks if the staking has started
+
+
+#### getUserRewardDebt → uint256
+
+
+
+Returns the amount of reward debt of a specific token and user
+
+
+```Solidity
+address _userAddress; // the address of the updated user
+
+uint256 _index; // index of the reward token to check
+```
+
+#### getUserOwedTokens → uint256
+
+
+
+Returns the amount of reward owed of a specific token and user
+
+
+```Solidity
+address _userAddress; // the address of the updated user
+
+uint256 _index; // index of the reward token to check
+```
+
+#### getUserAccumulatedReward → uint256
+
+
+
+Calculates the reward at a specific time
+
+
+```Solidity
+address _userAddress; // the address of the user
+
+uint256 _tokenIndex; // the index of the reward token you are interested
+
+uint256 _time; // the time to check the reward at
+```
+
+#### getUserTokensOwedLength → uint256
+
+
+
+
+
+```Solidity
+address _userAddress; 
+```
+
+#### getUserRewardDebtLength → uint256
+
+
+
+
+
+```Solidity
+address _userAddress; 
+```
+
+#### getRewardTokensCount → uint256
+
+
+
+
+
+
+
+#### cancelExtension
+
+
+
+Cancels the schedules extension
 
 #### getAvailableBalance → uint256
 
@@ -161,11 +322,38 @@ Calculates the available amount of reward tokens that are not locked
 ```Solidity
 uint256 _rewardTokenIndex; // the index of the reward token to check
 ```
+
+
+#### withdrawTokens
+
+
+
+Withdraw tokens other than the staking and reward token, for example rewards from liquidity mining
+
+
+```Solidity
+address _recipient; // The address to whom the rewards will be transferred
+
+address _token; // The address of the rewards contract
+```
+
+#### withdrawExcessRewards
+
+
+
+Withdraw excess rewards not needed for current campaign and extension
+
+
+```Solidity
+address _recipient; // The address to whom the rewards will be transferred
+```
+
 #### owner → address
 
 
 
 Returns the address of the current owner.
+
 
 #### renounceOwnership
 
@@ -175,6 +363,7 @@ Leaves the contract without owner. It will not be possible to call
 `onlyOwner` functions anymore. Can only be called by the current owner.
 NOTE: Renouncing ownership will leave the contract without an owner,
 thereby removing any functionality that is only available to the owner.
+
 
 #### transferOwnership
 
@@ -186,6 +375,10 @@ Can only be called by the current owner.
 ```Solidity
 address newOwner; 
 ```
+
+
+
+
 
 ### Events
 

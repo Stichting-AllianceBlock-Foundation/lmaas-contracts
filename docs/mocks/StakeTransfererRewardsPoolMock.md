@@ -54,6 +54,7 @@ uint256 _stakeLimit;
 uint256 _contractStakeLimit; 
 string _name; 
 ```
+
 #### withdraw
 
 
@@ -63,7 +64,9 @@ string _name;
 ```Solidity
 uint256 _tokenAmount; 
 ```
+
 #### claim
+
 
 
 
@@ -81,6 +84,7 @@ address _receiver; // The pool address to whitelist
 
 bool _whitelisted; // If it should be whitelisted or not
 ```
+
 #### exitAndTransfer
 
 
@@ -91,6 +95,30 @@ exits the current campaign and trasnfers the stake to another whitelisted campai
 ```Solidity
 address transferTo; 
 ```
+
+
+#### start
+
+
+
+Start the pool. Funds for rewards will be checked and staking will be opened.
+
+
+```Solidity
+uint256 _startTimestamp; // The start time of the pool
+
+uint256 _endTimestamp; // The end time of the pool
+
+uint256[] _rewardPerSecond; // Amount of rewards given per second
+```
+
+
+#### cancel
+
+
+
+
+
 #### stake
 
 
@@ -101,17 +129,135 @@ Stake an amount of tokens
 ```Solidity
 uint256 _tokenAmount; // The amount to be staked
 ```
+
+
+
+
 #### exit
 
 
 
 Claim all rewards and withdraw all staked tokens. Exits from the rewards pool
 
+
+
+
+#### balanceOf → uint256
+
+
+
+Returns the amount of tokens the user has staked
+
+
+```Solidity
+address _userAddress; // The user to get the balance of
+```
 #### updateRewardMultipliers
 
 
 
 Updates the accumulated reward multipliers for everyone and each token
+
+
+
+
+
+#### hasStakingStarted → bool
+
+
+
+Checks if the staking has started
+
+
+#### getUserRewardDebt → uint256
+
+
+
+Returns the amount of reward debt of a specific token and user
+
+
+```Solidity
+address _userAddress; // the address of the updated user
+
+uint256 _index; // index of the reward token to check
+```
+
+#### getUserOwedTokens → uint256
+
+
+
+Returns the amount of reward owed of a specific token and user
+
+
+```Solidity
+address _userAddress; // the address of the updated user
+
+uint256 _index; // index of the reward token to check
+```
+
+#### getUserAccumulatedReward → uint256
+
+
+
+Calculates the reward at a specific time
+
+
+```Solidity
+address _userAddress; // the address of the user
+
+uint256 _tokenIndex; // the index of the reward token you are interested
+
+uint256 _time; // the time to check the reward at
+```
+
+#### getUserTokensOwedLength → uint256
+
+
+
+
+
+```Solidity
+address _userAddress; 
+```
+
+#### getUserRewardDebtLength → uint256
+
+
+
+
+
+```Solidity
+address _userAddress; 
+```
+
+#### getRewardTokensCount → uint256
+
+
+
+
+
+
+#### extend
+
+
+
+Extends the rewards period and updates the rates. 
+     When the current campaign is still going on, the extension will be scheduled and started when the campaign ends.
+     The extension can be cancelled until it starts. After it starts, the rewards are locked in and cannot be withdraw.
+
+
+```Solidity
+uint256 _durationTime; // duration of the campaign (how many seconds the campaign will have)
+
+uint256[] _rewardPerSecond; // array with new rewards per second for each token
+```
+
+
+#### cancelExtension
+
+
+
+Cancels the schedules extension
 
 #### getAvailableBalance → uint256
 
@@ -123,11 +269,38 @@ Calculates the available amount of reward tokens that are not locked
 ```Solidity
 uint256 _rewardTokenIndex; // the index of the reward token to check
 ```
+
+
+#### withdrawTokens
+
+
+
+Withdraw tokens other than the staking and reward token, for example rewards from liquidity mining
+
+
+```Solidity
+address _recipient; // The address to whom the rewards will be transferred
+
+address _token; // The address of the rewards contract
+```
+
+#### withdrawExcessRewards
+
+
+
+Withdraw excess rewards not needed for current campaign and extension
+
+
+```Solidity
+address _recipient; // The address to whom the rewards will be transferred
+```
+
 #### owner → address
 
 
 
 Returns the address of the current owner.
+
 
 #### renounceOwnership
 
@@ -137,6 +310,7 @@ Leaves the contract without owner. It will not be possible to call
 `onlyOwner` functions anymore. Can only be called by the current owner.
 NOTE: Renouncing ownership will leave the contract without an owner,
 thereby removing any functionality that is only available to the owner.
+
 
 #### transferOwnership
 
@@ -148,6 +322,10 @@ Can only be called by the current owner.
 ```Solidity
 address newOwner; 
 ```
+
+
+
+
 
 ### Events
 
