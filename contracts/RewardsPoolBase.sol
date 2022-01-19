@@ -439,9 +439,6 @@ contract RewardsPoolBase is Ownable {
             uint256 availableBalance = getAvailableBalance(i);
 
             require(availableBalance >= newRewards, 'RewardsPoolBase: not enough rewards to extend');
-
-            uint256 spentRewards = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerSecond[i]);
-            totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
         }
 
         if (block.timestamp > endTimestamp) {
@@ -464,10 +461,16 @@ contract RewardsPoolBase is Ownable {
         uint256 _endTimestamp,
         uint256[] memory _rewardPerSecond
     ) internal {
-        rewardPerSecond = _rewardPerSecond;
+        uint256 rewardPerSecondLength = rewardPerSecond.length;
+        for (uint256 i = 0; i < rewardPerSecondLength; i++) {
+            uint256 spentRewards = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerSecond[i]);
+            totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
+        }
 
+        rewardPerSecond = _rewardPerSecond;
         startTimestamp = _startTimestamp;
         endTimestamp = _endTimestamp;
+
         extensionDuration = 0;
         delete extensionRewardPerSecond;
 
@@ -477,7 +480,7 @@ contract RewardsPoolBase is Ownable {
     /**
      * @dev Cancels the schedules extension
      */
-    function cancelExtension() public onlyOwner {
+    function cancelExtension() external onlyOwner {
         require(extensionDuration > 0, 'RewardsPoolBase: there is no extension scheduled');
         require(block.timestamp < endTimestamp, 'RewardsPoolBase: cannot cancel extension after it has started');
 
@@ -538,7 +541,7 @@ contract RewardsPoolBase is Ownable {
         IERC20Detailed(_lpTokenContract).safeTransfer(_recipient, currentReward);
     }
 
-    /** @dev Withdraw excess rewards not needed for rewards
+    /** @dev Withdraw excess rewards not needed for current campaign and extension
      * @param _recipient The address to whom the rewards will be transferred
      */
     function withdrawExcessRewards(address _recipient) external onlyOwner {

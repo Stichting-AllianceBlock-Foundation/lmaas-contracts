@@ -75,6 +75,25 @@ describe('RewardsPoolBase', () => {
     return instance;
   }
 
+  async function extend() {
+    let newRewardsPerSecond: BigNumber[] = [];
+
+    const mintPromises = [];
+
+    for (let i = 0; i < rewardTokensCount; i++) {
+      let parsedReward = await ethers.utils.parseEther(`${(i + 1) * 2}`);
+
+      // Send the required reward tokens to the RewardsPool
+      mintPromises.push(rewardTokensInstances[i].mint(RewardsPoolBaseInstance.address, parsedReward.mul(poolLength)));
+
+      newRewardsPerSecond.push(parsedReward);
+    }
+
+    await Promise.all(mintPromises);
+
+    await RewardsPoolBaseInstance.extend(poolLength, newRewardsPerSecond);
+  }
+
   beforeEach(async () => {
     [aliceAccount, bobAccount, carolAccount] = await ethers.getSigners();
 
@@ -495,25 +514,6 @@ describe('RewardsPoolBase', () => {
       expect(RewardsPoolBaseInstance.withdraw(0)).to.be.revertedWith('RewardsPoolBase: cannot withdraw 0');
     });
 
-    async function extend() {
-      let newRewardsPerSecond: BigNumber[] = [];
-
-      const mintPromises = [];
-
-      for (let i = 0; i < rewardTokensCount; i++) {
-        let parsedReward = await ethers.utils.parseEther(`${(i + 1) * 2}`);
-
-        // Send the required reward tokens to the RewardsPool
-        mintPromises.push(rewardTokensInstances[i].mint(RewardsPoolBaseInstance.address, parsedReward.mul(poolLength)));
-
-        newRewardsPerSecond.push(parsedReward);
-      }
-
-      await Promise.all(mintPromises);
-
-      await RewardsPoolBaseInstance.extend(poolLength, newRewardsPerSecond);
-    }
-
     it('[Should extend correctly if the pool is not done and extend with updateRewardMultipliers]:', async () => {
       await extend();
       const extensionDuration = await RewardsPoolBaseInstance.extensionDuration();
@@ -751,6 +751,29 @@ describe('RewardsPoolBase', () => {
         'Ownable: caller is not the owner'
       );
     });
+
+    it('[Should fail cancelling extension when there is no extension]:', async () => {
+      await expect(RewardsPoolBaseInstance.cancelExtension()).to.be.revertedWith(
+        'RewardsPoolBase: there is no extension scheduled'
+      );
+    });
+
+    it('[Should fail cancelling extension when it has already started]:', async () => {
+      await extend();
+      await timeTravel(poolLength + 1000);
+
+      await expect(RewardsPoolBaseInstance.cancelExtension()).to.be.revertedWith(
+        'RewardsPoolBase: cannot cancel extension after it has started'
+      );
+    });
+
+    it('[Should cancel extension]:', async () => {
+      await extend();
+
+      await RewardsPoolBaseInstance.cancelExtension();
+
+      expect(await RewardsPoolBaseInstance.extensionDuration()).to.equal(0);
+    });
   });
 
   describe('Get available balance', async function () {
@@ -794,6 +817,43 @@ describe('RewardsPoolBase', () => {
           RewardsPoolBaseInstance.withdrawLPRewards(carolAccount.address, rewardTokensAddresses[i])
         ).to.be.revertedWith('');
       }
+    });
+  });
+
+  describe('Withdrawing excess rewards', async function () {
+    it('[Should not withdtaw if the caller is not the factory contract]:', async () => {
+      const lpContractInstance = await deployERC20(amount);
+      await lpContractInstance.mint(RewardsPoolBaseInstance.address, '100000000000');
+
+      await expect(
+        RewardsPoolBaseInstance.connect(bobAccount).withdrawExcessRewards(carolAccount.address)
+      ).to.be.revertedWith('');
+    });
+
+    it('[Should withdraw excess rewards]:', async () => {
+      const balanceBefore = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
+
+      await rewardTokensInstances[0].mint(RewardsPoolBaseInstance.address, '8000');
+
+      await RewardsPoolBaseInstance.withdrawExcessRewards(aliceAccount.address);
+
+      const balanceAfter = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
+
+      expect(balanceAfter.sub(balanceBefore)).to.equal('8000');
+    });
+
+    it('[Should withdraw excess rewards with extension]:', async () => {
+      await extend();
+
+      const balanceBefore = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
+
+      await rewardTokensInstances[0].mint(RewardsPoolBaseInstance.address, '8000');
+
+      await RewardsPoolBaseInstance.withdrawExcessRewards(aliceAccount.address);
+
+      const balanceAfter = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
+
+      expect(balanceAfter.sub(balanceBefore)).to.equal('8000');
     });
   });
 

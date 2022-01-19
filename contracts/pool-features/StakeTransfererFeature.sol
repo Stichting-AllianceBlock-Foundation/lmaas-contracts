@@ -41,7 +41,6 @@ abstract contract StakeTransfererFeature is OnlyExitFeature, StakeTransferer {
         totalStaked = totalStaked - userStakedAmount;
 
         for (uint256 i = 0; i < rewardsTokens.length; i++) {
-            user.tokensOwed[i] = 0;
             user.rewardDebt[i] = 0;
         }
 
