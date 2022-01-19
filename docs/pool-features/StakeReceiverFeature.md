@@ -12,7 +12,6 @@ StakeReceiver
 RewardsPoolBase
 Ownable
 Context
-ReentrancyGuard
 ```
 
 ### Variables
@@ -147,6 +146,11 @@ address newOwner;
 
 
 
+```Solidity
+uint256 startTimestamp;
+uint256 endTimestamp;
+uint256[] rewardsPerSecond;
+```
 #### Staked
 
 
@@ -195,18 +199,9 @@ uint256 amount;
 
 
 ```Solidity
+uint256 newStartTimestamp;
 uint256 newEndTimestamp;
 uint256[] newRewardsPerSecond;
-```
-#### WithdrawLPRewards
-
-
-
-
-
-```Solidity
-uint256 rewardsAmount;
-address recipient;
 ```
 #### OwnershipTransferred
 

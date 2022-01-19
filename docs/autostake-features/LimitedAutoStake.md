@@ -13,7 +13,6 @@ Ownable
 Context
 ThrottledExit
 StakeLock
-ReentrancyGuard
 ```
 
 ### Variables

@@ -417,7 +417,9 @@ contract RewardsPoolBase is Ownable {
     }
 
     /**
-     * @dev Extends the rewards period and updates the rates
+     * @dev Extends the rewards period and updates the rates. 
+     When the current campaign is still going on, the extension will be scheduled and started when the campaign ends.
+     The extension can be cancelled until it starts. After it starts, the rewards are locked in and cannot be withdraw.
      * @param _durationTime duration of the campaign (how many seconds the campaign will have)
      * @param _rewardPerSecond array with new rewards per second for each token
      */
