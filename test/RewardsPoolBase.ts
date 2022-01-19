@@ -244,6 +244,34 @@ describe('RewardsPoolBase', () => {
     });
   });
 
+  describe('Cancel', function () {
+    it('[Should cancel when start is scheduled but not started]:', async () => {
+      const instance = await createPool();
+
+      await instance.start(startTimestamp, endTimestamp, rewardPerSecond);
+
+      await instance.cancel();
+
+      expect(await instance.startTimestamp()).to.equal(0);
+    });
+
+    it('[Should fail if already started]:', async () => {
+      const instance = await createPool();
+
+      await instance.start(startTimestamp, endTimestamp, rewardPerSecond);
+
+      await timeTravelTo(startTimestamp + 1);
+
+      await expect(instance.cancel()).to.be.revertedWith('RewardsPoolBase: No start scheduled or already started');
+    });
+
+    it('[Should fail if no start scheduled]:', async () => {
+      const instance = await createPool();
+
+      await expect(instance.cancel()).to.be.revertedWith('RewardsPoolBase: No start scheduled or already started');
+    });
+  });
+
   describe('Staking', function () {
     it('[Should not stake before staking start]:', async () => {
       await stakingTokenInstance.approve(RewardsPoolBaseInstance.address, standardStakingAmount);
