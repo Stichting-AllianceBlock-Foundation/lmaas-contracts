@@ -522,23 +522,23 @@ contract RewardsPoolBase is Ownable {
         return availableBalance;
     }
 
-    /** @dev Withdraw rewards acumulated from different pools for providing liquidity
+    /** @dev Withdraw tokens other than the staking and reward token, for example rewards from liquidity mining
      * @param _recipient The address to whom the rewards will be transferred
-     * @param _lpTokenContract The address of the rewards contract
+     * @param _token The address of the rewards contract
      */
-    function withdrawLPRewards(address _recipient, address _lpTokenContract) external onlyOwner {
-        uint256 currentReward = IERC20Detailed(_lpTokenContract).balanceOf(address(this));
+    function withdrawTokens(address _recipient, address _token) external onlyOwner {
+        uint256 currentReward = IERC20Detailed(_token).balanceOf(address(this));
         require(currentReward > 0, 'RewardsPoolBase: no rewards');
 
-        require(_lpTokenContract != address(stakingToken), 'RewardsPoolBase: cannot withdraw staking token');
+        require(_token != address(stakingToken), 'RewardsPoolBase: cannot withdraw staking token');
 
         uint256 rewardsTokensLength = rewardsTokens.length;
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
-            require(_lpTokenContract != rewardsTokens[i], 'RewardsPoolBase: cannot withdraw reward token');
+            require(_token != rewardsTokens[i], 'RewardsPoolBase: cannot withdraw reward token');
         }
 
-        IERC20Detailed(_lpTokenContract).safeTransfer(_recipient, currentReward);
+        IERC20Detailed(_token).safeTransfer(_recipient, currentReward);
     }
 
     /** @dev Withdraw excess rewards not needed for current campaign and extension

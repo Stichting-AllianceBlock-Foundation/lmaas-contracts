@@ -807,14 +807,14 @@ describe('RewardsPoolBase', () => {
       await lpContractInstance.mint(RewardsPoolBaseInstance.address, '100000000000');
 
       await expect(
-        RewardsPoolBaseInstance.connect(bobAccount).withdrawLPRewards(carolAccount.address, lpContractInstance.address)
+        RewardsPoolBaseInstance.connect(bobAccount).withdrawTokens(carolAccount.address, lpContractInstance.address)
       ).to.be.revertedWith('');
     });
 
     it('[Should revert if the token to withdraw is part of the rewards]:', async () => {
       for (let i = 0; i < rewardTokensCount; i++) {
         await expect(
-          RewardsPoolBaseInstance.withdrawLPRewards(carolAccount.address, rewardTokensAddresses[i])
+          RewardsPoolBaseInstance.withdrawTokens(carolAccount.address, rewardTokensAddresses[i])
         ).to.be.revertedWith('');
       }
     });
@@ -890,7 +890,7 @@ describe('RewardsPoolBase', () => {
     });
 
     it('[Should revert if the token to withdraw is part of the rewards]:', async () => {
-      await expect(RewardsPoolBaseInstance.withdrawLPRewards(carolAccount.address, rewardTokensAddresses[0])).to.be
+      await expect(RewardsPoolBaseInstance.withdrawTokens(carolAccount.address, rewardTokensAddresses[0])).to.be
         .reverted;
     });
   });
