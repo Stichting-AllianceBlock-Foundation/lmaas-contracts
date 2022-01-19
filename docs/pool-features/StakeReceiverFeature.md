@@ -87,7 +87,7 @@ uint256[] _rewardPerSecond; // Amount of rewards given per second
 
 
 
-
+Cancels the scheduled start. Can only be done before the start.
 
 #### stake
 
@@ -202,7 +202,7 @@ uint256 _time; // the time to check the reward at
 
 
 
-
+Returns the length of the owed tokens in the user info
 
 ```Solidity
 address _userAddress; 
@@ -212,7 +212,7 @@ address _userAddress;
 
 
 
-
+Returns the length of the reward debt in the user info
 
 ```Solidity
 address _userAddress; 
@@ -222,7 +222,7 @@ address _userAddress;
 
 
 
-
+Returns the amount of reward tokens
 
 
 #### extend

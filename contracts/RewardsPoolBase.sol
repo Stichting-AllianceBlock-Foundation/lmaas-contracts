@@ -141,8 +141,10 @@ contract RewardsPoolBase is Ownable {
         emit Started(startTimestamp, endTimestamp, rewardPerSecond);
     }
 
+    /** @dev Cancels the scheduled start. Can only be done before the start.
+     */
     function cancel() external onlyOwner {
-        require(startTimestamp > block.timestamp, 'RewardsPoolBase: No start scheduled or already started');
+        require(block.timestamp < startTimestamp, 'RewardsPoolBase: No start scheduled or already started');
 
         startTimestamp = 0;
         endTimestamp = 0;
@@ -402,16 +404,22 @@ contract RewardsPoolBase is Ownable {
         return user.tokensOwed[_tokenIndex] + pendingDebt;
     }
 
+    /** @dev Returns the length of the owed tokens in the user info
+     */
     function getUserTokensOwedLength(address _userAddress) external view returns (uint256) {
         UserInfo storage user = userInfo[_userAddress];
         return user.tokensOwed.length;
     }
 
+    /** @dev Returns the length of the reward debt in the user info
+     */
     function getUserRewardDebtLength(address _userAddress) external view returns (uint256) {
         UserInfo storage user = userInfo[_userAddress];
         return user.rewardDebt.length;
     }
 
+    /** @dev Returns the amount of reward tokens
+     */
     function getRewardTokensCount() external view returns (uint256) {
         return rewardsTokens.length;
     }
