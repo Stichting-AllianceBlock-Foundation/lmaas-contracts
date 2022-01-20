@@ -195,9 +195,9 @@ contract RewardsPoolBase is Ownable {
             user.rewardDebt[i] = (user.amountStaked * accumulatedRewardMultiplier[i]) / PRECISION; // Update user reward debt for each token
         }
 
-        stakingToken.safeTransferFrom(address(_chargeStaker ? _staker : msg.sender), address(this), _tokenAmount);
-
         emit Staked(_staker, _tokenAmount);
+
+        stakingToken.safeTransferFrom(address(_chargeStaker ? _staker : msg.sender), address(this), _tokenAmount);
     }
 
     /** @dev Claim all your rewards, this will not remove your stake
@@ -218,9 +218,9 @@ contract RewardsPoolBase is Ownable {
             user.tokensOwed[i] = 0;
             totalClaimed[i] = totalClaimed[i] + reward;
 
-            IERC20Detailed(rewardsTokens[i]).safeTransfer(_claimer, reward);
-
             emit Claimed(_claimer, reward, rewardsTokens[i]);
+
+            IERC20Detailed(rewardsTokens[i]).safeTransfer(_claimer, reward);
         }
     }
 
@@ -249,9 +249,9 @@ contract RewardsPoolBase is Ownable {
             user.rewardDebt[i] = totalDebt;
         }
 
-        stakingToken.safeTransfer(address(_withdrawer), _tokenAmount);
-
         emit Withdrawn(_withdrawer, _tokenAmount);
+
+        stakingToken.safeTransfer(address(_withdrawer), _tokenAmount);
     }
 
     /** @dev Claim all rewards and withdraw all staked tokens. Exits from the rewards pool
@@ -262,10 +262,11 @@ contract RewardsPoolBase is Ownable {
 
     function _exit(address exiter) internal {
         UserInfo storage user = userInfo[exiter];
-        _claim(exiter);
-        _withdraw(user.amountStaked, exiter);
 
         emit Exited(exiter, user.amountStaked);
+
+        _claim(exiter);
+        _withdraw(user.amountStaked, exiter);
     }
 
     /** @dev Returns the amount of tokens the user has staked
