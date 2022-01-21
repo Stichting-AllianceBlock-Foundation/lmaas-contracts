@@ -13,7 +13,6 @@ LiquidityMiningCampaign
 RewardsPoolBase
 Ownable
 Context
-ReentrancyGuard
 StakeTransferer
 ```
 
@@ -52,6 +51,7 @@ uint256 _stakeLimit;
 uint256 _contractStakeLimit; 
 string _name; 
 ```
+
 #### setReceiverWhitelisted
 
 
@@ -64,6 +64,19 @@ address _receiver; // The pool address to whitelist
 
 bool _whitelisted; // If it should be whitelisted or not
 ```
+
+
+#### exitAndStake
+
+
+
+Exits the current campaing, claims the bonus and stake all rewards in another pool
+	   @param _stakePool the address of the pool where the tokens will be staked
+
+```Solidity
+address _stakePool; 
+```
+
 #### exitAndTransfer
 
 
@@ -73,6 +86,30 @@ Not allowed
 ```Solidity
 address ; 
 ```
+
+
+#### start
+
+
+
+Start the pool. Funds for rewards will be checked and staking will be opened.
+
+
+```Solidity
+uint256 _startTimestamp; // The start time of the pool
+
+uint256 _endTimestamp; // The end time of the pool
+
+uint256[] _rewardPerSecond; // Amount of rewards given per second
+```
+
+
+#### cancel
+
+
+
+Cancels the scheduled start. Can only be done before the start.
+
 #### stake
 
 
@@ -83,11 +120,15 @@ Stake an amount of tokens
 ```Solidity
 uint256 _tokenAmount; // The amount to be staked
 ```
+
+
 #### claim
 
 
 
 Claim all your rewards, this will not remove your stake
+
+
 
 #### withdraw
 
@@ -99,17 +140,133 @@ Withdrawing a portion or all of staked tokens. This will not claim your rewards
 ```Solidity
 uint256 _tokenAmount; // The amount to be withdrawn
 ```
+
+
 #### exit
 
 
 
 Claim all rewards and withdraw all staked tokens. Exits from the rewards pool
 
+
+
+
+#### balanceOf → uint256
+
+
+
+Returns the amount of tokens the user has staked
+
+
+```Solidity
+address _userAddress; // The user to get the balance of
+```
 #### updateRewardMultipliers
 
 
 
 Updates the accumulated reward multipliers for everyone and each token
+
+
+
+
+
+#### hasStakingStarted → bool
+
+
+
+Checks if the staking has started
+
+
+#### getUserRewardDebt → uint256
+
+
+
+Returns the amount of reward debt of a specific token and user
+
+
+```Solidity
+address _userAddress; // the address of the updated user
+
+uint256 _index; // index of the reward token to check
+```
+
+#### getUserOwedTokens → uint256
+
+
+
+Returns the amount of reward owed of a specific token and user
+
+
+```Solidity
+address _userAddress; // the address of the updated user
+
+uint256 _index; // index of the reward token to check
+```
+
+#### getUserAccumulatedReward → uint256
+
+
+
+Calculates the reward at a specific time
+
+
+```Solidity
+address _userAddress; // the address of the user
+
+uint256 _tokenIndex; // the index of the reward token you are interested
+
+uint256 _time; // the time to check the reward at
+```
+
+#### getUserTokensOwedLength → uint256
+
+
+
+Returns the length of the owed tokens in the user info
+
+```Solidity
+address _userAddress; 
+```
+
+#### getUserRewardDebtLength → uint256
+
+
+
+Returns the length of the reward debt in the user info
+
+```Solidity
+address _userAddress; 
+```
+
+#### getRewardTokensCount → uint256
+
+
+
+Returns the amount of reward tokens
+
+
+#### extend
+
+
+
+Extends the rewards period and updates the rates. 
+     When the current campaign is still going on, the extension will be scheduled and started when the campaign ends.
+     The extension can be cancelled until it starts. After it starts, the rewards are locked in and cannot be withdraw.
+
+
+```Solidity
+uint256 _durationTime; // duration of the campaign (how many seconds the campaign will have)
+
+uint256[] _rewardPerSecond; // array with new rewards per second for each token
+```
+
+
+#### cancelExtension
+
+
+
+Cancels the schedules extension
 
 #### getAvailableBalance → uint256
 
@@ -121,11 +278,38 @@ Calculates the available amount of reward tokens that are not locked
 ```Solidity
 uint256 _rewardTokenIndex; // the index of the reward token to check
 ```
+
+
+#### withdrawTokens
+
+
+
+Withdraw tokens other than the staking and reward token, for example rewards from liquidity mining
+
+
+```Solidity
+address _recipient; // The address to whom the rewards will be transferred
+
+address _token; // The address of the rewards contract
+```
+
+#### withdrawExcessRewards
+
+
+
+Withdraw excess rewards not needed for current campaign and extension
+
+
+```Solidity
+address _recipient; // The address to whom the rewards will be transferred
+```
+
 #### owner → address
 
 
 
 Returns the address of the current owner.
+
 
 #### renounceOwnership
 
@@ -135,6 +319,7 @@ Leaves the contract without owner. It will not be possible to call
 `onlyOwner` functions anymore. Can only be called by the current owner.
 NOTE: Renouncing ownership will leave the contract without an owner,
 thereby removing any functionality that is only available to the owner.
+
 
 #### transferOwnership
 
@@ -147,6 +332,10 @@ Can only be called by the current owner.
 address newOwner; 
 ```
 
+
+
+
+
 ### Events
 
 #### Started
@@ -155,6 +344,11 @@ address newOwner;
 
 
 
+```Solidity
+uint256 startTimestamp;
+uint256 endTimestamp;
+uint256[] rewardsPerSecond;
+```
 #### Staked
 
 
@@ -203,18 +397,9 @@ uint256 amount;
 
 
 ```Solidity
+uint256 newStartTimestamp;
 uint256 newEndTimestamp;
 uint256[] newRewardsPerSecond;
-```
-#### WithdrawLPRewards
-
-
-
-
-
-```Solidity
-uint256 rewardsAmount;
-address recipient;
 ```
 #### OwnershipTransferred
 

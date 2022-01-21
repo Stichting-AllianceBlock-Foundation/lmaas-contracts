@@ -19,6 +19,7 @@ address treasury;
 
 ### Functions
 
+
 #### withdrawStake
 
 
@@ -28,6 +29,8 @@ address treasury;
 ```Solidity
 uint256 amount; 
 ```
+
+
 
 ### Events
 

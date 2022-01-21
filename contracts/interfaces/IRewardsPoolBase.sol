@@ -52,5 +52,5 @@ interface IRewardsPoolBase {
 
     function extend(uint256 _endTimestamp, uint256[] memory _rewardsPerSecond) external;
 
-    function withdrawLPRewards(address recipient, address lpTokenContract) external;
+    function withdrawTokens(address recipient, address token) external;
 }

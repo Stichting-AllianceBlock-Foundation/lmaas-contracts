@@ -12,7 +12,8 @@
     "prettier": "prettier --write 'contracts/**/*.sol'",
     "clean": "hardhat clean",
     "size": "hardhat compile && hardhat size-contracts",
-    "docs": "solidity-docgen --solc-module solc -t ./"
+    "docs": "solidity-docgen --solc-module solc -t ./",
+    "slither": "slither . --filter-paths node_modules"
   },
   "keywords": [],
   "author": "AllianceBlock",

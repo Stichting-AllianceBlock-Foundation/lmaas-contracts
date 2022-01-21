@@ -22,13 +22,7 @@ abstract contract StakeTransfererFeature is OnlyExitFeature, StakeTransferer {
     /** @dev exits the current campaign and trasnfers the stake to another whitelisted campaign
 		@param transferTo address of the receiver to transfer the stake to
 	 */
-    function exitAndTransfer(address transferTo)
-        public
-        virtual
-        override
-        onlyWhitelistedReceiver(transferTo)
-        nonReentrant
-    {
+    function exitAndTransfer(address transferTo) public virtual override onlyWhitelistedReceiver(transferTo) {
         UserInfo storage user = userInfo[msg.sender];
 
         if (user.amountStaked == 0) {
@@ -44,15 +38,13 @@ abstract contract StakeTransfererFeature is OnlyExitFeature, StakeTransferer {
 
         //If this is before the claim, the will never be able to claim his rewards.
         user.amountStaked = 0;
-        stakingToken.safeApprove(transferTo, userStakedAmount);
-
-        StakeReceiver(transferTo).delegateStake(msg.sender, userStakedAmount);
-
         totalStaked = totalStaked - userStakedAmount;
 
         for (uint256 i = 0; i < rewardsTokens.length; i++) {
-            user.tokensOwed[i] = 0;
             user.rewardDebt[i] = 0;
         }
+
+        stakingToken.safeApprove(transferTo, userStakedAmount);
+        StakeReceiver(transferTo).delegateStake(msg.sender, userStakedAmount);
     }
 }
