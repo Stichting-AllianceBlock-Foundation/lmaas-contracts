@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.4;
+pragma solidity 0.8.9;
 
+/** @dev Provides a time lock and onlyUnlocked modifier that allows locking a staking pool
+    for a certain period of time.
+*/
 abstract contract StakeLock {
     uint256 public lockEndTimestamp;
 

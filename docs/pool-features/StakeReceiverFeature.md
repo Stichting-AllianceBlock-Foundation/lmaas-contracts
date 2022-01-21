@@ -2,7 +2,7 @@
 
 
 
-
+Receive a stake from another pool
 
 ### Inheritance
 

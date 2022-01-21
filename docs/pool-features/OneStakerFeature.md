@@ -2,7 +2,7 @@
 
 
 
-
+Only allows one whitelisted address to stake, this is used for compounding rewards pool
 
 ### Inheritance
 

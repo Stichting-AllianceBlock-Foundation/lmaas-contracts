@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.4;
+pragma solidity 0.8.9;
 
 import './../interfaces/IERC20Detailed.sol';
 import './../SafeERC20Detailed.sol';
 import './AutoStake.sol';
 import './../StakeReceiver.sol';
 
+/** @dev Receive staking tokens from a whitelisted staking pool
+ */
 abstract contract StakeReceiverAutoStake is AutoStake, StakeReceiver {
     /** @dev Receives a stake from another pool
      * @param _staker The address who will own the stake

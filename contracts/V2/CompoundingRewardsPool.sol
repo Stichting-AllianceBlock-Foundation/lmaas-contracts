@@ -1,10 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.4;
+pragma solidity 0.8.9;
 
 import './../RewardsPoolBase.sol';
 import './../pool-features/OneStakerFeature.sol';
 
+/** @dev The underlying staking pool for the compounding rewards pool.
+    It only allows one staker to be active, namely the CompoundingRewardsPoolStaker,
+    which manages the shares in the pool per user, and stakes for all users at once.
+*/
 contract CompoundingRewardsPool is RewardsPoolBase, OneStakerFeature {
     constructor(
         IERC20Detailed _stakingToken,

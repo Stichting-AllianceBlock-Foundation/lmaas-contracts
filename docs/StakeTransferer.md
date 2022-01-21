@@ -2,7 +2,7 @@
 
 
 
-
+Interface to transfer staking tokens to another whitelisted pool
 
 ### Inheritance
 

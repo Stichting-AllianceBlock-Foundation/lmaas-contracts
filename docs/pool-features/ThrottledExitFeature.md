@@ -2,7 +2,7 @@
 
 
 
-
+Throttles the exit in rounds of a given duration and limit
 
 ### Inheritance
 
