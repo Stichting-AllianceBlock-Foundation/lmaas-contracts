@@ -849,7 +849,7 @@ describe('RewardsPoolBase', () => {
   });
 
   describe('Withdrawing excess rewards', async function () {
-    it('[Should not withdtaw if the caller is not the factory contract]:', async () => {
+    it('[Should not withdraw if the caller is not the factory contract]:', async () => {
       const lpContractInstance = await deployERC20(amount);
       await lpContractInstance.mint(RewardsPoolBaseInstance.address, '100000000000');
 

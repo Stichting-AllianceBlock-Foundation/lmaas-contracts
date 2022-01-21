@@ -2,7 +2,8 @@
 
 
 
-
+Locks the pool for a certain period of time, only after the lock period
+    has passed can the pool be exited.
 
 ### Inheritance
 

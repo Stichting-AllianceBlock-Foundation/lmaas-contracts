@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.4;
+pragma solidity 0.8.9;
 
 import './../RewardsPoolBase.sol';
 import './StakeLockingFeature.sol';
@@ -8,6 +8,8 @@ import './../interfaces/IERC20Detailed.sol';
 import './../SafeERC20Detailed.sol';
 import './../ThrottledExit.sol';
 
+/** @dev Throttles the exit in rounds of a given duration and limit
+ */
 abstract contract ThrottledExitFeature is StakeLockingFeature, ThrottledExit {
     using SafeERC20Detailed for IERC20Detailed;
 

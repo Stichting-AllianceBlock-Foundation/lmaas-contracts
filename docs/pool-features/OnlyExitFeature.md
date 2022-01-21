@@ -2,7 +2,7 @@
 
 
 
-
+Only allows exits, no claims or withdrawals.
 
 ### Inheritance
 

@@ -2,7 +2,7 @@
 
 
 
-
+Adds a limit to the total stake in an auto compounding pool
 
 ### Inheritance
 

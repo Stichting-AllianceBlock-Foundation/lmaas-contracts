@@ -2,7 +2,7 @@
 
 
 
-
+Receive staking tokens from a whitelisted staking pool
 
 ### Inheritance
 

@@ -2,7 +2,7 @@
 
 
 
-
+Transfer staked tokens to another whitelisted staking pool
 
 ### Inheritance
 

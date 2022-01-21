@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.4;
+pragma solidity 0.8.9;
 
 import './AutoStake.sol';
 
+/** @dev Adds a limit to the total stake in an auto compounding pool
+ */
 contract LimitedAutoStake is AutoStake {
     uint256 public immutable stakeLimit;
 

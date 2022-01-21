@@ -2,7 +2,7 @@
 
 
 
-
+Interface to receive stake transfers from other staking pools
 
 ### Inheritance
 

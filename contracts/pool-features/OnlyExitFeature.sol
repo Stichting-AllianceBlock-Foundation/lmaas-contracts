@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.4;
+pragma solidity 0.8.9;
 
 import './../RewardsPoolBase.sol';
 
+/** @dev Only allows exits, no claims or withdrawals.
+ */
 abstract contract OnlyExitFeature is RewardsPoolBase {
     //Without the passed argument the function is not overriden
     function withdraw(uint256) public virtual override {
