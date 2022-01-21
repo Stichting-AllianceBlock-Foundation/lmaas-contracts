@@ -9,7 +9,6 @@ Transfer staked tokens to another whitelisted staking pool
 ```
 StakeTransfererFeature
 StakeTransferer
-OnlyExitFeature
 RewardsPoolBase
 Ownable
 Context
@@ -60,23 +59,6 @@ exits the current campaign and trasnfers the stake to another whitelisted campai
 ```Solidity
 address transferTo; 
 ```
-
-#### withdraw
-
-
-
-
-
-```Solidity
-uint256 ; 
-```
-
-#### claim
-
-
-
-
-
 
 #### constructor
 
@@ -131,6 +113,24 @@ uint256 _tokenAmount; // The amount to be staked
 ```
 
 
+#### claim
+
+
+
+Claim all your rewards, this will not remove your stake
+
+
+
+#### withdraw
+
+
+
+Withdrawing a portion or all of staked tokens. This will not claim your rewards
+
+
+```Solidity
+uint256 _tokenAmount; // The amount to be withdrawn
+```
 
 
 #### exit

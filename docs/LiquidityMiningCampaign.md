@@ -10,15 +10,17 @@ Staking pool without any time locks or throttling
 
 ```
 LiquidityMiningCampaign
+StakeTransfererFeature
+StakeTransferer
 RewardsPoolBase
 Ownable
 Context
-StakeTransferer
 ```
 
 ### Variables
 
 ```Solidity
+mapping(address => bool) receiversWhitelist;
 uint256 PRECISION;
 uint256 totalStaked;
 uint256[] rewardPerSecond;
@@ -33,7 +35,6 @@ uint256 stakeLimit;
 uint256 contractStakeLimit;
 string name;
 mapping(address => struct RewardsPoolBase.UserInfo) userInfo;
-mapping(address => bool) receiversWhitelist;
 ```
 
 ### Functions
@@ -65,26 +66,15 @@ address _receiver; // The pool address to whitelist
 bool _whitelisted; // If it should be whitelisted or not
 ```
 
-
-#### exitAndStake
-
-
-
-Exits the current campaing, claims the bonus and stake all rewards in another pool
-	   @param _stakePool the address of the pool where the tokens will be staked
-
-```Solidity
-address _stakePool; 
-```
-
 #### exitAndTransfer
 
 
 
-Not allowed
+exits the current campaign and trasnfers the stake to another whitelisted campaign
+		@param transferTo address of the receiver to transfer the stake to
 
 ```Solidity
-address ; 
+address transferTo; 
 ```
 
 
