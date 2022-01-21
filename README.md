@@ -15,7 +15,11 @@ The `NonCompoundingRewardsPool` is a staking pool with a time lock, you have to 
 
 The `CompoundingRewardsPool` is a staking pool that auto compounds the rewards. Instead of having to restake your rewards, this pool keeps track of your share of the stakes and rewards combined.
 
+The most important contracts are here:
+
 - [Rewards pool base](docs/RewardsPoolBase.md)
 - [Liquidity mining campaign](docs/LiquidityMiningCampaign.md)
 - [Non compounding pool](docs/V2/NonCompoundingRewardsPool.md)
 - [Compounding pool](docs/V2/CompoundingRewardsPoolStaker.md)
+
+All other documentation can be found in the docs folder.
