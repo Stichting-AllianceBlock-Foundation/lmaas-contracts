@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.9;
 
+/** @dev Interface to transfer staking tokens to another whitelisted pool
+ */
 abstract contract StakeTransferer {
     mapping(address => bool) public receiversWhitelist;
 

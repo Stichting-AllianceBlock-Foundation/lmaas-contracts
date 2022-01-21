@@ -2,7 +2,8 @@
 
 
 
-
+Automatically restakes/compounds your rewards.
+    Based on ideas here: https://github.com/harvest-finance/harvest/blob/7a455967e40e980d4cfb2115bd000fbd6b201cc1/contracts/AutoStake.sol
 
 ### Inheritance
 

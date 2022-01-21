@@ -5,6 +5,14 @@ pragma solidity 0.8.9;
 import './interfaces/IERC20Detailed.sol';
 import './SafeERC20Detailed.sol';
 
+/** @dev Provides a throttling mechanism for staking pools. Instead of allowing
+    everyone to withdraw their stake at once at the end of the pool, this forces
+    the exits to go in rounds. Every round has a limit of how many tokens can be exited
+    and a certain amount of time has to pass before the next round can start. When the 
+    round is full, users that want to exit are put into the next round. Exit happens
+    in two stages, 'initiate exit' gives the user the time when they can exit. 
+    'Finalize exit' actually withdraws the users stake and rewards.
+*/
 abstract contract ThrottledExit {
     using SafeERC20Detailed for IERC20Detailed;
 

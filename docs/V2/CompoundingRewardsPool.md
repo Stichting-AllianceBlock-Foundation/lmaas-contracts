@@ -2,7 +2,9 @@
 
 
 
-
+The underlying staking pool for the compounding rewards pool.
+    It only allows one staker to be active, namely the CompoundingRewardsPoolStaker,
+    which manages the shares in the pool per user, and stakes for all users at once.
 
 ### Inheritance
 

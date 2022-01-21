@@ -10,8 +10,9 @@ import './../SafeERC20Detailed.sol';
 import './../StakeLock.sol';
 import './../ThrottledExit.sol';
 
-// Based on ideas here: https://github.com/harvest-finance/harvest/blob/7a455967e40e980d4cfb2115bd000fbd6b201cc1/contracts/AutoStake.sol
-
+/** @dev Automatically restakes/compounds your rewards.
+    Based on ideas here: https://github.com/harvest-finance/harvest/blob/7a455967e40e980d4cfb2115bd000fbd6b201cc1/contracts/AutoStake.sol
+ */
 contract AutoStake is StakeLock, ThrottledExit, Ownable {
     using SafeERC20Detailed for IERC20Detailed;
 

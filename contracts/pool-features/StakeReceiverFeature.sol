@@ -7,6 +7,8 @@ import './../SafeERC20Detailed.sol';
 import './../RewardsPoolBase.sol';
 import './../StakeReceiver.sol';
 
+/** @dev Receive a stake from another pool
+ */
 abstract contract StakeReceiverFeature is RewardsPoolBase, StakeReceiver {
     using SafeERC20Detailed for IERC20Detailed;
 

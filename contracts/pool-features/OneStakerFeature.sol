@@ -4,6 +4,8 @@ pragma solidity 0.8.9;
 
 import './../RewardsPoolBase.sol';
 
+/** @dev Only allows one whitelisted address to stake, this is used for compounding rewards pool
+ */
 abstract contract OneStakerFeature is RewardsPoolBase {
     address public immutable staker;
 

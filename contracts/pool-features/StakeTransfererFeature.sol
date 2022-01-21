@@ -8,6 +8,8 @@ import './OnlyExitFeature.sol';
 import './../StakeTransferer.sol';
 import './../StakeReceiver.sol';
 
+/** @dev Transfer staked tokens to another whitelisted staking pool
+ */
 abstract contract StakeTransfererFeature is OnlyExitFeature, StakeTransferer {
     using SafeERC20Detailed for IERC20Detailed;
 
