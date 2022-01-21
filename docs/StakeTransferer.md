@@ -30,6 +30,7 @@ address _receiver; // The pool address to whitelist
 
 bool _whitelisted; // If it should be whitelisted or not
 ```
+
 #### exitAndTransfer
 
 
@@ -39,5 +40,6 @@ bool _whitelisted; // If it should be whitelisted or not
 ```Solidity
 address transferTo; 
 ```
+
 
 

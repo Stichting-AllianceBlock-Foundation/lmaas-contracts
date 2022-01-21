@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.4;
 
-import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import './interfaces/IERC20Detailed.sol';
 import './SafeERC20Detailed.sol';
@@ -21,7 +20,7 @@ we calculate the amount of tokens you can claim.
 For example, you enter when the accumulatedRewardMultiplier is 5 and exit at 20. You staked 100 tokens.
 Your reward is (20 - 5) * 100 = 1500 tokens.
 */
-contract RewardsPoolBase is ReentrancyGuard, Ownable {
+contract RewardsPoolBase is Ownable {
     using SafeERC20Detailed for IERC20Detailed;
 
     uint256 internal constant PRECISION = 1 ether;
@@ -58,13 +57,12 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
 
     mapping(address => UserInfo) public userInfo;
 
-    event Started();
+    event Started(uint256 startTimestamp, uint256 endTimestamp, uint256[] rewardsPerSecond);
     event Staked(address indexed user, uint256 amount);
     event Claimed(address indexed user, uint256 amount, address token);
     event Withdrawn(address indexed user, uint256 amount);
     event Exited(address indexed user, uint256 amount);
-    event Extended(uint256 newEndTimestamp, uint256[] newRewardsPerSecond);
-    event WithdrawLPRewards(uint256 indexed rewardsAmount, address indexed recipient);
+    event Extended(uint256 newStartTimestamp, uint256 newEndTimestamp, uint256[] newRewardsPerSecond);
 
     /** @param _stakingToken The token to stake
      * @param _rewardsTokens The reward tokens
@@ -140,11 +138,13 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         endTimestamp = _endTimestamp;
         lastRewardTimestamp = _startTimestamp;
 
-        emit Started();
+        emit Started(startTimestamp, endTimestamp, rewardPerSecond);
     }
 
+    /** @dev Cancels the scheduled start. Can only be done before the start.
+     */
     function cancel() external onlyOwner {
-        require(startTimestamp > block.timestamp, 'RewardsPoolBase: No start scheduled or already started');
+        require(block.timestamp < startTimestamp, 'RewardsPoolBase: No start scheduled or already started');
 
         startTimestamp = 0;
         endTimestamp = 0;
@@ -154,7 +154,7 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
     /** @dev Stake an amount of tokens
      * @param _tokenAmount The amount to be staked
      */
-    function stake(uint256 _tokenAmount) public virtual nonReentrant {
+    function stake(uint256 _tokenAmount) public virtual {
         _stake(_tokenAmount, msg.sender, true);
     }
 
@@ -195,14 +195,14 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
             user.rewardDebt[i] = (user.amountStaked * accumulatedRewardMultiplier[i]) / PRECISION; // Update user reward debt for each token
         }
 
-        stakingToken.safeTransferFrom(address(_chargeStaker ? _staker : msg.sender), address(this), _tokenAmount);
-
         emit Staked(_staker, _tokenAmount);
+
+        stakingToken.safeTransferFrom(address(_chargeStaker ? _staker : msg.sender), address(this), _tokenAmount);
     }
 
     /** @dev Claim all your rewards, this will not remove your stake
      */
-    function claim() public virtual nonReentrant {
+    function claim() public virtual {
         _claim(msg.sender);
     }
 
@@ -216,18 +216,18 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
             uint256 reward = user.tokensOwed[i];
             user.tokensOwed[i] = 0;
-
-            IERC20Detailed(rewardsTokens[i]).safeTransfer(_claimer, reward);
             totalClaimed[i] = totalClaimed[i] + reward;
 
             emit Claimed(_claimer, reward, rewardsTokens[i]);
+
+            IERC20Detailed(rewardsTokens[i]).safeTransfer(_claimer, reward);
         }
     }
 
     /** @dev Withdrawing a portion or all of staked tokens. This will not claim your rewards
      * @param _tokenAmount The amount to be withdrawn
      */
-    function withdraw(uint256 _tokenAmount) public virtual nonReentrant {
+    function withdraw(uint256 _tokenAmount) public virtual {
         _withdraw(_tokenAmount, msg.sender);
     }
 
@@ -249,23 +249,24 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
             user.rewardDebt[i] = totalDebt;
         }
 
-        stakingToken.safeTransfer(address(_withdrawer), _tokenAmount);
-
         emit Withdrawn(_withdrawer, _tokenAmount);
+
+        stakingToken.safeTransfer(address(_withdrawer), _tokenAmount);
     }
 
     /** @dev Claim all rewards and withdraw all staked tokens. Exits from the rewards pool
      */
-    function exit() public virtual nonReentrant {
+    function exit() public virtual {
         _exit(msg.sender);
     }
 
     function _exit(address exiter) internal {
         UserInfo storage user = userInfo[exiter];
-        _claim(exiter);
-        _withdraw(user.amountStaked, exiter);
 
         emit Exited(exiter, user.amountStaked);
+
+        _claim(exiter);
+        _withdraw(user.amountStaked, exiter);
     }
 
     /** @dev Returns the amount of tokens the user has staked
@@ -404,60 +405,59 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         return user.tokensOwed[_tokenIndex] + pendingDebt;
     }
 
+    /** @dev Returns the length of the owed tokens in the user info
+     */
     function getUserTokensOwedLength(address _userAddress) external view returns (uint256) {
         UserInfo storage user = userInfo[_userAddress];
         return user.tokensOwed.length;
     }
 
+    /** @dev Returns the length of the reward debt in the user info
+     */
     function getUserRewardDebtLength(address _userAddress) external view returns (uint256) {
         UserInfo storage user = userInfo[_userAddress];
         return user.rewardDebt.length;
     }
 
+    /** @dev Returns the amount of reward tokens
+     */
     function getRewardTokensCount() external view returns (uint256) {
         return rewardsTokens.length;
     }
 
     /**
-     * @dev Extends the rewards period and updates the rates
+     * @dev Extends the rewards period and updates the rates. 
+     When the current campaign is still going on, the extension will be scheduled and started when the campaign ends.
+     The extension can be cancelled until it starts. After it starts, the rewards are locked in and cannot be withdraw.
      * @param _durationTime duration of the campaign (how many seconds the campaign will have)
      * @param _rewardPerSecond array with new rewards per second for each token
      */
     function extend(uint256 _durationTime, uint256[] memory _rewardPerSecond) external virtual onlyOwner {
         require(extensionDuration == 0, 'RewardsPoolBase: there is already an extension');
 
+        require(_durationTime > 0, 'RewardsPoolBase: duration must be greater than 0');
+
+        uint256 rewardPerSecondLength = _rewardPerSecond.length;
+        require(rewardPerSecondLength == rewardsTokens.length, 'RewardsPoolBase: invalid rewardPerSecond');
+
         uint256 newStartTimestamp = endTimestamp;
         uint256 newEndTimestamp = newStartTimestamp + _durationTime;
-        uint256 _rewardPerSecondLength = _rewardPerSecond.length;
 
-        require(
-            newEndTimestamp > newStartTimestamp && newEndTimestamp > endTimestamp,
-            'RewardsPoolBase: invalid endTimestamp'
-        );
-        require(_rewardPerSecondLength == rewardsTokens.length, 'RewardsPoolBase: invalid rewardPerSecond');
-        for (uint256 i = 0; i < _rewardPerSecondLength; i++) {
+        for (uint256 i = 0; i < rewardPerSecondLength; i++) {
             uint256 newRewards = calculateRewardsAmount(newStartTimestamp, newEndTimestamp, _rewardPerSecond[i]);
 
             // We need to check if we have enough balance available in the contract to pay for the extension
             uint256 availableBalance = getAvailableBalance(i);
 
             require(availableBalance >= newRewards, 'RewardsPoolBase: not enough rewards to extend');
-
-            uint256 spentRewards = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerSecond[i]);
-            totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
         }
 
-        uint256 currentTimestamp = block.timestamp;
-
-        if (currentTimestamp > endTimestamp) {
+        if (block.timestamp > endTimestamp) {
             _updateRewardMultipliers(endTimestamp);
             _extend(newStartTimestamp, newEndTimestamp, _rewardPerSecond);
-            _updateRewardMultipliers(currentTimestamp);
         } else {
             extensionDuration = _durationTime;
             extensionRewardPerSecond = _rewardPerSecond;
-
-            updateRewardMultipliers();
         }
     }
 
@@ -472,14 +472,31 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         uint256 _endTimestamp,
         uint256[] memory _rewardPerSecond
     ) internal {
-        rewardPerSecond = _rewardPerSecond;
+        uint256 rewardPerSecondLength = rewardPerSecond.length;
+        for (uint256 i = 0; i < rewardPerSecondLength; i++) {
+            uint256 spentRewards = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerSecond[i]);
+            totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
+        }
 
+        rewardPerSecond = _rewardPerSecond;
         startTimestamp = _startTimestamp;
         endTimestamp = _endTimestamp;
+
         extensionDuration = 0;
         delete extensionRewardPerSecond;
 
-        emit Extended(_endTimestamp, _rewardPerSecond);
+        emit Extended(_startTimestamp, _endTimestamp, _rewardPerSecond);
+    }
+
+    /**
+     * @dev Cancels the schedules extension
+     */
+    function cancelExtension() external onlyOwner {
+        require(extensionDuration > 0, 'RewardsPoolBase: there is no extension scheduled');
+        require(block.timestamp < endTimestamp, 'RewardsPoolBase: cannot cancel extension after it has started');
+
+        extensionDuration = 0;
+        delete extensionRewardPerSecond;
     }
 
     /**
@@ -495,6 +512,17 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         }
 
         uint256 spentRewards = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerSecond[_rewardTokenIndex]);
+
+        if (extensionDuration > 0) {
+            uint256 spentExtensionRewards = calculateRewardsAmount(
+                endTimestamp,
+                endTimestamp + extensionDuration,
+                extensionRewardPerSecond[_rewardTokenIndex]
+            );
+
+            spentRewards = spentRewards + spentExtensionRewards;
+        }
+
         uint256 availableBalance = balance -
             (totalSpentRewards[_rewardTokenIndex] + spentRewards - totalClaimed[_rewardTokenIndex]);
 
@@ -505,24 +533,38 @@ contract RewardsPoolBase is ReentrancyGuard, Ownable {
         return availableBalance;
     }
 
-    /** @dev Withdraw rewards acumulated from different pools for providing liquidity
-     * @param _recipient The address to whom the rewards will be trasferred
-     * @param _lpTokenContract The address of the rewards contract
+    /** @dev Withdraw tokens other than the staking and reward token, for example rewards from liquidity mining
+     * @param _recipient The address to whom the rewards will be transferred
+     * @param _token The address of the rewards contract
      */
-    function withdrawLPRewards(address _recipient, address _lpTokenContract) external nonReentrant onlyOwner {
-        uint256 currentReward = IERC20Detailed(_lpTokenContract).balanceOf(address(this));
+    function withdrawTokens(address _recipient, address _token) external onlyOwner {
+        uint256 currentReward = IERC20Detailed(_token).balanceOf(address(this));
         require(currentReward > 0, 'RewardsPoolBase: no rewards');
 
-        require(_lpTokenContract != address(stakingToken), 'RewardsPoolBase: cannot withdraw staking token');
+        require(_token != address(stakingToken), 'RewardsPoolBase: cannot withdraw staking token');
 
         uint256 rewardsTokensLength = rewardsTokens.length;
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
-            require(_lpTokenContract != rewardsTokens[i], 'RewardsPoolBase: cannot withdraw reward token');
+            require(_token != rewardsTokens[i], 'RewardsPoolBase: cannot withdraw reward token');
         }
 
-        IERC20Detailed(_lpTokenContract).safeTransfer(_recipient, currentReward);
-        emit WithdrawLPRewards(currentReward, _recipient);
+        IERC20Detailed(_token).safeTransfer(_recipient, currentReward);
+    }
+
+    /** @dev Withdraw excess rewards not needed for current campaign and extension
+     * @param _recipient The address to whom the rewards will be transferred
+     */
+    function withdrawExcessRewards(address _recipient) external onlyOwner {
+        uint256 rewardsTokensLength = rewardsTokens.length;
+
+        for (uint256 i = 0; i < rewardsTokensLength; i++) {
+            uint256 balance = getAvailableBalance(i);
+
+            if (balance > 0) {
+                IERC20Detailed(rewardsTokens[i]).safeTransfer(_recipient, balance);
+            }
+        }
     }
 
     /** @dev Calculates the amount of rewards given in a specific period

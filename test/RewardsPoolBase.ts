@@ -75,6 +75,25 @@ describe('RewardsPoolBase', () => {
     return instance;
   }
 
+  async function extend() {
+    let newRewardsPerSecond: BigNumber[] = [];
+
+    const mintPromises = [];
+
+    for (let i = 0; i < rewardTokensCount; i++) {
+      let parsedReward = await ethers.utils.parseEther(`${(i + 1) * 2}`);
+
+      // Send the required reward tokens to the RewardsPool
+      mintPromises.push(rewardTokensInstances[i].mint(RewardsPoolBaseInstance.address, parsedReward.mul(poolLength)));
+
+      newRewardsPerSecond.push(parsedReward);
+    }
+
+    await Promise.all(mintPromises);
+
+    await RewardsPoolBaseInstance.extend(poolLength, newRewardsPerSecond);
+  }
+
   beforeEach(async () => {
     [aliceAccount, bobAccount, carolAccount] = await ethers.getSigners();
 
@@ -222,6 +241,34 @@ describe('RewardsPoolBase', () => {
           rewardPerSecond.map((r) => r.add(1))
         )
       ).to.be.revertedWith('RewardsPoolBase: not enough rewards');
+    });
+  });
+
+  describe('Cancel', function () {
+    it('[Should cancel when start is scheduled but not started]:', async () => {
+      const instance = await createPool();
+
+      await instance.start(startTimestamp, endTimestamp, rewardPerSecond);
+
+      await instance.cancel();
+
+      expect(await instance.startTimestamp()).to.equal(0);
+    });
+
+    it('[Should fail if already started]:', async () => {
+      const instance = await createPool();
+
+      await instance.start(startTimestamp, endTimestamp, rewardPerSecond);
+
+      await timeTravelTo(startTimestamp + 1);
+
+      await expect(instance.cancel()).to.be.revertedWith('RewardsPoolBase: No start scheduled or already started');
+    });
+
+    it('[Should fail if no start scheduled]:', async () => {
+      const instance = await createPool();
+
+      await expect(instance.cancel()).to.be.revertedWith('RewardsPoolBase: No start scheduled or already started');
     });
   });
 
@@ -495,25 +542,6 @@ describe('RewardsPoolBase', () => {
       expect(RewardsPoolBaseInstance.withdraw(0)).to.be.revertedWith('RewardsPoolBase: cannot withdraw 0');
     });
 
-    async function extend() {
-      let newRewardsPerSecond: BigNumber[] = [];
-
-      const mintPromises = [];
-
-      for (let i = 0; i < rewardTokensCount; i++) {
-        let parsedReward = await ethers.utils.parseEther(`${(i + 1) * 2}`);
-
-        // Send the required reward tokens to the RewardsPool
-        mintPromises.push(rewardTokensInstances[i].mint(RewardsPoolBaseInstance.address, parsedReward.mul(poolLength)));
-
-        newRewardsPerSecond.push(parsedReward);
-      }
-
-      await Promise.all(mintPromises);
-
-      await RewardsPoolBaseInstance.extend(poolLength, newRewardsPerSecond);
-    }
-
     it('[Should extend correctly if the pool is not done and extend with updateRewardMultipliers]:', async () => {
       await extend();
       const extensionDuration = await RewardsPoolBaseInstance.extensionDuration();
@@ -727,13 +755,7 @@ describe('RewardsPoolBase', () => {
 
     it('[Should fail extending the rewards pool if the end timestamp is not in the future]:', async () => {
       await expect(RewardsPoolBaseInstance.extend(0, rewardPerSecond)).to.be.revertedWith(
-        'RewardsPoolBase: invalid endTimestamp'
-      );
-    });
-
-    it('[Should fail extending the rewards pool if the end timestamp is not greater than the previous]:', async () => {
-      await expect(RewardsPoolBaseInstance.extend(0, rewardPerSecond)).to.be.revertedWith(
-        'RewardsPoolBase: invalid endTimestamp'
+        'RewardsPoolBase: duration must be greater than 0'
       );
     });
 
@@ -756,6 +778,29 @@ describe('RewardsPoolBase', () => {
       await expect(RewardsPoolBaseInstance.connect(bobAccount).extend(newEndTime, rewardPerSecond)).to.be.revertedWith(
         'Ownable: caller is not the owner'
       );
+    });
+
+    it('[Should fail cancelling extension when there is no extension]:', async () => {
+      await expect(RewardsPoolBaseInstance.cancelExtension()).to.be.revertedWith(
+        'RewardsPoolBase: there is no extension scheduled'
+      );
+    });
+
+    it('[Should fail cancelling extension when it has already started]:', async () => {
+      await extend();
+      await timeTravel(poolLength + 1000);
+
+      await expect(RewardsPoolBaseInstance.cancelExtension()).to.be.revertedWith(
+        'RewardsPoolBase: cannot cancel extension after it has started'
+      );
+    });
+
+    it('[Should cancel extension]:', async () => {
+      await extend();
+
+      await RewardsPoolBaseInstance.cancelExtension();
+
+      expect(await RewardsPoolBaseInstance.extensionDuration()).to.equal(0);
     });
   });
 
@@ -790,16 +835,53 @@ describe('RewardsPoolBase', () => {
       await lpContractInstance.mint(RewardsPoolBaseInstance.address, '100000000000');
 
       await expect(
-        RewardsPoolBaseInstance.connect(bobAccount).withdrawLPRewards(carolAccount.address, lpContractInstance.address)
+        RewardsPoolBaseInstance.connect(bobAccount).withdrawTokens(carolAccount.address, lpContractInstance.address)
       ).to.be.revertedWith('');
     });
 
     it('[Should revert if the token to withdraw is part of the rewards]:', async () => {
       for (let i = 0; i < rewardTokensCount; i++) {
         await expect(
-          RewardsPoolBaseInstance.withdrawLPRewards(carolAccount.address, rewardTokensAddresses[i])
+          RewardsPoolBaseInstance.withdrawTokens(carolAccount.address, rewardTokensAddresses[i])
         ).to.be.revertedWith('');
       }
+    });
+  });
+
+  describe('Withdrawing excess rewards', async function () {
+    it('[Should not withdtaw if the caller is not the factory contract]:', async () => {
+      const lpContractInstance = await deployERC20(amount);
+      await lpContractInstance.mint(RewardsPoolBaseInstance.address, '100000000000');
+
+      await expect(
+        RewardsPoolBaseInstance.connect(bobAccount).withdrawExcessRewards(carolAccount.address)
+      ).to.be.revertedWith('');
+    });
+
+    it('[Should withdraw excess rewards]:', async () => {
+      const balanceBefore = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
+
+      await rewardTokensInstances[0].mint(RewardsPoolBaseInstance.address, '8000');
+
+      await RewardsPoolBaseInstance.withdrawExcessRewards(aliceAccount.address);
+
+      const balanceAfter = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
+
+      expect(balanceAfter.sub(balanceBefore)).to.equal('8000');
+    });
+
+    it('[Should withdraw excess rewards with extension]:', async () => {
+      await extend();
+
+      const balanceBefore = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
+
+      await rewardTokensInstances[0].mint(RewardsPoolBaseInstance.address, '8000');
+
+      await RewardsPoolBaseInstance.withdrawExcessRewards(aliceAccount.address);
+
+      const balanceAfter = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
+
+      expect(balanceAfter.sub(balanceBefore)).to.equal('8000');
     });
   });
 
@@ -836,7 +918,7 @@ describe('RewardsPoolBase', () => {
     });
 
     it('[Should revert if the token to withdraw is part of the rewards]:', async () => {
-      await expect(RewardsPoolBaseInstance.withdrawLPRewards(carolAccount.address, rewardTokensAddresses[0])).to.be
+      await expect(RewardsPoolBaseInstance.withdrawTokens(carolAccount.address, rewardTokensAddresses[0])).to.be
         .reverted;
     });
   });

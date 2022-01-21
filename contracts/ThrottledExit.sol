@@ -41,18 +41,16 @@ abstract contract ThrottledExit {
         nextAvailableExitTimestamp = campaignEndTimestamp + throttleRoundSeconds;
     }
 
-    function initiateExit(
-        uint256 amountStaked,
-        uint256 _rewardsTokensLength,
-        uint256[] memory _tokensOwed
-    ) internal virtual {
-        initialiseExitInfo(msg.sender, _rewardsTokensLength);
+    function initiateExit(uint256 amountStaked, uint256[] memory _tokensOwed) internal virtual {
+        uint256 rewardsTokensLength = _tokensOwed.length;
+
+        initialiseExitInfo(msg.sender, rewardsTokensLength);
 
         ExitInfo storage info = exitInfo[msg.sender];
         info.exitTimestamp = getAvailableExitTime(amountStaked);
         info.exitStake = info.exitStake + amountStaked;
 
-        for (uint256 i = 0; i < _rewardsTokensLength; i++) {
+        for (uint256 i = 0; i < rewardsTokensLength; i++) {
             info.rewards[i] = info.rewards[i] + _tokensOwed[i];
         }
 
@@ -71,6 +69,7 @@ abstract contract ThrottledExit {
         for (uint256 i = 0; i < _rewardsTokens.length; i++) {
             uint256 infoRewards = info.rewards[i];
             info.rewards[i] = 0;
+
             IERC20Detailed(_rewardsTokens[i]).safeTransfer(msg.sender, infoRewards);
         }
 

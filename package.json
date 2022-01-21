@@ -5,11 +5,15 @@
     "test": "hardhat test",
     "compile": "hardhat compile",
     "coverage": "hardhat coverage",
-    "testnet:deploy": "npx hardhat run --network rinkeby scripts/deployLMC.ts && npx hardhat run --network rinkeby scripts/deployStaking.ts && npx hardhat run --network rinkeby scripts/deployAutoStaking.ts",
+    "testnet:deployAll": "npx hardhat run --network rinkeby scripts/deployLMC.ts && npx hardhat run --network rinkeby scripts/deployStaking.ts && npx hardhat run --network rinkeby scripts/deployAutoStaking.ts",
+    "testnet:deployLMC": "npx hardhat run --network rinkeby scripts/deployLMC.ts",
+    "testnet:deployStaking": "npx hardhat run --network rinkeby scripts/deployStaking.ts",
+    "testnet:deployAutoStaking": "npx hardhat run --network rinkeby scripts/deployAutoStaking.ts",
     "prettier": "prettier --write 'contracts/**/*.sol'",
     "clean": "hardhat clean",
     "size": "hardhat compile && hardhat size-contracts",
-    "docs": "solidity-docgen --solc-module solc -t ./"
+    "docs": "solidity-docgen --solc-module solc -t ./",
+    "slither": "slither . --filter-paths node_modules"
   },
   "keywords": [],
   "author": "AllianceBlock",

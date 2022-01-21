@@ -28,7 +28,6 @@ abstract contract StakeTransfererAutoStake is AutoStake, StakeTransferer {
         override
         onlyWhitelistedReceiver(_transferTo)
         onlyUnlocked
-        nonReentrant
     {
         exitRewardPool();
         updateValuePerShare();

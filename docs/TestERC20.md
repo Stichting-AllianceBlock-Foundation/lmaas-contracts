@@ -43,7 +43,19 @@ bytes32 DEFAULT_ADMIN_ROLE;
 ```Solidity
 uint256 amount; 
 ```
+
+
+#### setDecimals
+
+
+
+
+
+```Solidity
+uint8 _d; 
+```
 #### decimals → uint8
+
 
 
 
@@ -62,6 +74,7 @@ Requirements:
 address to; 
 uint256 amount; 
 ```
+
 #### pause
 
 
@@ -70,6 +83,7 @@ Pauses all token transfers.
 See {ERC20Pausable} and {Pausable-_pause}.
 Requirements:
 - the caller must have the `PAUSER_ROLE`.
+
 
 #### unpause
 
@@ -80,11 +94,16 @@ See {ERC20Pausable} and {Pausable-_unpause}.
 Requirements:
 - the caller must have the `PAUSER_ROLE`.
 
+
+
 #### paused → bool
 
 
 
 Returns true if the contract is paused, and false otherwise.
+
+
+
 
 #### burn
 
@@ -96,6 +115,7 @@ See {ERC20-_burn}.
 ```Solidity
 uint256 amount; 
 ```
+
 #### burnFrom
 
 
@@ -111,11 +131,13 @@ Requirements:
 address account; 
 uint256 amount; 
 ```
+
 #### name → string
 
 
 
 Returns the name of the token.
+
 
 #### symbol → string
 
@@ -124,11 +146,13 @@ Returns the name of the token.
 Returns the symbol of the token, usually a shorter version of the
 name.
 
+
 #### totalSupply → uint256
 
 
 
 See {IERC20-totalSupply}.
+
 
 #### balanceOf → uint256
 
@@ -139,6 +163,7 @@ See {IERC20-balanceOf}.
 ```Solidity
 address account; 
 ```
+
 #### transfer → bool
 
 
@@ -152,6 +177,7 @@ Requirements:
 address recipient; 
 uint256 amount; 
 ```
+
 #### allowance → uint256
 
 
@@ -162,6 +188,7 @@ See {IERC20-allowance}.
 address owner; 
 address spender; 
 ```
+
 #### approve → bool
 
 
@@ -174,6 +201,7 @@ Requirements:
 address spender; 
 uint256 amount; 
 ```
+
 #### transferFrom → bool
 
 
@@ -192,6 +220,7 @@ address sender;
 address recipient; 
 uint256 amount; 
 ```
+
 #### increaseAllowance → bool
 
 
@@ -207,6 +236,7 @@ Requirements:
 address spender; 
 uint256 addedValue; 
 ```
+
 #### decreaseAllowance → bool
 
 
@@ -224,6 +254,12 @@ Requirements:
 address spender; 
 uint256 subtractedValue; 
 ```
+
+
+
+
+
+
 #### supportsInterface → bool
 
 
@@ -233,6 +269,7 @@ See {IERC165-supportsInterface}.
 ```Solidity
 bytes4 interfaceId; 
 ```
+
 #### getRoleMember → address
 
 
@@ -250,6 +287,7 @@ for more information.
 bytes32 role; 
 uint256 index; 
 ```
+
 #### getRoleMemberCount → uint256
 
 
@@ -260,6 +298,9 @@ together with {getRoleMember} to enumerate all bearers of a role.
 ```Solidity
 bytes32 role; 
 ```
+
+
+
 #### hasRole → bool
 
 
@@ -270,6 +311,8 @@ Returns `true` if `account` has been granted `role`.
 bytes32 role; 
 address account; 
 ```
+
+
 #### getRoleAdmin → bytes32
 
 
@@ -281,6 +324,7 @@ To change a role's admin, use {_setRoleAdmin}.
 ```Solidity
 bytes32 role; 
 ```
+
 #### grantRole
 
 
@@ -295,6 +339,7 @@ Requirements:
 bytes32 role; 
 address account; 
 ```
+
 #### revokeRole
 
 
@@ -308,6 +353,7 @@ Requirements:
 bytes32 role; 
 address account; 
 ```
+
 #### renounceRole
 
 
@@ -325,6 +371,11 @@ Requirements:
 bytes32 role; 
 address account; 
 ```
+
+
+
+
+
 
 ### Events
 
