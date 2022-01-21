@@ -11,3 +11,5 @@ build
 
 #Typechain files
 typechain-types
+
+.DS_Store
