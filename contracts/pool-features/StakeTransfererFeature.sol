@@ -2,15 +2,15 @@
 
 pragma solidity 0.8.9;
 
+import './../RewardsPoolBase.sol';
 import './../interfaces/IERC20Detailed.sol';
 import './../SafeERC20Detailed.sol';
-import './OnlyExitFeature.sol';
 import './../StakeTransferer.sol';
 import './../StakeReceiver.sol';
 
 /** @dev Transfer staked tokens to another whitelisted staking pool
  */
-abstract contract StakeTransfererFeature is OnlyExitFeature, StakeTransferer {
+abstract contract StakeTransfererFeature is RewardsPoolBase, StakeTransferer {
     using SafeERC20Detailed for IERC20Detailed;
 
     /** @dev Change whitelist status of a receiver pool to receive transfers.

@@ -244,7 +244,7 @@ describe('Liquidity mining campaign', () => {
       expect(userInfo.amountStaked).to.equal(bTen.add(bTwenty));
     });
 
-    it('[Should exit and stake sucessfully]:', async () => {
+    it('[Should exit and transfer sucessfully]:', async () => {
       await setupRewardsPoolParameters();
 
       const _contractStakeLimit = amount;
@@ -268,7 +268,7 @@ describe('Liquidity mining campaign', () => {
         testAccount,
         NonCompoundingRewardsPoolArtifact,
         [
-          rewardTokensAddresses[0],
+          stakingTokenAddress,
           rewardTokensAddresses,
           stakeLimit,
           throttleRoundSeconds,
@@ -294,7 +294,7 @@ describe('Liquidity mining campaign', () => {
         await getTime()
       );
 
-      await NewLmcInstance.exitAndStake(NonCompoundingRewardsPoolInstance.address);
+      await NewLmcInstance.exitAndTransfer(NonCompoundingRewardsPoolInstance.address);
 
       let finalBalance = await NonCompoundingRewardsPoolInstance.balanceOf(testAccount.address);
       let totalStakedAmount = await NonCompoundingRewardsPoolInstance.totalStaked();
@@ -309,14 +309,14 @@ describe('Liquidity mining campaign', () => {
       await expect(LmcInstance.connect(test2Account).exit()).to.be.revertedWith('RewardsPoolBase: cannot withdraw 0');
     });
 
-    it("[Should return from the exit and stake if the user hasn't locked]:", async () => {
+    it("[Should return from the exit and transfer if the user hasn't locked]:", async () => {
       await timeTravel(120);
       await LmcInstance.setReceiverWhitelisted(testAccount.address, true);
-      await LmcInstance.connect(test2Account).exitAndStake(testAccount.address);
+      await LmcInstance.connect(test2Account).exitAndTransfer(testAccount.address);
     });
 
-    it('[Should fail to exit and stake if the poolAddress is not whitelisted]:', async () => {
-      await expect(LmcInstance.exitAndStake(testAccount.address)).to.be.revertedWith(
+    it('[Should fail to exit and transfer if the poolAddress is not whitelisted]:', async () => {
+      await expect(LmcInstance.exitAndTransfer(testAccount.address)).to.be.revertedWith(
         'exitAndTransfer::receiver is not whitelisted'
       );
     });
