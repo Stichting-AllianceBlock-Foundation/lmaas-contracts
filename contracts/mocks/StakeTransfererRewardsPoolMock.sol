@@ -26,11 +26,11 @@ contract StakeTransfererRewardsPoolMock is OnlyExitRewardsPoolMock, StakeTransfe
         )
     {}
 
-    function withdraw(uint256 _tokenAmount) public override(OnlyExitRewardsPoolMock, OnlyExitFeature) {
+    function withdraw(uint256 _tokenAmount) public override(OnlyExitRewardsPoolMock, RewardsPoolBase) {
         OnlyExitRewardsPoolMock.withdraw(_tokenAmount);
     }
 
-    function claim() public override(OnlyExitRewardsPoolMock, OnlyExitFeature) {
+    function claim() public override(OnlyExitRewardsPoolMock, RewardsPoolBase) {
         OnlyExitRewardsPoolMock.claim();
     }
 }
