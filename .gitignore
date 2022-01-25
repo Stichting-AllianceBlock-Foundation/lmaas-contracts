@@ -9,7 +9,4 @@ coverage
 coverage.json
 build
 
-#Typechain files
-typechain-types
-
 .DS_Store

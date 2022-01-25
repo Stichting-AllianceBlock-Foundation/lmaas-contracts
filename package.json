@@ -1,6 +1,7 @@
 {
   "name": "lmaas-contracts",
   "version": "1.0.0",
+  "main": "typechain/index.ts",
   "scripts": {
     "test": "hardhat test",
     "build": "hardhat compile",
