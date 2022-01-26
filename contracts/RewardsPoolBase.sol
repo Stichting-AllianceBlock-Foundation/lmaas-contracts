@@ -57,6 +57,14 @@ contract RewardsPoolBase is Ownable {
 
     mapping(address => UserInfo) public userInfo;
 
+    struct Campaign {
+        uint256 startTimestamp;
+        uint256 endTimestamp;
+        uint256[] rewardPerSecond;
+    }
+
+    Campaign[] public campaigns;
+
     event Started(uint256 startTimestamp, uint256 endTimestamp, uint256[] rewardsPerSecond);
     event Staked(address indexed user, uint256 amount);
     event Claimed(address indexed user, uint256 amount, address token);
@@ -440,7 +448,10 @@ contract RewardsPoolBase is Ownable {
         uint256 rewardPerSecondLength = _rewardPerSecond.length;
         require(rewardPerSecondLength == rewardsTokens.length, 'RewardsPoolBase: invalid rewardPerSecond');
 
-        uint256 newStartTimestamp = endTimestamp;
+        uint256 currentTimestamp = block.timestamp;
+        bool ended = currentTimestamp > endTimestamp;
+
+        uint256 newStartTimestamp = ended ? currentTimestamp : endTimestamp;
         uint256 newEndTimestamp = newStartTimestamp + _durationTime;
 
         for (uint256 i = 0; i < rewardPerSecondLength; i++) {
@@ -452,7 +463,7 @@ contract RewardsPoolBase is Ownable {
             require(availableBalance >= newRewards, 'RewardsPoolBase: not enough rewards to extend');
         }
 
-        if (block.timestamp > endTimestamp) {
+        if (ended) {
             _updateRewardMultipliers(endTimestamp);
             _extend(newStartTimestamp, newEndTimestamp, _rewardPerSecond);
         } else {
@@ -477,6 +488,8 @@ contract RewardsPoolBase is Ownable {
             uint256 spentRewards = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerSecond[i]);
             totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
         }
+
+        campaigns.push(Campaign(startTimestamp, endTimestamp, rewardPerSecond));
 
         rewardPerSecond = _rewardPerSecond;
         startTimestamp = _startTimestamp;

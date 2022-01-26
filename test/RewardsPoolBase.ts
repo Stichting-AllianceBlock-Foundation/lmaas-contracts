@@ -3,8 +3,8 @@ import { ethers, network } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { BigNumber } from 'ethers';
 
-import { TestERC20 } from '../typechain-types/TestERC20';
-import { RewardsPoolBase } from '../typechain-types/RewardsPoolBase';
+import { TestERC20 } from '../typechain/TestERC20';
+import { RewardsPoolBase } from '../typechain/RewardsPoolBase';
 import { deployERC20, getTime, timeTravel, timeTravelTo } from './utils';
 
 describe('RewardsPoolBase', () => {

@@ -6,9 +6,9 @@ const { deployContract } = waffle;
 import CompoundingRewardsPoolArtifact from '../artifacts/contracts/V2/CompoundingRewardsPool.sol/CompoundingRewardsPool.json';
 import AutoStakeArtifact from '../artifacts/contracts/autostake-features/AutoStake.sol/AutoStake.json';
 import TestERC20Artifact from '../artifacts/contracts/TestERC20.sol/TestERC20.json';
-import { CompoundingRewardsPool } from '../typechain-types/CompoundingRewardsPool';
-import { AutoStake } from '../typechain-types/AutoStake';
-import { TestERC20 } from '../typechain-types/TestERC20';
+import { CompoundingRewardsPool } from '../typechain/CompoundingRewardsPool';
+import { AutoStake } from '../typechain/AutoStake';
+import { TestERC20 } from '../typechain/TestERC20';
 import { getTime, timeTravel } from './utils';
 
 describe('AutoStake', () => {

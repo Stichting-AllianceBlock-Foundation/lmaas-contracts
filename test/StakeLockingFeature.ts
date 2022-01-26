@@ -3,9 +3,9 @@ import { ethers, network } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { BigNumber, BigNumberish } from 'ethers';
 
-import { TestERC20 } from '../typechain-types/TestERC20';
-import { StakeLockingRewardsPoolMock } from '../typechain-types/StakeLockingRewardsPoolMock';
-import { StakeLockingFeature } from '../typechain-types/StakeLockingFeature';
+import { TestERC20 } from '../typechain/TestERC20';
+import { StakeLockingRewardsPoolMock } from '../typechain/StakeLockingRewardsPoolMock';
+import { StakeLockingFeature } from '../typechain/StakeLockingFeature';
 import { getTime, timeTravel } from './utils';
 
 describe('StakeLockingFeature', () => {

@@ -1,6 +1,6 @@
 import { BigNumberish } from '@ethersproject/bignumber';
 import { ethers, network } from 'hardhat';
-import { TestERC20 } from '../typechain-types/TestERC20';
+import { TestERC20 } from '../typechain/TestERC20';
 
 export async function timeTravel(seconds: number) {
   await network.provider.send('evm_increaseTime', [seconds]);

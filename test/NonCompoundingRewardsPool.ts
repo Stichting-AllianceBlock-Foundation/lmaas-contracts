@@ -5,8 +5,8 @@ import { expect } from 'chai';
 const { deployContract } = waffle;
 import NonCompoundingRewardsPoolArtifact from '../artifacts/contracts/V2/NonCompoundingRewardsPool.sol/NonCompoundingRewardsPool.json';
 import TestERC20Artifact from '../artifacts/contracts/TestERC20.sol/TestERC20.json';
-import { TestERC20 } from '../typechain-types/TestERC20';
-import { NonCompoundingRewardsPool } from '../typechain-types/NonCompoundingRewardsPool';
+import { TestERC20 } from '../typechain/TestERC20';
+import { NonCompoundingRewardsPool } from '../typechain/NonCompoundingRewardsPool';
 import { getTime, timeTravel } from './utils';
 
 describe('NonCompoundingRewardsPool', () => {

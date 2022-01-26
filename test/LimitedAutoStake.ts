@@ -6,10 +6,10 @@ const { deployContract } = waffle;
 import CompoundingRewardsPoolArtifact from '../artifacts/contracts/V2/CompoundingRewardsPool.sol/CompoundingRewardsPool.json';
 import LimitedAutoStakeArtifact from '../artifacts/contracts/autostake-features/LimitedAutoStake.sol/LimitedAutoStake.json';
 import TestERC20Artifact from '../artifacts/contracts/TestERC20.sol/TestERC20.json';
-import { LimitedAutoStake } from '../typechain-types/LimitedAutoStake';
-import { TestERC20 } from '../typechain-types/TestERC20';
+import { LimitedAutoStake } from '../typechain/LimitedAutoStake';
+import { TestERC20 } from '../typechain/TestERC20';
 import { getTime, timeTravel } from './utils';
-import { CompoundingRewardsPool } from '../typechain-types/CompoundingRewardsPool';
+import { CompoundingRewardsPool } from '../typechain/CompoundingRewardsPool';
 
 describe('LimitedAutoStake', () => {
   let accounts: SignerWithAddress[];

@@ -3,9 +3,9 @@ import { ethers } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { BigNumber } from 'ethers';
 
-import { TestERC20 } from '../typechain-types/TestERC20';
+import { TestERC20 } from '../typechain/TestERC20';
 import { getTime, timeTravel } from './utils';
-import { CompoundingRewardsPool } from '../typechain-types/CompoundingRewardsPool';
+import { CompoundingRewardsPool } from '../typechain/CompoundingRewardsPool';
 
 describe('OneStakerRewardsPool', () => {
   let aliceAccount: SignerWithAddress;

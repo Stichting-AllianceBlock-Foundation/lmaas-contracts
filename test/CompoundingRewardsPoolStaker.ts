@@ -5,9 +5,9 @@ const { deployContract } = waffle;
 import CompoundingRewardsPoolStakerArtifact from '../artifacts/contracts/V2/CompoundingRewardsPoolStaker.sol/CompoundingRewardsPoolStaker.json';
 import CompoundingRewardsPoolArtifact from '../artifacts/contracts/V2/CompoundingRewardsPool.sol/CompoundingRewardsPool.json';
 import TestERC20Artifact from '../artifacts/contracts/TestERC20.sol/TestERC20.json';
-import { CompoundingRewardsPoolStaker } from '../typechain-types/CompoundingRewardsPoolStaker';
-import { CompoundingRewardsPool } from '../typechain-types/CompoundingRewardsPool';
-import { TestERC20 } from '../typechain-types/TestERC20';
+import { CompoundingRewardsPoolStaker } from '../typechain/CompoundingRewardsPoolStaker';
+import { CompoundingRewardsPool } from '../typechain/CompoundingRewardsPool';
+import { TestERC20 } from '../typechain/TestERC20';
 import { getTime, timeTravel } from './utils';
 
 describe('CompoundingRewardsPoolStaker', () => {
