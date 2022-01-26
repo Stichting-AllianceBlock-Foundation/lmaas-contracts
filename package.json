@@ -4,8 +4,9 @@
   "main": "typechain/index.ts",
   "scripts": {
     "test": "hardhat test",
-    "build": "hardhat compile",
     "compile": "hardhat compile",
+    "build": "hardhat compile",
+    "prepare": "hardhat compile",
     "coverage": "hardhat coverage",
     "testnet:deployAll": "npx hardhat run --network rinkeby scripts/deployLMC.ts && npx hardhat run --network rinkeby scripts/deployStaking.ts && npx hardhat run --network rinkeby scripts/deployAutoStaking.ts",
     "testnet:deployLMC": "npx hardhat run --network rinkeby scripts/deployLMC.ts",

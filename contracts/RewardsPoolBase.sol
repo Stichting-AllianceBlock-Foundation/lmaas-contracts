@@ -63,7 +63,7 @@ contract RewardsPoolBase is Ownable {
         uint256[] rewardPerSecond;
     }
 
-    Campaign[] public campaigns;
+    Campaign[] public previousCampaigns;
 
     event Started(uint256 startTimestamp, uint256 endTimestamp, uint256[] rewardsPerSecond);
     event Staked(address indexed user, uint256 amount);
@@ -433,6 +433,12 @@ contract RewardsPoolBase is Ownable {
         return rewardsTokens.length;
     }
 
+    /** @dev Returns the amount of previous campaigns
+     */
+    function getPreviousCampaignsCount() external view returns (uint256) {
+        return previousCampaigns.length;
+    }
+
     /**
      * @dev Extends the rewards period and updates the rates. 
      When the current campaign is still going on, the extension will be scheduled and started when the campaign ends.
@@ -489,7 +495,7 @@ contract RewardsPoolBase is Ownable {
             totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
         }
 
-        campaigns.push(Campaign(startTimestamp, endTimestamp, rewardPerSecond));
+        previousCampaigns.push(Campaign(startTimestamp, endTimestamp, rewardPerSecond));
 
         rewardPerSecond = _rewardPerSecond;
         startTimestamp = _startTimestamp;
