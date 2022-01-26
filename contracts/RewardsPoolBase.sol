@@ -500,6 +500,7 @@ contract RewardsPoolBase is Ownable {
         rewardPerSecond = _rewardPerSecond;
         startTimestamp = _startTimestamp;
         endTimestamp = _endTimestamp;
+        lastRewardTimestamp = _startTimestamp;
 
         extensionDuration = 0;
         delete extensionRewardPerSecond;
