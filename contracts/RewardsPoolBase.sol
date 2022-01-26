@@ -478,12 +478,6 @@ contract RewardsPoolBase is Ownable {
         }
     }
 
-    /**
-     * @dev Extends the rewards period and updates the rates, (this is just the internal function, that does the actual extends)
-     * @param _startTimestamp current timestamp for the rewards
-     * @param _endTimestamp new end timestamp for the rewards
-     * @param _rewardPerSecond array with new rewards per second for each token
-     */
     function _extend(
         uint256 _startTimestamp,
         uint256 _endTimestamp,

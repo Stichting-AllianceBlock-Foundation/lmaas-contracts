@@ -49,6 +49,7 @@ uint256 stakeLimit;
 uint256 contractStakeLimit;
 string name;
 mapping(address => struct RewardsPoolBase.UserInfo) userInfo;
+struct RewardsPoolBase.Campaign[] previousCampaigns;
 ```
 
 ### Functions
@@ -305,6 +306,13 @@ address _userAddress;
 Returns the amount of reward tokens
 
 
+#### getPreviousCampaignsCount → uint256
+
+
+
+Returns the amount of previous campaigns
+
+
 
 #### cancelExtension
 
@@ -492,4 +500,11 @@ uint256 firstStakedTimestamp;
 uint256 amountStaked;
 uint256[] rewardDebt;
 uint256[] tokensOwed;
+```
+#### Campaign
+
+```Solidity
+uint256 startTimestamp;
+uint256 endTimestamp;
+uint256[] rewardPerSecond;
 ```
