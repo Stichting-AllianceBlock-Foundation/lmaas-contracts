@@ -23,3 +23,13 @@ The most important contracts are here:
 - [Compounding pool](docs/V2/CompoundingRewardsPoolStaker.md)
 
 All other documentation can be found in the docs folder.
+
+## GO source code
+In order for other LMAAS back-end projects to call functions on the deployed contracts, Solidity code needs to be translated into the language of those projects.
+
+This can be done using the commannd:
+```shell
+bash ./generate_go.sh
+```
+
+For details about the steps in the script see the comments in the same file.
