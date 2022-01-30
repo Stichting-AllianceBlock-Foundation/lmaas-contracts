@@ -1,16 +1,40 @@
 #!/bin/bash
 
-CONTRACT_NAME=NonCompoundingRewardsPool
-CONTRACT_PATH=contracts/V2
-GO_PKG=staker
+if [ "$#" -ne 4 ]; then
+  # print help
+  echo "==========================================================="
+  echo "GO source code generator"
+  echo "Usage: $0 <contract_path> <contract_name> <go_pkg> <go_path>"
+  echo ""
+  echo "Example: "
+  echo ""
+  echo "  $0 contracts/V2 NonCompoundingRewardsPool staker staker"
+  echo ""
+  echo "will create: ./go-staker/staker/NonCompoundingRewardsPool.go"
+  echo "based on: ./contracts/V2/NonCompoundingRewardsPool.sol"
+  echo ""
+  echo "  $0 contracts StakeLock lock staker/lock"
+  echo ""
+  echo "will create: ./go-staker/staker/lock/StakeLock.go"
+  echo "based on: ./contracts/StakeLock.sol"
+  echo "==========================================================="
+  exit 1
+fi
+
+CONTRACT_PATH=$1
+CONTRACT_NAME=$2
+GO_PKG=$3
+# we can choose to place the files in a deeper hierachy inside the module. normally the last segment should match the package name
+GO_PATH=$4
 
 CURRENT_USER=$(id -u):$(id -g)
+GO_MOD_BASENAME=go-staker
 
 SOLIDITY_VERSION=$(grep -E "pragma solidity [^;]+;" ${CONTRACT_PATH}/${CONTRACT_NAME}.sol | cut -d' ' -f3 | tr -d ';')
 NODE_VERSION=10.17
 
 echo "==========================================================="
-echo "Generate GO source code in package: ${GO_PKG}"
+echo "Generate GO source code in package: ${GO_PKG}, at path: ${GO_PATH}"
 echo "For contract: ${CONTRACT_PATH}/${CONTRACT_NAME}"
 echo "Node: ${NODE_VERSION}"
 echo "Solidity: ${SOLIDITY_VERSION}"
@@ -81,7 +105,7 @@ docker run \
   --rm \
   --user ${CURRENT_USER} \
   -v build-contracts:/build \
-  -v $(pwd)/go-staker/${GO_PKG}:/out \
+  -v $(pwd)/${GO_MOD_BASENAME}/${GO_PATH}:/out \
   abigen:custom --abi=/build/${CONTRACT_NAME}.abi --pkg=${GO_PKG} --out=/out/${CONTRACT_NAME}.go
 echo
 

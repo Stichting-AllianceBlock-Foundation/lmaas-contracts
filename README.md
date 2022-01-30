@@ -25,11 +25,20 @@ The most important contracts are here:
 All other documentation can be found in the docs folder.
 
 ## GO source code
+
+You need Linux and Docker to run this procedure.
+
 In order for other LMAAS back-end projects to call functions on the deployed contracts, Solidity code needs to be translated into the language of those projects.
 
-This can be done using the commannd:
+This can be done using the provided script: `./generate_go_pkg.sh`
+
+Run the following for help: 
 ```shell
-bash ./generate_go.sh
+bash ./generate_go_pkg.sh
 ```
 
-For details about the steps in the script see the comments in the same file.
+Currently generated files:
+
+```shell
+bash ./generate_go_pkg.sh contracts/V2 NonCompoundingRewardsPool staker staker
+```
