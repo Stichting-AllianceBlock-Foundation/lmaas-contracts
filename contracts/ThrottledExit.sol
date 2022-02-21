@@ -70,6 +70,7 @@ abstract contract ThrottledExit {
         require(block.timestamp > info.exitTimestamp, 'finalizeExit::Trying to exit too early');
 
         uint256 infoExitStake = info.exitStake;
+        require(infoExitStake > 0, 'finalizeExit::No stake to exit');
         info.exitStake = 0;
 
         IERC20(_stakingToken).safeTransfer(address(msg.sender), infoExitStake);

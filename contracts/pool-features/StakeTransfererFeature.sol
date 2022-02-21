@@ -46,7 +46,7 @@ abstract contract StakeTransfererFeature is RewardsPoolBase, StakeTransferer {
             user.rewardDebt[i] = 0;
         }
 
-        stakingToken.safeApprove(transferTo, userStakedAmount);
+        stakingToken.approve(transferTo, userStakedAmount);
         StakeReceiver(transferTo).delegateStake(msg.sender, userStakedAmount);
     }
 }

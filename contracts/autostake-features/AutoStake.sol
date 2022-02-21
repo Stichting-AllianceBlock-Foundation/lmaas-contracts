@@ -159,8 +159,7 @@ contract AutoStake is StakeLock, ThrottledExit, Ownable {
 
             uint256 balanceToRestake = stakingToken.balanceOf(address(this)) - exitStake;
 
-            stakingToken.safeApprove(address(rewardPool), 0);
-            stakingToken.safeApprove(address(rewardPool), balanceToRestake);
+            stakingToken.approve(address(rewardPool), balanceToRestake);
             rewardPool.stake(balanceToRestake);
         }
     }

@@ -158,6 +158,19 @@ describe('RewardsPoolBase', () => {
     ).to.be.revertedWith('RewardsPoolBase: empty rewardsTokens');
   });
 
+  it('[Should fail to deploy RewardsPoolBase with duplicate rewards token addresses array]:', async () => {
+    const RewardsPoolBase = await ethers.getContractFactory('RewardsPoolBase');
+    await expect(
+      RewardsPoolBase.deploy(
+        stakingTokenAddress,
+        [rewardTokensAddresses[0], rewardTokensAddresses[0]],
+        stakeLimit,
+        contractStakeLimit,
+        name
+      )
+    ).to.be.revertedWith('RewardsPoolBase: duplicate rewards token');
+  });
+
   it('[Should fail to deploy RewardsPoolBase with 0 staking limit]:', async () => {
     const RewardsPoolBase = await ethers.getContractFactory('RewardsPoolBase');
     await expect(

@@ -42,7 +42,7 @@ abstract contract StakeTransfererAutoStake is AutoStake, StakeTransferer {
         totalShares = totalShares - share[msg.sender];
         share[msg.sender] = 0;
 
-        stakingToken.safeApprove(_transferTo, userStake);
+        stakingToken.approve(_transferTo, userStake);
 
         StakeReceiver(_transferTo).delegateStake(msg.sender, userStake);
 

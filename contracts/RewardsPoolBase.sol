@@ -91,6 +91,15 @@ contract RewardsPoolBase is Ownable {
 
         require(_rewardsTokens.length > 0, 'RewardsPoolBase: empty rewardsTokens');
 
+        for (uint256 i = 0; i < _rewardsTokens.length; i++) {
+            for (uint256 j = i + 1; j < _rewardsTokens.length; j++) {
+                require(
+                    address(_rewardsTokens[i]) != address(_rewardsTokens[j]),
+                    'RewardsPoolBase: duplicate rewards token'
+                );
+            }
+        }
+
         stakingToken = _stakingToken;
         rewardsTokens = _rewardsTokens;
         stakeLimit = _stakeLimit;
@@ -153,6 +162,7 @@ contract RewardsPoolBase is Ownable {
     function cancel() external onlyOwner {
         require(block.timestamp < startTimestamp, 'RewardsPoolBase: No start scheduled or already started');
 
+        rewardPerSecond = new uint256[](0);
         startTimestamp = 0;
         endTimestamp = 0;
         lastRewardTimestamp = 0;
