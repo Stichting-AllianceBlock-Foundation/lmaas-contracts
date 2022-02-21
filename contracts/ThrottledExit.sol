@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.9;
 
-import './interfaces/IERC20Detailed.sol';
-import './SafeERC20Detailed.sol';
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 
 /** @dev Provides a throttling mechanism for staking pools. Instead of allowing
     everyone to withdraw their stake at once at the end of the pool, this forces
@@ -14,7 +14,7 @@ import './SafeERC20Detailed.sol';
     'Finalize exit' actually withdraws the users stake and rewards.
 */
 abstract contract ThrottledExit {
-    using SafeERC20Detailed for IERC20Detailed;
+    using SafeERC20 for IERC20;
 
     uint256 public nextAvailableExitTimestamp;
     uint256 public nextAvailableRoundExitVolume;
@@ -72,13 +72,13 @@ abstract contract ThrottledExit {
         uint256 infoExitStake = info.exitStake;
         info.exitStake = 0;
 
-        IERC20Detailed(_stakingToken).safeTransfer(address(msg.sender), infoExitStake);
+        IERC20(_stakingToken).safeTransfer(address(msg.sender), infoExitStake);
 
         for (uint256 i = 0; i < _rewardsTokens.length; i++) {
             uint256 infoRewards = info.rewards[i];
             info.rewards[i] = 0;
 
-            IERC20Detailed(_rewardsTokens[i]).safeTransfer(msg.sender, infoRewards);
+            IERC20(_rewardsTokens[i]).safeTransfer(msg.sender, infoRewards);
         }
 
         emit ExitCompleted(msg.sender, infoExitStake);
@@ -124,8 +124,7 @@ abstract contract ThrottledExit {
             return;
         }
 
-        for (uint256 i = info.rewards.length; i < tokensLength; i++) {
-            info.rewards.push(0);
-        }
+        uint256[] memory empty = new uint256[](tokensLength);
+        info.rewards = empty;
     }
 }

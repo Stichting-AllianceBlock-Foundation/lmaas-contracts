@@ -4,9 +4,9 @@ pragma solidity 0.8.9;
 
 import '@openzeppelin/contracts/utils/math/Math.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import './../interfaces/IRewardsPoolBase.sol';
-import './../interfaces/IERC20Detailed.sol';
-import './../SafeERC20Detailed.sol';
 import './../StakeLock.sol';
 import './../ThrottledExit.sol';
 
@@ -14,12 +14,12 @@ import './../ThrottledExit.sol';
     Based on ideas here: https://github.com/harvest-finance/harvest/blob/7a455967e40e980d4cfb2115bd000fbd6b201cc1/contracts/AutoStake.sol
  */
 contract AutoStake is StakeLock, ThrottledExit, Ownable {
-    using SafeERC20Detailed for IERC20Detailed;
+    using SafeERC20 for IERC20;
 
     uint256 public constant UNIT = 1 ether;
 
     IRewardsPoolBase public rewardPool;
-    IERC20Detailed public immutable stakingToken;
+    IERC20 public immutable stakingToken;
     address public immutable factory;
     uint256 public valuePerShare = UNIT;
     uint256 public totalShares;
@@ -42,7 +42,7 @@ contract AutoStake is StakeLock, ThrottledExit, Ownable {
         uint256 _throttleRoundCap
     ) {
         factory = msg.sender;
-        stakingToken = IERC20Detailed(token);
+        stakingToken = IERC20(token);
         setThrottleParams(_throttleRoundSeconds, _throttleRoundCap);
     }
 

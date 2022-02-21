@@ -2,11 +2,12 @@
 
 pragma solidity 0.8.9;
 
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import './../pool-features/ThrottledExitFeature.sol';
 
 contract ThrottledExitRewardsPoolMock is RewardsPoolBase, OnlyExitFeature, ThrottledExitFeature {
     constructor(
-        IERC20Detailed _stakingToken,
+        IERC20 _stakingToken,
         uint256, // _startTimestamp,
         uint256 _endTimestamp,
         address[] memory _rewardsTokens,

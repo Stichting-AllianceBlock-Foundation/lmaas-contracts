@@ -2,16 +2,16 @@
 
 pragma solidity 0.8.9;
 
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import './../RewardsPoolBase.sol';
-import './../interfaces/IERC20Detailed.sol';
-import './../SafeERC20Detailed.sol';
 import './../StakeTransferer.sol';
 import './../StakeReceiver.sol';
 
 /** @dev Transfer staked tokens to another whitelisted staking pool
  */
 abstract contract StakeTransfererFeature is RewardsPoolBase, StakeTransferer {
-    using SafeERC20Detailed for IERC20Detailed;
+    using SafeERC20 for IERC20;
 
     /** @dev Change whitelist status of a receiver pool to receive transfers.
      * @param _receiver The pool address to whitelist

@@ -121,7 +121,7 @@ describe('NonCompoundingRewardsPool', () => {
 
     it('[Should not allow extending]:', async () => {
       await expect(NonCompoundingRewardsPoolInstance.extend(0, [])).to.be.revertedWith(
-        'NonCompoundingRewardsPool::cannot extend this pool.'
+        'NonCompoundingRewardsPool: cannot extend this pool.'
       );
     });
 
