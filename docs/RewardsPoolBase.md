@@ -32,7 +32,7 @@ uint256 PRECISION;
 uint256 totalStaked;
 uint256[] rewardPerSecond;
 address[] rewardsTokens;
-contract IERC20Detailed stakingToken;
+contract IERC20 stakingToken;
 uint256 startTimestamp;
 uint256 endTimestamp;
 uint256 extensionDuration;
@@ -54,7 +54,7 @@ struct RewardsPoolBase.Campaign[] previousCampaigns;
 
 
 ```Solidity
-contract IERC20Detailed _stakingToken; // The token to stake
+contract IERC20 _stakingToken; // The token to stake
 
 address[] _rewardsTokens; // The reward tokens
 
