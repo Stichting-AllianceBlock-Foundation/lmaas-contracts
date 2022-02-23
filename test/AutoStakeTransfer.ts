@@ -38,6 +38,7 @@ describe('AutoStakeTransfer', () => {
   const amount = ethers.utils.parseEther('5184000');
   const bOne = ethers.utils.parseEther('1');
   const standardStakingAmount = ethers.utils.parseEther('5'); // 5 tokens
+  const contractStakeLimit = amount;
 
   beforeEach(async () => {
     stakingTokenInstance = (await deployContract(testAccount, TestERC20Artifact, [amount])) as TestERC20;
@@ -50,6 +51,7 @@ describe('AutoStakeTransfer', () => {
       stakingTokenInstance.address,
       throttleRoundSeconds,
       bOne,
+      contractStakeLimit,
     ])) as StakeTransfererAutoStake;
 
     CompoundingRewardsPoolInstance = (await deployContract(testAccount, CompoundingRewardsPoolArtifact, [
@@ -68,6 +70,7 @@ describe('AutoStakeTransfer', () => {
       stakingTokenInstance.address,
       throttleRoundSeconds,
       bOne,
+      contractStakeLimit,
     ])) as StakeReceiverAutoStake;
 
     CompoundingRewardsPoolInstance = (await deployContract(testAccount, CompoundingRewardsPoolArtifact, [

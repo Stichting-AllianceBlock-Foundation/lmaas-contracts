@@ -4,7 +4,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { BigNumber } from 'ethers';
 
 import { TestERC20 } from '../typechain/TestERC20';
-import { getTime, timeTravel } from './utils';
+import { getTime, timeTravel, timeTravelTo } from './utils';
 import { CompoundingRewardsPool } from '../typechain/CompoundingRewardsPool';
 
 describe('OneStakerRewardsPool', () => {
@@ -114,12 +114,12 @@ describe('OneStakerRewardsPool', () => {
       expect(userRewardDebt).to.equal(0, "User's reward debt is not correct");
       expect(userOwedToken).to.equal(0, "User's reward debt is not correct");
 
-      await timeTravel(10);
+      await timeTravelTo(currentTime + 10);
 
       const accumulatedReward = await OneStakerRewardsPoolInstance.getUserAccumulatedReward(
         staker.address,
         0,
-        await getTime()
+        currentTime + 10
       );
       expect(accumulatedReward).to.equal(bOne.mul(10), 'The reward accrued was not 1 token');
     });

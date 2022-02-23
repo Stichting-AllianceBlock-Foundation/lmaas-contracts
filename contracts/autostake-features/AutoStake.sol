@@ -27,6 +27,10 @@ contract AutoStake is StakeLock, ThrottledExit, Ownable {
     uint256 public exitStake;
     mapping(address => uint256) public share;
 
+    uint256 public immutable contractStakeLimit;
+    uint256 public totalAmountStaked;
+    mapping(address => uint256) public userStakedAmount;
+
     event Staked(
         address indexed user,
         uint256 amount,
@@ -39,15 +43,23 @@ contract AutoStake is StakeLock, ThrottledExit, Ownable {
     constructor(
         address token,
         uint256 _throttleRoundSeconds,
-        uint256 _throttleRoundCap
+        uint256 _throttleRoundCap,
+        uint256 _contractStakeLimit
     ) {
+        require(_contractStakeLimit != 0, 'AutoStake: contract stake limit should not be 0');
+
         factory = msg.sender;
         stakingToken = IERC20(token);
+        contractStakeLimit = _contractStakeLimit;
         setThrottleParams(_throttleRoundSeconds, _throttleRoundCap);
     }
 
+    function onlyUnderContractStakeLimit(uint256 _stakeAmount) public view {
+        require(totalAmountStaked + _stakeAmount <= contractStakeLimit, 'AutoStake: Only under contract stake limit');
+    }
+
     function start(uint256 _endTimestamp) external virtual onlyOwner {
-        require(rewardPool.endTimestamp() == _endTimestamp, 'End timestamp is not the same as rewards pool');
+        require(rewardPool.endTimestamp() == _endTimestamp, 'AutoStake: End timestamp is not the same as rewards pool');
         startThrottle(_endTimestamp);
         lock(_endTimestamp);
     }
@@ -56,7 +68,7 @@ contract AutoStake is StakeLock, ThrottledExit, Ownable {
      * @param _pool The reward pool
      */
     function setPool(address _pool) external onlyOwner {
-        require(address(rewardPool) == address(0), 'Reward pool already set');
+        require(address(rewardPool) == address(0), 'AutoStake: Reward pool already set');
         rewardPool = IRewardsPoolBase(_pool);
     }
 
@@ -74,6 +86,7 @@ contract AutoStake is StakeLock, ThrottledExit, Ownable {
      * @param _tokenAmount The amount to be staked
      */
     function stake(uint256 _tokenAmount) public virtual {
+        onlyUnderContractStakeLimit(_tokenAmount);
         _stake(_tokenAmount, msg.sender, true);
     }
 
@@ -87,9 +100,13 @@ contract AutoStake is StakeLock, ThrottledExit, Ownable {
 
         // now we can issue shares
         stakingToken.safeTransferFrom(_chargeStaker ? _staker : msg.sender, address(this), _amount);
+
+        userStakedAmount[_staker] += _amount;
+        totalAmountStaked += _amount;
+
         uint256 sharesToIssue = (_amount * UNIT) / valuePerShare;
-        totalShares = totalShares + sharesToIssue;
-        share[_staker] = share[_staker] + sharesToIssue;
+        totalShares += sharesToIssue;
+        share[_staker] += sharesToIssue;
 
         uint256 oldValuePerShare = valuePerShare;
 
@@ -112,9 +129,11 @@ contract AutoStake is StakeLock, ThrottledExit, Ownable {
             return;
         }
 
-        totalShares = totalShares - share[msg.sender];
+        totalShares -= share[msg.sender];
+        totalAmountStaked -= userStakedAmount[msg.sender];
         share[msg.sender] = 0;
-        exitStake = exitStake + userStake;
+        userStakedAmount[msg.sender] = 0;
+        exitStake += userStake;
 
         // now we can transfer funds and burn shares
         initiateExit(userStake, new uint256[](0));
@@ -125,7 +144,7 @@ contract AutoStake is StakeLock, ThrottledExit, Ownable {
     /// @dev Completes the throttled exit from the pool.
     function completeExit() external virtual onlyUnlocked {
         ExitInfo storage info = exitInfo[msg.sender];
-        exitStake = exitStake - info.exitStake;
+        exitStake -= info.exitStake;
 
         finalizeExit(address(stakingToken), new address[](0));
 
@@ -162,5 +181,13 @@ contract AutoStake is StakeLock, ThrottledExit, Ownable {
             stakingToken.approve(address(rewardPool), balanceToRestake);
             rewardPool.stake(balanceToRestake);
         }
+    }
+
+    function getUserAccumulatedRewards(address who) public view returns (uint256) {
+        uint256 balance = balanceOf(who);
+        if (userStakedAmount[who] > balance) {
+            return 0;
+        }
+        return balance - userStakedAmount[who];
     }
 }

@@ -36,6 +36,7 @@ describe('LimitedAutoStake', () => {
   const day: number = 60 * 24 * 60;
   const amount: BigNumber = ethers.utils.parseEther('5184000');
   const stakeLimit: BigNumber = amount;
+  const contractStakeLimit = amount;
   const bOne: BigNumber = ethers.utils.parseEther('1');
   const standardStakingAmount: BigNumber = ethers.utils.parseEther('5'); // 5 tokens
 
@@ -54,12 +55,14 @@ describe('LimitedAutoStake', () => {
         throttleRoundSeconds,
         bOne,
         stakeLimit,
+        contractStakeLimit,
       ])) as LimitedAutoStake;
 
       CompoundingRewardsPoolInstance = (await deployContract(testAccount, CompoundingRewardsPoolArtifact, [
         stakingTokenInstance.address,
         [stakingTokenInstance.address],
         AutoStakingInstance.address,
+        contractStakeLimit,
       ])) as CompoundingRewardsPool;
 
       await AutoStakingInstance.setPool(CompoundingRewardsPoolInstance.address);
@@ -79,8 +82,23 @@ describe('LimitedAutoStake', () => {
           throttleRoundSeconds,
           bOne,
           0,
+          contractStakeLimit,
         ])
-      ).to.be.revertedWith('LimitedAutoStake:constructor::stake limit should not be 0');
+      ).to.be.revertedWith('LimitedAutoStake: stake limit should not be 0');
+    });
+
+    it('[Should fail to deploy RewardsPoolBase with 0 contract staking limit]:', async () => {
+      stakingTokenInstance = (await deployContract(testAccount, TestERC20Artifact, [amount])) as TestERC20;
+
+      await expect(
+        deployContract(testAccount, LimitedAutoStakeArtifact, [
+          stakingTokenInstance.address,
+          throttleRoundSeconds,
+          bOne,
+          stakeLimit,
+          0,
+        ])
+      ).to.be.revertedWith('AutoStake: contract stake limit should not be 0');
     });
   });
 
@@ -97,12 +115,14 @@ describe('LimitedAutoStake', () => {
         throttleRoundSeconds,
         bOne,
         stakeLimit,
+        contractStakeLimit,
       ])) as LimitedAutoStake;
 
       CompoundingRewardsPoolInstance = (await deployContract(testAccount, CompoundingRewardsPoolArtifact, [
         stakingTokenInstance.address,
         [stakingTokenInstance.address],
         AutoStakingInstance.address,
+        contractStakeLimit,
       ])) as CompoundingRewardsPool;
 
       await AutoStakingInstance.setPool(CompoundingRewardsPoolInstance.address);
@@ -143,7 +163,7 @@ describe('LimitedAutoStake', () => {
 
     it('[Should fail if amount to stake is more than limit]:', async () => {
       await expect(AutoStakingInstance.stake(stakeLimit.mul(2))).to.be.revertedWith(
-        'onlyUnderStakeLimit::Stake limit reached'
+        'LimitedAutoStake: user stake limit reache'
       );
     });
 

@@ -13,15 +13,16 @@ contract LimitedAutoStake is AutoStake {
         address token,
         uint256 _throttleRoundSeconds,
         uint256 _throttleRoundCap,
-        uint256 _stakeLimit
-    ) AutoStake(token, _throttleRoundSeconds, _throttleRoundCap) {
-        require(_stakeLimit != 0, 'LimitedAutoStake:constructor::stake limit should not be 0');
+        uint256 _stakeLimit,
+        uint256 _contractStakeLimit
+    ) AutoStake(token, _throttleRoundSeconds, _throttleRoundCap, _contractStakeLimit) {
+        require(_stakeLimit != 0, 'LimitedAutoStake: stake limit should not be 0');
         stakeLimit = _stakeLimit;
     }
 
     modifier onlyUnderStakeLimit(address staker, uint256 newStake) {
-        uint256 currentStake = balanceOf(staker);
-        require(currentStake + newStake <= stakeLimit, 'onlyUnderStakeLimit::Stake limit reached');
+        uint256 currentStake = AutoStake.userStakedAmount[staker];
+        require(currentStake + newStake <= stakeLimit, 'LimitedAutoStake: user stake limit reached');
         _;
     }
 

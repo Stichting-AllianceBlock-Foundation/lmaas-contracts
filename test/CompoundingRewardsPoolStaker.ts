@@ -38,6 +38,7 @@ describe('CompoundingRewardsPoolStaker', () => {
   const amount = ethers.utils.parseEther('5184000');
   const bOne = ethers.utils.parseEther('1');
   const standardStakingAmount = ethers.utils.parseEther('5'); // 5 tokens
+  const stakeLimit = ethers.utils.parseEther('15'); // 10 tokens
   const contractStakeLimit = ethers.utils.parseEther('15'); // 10 tokens
 
   beforeEach(async () => {
@@ -55,6 +56,7 @@ describe('CompoundingRewardsPoolStaker', () => {
       stakingTokenInstance.address,
       throttleRoundSeconds,
       bOne,
+      stakeLimit,
       contractStakeLimit,
     ])) as CompoundingRewardsPoolStaker;
 
@@ -75,7 +77,8 @@ describe('CompoundingRewardsPoolStaker', () => {
       stakingTokenInstance.address,
       throttleRoundSeconds,
       bOne,
-      standardStakingAmount,
+      stakeLimit,
+      contractStakeLimit,
     ])) as CompoundingRewardsPoolStaker;
 
     CompoundingRewardsPoolInstance = (await deployContract(testAccount, CompoundingRewardsPoolArtifact, [
@@ -148,6 +151,6 @@ describe('CompoundingRewardsPoolStaker', () => {
 
     await expect(
       StakeTransfererAutoStakeInstance.exitAndTransfer(StakeReceiverAutoStakeInstance.address)
-    ).to.be.revertedWith('onlyUnderStakeLimit::Stake limit reached');
+    ).to.be.revertedWith('LimitedAutoStake: user stake limit reached');
   });
 });
