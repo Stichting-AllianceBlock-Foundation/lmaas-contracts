@@ -1,12 +1,12 @@
 import { ethers } from 'hardhat';
 import { deployContract } from 'ethereum-waffle';
 
-import { TestERC20 } from '../typechain-types/TestERC20';
+import { TestERC20 } from '../typechain/TestERC20';
 
 import CompoundingRewardsPoolStakerArtifact from '../artifacts/contracts/V2/CompoundingRewardsPoolStaker.sol/CompoundingRewardsPoolStaker.json';
 import CompoundingRewardsPoolArtifact from '../artifacts/contracts/V2/CompoundingRewardsPool.sol/CompoundingRewardsPool.json';
-import { CompoundingRewardsPoolStaker } from '../typechain-types/CompoundingRewardsPoolStaker';
-import { CompoundingRewardsPool } from '../typechain-types/CompoundingRewardsPool';
+import { CompoundingRewardsPoolStaker } from '../typechain/CompoundingRewardsPoolStaker';
+import { CompoundingRewardsPool } from '../typechain/CompoundingRewardsPool';
 import { BigNumber } from 'ethers';
 
 async function main() {
@@ -65,7 +65,9 @@ async function main() {
   const currentTime = Math.round(new Date().getTime() / 1000);
   const startTime = currentTime + 60;
 
-  await CompoundingRewardsPoolInstance.start(startTime, startTime + duration, rewardTokenAmounts);
+  const tx = await CompoundingRewardsPoolInstance.start(startTime, startTime + duration, rewardTokenAmounts);
+  await tx.wait();
+
   await CompoundingRewardsPoolStakerInstance.start(startTime + duration);
 
   console.log('Auto staking pool starts at:', new Date(startTime * 1000));
