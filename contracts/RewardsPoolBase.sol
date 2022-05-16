@@ -3,6 +3,7 @@ pragma solidity 0.8.9;
 
 import '@openzeppelin/contracts/access/Ownable.sol';
 import './interfaces/IERC20Detailed.sol';
+import './interfaces/IWETH.sol';
 import './SafeERC20Detailed.sol';
 
 /** @dev Base pool contract used in all other pools. 
@@ -33,6 +34,7 @@ contract RewardsPoolBase is Ownable {
     address[] public rewardsTokens;
 
     IERC20Detailed public stakingToken;
+    address public wrappedNativeToken;
 
     uint256 public startTimestamp;
     uint256 public endTimestamp;
@@ -69,13 +71,15 @@ contract RewardsPoolBase is Ownable {
      * @param _stakeLimit Maximum amount of tokens that can be staked per user
      * @param _contractStakeLimit Maximum amount of tokens that can be staked in total
      * @param _name Name of the pool
+     * @param _wrappedNativeToken The wrapped version of the native token, so the token can handle native as a reward
      */
     constructor(
         IERC20Detailed _stakingToken,
         address[] memory _rewardsTokens,
         uint256 _stakeLimit,
         uint256 _contractStakeLimit,
-        string memory _name
+        string memory _name,
+        address _wrappedNativeToken
     ) {
         require(address(_stakingToken) != address(0), 'RewardsPoolBase: invalid staking token');
 
@@ -87,6 +91,7 @@ contract RewardsPoolBase is Ownable {
         rewardsTokens = _rewardsTokens;
         stakeLimit = _stakeLimit;
         contractStakeLimit = _contractStakeLimit;
+        wrappedNativeToken = _wrappedNativeToken;
 
         for (uint256 i = 0; i < rewardsTokens.length; i++) {
             accumulatedRewardMultiplier.push(0);
@@ -220,7 +225,14 @@ contract RewardsPoolBase is Ownable {
 
             emit Claimed(_claimer, reward, rewardsTokens[i]);
 
-            IERC20Detailed(rewardsTokens[i]).safeTransfer(_claimer, reward);
+            if (rewardsTokens[i] == wrappedNativeToken) {
+                IWETH(rewardsTokens[i]).withdraw(reward);
+
+                /* This will transfer the native token to the user. */
+                payable(msg.sender).transfer(reward);
+            } else {
+                IERC20Detailed(rewardsTokens[i]).safeTransfer(_claimer, reward);
+            }
         }
     }
 
@@ -278,8 +290,8 @@ contract RewardsPoolBase is Ownable {
     }
 
     /**
-		@dev Updates the accumulated reward multipliers for everyone and each token
-	 */
+      @dev Updates the accumulated reward multipliers for everyone and each token
+    */
     function updateRewardMultipliers() public {
         uint256 currentTimestamp = block.timestamp;
 

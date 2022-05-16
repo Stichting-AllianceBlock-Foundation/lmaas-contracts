@@ -13,7 +13,8 @@ contract StakeTransfererRewardsPoolMock is OnlyExitRewardsPoolMock, StakeTransfe
         address[] memory _rewardsTokens,
         uint256 _stakeLimit,
         uint256 _contractStakeLimit,
-        string memory _name
+        string memory _name,
+        address _wrappedNativeToken
     )
         OnlyExitRewardsPoolMock(
             _stakingToken,
@@ -22,7 +23,8 @@ contract StakeTransfererRewardsPoolMock is OnlyExitRewardsPoolMock, StakeTransfe
             _rewardsTokens,
             _stakeLimit,
             _contractStakeLimit,
-            _name
+            _name,
+            _wrappedNativeToken
         )
     {}
 
