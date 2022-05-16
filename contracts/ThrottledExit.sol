@@ -65,9 +65,13 @@ abstract contract ThrottledExit {
         emit ExitRequested(msg.sender, info.exitTimestamp);
     }
 
-    function finalizeExit(address _stakingToken, address[] memory _rewardsTokens) internal virtual {
+    function finalizeExit(
+        address _stakingToken,
+        address[] memory _rewardsTokens,
+        address _wrappedNativeToken
+    ) internal virtual {
         ExitInfo storage info = exitInfo[msg.sender];
-        require(block.timestamp > info.exitTimestamp, 'finalizeExit::Trying to exit too early');
+        require(block.timestamp > info.exitTimestamp, 'finalizeExit:: Trying to exit too early');
 
         uint256 infoExitStake = info.exitStake;
         require(infoExitStake > 0, 'finalizeExit::No stake to exit');
@@ -79,7 +83,14 @@ abstract contract ThrottledExit {
             uint256 infoRewards = info.rewards[i];
             info.rewards[i] = 0;
 
-            IERC20(_rewardsTokens[i]).safeTransfer(msg.sender, infoRewards);
+            if (_rewardsTokens[i] == _wrappedNativeToken) {
+                IWETH(_rewardsTokens[i]).withdraw(infoRewards);
+
+                /* This will transfer the native token to the user. */
+                payable(msg.sender).transfer(infoRewards);
+            } else {
+                IERC20(_rewardsTokens[i]).safeTransfer(msg.sender, infoRewards);
+            }
         }
 
         emit ExitCompleted(msg.sender, infoExitStake);
