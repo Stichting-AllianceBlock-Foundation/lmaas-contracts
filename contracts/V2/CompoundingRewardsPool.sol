@@ -15,9 +15,10 @@ contract CompoundingRewardsPool is RewardsPoolBase, OneStakerFeature {
         IERC20 _stakingToken,
         address[] memory _rewardsTokens,
         address _staker,
-        string memory _name
+        string memory _name,
+        address _wrappedNativeToken
     )
-        RewardsPoolBase(_stakingToken, _rewardsTokens, type(uint256).max, type(uint256).max, _name)
+        RewardsPoolBase(_stakingToken, _rewardsTokens, type(uint256).max, type(uint256).max, _name, _wrappedNativeToken)
         OneStakerFeature(_staker)
     {}
 

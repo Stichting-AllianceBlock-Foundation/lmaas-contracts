@@ -4,6 +4,7 @@ pragma solidity 0.8.9;
 
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import './interfaces/IWETH.sol';
 
 /** @dev Provides a throttling mechanism for staking pools. Instead of allowing
     everyone to withdraw their stake at once at the end of the pool, this forces
@@ -65,9 +66,13 @@ abstract contract ThrottledExit {
         emit ExitRequested(msg.sender, info.exitTimestamp);
     }
 
-    function finalizeExit(address _stakingToken, address[] memory _rewardsTokens) internal virtual {
+    function finalizeExit(
+        address _stakingToken,
+        address[] memory _rewardsTokens,
+        address _wrappedNativeToken
+    ) internal virtual {
         ExitInfo storage info = exitInfo[msg.sender];
-        require(block.timestamp > info.exitTimestamp, 'finalizeExit::Trying to exit too early');
+        require(block.timestamp > info.exitTimestamp, 'finalizeExit:: Trying to exit too early');
 
         uint256 infoExitStake = info.exitStake;
         require(infoExitStake > 0, 'finalizeExit::No stake to exit');
@@ -79,7 +84,14 @@ abstract contract ThrottledExit {
             uint256 infoRewards = info.rewards[i];
             info.rewards[i] = 0;
 
-            IERC20(_rewardsTokens[i]).safeTransfer(msg.sender, infoRewards);
+            if (_rewardsTokens[i] == _wrappedNativeToken) {
+                IWETH(_rewardsTokens[i]).withdraw(infoRewards);
+
+                /* This will transfer the native token to the user. */
+                payable(msg.sender).transfer(infoRewards);
+            } else {
+                IERC20(_rewardsTokens[i]).safeTransfer(msg.sender, infoRewards);
+            }
         }
 
         emit ExitCompleted(msg.sender, infoExitStake);
