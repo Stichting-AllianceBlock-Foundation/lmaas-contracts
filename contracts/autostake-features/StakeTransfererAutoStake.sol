@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.9;
 
-import './../interfaces/IERC20Detailed.sol';
-import './../SafeERC20Detailed.sol';
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import './AutoStake.sol';
 import './../StakeTransferer.sol';
 import './../StakeReceiver.sol';
@@ -11,7 +11,7 @@ import './../StakeReceiver.sol';
 /** @dev Transfer staked tokens to another whitelisted staking pool
  */
 abstract contract StakeTransfererAutoStake is AutoStake, StakeTransferer {
-    using SafeERC20Detailed for IERC20Detailed;
+    using SafeERC20 for IERC20;
 
     /** @dev Change whitelist status of a receiver pool to receive transfers.
      * @param _receiver The pool address to whitelist
@@ -42,7 +42,7 @@ abstract contract StakeTransfererAutoStake is AutoStake, StakeTransferer {
         totalShares = totalShares - share[msg.sender];
         share[msg.sender] = 0;
 
-        stakingToken.safeApprove(_transferTo, userStake);
+        stakingToken.approve(_transferTo, userStake);
 
         StakeReceiver(_transferTo).delegateStake(msg.sender, userStake);
 

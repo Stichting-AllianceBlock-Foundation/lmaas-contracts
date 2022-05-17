@@ -20,13 +20,16 @@ StakeLock
 ```Solidity
 uint256 UNIT;
 contract IRewardsPoolBase rewardPool;
-contract IERC20Detailed stakingToken;
+contract IERC20 stakingToken;
 address factory;
 uint256 valuePerShare;
 uint256 totalShares;
 uint256 totalValue;
 uint256 exitStake;
 mapping(address => uint256) share;
+uint256 contractStakeLimit;
+uint256 totalAmountStaked;
+mapping(address => uint256) userStakedAmount;
 uint256 nextAvailableExitTimestamp;
 uint256 nextAvailableRoundExitVolume;
 uint256 throttleRoundSeconds;
@@ -48,6 +51,17 @@ uint256 lockEndTimestamp;
 address token; 
 uint256 _throttleRoundSeconds; 
 uint256 _throttleRoundCap; 
+uint256 _contractStakeLimit; 
+```
+
+#### onlyUnderContractStakeLimit
+
+
+
+
+
+```Solidity
+uint256 _stakeAmount; 
 ```
 
 
@@ -123,6 +137,16 @@ address _staker;
 
 
 
+
+#### getUserAccumulatedRewards → uint256
+
+
+
+
+
+```Solidity
+address who; 
+```
 
 #### owner → address
 

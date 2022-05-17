@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.9;
 
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import './../RewardsPoolBase.sol';
 import './../pool-features/OnlyExitFeature.sol';
 import './../pool-features/ThrottledExitFeature.sol';
@@ -29,7 +30,7 @@ contract NonCompoundingRewardsPool is
      * @param _wrappedNativeToken The wrapped version of the native token, so the token can handle native as a reward
      */
     constructor(
-        IERC20Detailed _stakingToken,
+        IERC20 _stakingToken,
         address[] memory _rewardsTokens,
         uint256 _stakeLimit,
         uint256 _throttleRoundSeconds,
@@ -85,6 +86,6 @@ contract NonCompoundingRewardsPool is
 
     /// @dev Not allowed
     function extend(uint256, uint256[] calldata) external virtual override(RewardsPoolBase) {
-        revert('NonCompoundingRewardsPool::cannot extend this pool.');
+        revert('NonCompoundingRewardsPool: cannot extend this pool.');
     }
 }

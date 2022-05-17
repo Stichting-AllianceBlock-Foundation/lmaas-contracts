@@ -34,4 +34,8 @@ module.exports = {
     gasPrice: 120,
     coinmarketcap: '2f8f78a1-2769-493f-9cd4-df353a6594d7',
   },
+  typechain: {
+    outDir: 'typechain',
+    target: 'ethers-v5',
+  },
 };

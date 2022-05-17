@@ -3,8 +3,8 @@ import { ethers, network } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { BigNumber } from 'ethers';
 
-import { TestERC20 } from '../typechain-types/TestERC20';
-import { RewardsPoolBase } from '../typechain-types/RewardsPoolBase';
+import { TestERC20 } from '../typechain/TestERC20';
+import { RewardsPoolBase } from '../typechain/RewardsPoolBase';
 import { deployERC20, getTime, timeTravel, timeTravelTo } from './utils';
 
 describe('RewardsPoolBase', () => {
@@ -156,6 +156,19 @@ describe('RewardsPoolBase', () => {
     await expect(
       RewardsPoolBase.deploy(stakingTokenAddress, [], stakeLimit, contractStakeLimit, name)
     ).to.be.revertedWith('RewardsPoolBase: empty rewardsTokens');
+  });
+
+  it('[Should fail to deploy RewardsPoolBase with duplicate rewards token addresses array]:', async () => {
+    const RewardsPoolBase = await ethers.getContractFactory('RewardsPoolBase');
+    await expect(
+      RewardsPoolBase.deploy(
+        stakingTokenAddress,
+        [rewardTokensAddresses[0], rewardTokensAddresses[0]],
+        stakeLimit,
+        contractStakeLimit,
+        name
+      )
+    ).to.be.revertedWith('RewardsPoolBase: duplicate rewards token');
   });
 
   it('[Should fail to deploy RewardsPoolBase with 0 staking limit]:', async () => {
@@ -619,45 +632,57 @@ describe('RewardsPoolBase', () => {
     });
 
     it('[Should extend correctly when pool is already done and also do a claim ]:', async () => {
-      await timeTravel(poolLength + 1000);
+      await timeTravel(poolLength * 2);
 
       await extend();
+      const extendTime = await getTime();
+
+      const startTimestamp = await RewardsPoolBaseInstance.startTimestamp();
+      const endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
+      expect(startTimestamp).to.equal(extendTime);
+      expect(endTimestamp.sub(startTimestamp)).to.equal(poolLength);
+
       await RewardsPoolBaseInstance.claim();
       for (let i = 0; i < rewardTokensCount; i++) {
         const userDebt = await RewardsPoolBaseInstance.getUserRewardDebt(aliceAccount.address, i);
         expect(userDebt).to.be.gt(0);
       }
-      const startTimestamp = await RewardsPoolBaseInstance.startTimestamp();
-      const endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
-      expect(endTimestamp.sub(startTimestamp)).to.equal(poolLength);
     });
 
     it('[Should extend correctly when pool is already done and also do a withdraw ]:', async () => {
-      await timeTravel(poolLength + 1000);
+      await timeTravel(poolLength * 2);
 
       await extend();
+      const extendTime = await getTime();
+
+      const startTimestamp = await RewardsPoolBaseInstance.startTimestamp();
+      const endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
+      expect(startTimestamp).to.equal(extendTime);
+      expect(endTimestamp.sub(startTimestamp)).to.equal(poolLength);
+
       await RewardsPoolBaseInstance.withdraw(bOne);
       for (let i = 0; i < rewardTokensCount; i++) {
         const userDebt = await RewardsPoolBaseInstance.getUserRewardDebt(aliceAccount.address, i);
         expect(userDebt).to.be.gt(0);
       }
-      const startTimestamp = await RewardsPoolBaseInstance.startTimestamp();
-      const endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
-      expect(endTimestamp.sub(startTimestamp)).to.equal(poolLength);
     });
 
     it('[Should extend correctly when pool is already done and also do a stake]:', async () => {
-      await timeTravel(poolLength + 1000);
+      await timeTravel(poolLength * 2);
 
       await extend();
+      const extendTime = await getTime();
+
+      const startTimestamp = await RewardsPoolBaseInstance.startTimestamp();
+      const endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
+      expect(startTimestamp).to.equal(extendTime);
+      expect(endTimestamp.sub(startTimestamp)).to.equal(poolLength);
+
       await RewardsPoolBaseInstance.stake(standardStakingAmount);
       for (let i = 0; i < rewardTokensCount; i++) {
         const userDebt = await RewardsPoolBaseInstance.getUserRewardDebt(aliceAccount.address, i);
         expect(userDebt).to.be.gt(0);
       }
-      const startTimestamp = await RewardsPoolBaseInstance.startTimestamp();
-      const endTimestamp = await RewardsPoolBaseInstance.endTimestamp();
-      expect(endTimestamp.sub(startTimestamp)).to.equal(poolLength);
     });
 
     it('[Should extend correctly multiple times with updateRewardMultipliers]:', async () => {

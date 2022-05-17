@@ -1,10 +1,10 @@
 import { ethers } from 'hardhat';
 import { deployContract } from 'ethereum-waffle';
 
-import { TestERC20 } from '../typechain-types/TestERC20';
+import { TestERC20 } from '../typechain/TestERC20';
 
 import LMCArtifact from '../artifacts/contracts/LiquidityMiningCampaign.sol/LiquidityMiningCampaign.json';
-import { LiquidityMiningCampaign } from '../typechain-types/LiquidityMiningCampaign';
+import { LiquidityMiningCampaign } from '../typechain/LiquidityMiningCampaign';
 import { BigNumber } from 'ethers';
 
 async function main() {

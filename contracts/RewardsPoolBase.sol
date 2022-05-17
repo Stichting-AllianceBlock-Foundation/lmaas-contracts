@@ -2,9 +2,9 @@
 pragma solidity 0.8.9;
 
 import '@openzeppelin/contracts/access/Ownable.sol';
-import './interfaces/IERC20Detailed.sol';
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import './interfaces/IWETH.sol';
-import './SafeERC20Detailed.sol';
 
 /** @dev Base pool contract used in all other pools. 
 Users can stake tokens and get rewards based on the percentage of total staked tokens.
@@ -22,7 +22,7 @@ For example, you enter when the accumulatedRewardMultiplier is 5 and exit at 20.
 Your reward is (20 - 5) * 100 = 1500 tokens.
 */
 contract RewardsPoolBase is Ownable {
-    using SafeERC20Detailed for IERC20Detailed;
+    using SafeERC20 for IERC20;
 
     uint256 internal constant PRECISION = 1 ether;
 
@@ -33,7 +33,7 @@ contract RewardsPoolBase is Ownable {
     uint256[] public rewardPerSecond;
     address[] public rewardsTokens;
 
-    IERC20Detailed public stakingToken;
+    IERC20 public immutable stakingToken;
     address public wrappedNativeToken;
 
     uint256 public startTimestamp;
@@ -45,8 +45,8 @@ contract RewardsPoolBase is Ownable {
 
     uint256[] public accumulatedRewardMultiplier;
 
-    uint256 public stakeLimit;
-    uint256 public contractStakeLimit;
+    uint256 public immutable stakeLimit;
+    uint256 public immutable contractStakeLimit;
 
     string public name;
 
@@ -58,6 +58,14 @@ contract RewardsPoolBase is Ownable {
     }
 
     mapping(address => UserInfo) public userInfo;
+
+    struct Campaign {
+        uint256 startTimestamp;
+        uint256 endTimestamp;
+        uint256[] rewardPerSecond;
+    }
+
+    Campaign[] public previousCampaigns;
 
     event Started(uint256 startTimestamp, uint256 endTimestamp, uint256[] rewardsPerSecond);
     event Staked(address indexed user, uint256 amount);
@@ -74,7 +82,7 @@ contract RewardsPoolBase is Ownable {
      * @param _wrappedNativeToken The wrapped version of the native token, so the token can handle native as a reward
      */
     constructor(
-        IERC20Detailed _stakingToken,
+        IERC20 _stakingToken,
         address[] memory _rewardsTokens,
         uint256 _stakeLimit,
         uint256 _contractStakeLimit,
@@ -87,17 +95,25 @@ contract RewardsPoolBase is Ownable {
 
         require(_rewardsTokens.length > 0, 'RewardsPoolBase: empty rewardsTokens');
 
+        for (uint256 i = 0; i < _rewardsTokens.length; i++) {
+            for (uint256 j = i + 1; j < _rewardsTokens.length; j++) {
+                require(
+                    address(_rewardsTokens[i]) != address(_rewardsTokens[j]),
+                    'RewardsPoolBase: duplicate rewards token'
+                );
+            }
+        }
+
         stakingToken = _stakingToken;
         rewardsTokens = _rewardsTokens;
         stakeLimit = _stakeLimit;
         contractStakeLimit = _contractStakeLimit;
         wrappedNativeToken = _wrappedNativeToken;
 
-        for (uint256 i = 0; i < rewardsTokens.length; i++) {
-            accumulatedRewardMultiplier.push(0);
-            totalClaimed.push(0);
-            totalSpentRewards.push(0);
-        }
+        uint256[] memory empty = new uint256[](rewardsTokens.length);
+        accumulatedRewardMultiplier = empty;
+        totalClaimed = empty;
+        totalSpentRewards = empty;
 
         name = _name;
     }
@@ -134,7 +150,7 @@ contract RewardsPoolBase is Ownable {
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
             uint256 rewardsAmount = calculateRewardsAmount(_startTimestamp, _endTimestamp, rewardPerSecond[i]);
 
-            uint256 balance = IERC20Detailed(rewardsTokens[i]).balanceOf(address(this));
+            uint256 balance = IERC20(rewardsTokens[i]).balanceOf(address(this));
 
             require(balance >= rewardsAmount, 'RewardsPoolBase: not enough rewards');
         }
@@ -151,6 +167,7 @@ contract RewardsPoolBase is Ownable {
     function cancel() external onlyOwner {
         require(block.timestamp < startTimestamp, 'RewardsPoolBase: No start scheduled or already started');
 
+        rewardPerSecond = new uint256[](0);
         startTimestamp = 0;
         endTimestamp = 0;
         lastRewardTimestamp = 0;
@@ -231,7 +248,7 @@ contract RewardsPoolBase is Ownable {
                 /* This will transfer the native token to the user. */
                 payable(msg.sender).transfer(reward);
             } else {
-                IERC20Detailed(rewardsTokens[i]).safeTransfer(_claimer, reward);
+                IERC20(rewardsTokens[i]).safeTransfer(_claimer, reward);
             }
         }
     }
@@ -347,10 +364,9 @@ contract RewardsPoolBase is Ownable {
         if (user.rewardDebt.length == 0) {
             // Initialize user struct
 
-            for (uint256 i = 0; i < rewardsTokensLength; i++) {
-                user.rewardDebt.push(0);
-                user.tokensOwed.push(0);
-            }
+            uint256[] memory empty = new uint256[](rewardsTokensLength);
+            user.rewardDebt = empty;
+            user.tokensOwed = empty;
         }
 
         if (user.amountStaked == 0) {
@@ -437,6 +453,12 @@ contract RewardsPoolBase is Ownable {
         return rewardsTokens.length;
     }
 
+    /** @dev Returns the amount of previous campaigns
+     */
+    function getPreviousCampaignsCount() external view returns (uint256) {
+        return previousCampaigns.length;
+    }
+
     /**
      * @dev Extends the rewards period and updates the rates. 
      When the current campaign is still going on, the extension will be scheduled and started when the campaign ends.
@@ -444,7 +466,7 @@ contract RewardsPoolBase is Ownable {
      * @param _durationTime duration of the campaign (how many seconds the campaign will have)
      * @param _rewardPerSecond array with new rewards per second for each token
      */
-    function extend(uint256 _durationTime, uint256[] memory _rewardPerSecond) external virtual onlyOwner {
+    function extend(uint256 _durationTime, uint256[] calldata _rewardPerSecond) external virtual onlyOwner {
         require(extensionDuration == 0, 'RewardsPoolBase: there is already an extension');
 
         require(_durationTime > 0, 'RewardsPoolBase: duration must be greater than 0');
@@ -452,7 +474,10 @@ contract RewardsPoolBase is Ownable {
         uint256 rewardPerSecondLength = _rewardPerSecond.length;
         require(rewardPerSecondLength == rewardsTokens.length, 'RewardsPoolBase: invalid rewardPerSecond');
 
-        uint256 newStartTimestamp = endTimestamp;
+        uint256 currentTimestamp = block.timestamp;
+        bool ended = currentTimestamp > endTimestamp;
+
+        uint256 newStartTimestamp = ended ? currentTimestamp : endTimestamp;
         uint256 newEndTimestamp = newStartTimestamp + _durationTime;
 
         for (uint256 i = 0; i < rewardPerSecondLength; i++) {
@@ -464,7 +489,7 @@ contract RewardsPoolBase is Ownable {
             require(availableBalance >= newRewards, 'RewardsPoolBase: not enough rewards to extend');
         }
 
-        if (block.timestamp > endTimestamp) {
+        if (ended) {
             _updateRewardMultipliers(endTimestamp);
             _extend(newStartTimestamp, newEndTimestamp, _rewardPerSecond);
         } else {
@@ -473,12 +498,6 @@ contract RewardsPoolBase is Ownable {
         }
     }
 
-    /**
-     * @dev Extends the rewards period and updates the rates, (this is just the internal function, that does the actual extends)
-     * @param _startTimestamp current timestamp for the rewards
-     * @param _endTimestamp new end timestamp for the rewards
-     * @param _rewardPerSecond array with new rewards per second for each token
-     */
     function _extend(
         uint256 _startTimestamp,
         uint256 _endTimestamp,
@@ -490,9 +509,12 @@ contract RewardsPoolBase is Ownable {
             totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
         }
 
+        previousCampaigns.push(Campaign(startTimestamp, endTimestamp, rewardPerSecond));
+
         rewardPerSecond = _rewardPerSecond;
         startTimestamp = _startTimestamp;
         endTimestamp = _endTimestamp;
+        lastRewardTimestamp = _startTimestamp;
 
         extensionDuration = 0;
         delete extensionRewardPerSecond;
@@ -517,7 +539,7 @@ contract RewardsPoolBase is Ownable {
      */
     function getAvailableBalance(uint256 _rewardTokenIndex) public view returns (uint256) {
         address rewardToken = rewardsTokens[_rewardTokenIndex];
-        uint256 balance = IERC20Detailed(rewardToken).balanceOf(address(this));
+        uint256 balance = IERC20(rewardToken).balanceOf(address(this));
 
         if (startTimestamp == 0) {
             return balance;
@@ -550,7 +572,7 @@ contract RewardsPoolBase is Ownable {
      * @param _token The address of the rewards contract
      */
     function withdrawTokens(address _recipient, address _token) external onlyOwner {
-        uint256 currentReward = IERC20Detailed(_token).balanceOf(address(this));
+        uint256 currentReward = IERC20(_token).balanceOf(address(this));
         require(currentReward > 0, 'RewardsPoolBase: no rewards');
 
         require(_token != address(stakingToken), 'RewardsPoolBase: cannot withdraw staking token');
@@ -561,7 +583,7 @@ contract RewardsPoolBase is Ownable {
             require(_token != rewardsTokens[i], 'RewardsPoolBase: cannot withdraw reward token');
         }
 
-        IERC20Detailed(_token).safeTransfer(_recipient, currentReward);
+        IERC20(_token).safeTransfer(_recipient, currentReward);
     }
 
     /** @dev Withdraw excess rewards not needed for current campaign and extension
@@ -574,7 +596,7 @@ contract RewardsPoolBase is Ownable {
             uint256 balance = getAvailableBalance(i);
 
             if (balance > 0) {
-                IERC20Detailed(rewardsTokens[i]).safeTransfer(_recipient, balance);
+                IERC20(rewardsTokens[i]).safeTransfer(_recipient, balance);
             }
         }
     }

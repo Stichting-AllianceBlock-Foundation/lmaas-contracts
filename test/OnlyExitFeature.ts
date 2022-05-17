@@ -3,8 +3,8 @@ import { ethers, network } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { BigNumber, BigNumberish } from 'ethers';
 
-import { TestERC20 } from '../typechain-types/TestERC20';
-import { OnlyExitRewardsPoolMock } from '../typechain-types/OnlyExitRewardsPoolMock';
+import { TestERC20 } from '../typechain/TestERC20';
+import { OnlyExitRewardsPoolMock } from '../typechain/OnlyExitRewardsPoolMock';
 import { getTime, timeTravel } from './utils';
 
 describe('OnlyExitFeature', () => {

@@ -6,10 +6,10 @@ import CompoundingRewardsPoolArtifact from '../artifacts/contracts/V2/Compoundin
 import TestERC20Artifact from '../artifacts/contracts/TestERC20.sol/TestERC20.json';
 import StakeTransfererAutoStakeArtifact from '../artifacts/contracts/mocks/AutoStakeTransfererMock.sol/AutoStakeTransfererMock.json';
 import StakeReceiverAutoStakeArtifact from '../artifacts/contracts/mocks/AutoStakeReceiverMock.sol/AutoStakeReceiverMock.json';
-import { CompoundingRewardsPool } from '../typechain-types/CompoundingRewardsPool';
-import { TestERC20 } from '../typechain-types/TestERC20';
-import { StakeTransfererAutoStake } from '../typechain-types/StakeTransfererAutoStake';
-import { StakeReceiverAutoStake } from '../typechain-types/StakeReceiverAutoStake';
+import { CompoundingRewardsPool } from '../typechain/CompoundingRewardsPool';
+import { TestERC20 } from '../typechain/TestERC20';
+import { StakeTransfererAutoStake } from '../typechain/StakeTransfererAutoStake';
+import { StakeReceiverAutoStake } from '../typechain/StakeReceiverAutoStake';
 import { getTime, timeTravel } from './utils';
 
 describe('AutoStakeTransfer', () => {
@@ -38,6 +38,7 @@ describe('AutoStakeTransfer', () => {
   const amount = ethers.utils.parseEther('5184000');
   const bOne = ethers.utils.parseEther('1');
   const standardStakingAmount = ethers.utils.parseEther('5'); // 5 tokens
+  const contractStakeLimit = amount;
 
   beforeEach(async () => {
     stakingTokenInstance = (await deployContract(testAccount, TestERC20Artifact, [amount])) as TestERC20;
@@ -50,6 +51,7 @@ describe('AutoStakeTransfer', () => {
       stakingTokenInstance.address,
       throttleRoundSeconds,
       bOne,
+      contractStakeLimit,
     ])) as StakeTransfererAutoStake;
 
     CompoundingRewardsPoolInstance = (await deployContract(testAccount, CompoundingRewardsPoolArtifact, [
@@ -68,6 +70,7 @@ describe('AutoStakeTransfer', () => {
       stakingTokenInstance.address,
       throttleRoundSeconds,
       bOne,
+      contractStakeLimit,
     ])) as StakeReceiverAutoStake;
 
     CompoundingRewardsPoolInstance = (await deployContract(testAccount, CompoundingRewardsPoolArtifact, [

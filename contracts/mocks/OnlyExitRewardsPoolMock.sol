@@ -2,12 +2,13 @@
 
 pragma solidity 0.8.9;
 
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import './../RewardsPoolBase.sol';
 import './../pool-features/OnlyExitFeature.sol';
 
 contract OnlyExitRewardsPoolMock is RewardsPoolBase, OnlyExitFeature {
     constructor(
-        IERC20Detailed _stakingToken,
+        IERC20 _stakingToken,
         uint256 _startTimestamp,
         uint256 _endTimestamp,
         address[] memory _rewardsTokens,

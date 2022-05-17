@@ -6,9 +6,9 @@ const { deployContract } = waffle;
 import TestERC20Artifact from '../artifacts/contracts/TestERC20.sol/TestERC20.json';
 import LMCArtifact from '../artifacts/contracts/LiquidityMiningCampaign.sol/LiquidityMiningCampaign.json';
 import NonCompoundingRewardsPoolArtifact from '../artifacts/contracts/V2/NonCompoundingRewardsPool.sol/NonCompoundingRewardsPool.json';
-import { NonCompoundingRewardsPool } from '../typechain-types/NonCompoundingRewardsPool';
-import { TestERC20 } from '../typechain-types/TestERC20';
-import { LiquidityMiningCampaign } from '../typechain-types/LiquidityMiningCampaign';
+import { NonCompoundingRewardsPool } from '../typechain/NonCompoundingRewardsPool';
+import { TestERC20 } from '../typechain/TestERC20';
+import { LiquidityMiningCampaign } from '../typechain/LiquidityMiningCampaign';
 import { getTime, timeTravel, timeTravelTo } from './utils';
 
 describe('Liquidity mining campaign', () => {

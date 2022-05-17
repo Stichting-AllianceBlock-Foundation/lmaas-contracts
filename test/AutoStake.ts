@@ -6,9 +6,9 @@ const { deployContract } = waffle;
 import CompoundingRewardsPoolArtifact from '../artifacts/contracts/V2/CompoundingRewardsPool.sol/CompoundingRewardsPool.json';
 import AutoStakeArtifact from '../artifacts/contracts/autostake-features/AutoStake.sol/AutoStake.json';
 import TestERC20Artifact from '../artifacts/contracts/TestERC20.sol/TestERC20.json';
-import { CompoundingRewardsPool } from '../typechain-types/CompoundingRewardsPool';
-import { AutoStake } from '../typechain-types/AutoStake';
-import { TestERC20 } from '../typechain-types/TestERC20';
+import { CompoundingRewardsPool } from '../typechain/CompoundingRewardsPool';
+import { AutoStake } from '../typechain/AutoStake';
+import { TestERC20 } from '../typechain/TestERC20';
 import { getTime, timeTravel } from './utils';
 
 describe('AutoStake', () => {
@@ -37,6 +37,7 @@ describe('AutoStake', () => {
   const amount: BigNumber = ethers.utils.parseEther('5184000');
   const bOne: BigNumber = ethers.utils.parseEther('1');
   const standardStakingAmount: BigNumber = ethers.utils.parseEther('5');
+  const contractStakeLimit = amount;
 
   describe('Deploy and Connect', async function () {
     beforeEach(async () => {
@@ -52,12 +53,14 @@ describe('AutoStake', () => {
         stakingTokenInstance.address,
         throttleRoundSeconds,
         bOne,
+        contractStakeLimit,
       ])) as AutoStake;
 
       CompoundingRewardsPoolInstance = (await deployContract(staker, CompoundingRewardsPoolArtifact, [
         stakingTokenInstance.address,
         [stakingTokenInstance.address],
         AutoStakingInstance.address,
+        contractStakeLimit,
       ])) as CompoundingRewardsPool;
 
       await AutoStakingInstance.setPool(CompoundingRewardsPoolInstance.address);
@@ -74,12 +77,13 @@ describe('AutoStake', () => {
         stakingTokenInstance.address,
         throttleRoundSeconds,
         bOne,
+        contractStakeLimit,
       ])) as AutoStake;
 
       let CompoundingRewardsPoolInstanceNew: CompoundingRewardsPool = (await deployContract(
         staker,
         CompoundingRewardsPoolArtifact,
-        [stakingTokenInstance.address, [stakingTokenInstance.address], AutoStakingInstance.address]
+        [stakingTokenInstance.address, [stakingTokenInstance.address], AutoStakingInstance.address, contractStakeLimit]
       )) as CompoundingRewardsPool;
 
       await expect(
@@ -100,12 +104,14 @@ describe('AutoStake', () => {
         stakingTokenInstance.address,
         throttleRoundSeconds,
         bOne,
+        contractStakeLimit,
       ])) as AutoStake;
 
       CompoundingRewardsPoolInstance = (await deployContract(staker, CompoundingRewardsPoolArtifact, [
         stakingTokenInstance.address,
         [stakingTokenInstance.address],
         AutoStakingInstance.address,
+        contractStakeLimit,
       ])) as CompoundingRewardsPool;
 
       await AutoStakingInstance.setPool(CompoundingRewardsPoolInstance.address);

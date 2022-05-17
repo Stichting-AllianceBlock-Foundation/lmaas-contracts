@@ -1,10 +1,10 @@
 import { ethers } from 'hardhat';
 import { deployContract } from 'ethereum-waffle';
 
-import { TestERC20 } from '../typechain-types/TestERC20';
+import { TestERC20 } from '../typechain/TestERC20';
 
 import NonCompoundingRewardsPoolArtifact from '../artifacts/contracts/V2/NonCompoundingRewardsPool.sol/NonCompoundingRewardsPool.json';
-import { NonCompoundingRewardsPool } from '../typechain-types/NonCompoundingRewardsPool';
+import { NonCompoundingRewardsPool } from '../typechain/NonCompoundingRewardsPool';
 import { BigNumber } from 'ethers';
 
 async function main() {

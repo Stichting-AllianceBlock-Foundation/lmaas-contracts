@@ -2,8 +2,6 @@
 
 pragma solidity 0.8.9;
 
-import './../interfaces/IERC20Detailed.sol';
-import './../SafeERC20Detailed.sol';
 import './AutoStake.sol';
 import './../StakeReceiver.sol';
 

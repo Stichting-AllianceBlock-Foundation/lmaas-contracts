@@ -8,6 +8,7 @@ contract AutoStakeReceiverMock is StakeReceiverAutoStake {
     constructor(
         address token,
         uint256 _throttleRoundSeconds,
-        uint256 _throttleRoundCap
-    ) AutoStake(token, _throttleRoundSeconds, _throttleRoundCap) {}
+        uint256 _throttleRoundCap,
+        uint256 _contractStakeLimit
+    ) AutoStake(token, _throttleRoundSeconds, _throttleRoundCap, _contractStakeLimit) {}
 }

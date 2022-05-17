@@ -24,7 +24,7 @@ uint256 PRECISION;
 uint256 totalStaked;
 uint256[] rewardPerSecond;
 address[] rewardsTokens;
-contract IERC20Detailed stakingToken;
+contract IERC20 stakingToken;
 uint256 startTimestamp;
 uint256 endTimestamp;
 uint256 extensionDuration;
@@ -34,6 +34,7 @@ uint256 stakeLimit;
 uint256 contractStakeLimit;
 string name;
 mapping(address => struct RewardsPoolBase.UserInfo) userInfo;
+struct RewardsPoolBase.Campaign[] previousCampaigns;
 ```
 
 ### Functions
@@ -70,7 +71,7 @@ uint256 ;
 
 
 ```Solidity
-contract IERC20Detailed _stakingToken; // The token to stake
+contract IERC20 _stakingToken; // The token to stake
 
 address[] _rewardsTokens; // The reward tokens
 
@@ -213,6 +214,13 @@ address _userAddress;
 
 
 Returns the amount of reward tokens
+
+
+#### getPreviousCampaignsCount → uint256
+
+
+
+Returns the amount of previous campaigns
 
 
 #### extend
@@ -390,4 +398,11 @@ uint256 firstStakedTimestamp;
 uint256 amountStaked;
 uint256[] rewardDebt;
 uint256[] tokensOwed;
+```
+#### Campaign
+
+```Solidity
+uint256 startTimestamp;
+uint256 endTimestamp;
+uint256[] rewardPerSecond;
 ```

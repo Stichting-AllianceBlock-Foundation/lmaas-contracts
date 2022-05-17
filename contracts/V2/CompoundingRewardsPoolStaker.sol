@@ -15,8 +15,9 @@ contract CompoundingRewardsPoolStaker is LimitedAutoStake, StakeTransfererAutoSt
         address token,
         uint256 _throttleRoundSeconds,
         uint256 _throttleRoundCap,
-        uint256 _stakeLimit
-    ) LimitedAutoStake(token, _throttleRoundSeconds, _throttleRoundCap, _stakeLimit) {}
+        uint256 _stakeLimit,
+        uint256 _contractStakeLimit
+    ) LimitedAutoStake(token, _throttleRoundSeconds, _throttleRoundCap, _stakeLimit, _contractStakeLimit) {}
 
     /** @dev Stake an amount of tokens
      * @param _tokenAmount The amount to be staked
