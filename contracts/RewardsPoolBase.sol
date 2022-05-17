@@ -614,4 +614,6 @@ contract RewardsPoolBase is Ownable {
         uint256 rewardsPeriodSeconds = _endTimestamp - _startTimestamp;
         return _rewardPerSecond * rewardsPeriodSeconds;
     }
+
+    receive() external payable {}
 }
