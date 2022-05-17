@@ -127,7 +127,7 @@ contract AutoStake is StakeLock, ThrottledExit, Ownable {
         ExitInfo storage info = exitInfo[msg.sender];
         exitStake = exitStake - info.exitStake;
 
-        finalizeExit(address(stakingToken), new address[](0));
+        finalizeExit(address(stakingToken), new address[](0), address(0));
 
         updateValuePerShare();
     }
