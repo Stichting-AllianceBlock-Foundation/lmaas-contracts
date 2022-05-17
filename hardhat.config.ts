@@ -26,7 +26,11 @@ module.exports = {
     },
     rinkeby: {
       url: `https://broker.alliancenode.io/ethereum/rinkeby/${process.env.ALLIANCE_BLOCK_API_KEY}`,
-      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+      accounts: [process.env.PRIVATE_KEY],
+    },
+    moonbeam: {
+      url: 'https://rpc.api.moonbeam.network/',
+      accounts: [process.env.PRIVATE_KEY],
     },
   },
   gasReporter: {

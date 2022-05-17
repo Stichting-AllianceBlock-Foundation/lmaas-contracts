@@ -22,7 +22,7 @@ abstract contract OneStakerFeature is RewardsPoolBase {
         _;
     }
 
-    function stake(uint256 _tokenAmount) public virtual override(RewardsPoolBase) onlyStaker {
+    function stake(uint256 _tokenAmount) public payable virtual override(RewardsPoolBase) onlyStaker {
         RewardsPoolBase.stake(_tokenAmount);
     }
 }

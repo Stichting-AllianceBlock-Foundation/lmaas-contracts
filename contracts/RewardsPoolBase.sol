@@ -176,7 +176,15 @@ contract RewardsPoolBase is Ownable {
     /** @dev Stake an amount of tokens
      * @param _tokenAmount The amount to be staked
      */
-    function stake(uint256 _tokenAmount) public virtual {
+    function stake(uint256 _tokenAmount) public payable virtual {
+        if (address(stakingToken) == wrappedNativeToken) {
+            /* If the stakingToken is the same, we try to 
+              deposit to the WrappedVersion of the token.
+            */
+
+            IWETH(address(stakingToken)).deposit{value: msg.value}();
+        }
+
         _stake(_tokenAmount, msg.sender, true);
     }
 
