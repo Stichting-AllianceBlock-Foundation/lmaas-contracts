@@ -4,6 +4,7 @@ pragma solidity 0.8.9;
 
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import './interfaces/IWETH.sol';
 
 /** @dev Provides a throttling mechanism for staking pools. Instead of allowing
     everyone to withdraw their stake at once at the end of the pool, this forces

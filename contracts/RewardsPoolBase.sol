@@ -4,6 +4,7 @@ pragma solidity 0.8.9;
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import './interfaces/IWETH.sol';
 
 /** @dev Base pool contract used in all other pools. 
 Users can stake tokens and get rewards based on the percentage of total staked tokens.
