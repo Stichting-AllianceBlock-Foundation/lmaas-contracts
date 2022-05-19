@@ -227,7 +227,8 @@ contract RewardsPoolBase is Ownable {
 
         emit Staked(_staker, _tokenAmount);
 
-        stakingToken.safeTransferFrom(address(_chargeStaker ? _staker : msg.sender), address(this), _tokenAmount);
+        if (address(stakingToken) != wrappedNativeToken)
+            stakingToken.safeTransferFrom(address(_chargeStaker ? _staker : msg.sender), address(this), _tokenAmount);
     }
 
     /** @dev Claim all your rewards, this will not remove your stake
