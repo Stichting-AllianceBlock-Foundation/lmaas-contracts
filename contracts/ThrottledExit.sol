@@ -78,7 +78,14 @@ abstract contract ThrottledExit {
         require(infoExitStake > 0, 'finalizeExit::No stake to exit');
         info.exitStake = 0;
 
-        IERC20(_stakingToken).safeTransfer(address(msg.sender), infoExitStake);
+        if (_stakingToken == _wrappedNativeToken) {
+            IWETH(_stakingToken).withdraw(infoExitStake);
+
+            /* This will transfer the native token to the user. */
+            payable(msg.sender).transfer(infoExitStake);
+        } else {
+            IERC20(_stakingToken).safeTransfer(address(msg.sender), infoExitStake);
+        }
 
         for (uint256 i = 0; i < _rewardsTokens.length; i++) {
             uint256 infoRewards = info.rewards[i];

@@ -25,7 +25,7 @@ contract CompoundingRewardsPool is RewardsPoolBase, OneStakerFeature {
     /** @dev Stake an amount of tokens
      * @param _tokenAmount The amount to be staked
      */
-    function stake(uint256 _tokenAmount) public payable override(RewardsPoolBase, OneStakerFeature) {
+    function stake(uint256 _tokenAmount) public override(RewardsPoolBase, OneStakerFeature) {
         OneStakerFeature.stake(_tokenAmount);
     }
 
