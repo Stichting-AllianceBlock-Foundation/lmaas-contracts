@@ -177,71 +177,26 @@ contract RewardsPoolBase is Ownable {
      * @param _tokenAmount The amount to be staked
      */
     function stake(uint256 _tokenAmount) public virtual {
-        _stake(_tokenAmount, msg.sender, true);
+        _stake(_tokenAmount, msg.sender, true, true);
     }
 
     /** @dev Stake an amount of tokens in a native way
-     * @param _tokenAmount The amount to be staked
      */
-    function stakeNative(uint256 _tokenAmount) public payable virtual {
-        if (address(stakingToken) == wrappedNativeToken) {
-            /* If the stakingToken is the same, we try to 
-              deposit to the WrappedVersion of the token.
-            */
-
-            IWETH(address(stakingToken)).deposit{value: msg.value}();
-        }
-
-        _stakeNative(_tokenAmount, msg.sender, true);
-    }
-
-    function _stakeNative(
-        uint256 _tokenAmount,
-        address _staker,
-        bool _chargeStaker
-    ) internal {
-        uint256 currentTimestamp = block.timestamp;
+    function stakeNative() public payable virtual {
         require(
-            (startTimestamp > 0 && currentTimestamp > startTimestamp) &&
-                (currentTimestamp <= endTimestamp + extensionDuration),
-            'RewardsPoolBase: staking is not started or is finished or no extension taking in place'
+            address(stakingToken) == wrappedNativeToken,
+            'RewardsPoolBase: staking native not available for this campaign'
         );
 
-        UserInfo storage user = userInfo[_staker];
-        require(
-            (user.amountStaked + _tokenAmount <= stakeLimit) && (totalStaked + _tokenAmount <= contractStakeLimit),
-            'RewardsPoolBase: stake limit reached'
-        );
-
-        require(_tokenAmount > 0, 'RewardsPoolBase: cannot stake 0');
-
-        // if no amount has been staked this is considered the initial stake
-        if (user.amountStaked == 0) {
-            user.firstStakedTimestamp = currentTimestamp;
-        }
-
-        updateRewardMultipliers(); // Update the accumulated multipliers for everyone
-        _updateUserAccruedReward(_staker); // Update the accrued reward for this specific user
-
-        user.amountStaked = user.amountStaked + _tokenAmount;
-        totalStaked = totalStaked + _tokenAmount;
-
-        uint256 rewardsTokensLength = rewardsTokens.length;
-
-        for (uint256 i = 0; i < rewardsTokensLength; i++) {
-            user.rewardDebt[i] = (user.amountStaked * accumulatedRewardMultiplier[i]) / PRECISION; // Update user reward debt for each token
-        }
-
-        emit Staked(_staker, _tokenAmount);
-
-        if (address(stakingToken) != wrappedNativeToken)
-            stakingToken.safeTransferFrom(address(_chargeStaker ? _staker : msg.sender), address(this), _tokenAmount);
+        IWETH(address(stakingToken)).deposit{value: msg.value}();
+        _stake(msg.value, msg.sender, true, false);
     }
 
     function _stake(
         uint256 _tokenAmount,
         address _staker,
-        bool _chargeStaker
+        bool _chargeStaker,
+        bool _shouldTransfer
     ) internal {
         uint256 currentTimestamp = block.timestamp;
         require(
@@ -277,7 +232,8 @@ contract RewardsPoolBase is Ownable {
 
         emit Staked(_staker, _tokenAmount);
 
-        stakingToken.safeTransferFrom(address(_chargeStaker ? _staker : msg.sender), address(this), _tokenAmount);
+        if (_shouldTransfer)
+            stakingToken.safeTransferFrom(address(_chargeStaker ? _staker : msg.sender), address(this), _tokenAmount);
     }
 
     /** @dev Claim all your rewards, this will not remove your stake
