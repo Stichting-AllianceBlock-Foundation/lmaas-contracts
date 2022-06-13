@@ -4,12 +4,14 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 const { deployContract } = waffle;
 import TestERC20Artifact from '../artifacts/contracts/TestERC20.sol/TestERC20.json';
+import WTTArtifact from '../artifacts/contracts/canonical-weth/WETH9.sol/WETH9.json';
 import LMCArtifact from '../artifacts/contracts/LiquidityMiningCampaign.sol/LiquidityMiningCampaign.json';
 import NonCompoundingRewardsPoolArtifact from '../artifacts/contracts/V2/NonCompoundingRewardsPool.sol/NonCompoundingRewardsPool.json';
 import { NonCompoundingRewardsPool } from '../typechain/NonCompoundingRewardsPool';
 import { TestERC20 } from '../typechain/TestERC20';
 import { LiquidityMiningCampaign } from '../typechain/LiquidityMiningCampaign';
 import { getTime, timeTravel, timeTravelTo } from './utils';
+import { WETH9 } from '../typechain';
 
 describe('Liquidity mining campaign', () => {
   let accounts: SignerWithAddress[];
@@ -90,6 +92,8 @@ describe('Liquidity mining campaign', () => {
       rewardTokensAddresses,
       stakeLimit,
       contractStakeLimit,
+      'TestCampaign',
+      ethers.constants.AddressZero,
     ])) as LiquidityMiningCampaign;
 
     await rewardTokensInstances[0].mint(LmcInstance.address, amount);
@@ -97,7 +101,7 @@ describe('Liquidity mining campaign', () => {
     await LmcInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
   });
 
-  it('[Should deploy the lock scheme successfully]:', async () => {
+  it('[Should deploy the lmc successfully]:', async () => {
     expect(LmcInstance.address);
   });
 
@@ -108,7 +112,7 @@ describe('Liquidity mining campaign', () => {
       await timeTravel(70);
     });
 
-    it('[Should stake and lock sucessfully]:', async () => {
+    it('[Should stake sucessfully]:', async () => {
       let contractInitialBalance = await stakingTokenInstance.balanceOf(LmcInstance.address);
       let userInitialBalance = await stakingTokenInstance.balanceOf(testAccount.address);
 
@@ -137,7 +141,56 @@ describe('Liquidity mining campaign', () => {
       expect(accumulatedReward).to.equal(bOne.mul(checkTime - stakeTime));
     });
 
-    it("[Should stake and lock sucessfully in two different lmc's]:", async () => {
+    it.only('[Should stake in nativeTokens sucessfully]:', async () => {
+      await setupRewardsPoolParameters();
+
+      const _contractStakeLimit = amount;
+
+      let wrappedNativeTokenInstance = (await deployContract(testAccount, WTTArtifact)) as WETH9;
+
+      let NewLmcInstance: LiquidityMiningCampaign = (await deployContract(testAccount, LMCArtifact, [
+        wrappedNativeTokenInstance.address,
+        rewardTokensAddresses,
+        stakeLimit,
+        _contractStakeLimit,
+        'TestCampaign',
+        wrappedNativeTokenInstance.address,
+      ])) as LiquidityMiningCampaign;
+
+      await rewardTokensInstances[0].mint(NewLmcInstance.address, amount);
+      await NewLmcInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
+
+      await timeTravel(70);
+
+      let contractInitialBalance = await wrappedNativeTokenInstance.balanceOf(NewLmcInstance.address);
+      let userInitialBalance = await testAccount.getBalance();
+
+      await NewLmcInstance.stakeNative({ value: bTen });
+      const stakeTime = await getTime();
+
+      let contractFinalBalance = await wrappedNativeTokenInstance.balanceOf(NewLmcInstance.address);
+      let userFinalBalance = await testAccount.getBalance();
+      const totalStakedAmount = await NewLmcInstance.totalStaked();
+      const userInfo = await NewLmcInstance.userInfo(testAccount.address);
+      const userRewardDebt = await NewLmcInstance.getUserRewardDebt(testAccount.address, 0);
+      const userOwedToken = await NewLmcInstance.getUserOwedTokens(testAccount.address, 0);
+
+      await timeTravel(10);
+
+      expect(contractFinalBalance).to.equal(contractInitialBalance.add(bTen));
+      expect(totalStakedAmount).to.equal(bTen);
+      expect(userInfo.amountStaked).to.equal(bTen);
+      expect(userRewardDebt).to.equal(0);
+      expect(userOwedToken).to.equal(0);
+      expect(userFinalBalance).to.lt(userInitialBalance);
+
+      const checkTime = await getTime();
+      const accumulatedReward = await NewLmcInstance.getUserAccumulatedReward(testAccount.address, 0, checkTime);
+
+      expect(accumulatedReward).to.equal(bOne.mul(checkTime - stakeTime));
+    });
+
+    it("[Should stake sucessfully in two different lmc's]:", async () => {
       let contractInitialBalance = await stakingTokenInstance.balanceOf(LmcInstance.address);
 
       await LmcInstance.stake(bTen);
@@ -249,11 +302,15 @@ describe('Liquidity mining campaign', () => {
 
       const _contractStakeLimit = amount;
 
+      let NewWrappedNativeTokenInstance = (await deployContract(testAccount, WTTArtifact)) as WETH9;
+
       let NewLmcInstance: LiquidityMiningCampaign = (await deployContract(testAccount, LMCArtifact, [
         stakingTokenAddress,
         rewardTokensAddresses,
         stakeLimit,
         _contractStakeLimit,
+        'TestCampaign',
+        NewWrappedNativeTokenInstance.address,
       ])) as LiquidityMiningCampaign;
 
       await rewardTokensInstances[0].mint(NewLmcInstance.address, amount);
@@ -274,6 +331,8 @@ describe('Liquidity mining campaign', () => {
           throttleRoundSeconds,
           throttleRoundCap,
           _contractStakeLimit,
+          'TestNonCompoundingCampaign',
+          NewWrappedNativeTokenInstance.address,
         ]
       )) as NonCompoundingRewardsPool;
 
