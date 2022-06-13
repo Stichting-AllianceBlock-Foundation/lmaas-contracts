@@ -18,7 +18,6 @@ contract LiquidityMiningCampaign is RewardsPoolBase, StakeTransfererFeature {
         address[] memory _rewardsTokens,
         uint256 _stakeLimit,
         uint256 _contractStakeLimit,
-        string memory _name,
-        address _wrappedNativeToken
-    ) RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _name, _wrappedNativeToken) {}
+        string memory _name
+    ) RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _name) {}
 }

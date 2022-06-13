@@ -27,7 +27,6 @@ contract NonCompoundingRewardsPool is
      * @param _throttleRoundCap Maximum tokens withdrawn per throttle round
      * @param _contractStakeLimit Maximum amount of tokens that can be staked in total
      * @param _name Name of the pool
-     * @param _wrappedNativeToken The wrapped version of the native token, so the token can handle native as a reward
      */
     constructor(
         IERC20 _stakingToken,
@@ -36,9 +35,8 @@ contract NonCompoundingRewardsPool is
         uint256 _throttleRoundSeconds,
         uint256 _throttleRoundCap,
         uint256 _contractStakeLimit,
-        string memory _name,
-        address _wrappedNativeToken
-    ) RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _name, _wrappedNativeToken) {
+        string memory _name
+    ) RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _name) {
         setThrottleParams(_throttleRoundSeconds, _throttleRoundCap);
     }
 
