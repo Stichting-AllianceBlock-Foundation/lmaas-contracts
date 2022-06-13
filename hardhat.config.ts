@@ -25,7 +25,7 @@ module.exports = {
       },
     },
     rinkeby: {
-      url: `https://broker.alliancenode.io/ethereum/rinkeby/${process.env.ALLIANCE_BLOCK_API_KEY}`,
+      url: `https://rinkeby.infura.io/v3/${process.env.INFURA_API_KEY}`,
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
   },
