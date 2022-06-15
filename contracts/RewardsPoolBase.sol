@@ -159,7 +159,11 @@ contract RewardsPoolBase is Ownable {
 
     /** @dev Cancels the scheduled start. Can only be done before the start.
      */
-    function cancel() external onlyOwner {
+    function cancel() external virtual onlyOwner {
+        _cancel();
+    }
+
+    function _cancel() internal {
         require(block.timestamp < startTimestamp, 'RewardsPoolBase: No start scheduled or already started');
 
         rewardPerSecond = new uint256[](0);
@@ -513,7 +517,11 @@ contract RewardsPoolBase is Ownable {
     /**
      * @dev Cancels the schedules extension
      */
-    function cancelExtension() external onlyOwner {
+    function cancelExtension() external virtual onlyOwner {
+        _cancelExtension();
+    }
+
+    function _cancelExtension() internal onlyOwner {
         require(extensionDuration > 0, 'RewardsPoolBase: there is no extension scheduled');
         require(block.timestamp < endTimestamp, 'RewardsPoolBase: cannot cancel extension after it has started');
 

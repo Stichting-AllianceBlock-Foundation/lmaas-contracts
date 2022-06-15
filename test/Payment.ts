@@ -1,5 +1,6 @@
-const { expect } = require('chai');
-const { ethers } = require('hardhat');
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { BigNumber } from 'ethers';
 
 describe('Payment', () => {
   let payment: any;
@@ -8,7 +9,11 @@ describe('Payment', () => {
   const userWallet = '0x1750659358e53EddecEd0E818E2c65F9fD9A44e5';
   const receiverA = '0x1750659358e53EddecEd0E818E2c65F9fD9A44e5';
   const receiverB = '0x1750659358e53EddecEd0E818E2c65F9fD9A44e5';
-  const campaignPrices = ['3750', '5250', '6750'];
+  const campaignPrices: [BigNumber, BigNumber, BigNumber] = [
+    BigNumber.from('3750'),
+    BigNumber.from('5250'),
+    BigNumber.from('6750'),
+  ];
   const extensionPrice = 1850;
   const lowestDiscount = 10;
   const mediumDiscount = 20;
@@ -22,7 +27,7 @@ describe('Payment', () => {
 
     const Payment = await ethers.getContractFactory('PaymentPortal');
 
-    const args = [
+    const args: [string, string, string, [BigNumber, BigNumber, BigNumber], number, number, number, number] = [
       receiverA,
       receiverB,
       erc20.address,

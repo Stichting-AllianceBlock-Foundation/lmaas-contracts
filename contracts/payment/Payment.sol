@@ -32,6 +32,10 @@ contract PaymentPortal is Ownable {
     mapping(address => uint256) private campaignsDeployed;
     // Whitelisted addresses
     mapping(address => bool) private whitelist;
+    // Addressess that are allowed to refund a credit
+    mapping(address => bool) private refundWhitelist;
+    mapping(address => bool) private refundWhitelistExtension;
+
     //Discounts
     uint256 private lowestDiscount;
     uint256 private mediumDiscount;
@@ -114,6 +118,22 @@ contract PaymentPortal is Ownable {
         returns (uint256)
     {
         return campaignsDeployed[_wallet];
+    }
+
+    function getWhitelistedRefunds(address _wallet)
+        external
+        view
+        returns (bool)
+    {
+        return refundWhitelist[_wallet];
+    }
+
+    function getWhitelistedRefundsExtension(address _wallet)
+        external
+        view
+        returns (bool)
+    {
+        return refundWhitelistExtension[_wallet];
     }
 
     //#Question: Split into external / internal function, why?
@@ -200,7 +220,38 @@ contract PaymentPortal is Ownable {
         }
     }
 
+    function refundCredit(address walletToGiveCredit, uint256 _startTimestamp, uint256 _endTimestamp)
+        external
+    {
+        require(refundWhitelist[walletToGiveCredit] == true, "Wallet not whitelisted for a refund");
+        uint256 campaignDuration = (_endTimestamp - _startTimestamp) / 60 / 60 / 24;
+
+        if (campaignDuration <= 35) {
+            creditsCampaigns[walletToGiveCredit][
+                uint256(CampaignTypes.SHORT)
+            ] += 1;
+        } else if (campaignDuration > 35 && campaignDuration <= 179) {
+            creditsCampaigns[walletToGiveCredit][
+                uint256(CampaignTypes.MEDIUM)
+            ] += 1;
+        } else if (campaignDuration > 179) {
+            creditsCampaigns[walletToGiveCredit][
+                uint256(CampaignTypes.LONG)
+                ] += 1;
+        }
+        refundWhitelist[msg.sender] = false;
+    }
+
     function addCreditExtension(address walletToGiveCredit) external onlyOwner {
+        creditsCampaignExtension[walletToGiveCredit] += 1;
+        refundWhitelistExtension[msg.sender] = false;
+    }
+
+    function refundExtension(address walletToGiveCredit)
+        external
+    {
+        require(refundWhitelistExtension[walletToGiveCredit] == true, "Wallet not whitelisted for a refund");
+
         creditsCampaignExtension[walletToGiveCredit] += 1;
     }
 
@@ -292,6 +343,8 @@ contract PaymentPortal is Ownable {
                 uint256(CampaignTypes.LONG)
             ] -= 1;
         }
+
+        refundWhitelist[walletToGiveAccess] = true;
     }
 
     function useCreditExtension(address walletToGiveAccess) external {
