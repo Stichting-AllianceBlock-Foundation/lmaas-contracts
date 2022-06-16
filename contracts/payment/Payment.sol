@@ -220,39 +220,9 @@ contract PaymentPortal is Ownable {
         }
     }
 
-    function refundCredit(address walletToGiveCredit, uint256 _startTimestamp, uint256 _endTimestamp)
-        external
-    {
-        require(refundWhitelist[walletToGiveCredit] == true, "Wallet not whitelisted for a refund");
-        uint256 campaignDuration = (_endTimestamp - _startTimestamp) / 60 / 60 / 24;
-
-        if (campaignDuration <= 35) {
-            creditsCampaigns[walletToGiveCredit][
-                uint256(CampaignTypes.SHORT)
-            ] += 1;
-        } else if (campaignDuration > 35 && campaignDuration <= 179) {
-            creditsCampaigns[walletToGiveCredit][
-                uint256(CampaignTypes.MEDIUM)
-            ] += 1;
-        } else if (campaignDuration > 179) {
-            creditsCampaigns[walletToGiveCredit][
-                uint256(CampaignTypes.LONG)
-                ] += 1;
-        }
-        refundWhitelist[msg.sender] = false;
-    }
-
     function addCreditExtension(address walletToGiveCredit) external onlyOwner {
         creditsCampaignExtension[walletToGiveCredit] += 1;
         refundWhitelistExtension[msg.sender] = false;
-    }
-
-    function refundExtension(address walletToGiveCredit)
-        external
-    {
-        require(refundWhitelistExtension[walletToGiveCredit] == true, "Wallet not whitelisted for a refund");
-
-        creditsCampaignExtension[walletToGiveCredit] += 1;
     }
 
     function pay(address walletToGiveCredit, uint256 _days) external {
@@ -347,12 +317,44 @@ contract PaymentPortal is Ownable {
         refundWhitelist[walletToGiveAccess] = true;
     }
 
+    function refundCredit(address walletToGiveCredit, uint256 _startTimestamp, uint256 _endTimestamp)
+        external
+    {
+        require(refundWhitelist[walletToGiveCredit] == true, "Wallet not whitelisted for a refund");
+        uint256 campaignDuration = (_endTimestamp - _startTimestamp) / 60 / 60 / 24;
+
+        if (campaignDuration <= 35) {
+            creditsCampaigns[walletToGiveCredit][
+                uint256(CampaignTypes.SHORT)
+            ] += 1;
+        } else if (campaignDuration > 35 && campaignDuration <= 179) {
+            creditsCampaigns[walletToGiveCredit][
+                uint256(CampaignTypes.MEDIUM)
+            ] += 1;
+        } else if (campaignDuration > 179) {
+            creditsCampaigns[walletToGiveCredit][
+                uint256(CampaignTypes.LONG)
+                ] += 1;
+        }
+        refundWhitelist[walletToGiveCredit] = false;
+    }
+
     function useCreditExtension(address walletToGiveAccess) external {
         require(
             creditsCampaignExtension[walletToGiveAccess] > 0,
             "No credits available"
         );
         creditsCampaignExtension[walletToGiveAccess] -= 1;
+        refundWhitelistExtension[walletToGiveAccess] = true;
+    }
+
+    function refundCreditExtension(address walletToGiveCredit)
+        external
+    {
+        require(refundWhitelistExtension[walletToGiveCredit] == true, "Wallet not whitelisted for a refund");
+
+        creditsCampaignExtension[walletToGiveCredit] += 1;
+        refundWhitelistExtension[walletToGiveCredit] = false;
     }
 
     // Splits the payment among address A and B based on the share
