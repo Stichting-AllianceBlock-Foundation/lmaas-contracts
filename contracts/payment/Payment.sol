@@ -225,7 +225,7 @@ contract PaymentPortal is Ownable {
         refundWhitelistExtension[msg.sender] = false;
     }
 
-    function pay(address walletToGiveCredit, uint256 _days) external {
+    function getCampaignPrice(uint256 _days) public view returns(uint256) {
         uint256 priceToPay;
         uint256 campaignPrice;
         if (_days <= 35) {
@@ -250,7 +250,11 @@ contract PaymentPortal is Ownable {
         } else if (campaignsDeployed[msg.sender] > 5) {
             priceToPay = (campaignPrice * (100 - highestDiscount)) / 100;
         }
+        return priceToPay;
+    }
 
+    function pay(address walletToGiveCredit, uint256 _days) external {
+        uint256 priceToPay = getCampaignPrice(_days);
         usdtToken.safeTransferFrom(msg.sender, address(this), priceToPay);
         transferPayment(address(this), priceToPay);
         if (_days <= 35) {
