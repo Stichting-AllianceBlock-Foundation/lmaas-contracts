@@ -14,10 +14,12 @@ describe('Payment', () => {
     BigNumber.from('5250'),
     BigNumber.from('6750'),
   ];
+  const discounts: [BigNumber, BigNumber, BigNumber] = [
+    BigNumber.from('10'),
+    BigNumber.from('20'),
+    BigNumber.from('35'),
+  ];
   const extensionPrice = 1850;
-  const lowestDiscount = 10;
-  const mediumDiscount = 20;
-  const highestDiscount = 35;
 
   beforeEach(async () => {
     const UsdtToken = await ethers.getContractFactory('TestERC20');
@@ -27,16 +29,8 @@ describe('Payment', () => {
 
     const Payment = await ethers.getContractFactory('PaymentPortal');
 
-    const args: [string, string, string, [BigNumber, BigNumber, BigNumber], number, number, number, number] = [
-      receiverA,
-      receiverB,
-      erc20.address,
-      campaignPrices,
-      extensionPrice,
-      lowestDiscount,
-      mediumDiscount,
-      highestDiscount,
-    ];
+    const args: [string, string, string, [BigNumber, BigNumber, BigNumber], number, [BigNumber, BigNumber, BigNumber]] =
+      [receiverA, receiverB, erc20.address, campaignPrices, extensionPrice, discounts];
 
     payment = await Payment.deploy(...args);
 
@@ -45,73 +39,43 @@ describe('Payment', () => {
     await erc20.approve(payment.address, 10000000000);
   });
 
-  //#TO DO: Bignumber array
-  // it("Should return price campaign", async () => {
-  //   expect(await payment.getPriceCampaign()).to.equal(campaignPrices);
-  // });
-
-  //#TO DO: How to test mappings?
-  // it("Should return credits of wallet x", async () => {
-  //   expect(await payment.getCreditsCampaigns()).to.equal(0);
-  // });
-
-  // it("Should return extension credits of wallet x", async () => {
-  //   expect(await payment.getCreditsCampaignExtension()).to.equal(0);
-  // });
-
-  // it("Should return campaigns deployed of wallet x", async () => {
-  //   expect(await payment.getCampaignsDeployed()).to.equal(0);
-  // });
-
   it('Should change value of payment receivers', async () => {
     const address = '0x6606A67b2d0a1f2a01D27f41671D72bAb47a45D8';
-    expect(await payment.getPaymentReceiverA()).to.equal(receiverA);
-    expect(await payment.getPaymentReceiverB()).to.equal(receiverB);
+    expect(await payment.paymentReceiverA()).to.equal(receiverA);
+    expect(await payment.paymentReceiverB()).to.equal(receiverB);
 
     await payment.setPaymentReceivers(address, address);
 
-    expect(await payment.getPaymentReceiverA()).to.equal(address);
-    expect(await payment.getPaymentReceiverB()).to.equal(address);
+    expect(await payment.paymentReceiverA()).to.equal(address);
+    expect(await payment.paymentReceiverB()).to.equal(address);
   });
 
   it('Should change value of price campaign extension', async () => {
     const newPrice = 2500;
 
-    expect(await payment.getPriceCampaignExtension()).to.equal(extensionPrice);
+    expect(await payment.priceCampaignExtension()).to.equal(extensionPrice);
     await payment.setPriceCampaignExtension(newPrice);
-    expect(await payment.getPriceCampaignExtension()).to.equal(newPrice);
+    expect(await payment.priceCampaignExtension()).to.equal(newPrice);
   });
 
-  it('Should change lowest discount value', async () => {
-    const newLowestDiscount = 25;
+  it('Should change discount values', async () => {
+    const newDiscounts: [BigNumber, BigNumber, BigNumber] = [
+      BigNumber.from('25'),
+      BigNumber.from('35'),
+      BigNumber.from('50'),
+    ];
 
-    expect(await payment.getLowestDiscount()).to.equal(lowestDiscount);
-    await payment.setLowestDiscount(newLowestDiscount);
-    expect(await payment.getLowestDiscount()).to.equal(newLowestDiscount);
-  });
-
-  it('Should change medium discount value', async () => {
-    const newMediumDiscount = 50;
-
-    expect(await payment.getMediumDiscount()).to.equal(mediumDiscount);
-    await payment.setMediumDiscount(newMediumDiscount);
-    expect(await payment.getMediumDiscount()).to.equal(newMediumDiscount);
-  });
-
-  it('Should change highest discount value', async () => {
-    const newHighestDiscount = 75;
-
-    expect(await payment.getHighestDiscount()).to.equal(highestDiscount);
-    await payment.setHighestDiscount(newHighestDiscount);
-    expect(await payment.getHighestDiscount()).to.equal(newHighestDiscount);
+    expect(await payment.discounts(0)).to.equal(discounts[0]);
+    await payment.setDiscounts(newDiscounts);
+    expect(await payment.discounts(0)).to.equal(newDiscounts[0]);
   });
 
   it('Should add and remove an address to the whitelist', async () => {
-    expect(await payment.isWhitelisted(userWallet)).to.equal(false);
+    expect(await payment.whitelist(userWallet)).to.equal(false);
     await payment.addToWhitelist(userWallet);
-    expect(await payment.isWhitelisted(userWallet)).to.equal(true);
+    expect(await payment.whitelist(userWallet)).to.equal(true);
     await payment.removeFromWhitelist(userWallet);
-    expect(await payment.isWhitelisted(userWallet)).to.equal(false);
+    expect(await payment.whitelist(userWallet)).to.equal(false);
   });
 
   it('Should add a credit to a short campaign campaign based on duration', async () => {
@@ -119,7 +83,7 @@ describe('Payment', () => {
 
     //0 = enum value for short campaign
     await payment.pay(userWallet, shortCampaignDays);
-    expect(await payment.getCreditsCampaigns(userWallet, 0)).to.equal(1);
+    expect(await payment.creditsCampaigns(userWallet, 0)).to.equal(1);
   });
 
   it('Should add a credit to a medium campaign campaign based on duration', async () => {
@@ -127,7 +91,7 @@ describe('Payment', () => {
 
     //1 = enum value for medium campaign
     await payment.pay(userWallet, mediumCampaignDays);
-    expect(await payment.getCreditsCampaigns(userWallet, 1)).to.equal(1);
+    expect(await payment.creditsCampaigns(userWallet, 1)).to.equal(1);
   });
 
   it('Should add a credit to a long campaign campaign based on duration', async () => {
@@ -135,7 +99,7 @@ describe('Payment', () => {
 
     //2 = enum value for long campaign
     await payment.pay(userWallet, LongCampaignDays);
-    expect(await payment.getCreditsCampaigns(userWallet, 2)).to.equal(1);
+    expect(await payment.creditsCampaigns(userWallet, 2)).to.equal(1);
   });
 
   it('Should use credit after pool has been deployed ( Short campaign )', async () => {
@@ -147,10 +111,10 @@ describe('Payment', () => {
 
     //0 = enum value for short campaign
     await payment.pay(userWallet, shortCampaignDays);
-    expect(await payment.getCreditsCampaigns(userWallet, 0)).to.equal(1);
+    expect(await payment.creditsCampaigns(userWallet, 0)).to.equal(1);
 
     await payment.useCredit(userWallet, starTimestamp, endTimestamp);
-    expect(await payment.getCreditsCampaigns(userWallet, 0)).to.equal(0);
+    expect(await payment.creditsCampaigns(userWallet, 0)).to.equal(0);
   });
 
   it('Should use credit after pool has been deployed ( Medium campaign )', async () => {
@@ -162,10 +126,10 @@ describe('Payment', () => {
 
     //0 = enum value for short campaign
     await payment.pay(userWallet, mediumCampaignDays);
-    expect(await payment.getCreditsCampaigns(userWallet, 1)).to.equal(1);
+    expect(await payment.creditsCampaigns(userWallet, 1)).to.equal(1);
 
     await payment.useCredit(userWallet, starTimestamp, endTimestamp);
-    expect(await payment.getCreditsCampaigns(userWallet, 1)).to.equal(0);
+    expect(await payment.creditsCampaigns(userWallet, 1)).to.equal(0);
   });
 
   it('Should use credit after pool has been deployed ( Long campaign )', async () => {
@@ -177,25 +141,25 @@ describe('Payment', () => {
 
     //0 = enum value for short campaign
     await payment.pay(userWallet, LongCampaignDays);
-    expect(await payment.getCreditsCampaigns(userWallet, 2)).to.equal(1);
+    expect(await payment.creditsCampaigns(userWallet, 2)).to.equal(1);
 
     await payment.useCredit(userWallet, starTimestamp, endTimestamp);
-    expect(await payment.getCreditsCampaigns(userWallet, 2)).to.equal(0);
+    expect(await payment.creditsCampaigns(userWallet, 2)).to.equal(0);
   });
 
   it('Should add a credit to campaign extension', async () => {
     await payment.payExtension(userWallet);
     //0 is enum key for a short campaign
-    expect(await payment.getCreditsCampaignExtension(userWallet)).to.equal(1);
+    expect(await payment.creditsCampaignExtension(userWallet)).to.equal(1);
   });
 
   it('Should use a credit from campaign extension', async () => {
     await payment.payExtension(userWallet);
     //0 is enum key for a short campaign
-    expect(await payment.getCreditsCampaignExtension(userWallet)).to.equal(1);
+    expect(await payment.creditsCampaignExtension(userWallet)).to.equal(1);
 
     await payment.useCreditExtension(userWallet);
-    expect(await payment.getCreditsCampaignExtension(userWallet)).to.equal(0);
+    expect(await payment.creditsCampaignExtension(userWallet)).to.equal(0);
   });
 
   it('Should throw an error when no credits are available for a campaign', async () => {

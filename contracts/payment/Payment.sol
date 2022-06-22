@@ -1,45 +1,71 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import '@openzeppelin/contracts/access/Ownable.sol';
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 
-import "hardhat/console.sol";
+import 'hardhat/console.sol';
+
+interface LiquidityMiningCampaignPaymentInterface {
+    function startWithPaymentContract(
+        uint256 _startTimestamp,
+        uint256 _endTimestamp,
+        uint256[] calldata _rewardPerSecond
+    ) external;
+
+    function cancelWithPaymentContract() external;
+
+    function extendWithPaymentContract(uint256 _durationTime, uint256[] calldata _rewardPerSecond) external;
+
+    function cancelExtensionWithPaymentContract() external;
+
+    // function useCreditExtension(address walletToGiveAccess) external;
+
+    // function refundCreditExtension(address walletToGiveCredit) external;
+}
 
 // import ‘https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol’;
 contract PaymentPortal is Ownable {
     using SafeERC20 for IERC20;
     uint256 private constant HUNDRED_PERCENT = 1000;
+    uint256 private constant SECONDS_PER_DAY = 60 * 60 * 24;
     // All payments will be sent to this address
-    address private paymentReceiverA;
-    address private paymentReceiverB;
-    uint256 private paymentShareA = HUNDRED_PERCENT;
+    address public paymentReceiverA;
+    address public paymentReceiverB;
+    uint256 public paymentShareA = HUNDRED_PERCENT;
+
     IERC20 private immutable usdtToken;
+
+    //Short campaign <= 35 days
+    //Medium campaign > 35 days <= 179 days
+    //Long campaign > 179 days
     enum CampaignTypes {
         SHORT,
         MEDIUM,
         LONG
     }
-    //Prices for deploying first campaigns
-    uint256[3] private priceCampaign;
-    //Prices for extensions
-    uint256 private priceCampaignExtension;
-    //Credits per address
-    mapping(address => mapping(uint256 => uint256)) private creditsCampaigns;
-    //Credits per address for extensions
-    mapping(address => uint256) private creditsCampaignExtension;
-    // Count number of short campaigns deployed ( <36 days )
-    mapping(address => uint256) private campaignsDeployed;
-    // Whitelisted addresses
-    mapping(address => bool) private whitelist;
-    // Addressess that are allowed to refund a credit
-    mapping(address => bool) private refundWhitelist;
-    mapping(address => bool) private refundWhitelistExtension;
 
-    //Discounts
-    uint256 private lowestDiscount;
-    uint256 private mediumDiscount;
-    uint256 private highestDiscount;
+    //Prices for deploying first campaigns
+    //priceCampaign and discounts maps to the CampaignTypes - priceCampaign[0] = short,
+    //priceCampaign[1] = medium and priceCampaign[2] = Long
+    uint256[3] public priceCampaign;
+    uint256[3] public discounts;
+    //Credits per address
+    mapping(address => mapping(uint256 => uint256)) public creditsCampaigns;
+
+    //Prices for extensions
+    uint256 public priceCampaignExtension;
+    //Credits per address for extensions
+    mapping(address => uint256) public creditsCampaignExtension;
+
+    // Count number of short campaigns deployed ( <36 days )
+    mapping(address => uint256) public campaignsDeployed;
+
+    // Whitelisted addresses
+    mapping(address => bool) public whitelist;
+    // Addressess that are allowed to refund a credit
+    mapping(address => bool) public refundWhitelist;
+    mapping(address => bool) public refundWhitelistExtension;
 
     constructor(
         address _paymentReceiverA, // required
@@ -47,145 +73,42 @@ contract PaymentPortal is Ownable {
         address _usdtToken, // address of the USDT token
         uint256[3] memory _priceCampaign, // price in USDT when paying with USDT (USDT uses 6 decimals)
         uint256 _priceCampaignExtension,
-        uint256 _lowestDiscount,
-        uint256 _mediumDiscount,
-        uint256 _highestDiscount
+        uint256[3] memory _discounts
     ) {
         _setPaymentReceivers(_paymentReceiverA, _paymentReceiverB);
-        require(
-            _usdtToken != address(0),
-            "PaymentPortal: USDT token address cannot be 0"
-        );
+        require(_usdtToken != address(0), 'PaymentPortal: USDT token address cannot be 0');
         usdtToken = IERC20(_usdtToken);
         priceCampaign = _priceCampaign;
         priceCampaignExtension = _priceCampaignExtension;
-        lowestDiscount = _lowestDiscount;
-        mediumDiscount = _mediumDiscount;
-        highestDiscount = _highestDiscount;
+        discounts = _discounts;
     }
 
-    function getPriceCampaign() external view returns (uint256[3] memory) {
-        return priceCampaign;
-    }
-
-    function getPaymentReceiverA() external view returns (address) {
-        return paymentReceiverA;
-    }
-
-    function getPaymentReceiverB() external view returns (address) {
-        return paymentReceiverB;
-    }
-
-    function getPaymentShareA() external view returns (uint256) {
-        return paymentShareA;
-    }
-
-    function getPriceCampaignExtension() external view returns (uint256) {
-        return priceCampaignExtension;
-    }
-
-    function getLowestDiscount() external view returns (uint256) {
-        return lowestDiscount;
-    }
-
-    function getMediumDiscount() external view returns (uint256) {
-        return mediumDiscount;
-    }
-
-    function getHighestDiscount() external view returns (uint256) {
-        return highestDiscount;
-    }
-
-    function getCreditsCampaigns(address _wallet, CampaignTypes _type)
-        external
-        view
-        returns (uint256)
-    {
-        return creditsCampaigns[_wallet][uint256(_type)];
-    }
-
-    function getCreditsCampaignExtension(address _wallet)
-        external
-        view
-        returns (uint256)
-    {
-        return creditsCampaignExtension[_wallet];
-    }
-
-    function getCampaignsDeployed(address _wallet)
-        external
-        view
-        returns (uint256)
-    {
-        return campaignsDeployed[_wallet];
-    }
-
-    function getWhitelistedRefunds(address _wallet)
-        external
-        view
-        returns (bool)
-    {
-        return refundWhitelist[_wallet];
-    }
-
-    function getWhitelistedRefundsExtension(address _wallet)
-        external
-        view
-        returns (bool)
-    {
-        return refundWhitelistExtension[_wallet];
-    }
-
-    //#Question: Split into external / internal function, why?
-    function _setPaymentReceivers(
-        address _paymentReceiverA,
-        address _paymentReceiverB
-    ) internal {
-        require(
-            _paymentReceiverA != address(0),
-            "PaymentPortal: Payment receiver A must be set"
-        );
+    function _setPaymentReceivers(address _paymentReceiverA, address _paymentReceiverB) internal {
+        require(_paymentReceiverA != address(0), 'PaymentPortal: Payment receiver A must be set');
         require(
             paymentShareA == HUNDRED_PERCENT || _paymentReceiverB != address(0),
-            "PaymentPortal: If payment is shared, payment receiver B must be set"
+            'PaymentPortal: If payment is shared, payment receiver B must be set'
         );
         paymentReceiverA = _paymentReceiverA;
         paymentReceiverB = _paymentReceiverB;
     }
 
-    function setPaymentReceivers(
-        address _paymentReceiverA,
-        address _paymentReceiverB
-    ) external onlyOwner {
+    function setPaymentReceivers(address _paymentReceiverA, address _paymentReceiverB) external onlyOwner {
         _setPaymentReceivers(_paymentReceiverA, _paymentReceiverB);
     }
 
     //Set prices of campaigns
-    function setPriceCampaign(uint256[3] calldata _priceCampaign)
-        external
-        onlyOwner
-    {
+    function setPriceCampaign(uint256[3] calldata _priceCampaign) external onlyOwner {
         priceCampaign = _priceCampaign;
     }
 
     //Set prices of campaigns
-    function setPriceCampaignExtension(uint256 _priceCampaignExtension)
-        external
-        onlyOwner
-    {
+    function setPriceCampaignExtension(uint256 _priceCampaignExtension) external onlyOwner {
         priceCampaignExtension = _priceCampaignExtension;
     }
 
-    function setLowestDiscount(uint256 _lowestDiscount) external onlyOwner {
-        lowestDiscount = _lowestDiscount;
-    }
-
-    function setMediumDiscount(uint256 _mediumDiscount) external onlyOwner {
-        mediumDiscount = _mediumDiscount;
-    }
-
-    function setHighestDiscount(uint256 _highestDiscount) external onlyOwner {
-        highestDiscount = _highestDiscount;
+    function setDiscounts(uint256[3] calldata _discounts) external onlyOwner {
+        discounts = _discounts;
     }
 
     //Whitelist functionalities
@@ -201,23 +124,21 @@ contract PaymentPortal is Ownable {
         return whitelist[_wallet];
     }
 
-    function addCredit(address walletToGiveCredit, uint256 _days)
-        external
-        onlyOwner
-    {
+    function daysToCampaignType(uint256 _days) internal pure returns (uint256) {
         if (_days <= 35) {
-            creditsCampaigns[walletToGiveCredit][
-                uint256(CampaignTypes.SHORT)
-            ] += 1;
+            return uint256(CampaignTypes.SHORT);
         } else if (_days > 35 && _days <= 179) {
-            creditsCampaigns[walletToGiveCredit][
-                uint256(CampaignTypes.MEDIUM)
-            ] += 1;
+            return uint256(CampaignTypes.MEDIUM);
         } else if (_days > 179) {
-            creditsCampaigns[walletToGiveCredit][
-                uint256(CampaignTypes.LONG)
-            ] += 1;
+            return uint256(CampaignTypes.LONG);
+        } else {
+            return 0;
         }
+    }
+
+    function addCredit(address walletToGiveCredit, uint256 _days) external onlyOwner {
+        uint256 campaignType = daysToCampaignType(_days);
+        creditsCampaigns[walletToGiveCredit][campaignType] += 1;
     }
 
     function addCreditExtension(address walletToGiveCredit) external onlyOwner {
@@ -225,140 +146,103 @@ contract PaymentPortal is Ownable {
         refundWhitelistExtension[msg.sender] = false;
     }
 
-    function getCampaignPrice(uint256 _days) public view returns(uint256) {
+    function getCampaignPrice(uint256 _days) public view returns (uint256) {
         uint256 priceToPay;
         uint256 campaignPrice;
-        if (_days <= 35) {
-            campaignPrice = priceCampaign[uint256(CampaignTypes.SHORT)];
-        } else if (_days > 35 && _days <= 179) {
-            campaignPrice = priceCampaign[uint256(CampaignTypes.MEDIUM)];
-        } else if (_days > 179) {
-            campaignPrice = priceCampaign[uint256(CampaignTypes.LONG)];
-        }
+
+        uint256 campaignType = daysToCampaignType(_days);
+        campaignPrice = priceCampaign[campaignType];
         if (campaignsDeployed[msg.sender] == 0) {
             priceToPay = campaignPrice;
-        } else if (
-            campaignsDeployed[msg.sender] >= 1 &&
-            campaignsDeployed[msg.sender] <= 2
-        ) {
-            priceToPay = (campaignPrice * (100 - lowestDiscount)) / 100;
-        } else if (
-            campaignsDeployed[msg.sender] > 2 &&
-            campaignsDeployed[msg.sender] <= 5
-        ) {
-            priceToPay = (campaignPrice * (100 - mediumDiscount)) / 100;
+        } else if (campaignsDeployed[msg.sender] >= 1 && campaignsDeployed[msg.sender] <= 2) {
+            priceToPay = (campaignPrice * (100 - discounts[uint256(CampaignTypes.SHORT)])) / 100;
+        } else if (campaignsDeployed[msg.sender] > 2 && campaignsDeployed[msg.sender] <= 5) {
+            priceToPay = (campaignPrice * (100 - discounts[uint256(CampaignTypes.MEDIUM)])) / 100;
         } else if (campaignsDeployed[msg.sender] > 5) {
-            priceToPay = (campaignPrice * (100 - highestDiscount)) / 100;
+            priceToPay = (campaignPrice * (100 - discounts[uint256(CampaignTypes.LONG)])) / 100;
         }
         return priceToPay;
     }
 
     function pay(address walletToGiveCredit, uint256 _days) external {
         uint256 priceToPay = getCampaignPrice(_days);
-        usdtToken.safeTransferFrom(msg.sender, address(this), priceToPay);
-        transferPayment(address(this), priceToPay);
-        if (_days <= 35) {
-            creditsCampaigns[walletToGiveCredit][
-                uint256(CampaignTypes.SHORT)
-            ] += 1;
-        } else if (_days > 35 && _days <= 179) {
-            creditsCampaigns[walletToGiveCredit][
-                uint256(CampaignTypes.MEDIUM)
-            ] += 1;
-        } else if (_days > 179) {
-            creditsCampaigns[walletToGiveCredit][
-                uint256(CampaignTypes.LONG)
-            ] += 1;
-        }
+        uint256 campaignType = daysToCampaignType(_days);
+        // usdtToken.safeTransferFrom(msg.sender, address(this), priceToPay);
+        transferPayment(msg.sender, priceToPay);
+
+        creditsCampaigns[walletToGiveCredit][campaignType] += 1;
         campaignsDeployed[walletToGiveCredit] += 1;
     }
 
     function payExtension(address walletToGiveCredit) external {
-        usdtToken.safeTransferFrom(
-            msg.sender,
-            address(this),
-            priceCampaignExtension
-        );
-        transferPayment(address(this), priceCampaignExtension);
+        // usdtToken.safeTransferFrom(msg.sender, address(this), priceCampaignExtension);
+        transferPayment(msg.sender, priceCampaignExtension);
         creditsCampaignExtension[walletToGiveCredit] += 1;
     }
 
-    function useCredit(address walletToGiveAccess, uint256 _startTimestamp, uint256 _endTimestamp) external {
-        uint256 campaignDuration = (_endTimestamp - _startTimestamp) / 60 / 60 / 24;
-
-        if (campaignDuration <= 35) {
-            require(
-                creditsCampaigns[walletToGiveAccess][
-                    uint256(CampaignTypes.SHORT)
-                ] > 0,
-                "No credits available"
-            );
-            creditsCampaigns[walletToGiveAccess][
-                uint256(CampaignTypes.SHORT)
-            ] -= 1;
-        } else if (campaignDuration > 35 && campaignDuration <= 179) {
-            require(
-                creditsCampaigns[walletToGiveAccess][
-                    uint256(CampaignTypes.MEDIUM)
-                ] > 0,
-                "No credits available"
-            );
-            creditsCampaigns[walletToGiveAccess][
-                uint256(CampaignTypes.MEDIUM)
-            ] -= 1;
-        } else if (campaignDuration > 179) {
-            require(
-                creditsCampaigns[walletToGiveAccess][
-                    uint256(CampaignTypes.LONG)
-                ] > 0,
-                "No credits available"
-            );
-            creditsCampaigns[walletToGiveAccess][
-                uint256(CampaignTypes.LONG)
-            ] -= 1;
-        }
-
-        refundWhitelist[walletToGiveAccess] = true;
+    function calculateCampaignDuration(uint256 _startTimestamp, uint256 _endTimestamp) internal pure returns (uint256) {
+        return (_endTimestamp - _startTimestamp) / SECONDS_PER_DAY;
     }
 
-    function refundCredit(address walletToGiveCredit, uint256 _startTimestamp, uint256 _endTimestamp)
-        external
-    {
-        require(refundWhitelist[walletToGiveCredit] == true, "Wallet not whitelisted for a refund");
-        uint256 campaignDuration = (_endTimestamp - _startTimestamp) / 60 / 60 / 24;
+    //msg.sender = LMC address
 
-        if (campaignDuration <= 35) {
-            creditsCampaigns[walletToGiveCredit][
-                uint256(CampaignTypes.SHORT)
-            ] += 1;
-        } else if (campaignDuration > 35 && campaignDuration <= 179) {
-            creditsCampaigns[walletToGiveCredit][
-                uint256(CampaignTypes.MEDIUM)
-            ] += 1;
-        } else if (campaignDuration > 179) {
-            creditsCampaigns[walletToGiveCredit][
-                uint256(CampaignTypes.LONG)
-                ] += 1;
-        }
-        refundWhitelist[walletToGiveCredit] = false;
+    function useCredit(
+        uint256 _startTimestamp,
+        uint256 _endTimestamp,
+        uint256[] calldata _rewardPerSecond,
+        address _LMCAddress
+    ) external {
+        LiquidityMiningCampaignPaymentInterface LMCPI = LiquidityMiningCampaignPaymentInterface(_LMCAddress);
+
+        uint256 campaignDuration = calculateCampaignDuration(_startTimestamp, _endTimestamp);
+        uint256 campaignType = daysToCampaignType(campaignDuration);
+
+        require(creditsCampaigns[msg.sender][campaignType] > 0, 'No credits available');
+        creditsCampaigns[msg.sender][campaignType] -= 1;
+        refundWhitelist[msg.sender] = true;
+
+        LMCPI.startWithPaymentContract(_startTimestamp, _endTimestamp, _rewardPerSecond);
     }
 
-    function useCreditExtension(address walletToGiveAccess) external {
-        require(
-            creditsCampaignExtension[walletToGiveAccess] > 0,
-            "No credits available"
-        );
-        creditsCampaignExtension[walletToGiveAccess] -= 1;
-        refundWhitelistExtension[walletToGiveAccess] = true;
+    function refundCredit(
+        uint256 _startTimestamp,
+        uint256 _endTimestamp,
+        address _LMCAddress
+    ) external {
+        require(refundWhitelist[msg.sender] == true, 'Wallet not whitelisted for a refund');
+        uint256 campaignDuration = calculateCampaignDuration(_startTimestamp, _endTimestamp);
+        uint256 campaignType = daysToCampaignType(campaignDuration);
+
+        creditsCampaigns[msg.sender][campaignType] += 1;
+        refundWhitelist[msg.sender] = false;
+
+        LiquidityMiningCampaignPaymentInterface LMCPI = LiquidityMiningCampaignPaymentInterface(_LMCAddress);
+        LMCPI.cancelWithPaymentContract();
     }
 
-    function refundCreditExtension(address walletToGiveCredit)
-        external
-    {
-        require(refundWhitelistExtension[walletToGiveCredit] == true, "Wallet not whitelisted for a refund");
+    function useCreditExtension(
+        uint256 _durationTime,
+        uint256[] calldata _rewardPerSecond,
+        address _LMCAddress
+    ) external {
+        require(creditsCampaignExtension[msg.sender] > 0, 'No credits available');
 
-        creditsCampaignExtension[walletToGiveCredit] += 1;
-        refundWhitelistExtension[walletToGiveCredit] = false;
+        creditsCampaignExtension[msg.sender] -= 1;
+        refundWhitelistExtension[msg.sender] = true;
+
+        LiquidityMiningCampaignPaymentInterface LMCPI = LiquidityMiningCampaignPaymentInterface(_LMCAddress);
+        LMCPI.extendWithPaymentContract(_durationTime, _rewardPerSecond);
+        (_durationTime, _rewardPerSecond);
+    }
+
+    function refundCreditExtension(address _LMCAddress) external {
+        require(refundWhitelistExtension[msg.sender] == true, 'Wallet not whitelisted for a refund');
+
+        creditsCampaignExtension[msg.sender] += 1;
+        refundWhitelistExtension[msg.sender] = false;
+
+        LiquidityMiningCampaignPaymentInterface LMCPI = LiquidityMiningCampaignPaymentInterface(_LMCAddress);
+        LMCPI.cancelExtensionWithPaymentContract();
     }
 
     // Splits the payment among address A and B based on the share

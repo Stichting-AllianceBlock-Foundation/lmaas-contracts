@@ -24,10 +24,12 @@ describe.only('Liquidity mining campaign payment', () => {
     BigNumber.from('5250'),
     BigNumber.from('6750'),
   ];
+  const discounts: [BigNumber, BigNumber, BigNumber] = [
+    BigNumber.from('10'),
+    BigNumber.from('20'),
+    BigNumber.from('35'),
+  ];
   const extensionPrice = 1850;
-  const lowestDiscount = 10;
-  const mediumDiscount = 20;
-  const highestDiscount = 35;
 
   let accounts: SignerWithAddress[];
   let testAccount: SignerWithAddress;
@@ -38,6 +40,16 @@ describe.only('Liquidity mining campaign payment', () => {
   let rewardPerSecond: BigNumber[];
   rewardPerSecond = [BigNumber.from('1')];
 
+  let LMCPaymentContractAddress: string;
+
+  let startTimestamp: any = new Date();
+  let endTimestamp: any = new Date();
+  startTimestamp.setDate(startTimestamp.getDate() + 1);
+  endTimestamp.setDate(startTimestamp.getDate() + 1501);
+  startTimestamp = Math.floor(startTimestamp.getTime() / 1000);
+  endTimestamp = Math.floor(endTimestamp.getTime() / 1000);
+
+  const LongCampaignDays = 2555;
   before(async () => {
     accounts = await ethers.getSigners();
     [testAccount] = accounts;
@@ -50,25 +62,18 @@ describe.only('Liquidity mining campaign payment', () => {
     const contractStakeLimit = ethers.utils.parseEther('35'); // 10 tokens
     rewardTokensInstances = [];
 
+    //Unix timestamp of 1500 days
+
     //deploy erc20
     const UsdtToken = await ethers.getContractFactory('TestERC20');
     erc20 = await UsdtToken.deploy(1000000000000);
     await erc20.deployed();
 
-    const args: [string, string, string, [BigNumber, BigNumber, BigNumber], number, number, number, number] = [
-      receiverA,
-      receiverB,
-      erc20.address,
-      campaignPrices,
-      extensionPrice,
-      lowestDiscount,
-      mediumDiscount,
-      highestDiscount,
-    ];
+    const args: [string, string, string, [BigNumber, BigNumber, BigNumber], number, [BigNumber, BigNumber, BigNumber]] =
+      [receiverA, receiverB, erc20.address, campaignPrices, extensionPrice, discounts];
 
     //Deploy payment contract
     PaymentInstance = await deployContract(testAccount, PaymentArtifact, [...args]);
-
     //Deploy LMC instance
     stakingTokenInstance = (await deployContract(testAccount, TestERC20Artifact, [amount])) as TestERC20;
     await stakingTokenInstance.mint(testAccount.address, thirty);
@@ -90,94 +95,71 @@ describe.only('Liquidity mining campaign payment', () => {
       PaymentInstance.address,
     ]);
 
+    LMCPaymentContractAddress = LmcPaymentInstance.address;
+
     await erc20.approve(PaymentInstance.address, 10000000000);
     await tknInst.mint(LmcPaymentInstance.address, amount);
   });
 
   describe('Create campaign', async () => {
     it('Should start a campaign and use a credit', async () => {
-      const LongCampaignDays = 2555;
-
-      //3 years days
-      const starTimestamp = 1855292518;
-      const endTimestamp = 1955292518;
-
       //0 = enum value for short campaign
       await PaymentInstance.pay(testAccount.address, LongCampaignDays);
-      expect(await PaymentInstance.getCreditsCampaigns(testAccount.address, 2)).to.equal(1);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
 
-      await LmcPaymentInstance.start(starTimestamp, endTimestamp, rewardPerSecond);
-      expect(await PaymentInstance.getCreditsCampaigns(testAccount.address, 2)).to.equal(0);
+      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentContractAddress);
+      // await LmcPaymentInstance.start(starTimestamp, endTimestamp, rewardPerSecond);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
     });
 
     it('Should cancel a campaign and refund a credit', async () => {
-      const LongCampaignDays = 2555;
-
-      //3 years days
-      const starTimestamp = 1855292518;
-      const endTimestamp = 1955292518;
-
       //0 = enum value for short campaign
       await PaymentInstance.pay(testAccount.address, LongCampaignDays);
-      expect(await PaymentInstance.getCreditsCampaigns(testAccount.address, 2)).to.equal(1);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
 
-      await LmcPaymentInstance.start(starTimestamp, endTimestamp, rewardPerSecond);
-      expect(await PaymentInstance.getCreditsCampaigns(testAccount.address, 2)).to.equal(0);
-      expect(await PaymentInstance.getWhitelistedRefunds(testAccount.address)).to.equal(true);
+      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentContractAddress);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
+      expect(await PaymentInstance.refundWhitelist(testAccount.address)).to.equal(true);
 
-      await LmcPaymentInstance.cancel();
-      expect(await PaymentInstance.getCreditsCampaigns(testAccount.address, 2)).to.equal(1);
-      expect(await PaymentInstance.getWhitelistedRefunds(testAccount.address)).to.equal(false);
+      await PaymentInstance.refundCredit(startTimestamp, endTimestamp, LMCPaymentContractAddress);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
+      expect(await PaymentInstance.refundWhitelist(testAccount.address)).to.equal(false);
     });
   });
 
   describe('Extend campaign', async () => {
     it('Should extend a campaign and use a credit', async () => {
-      const LongCampaignDays = 2555;
-
-      //3 years days
-      const starTimestamp = 1855292518;
-      const endTimestamp = 1955292518;
-
-      const durationTime = 10;
       //0 = enum value for short campaign
       await PaymentInstance.pay(testAccount.address, LongCampaignDays);
-      expect(await PaymentInstance.getCreditsCampaigns(testAccount.address, 2)).to.equal(1);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
 
-      await LmcPaymentInstance.start(starTimestamp, endTimestamp, rewardPerSecond);
-      expect(await PaymentInstance.getCreditsCampaigns(testAccount.address, 2)).to.equal(0);
+      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentContractAddress);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
       await PaymentInstance.payExtension(testAccount.address);
-      expect(await PaymentInstance.getCreditsCampaignExtension(testAccount.address)).to.equal(1);
+      expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(1);
 
-      await LmcPaymentInstance.extend(10, rewardPerSecond);
-      expect(await PaymentInstance.getCreditsCampaignExtension(testAccount.address)).to.equal(0);
+      await PaymentInstance.useCreditExtension(10, rewardPerSecond, LMCPaymentContractAddress);
+      expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(0);
     });
 
     it('Should cancel an extension and refund a credit', async () => {
-      const LongCampaignDays = 2555;
-
-      //3 years days
-      const starTimestamp = 1855292518;
-      const endTimestamp = 1955292518;
-
-      const durationTime = 10;
       //0 = enum value for short campaign
       await PaymentInstance.pay(testAccount.address, LongCampaignDays);
-      expect(await PaymentInstance.getCreditsCampaigns(testAccount.address, 2)).to.equal(1);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
 
-      await LmcPaymentInstance.start(starTimestamp, endTimestamp, rewardPerSecond);
-      expect(await PaymentInstance.getCreditsCampaigns(testAccount.address, 2)).to.equal(0);
+      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentContractAddress);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
 
       await PaymentInstance.payExtension(testAccount.address);
-      expect(await PaymentInstance.getCreditsCampaignExtension(testAccount.address)).to.equal(1);
+      expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(1);
 
-      await LmcPaymentInstance.extend(10, rewardPerSecond);
-      expect(await PaymentInstance.getCreditsCampaignExtension(testAccount.address)).to.equal(0);
-      expect(await PaymentInstance.getWhitelistedRefundsExtension(testAccount.address)).to.equal(true);
+      await PaymentInstance.useCreditExtension(10, rewardPerSecond, LMCPaymentContractAddress);
+      expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(0);
+      expect(await PaymentInstance.refundWhitelistExtension(testAccount.address)).to.equal(true);
 
-      await LmcPaymentInstance.cancelExtension();
-      expect(await PaymentInstance.getCreditsCampaignExtension(testAccount.address)).to.equal(1);
-      expect(await PaymentInstance.getWhitelistedRefundsExtension(testAccount.address)).to.equal(false);
+      await PaymentInstance.refundCreditExtension(LMCPaymentContractAddress);
+      expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(1);
+      expect(await PaymentInstance.refundWhitelistExtension(testAccount.address)).to.equal(false);
     });
   });
 });
