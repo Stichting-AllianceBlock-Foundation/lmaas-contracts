@@ -6,6 +6,13 @@ import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 
 import 'hardhat/console.sol';
 
+/** @dev Payment contract based on a credit system.
+    User's pay in USDT for a short, medium or long campaign.
+    When a credit is being used, this contract will kick off the start method in a liquidity mining campaign or staking campaign.
+    Same goes for cancelling, extending and cancelling an extension.
+    Prices for campaigns, extensions 
+*/
+
 interface LiquidityMiningCampaignPaymentInterface {
     function startWithPaymentContract(
         uint256 _startTimestamp,
@@ -18,10 +25,6 @@ interface LiquidityMiningCampaignPaymentInterface {
     function extendWithPaymentContract(uint256 _durationTime, uint256[] calldata _rewardPerSecond) external;
 
     function cancelExtensionWithPaymentContract() external;
-
-    // function useCreditExtension(address walletToGiveAccess) external;
-
-    // function refundCreditExtension(address walletToGiveCredit) external;
 }
 
 // import ‘https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol’;
@@ -29,49 +32,51 @@ contract PaymentPortal is Ownable {
     using SafeERC20 for IERC20;
     uint256 private constant HUNDRED_PERCENT = 1000;
     uint256 private constant SECONDS_PER_DAY = 60 * 60 * 24;
-    // All payments will be sent to this address
     address public paymentReceiverA;
     address public paymentReceiverB;
     uint256 public paymentShareA = HUNDRED_PERCENT;
 
     IERC20 private immutable usdtToken;
 
-    //Short campaign <= 35 days
-    //Medium campaign > 35 days <= 179 days
-    //Long campaign > 179 days
+    /** @dev Short campaign <= 35 days
+        Medium campaign > 35 days <= 179 days
+        Long campaign > 179 days
+     */
     enum CampaignTypes {
         SHORT,
         MEDIUM,
         LONG
     }
 
-    //Prices for deploying first campaigns
-    //priceCampaign and discounts maps to the CampaignTypes - priceCampaign[0] = short,
-    //priceCampaign[1] = medium and priceCampaign[2] = Long
+    /** @dev Prices for deploying first campaigns
+        priceCampaign and discounts maps to the CampaignTypes - priceCampaign[0] = short,
+        priceCampaign[1] = medium and priceCampaign[2] = Long
+     */
     uint256[3] public priceCampaign;
     uint256[3] public discounts;
-    //Credits per address
+
+    uint256 public priceCampaignExtension;
     mapping(address => mapping(uint256 => uint256)) public creditsCampaigns;
 
-    //Prices for extensions
-    uint256 public priceCampaignExtension;
-    //Credits per address for extensions
     mapping(address => uint256) public creditsCampaignExtension;
-
-    // Count number of short campaigns deployed ( <36 days )
     mapping(address => uint256) public campaignsDeployed;
 
-    // Whitelisted addresses
     mapping(address => bool) public whitelist;
-    // Addressess that are allowed to refund a credit
     mapping(address => bool) public refundWhitelist;
     mapping(address => bool) public refundWhitelistExtension;
 
+    /** @param _paymentReceiverA First payment receiver
+     * @param _paymentReceiverB Second payment receiver
+     * @param _usdtToken Address of USDT token used to pay
+     * @param _priceCampaign Array of prices it costs to deploy a campaign ( short, medium, long)
+     * @param _priceCampaignExtension Price it costs to extend a campaign
+     * @param _discounts Array of discounts that are applied when a user has deployed campaigns before
+     */
     constructor(
-        address _paymentReceiverA, // required
-        address _paymentReceiverB, // optional, but _paymentShareA must be 1000
-        address _usdtToken, // address of the USDT token
-        uint256[3] memory _priceCampaign, // price in USDT when paying with USDT (USDT uses 6 decimals)
+        address _paymentReceiverA,
+        address _paymentReceiverB,
+        address _usdtToken,
+        uint256[3] memory _priceCampaign,
         uint256 _priceCampaignExtension,
         uint256[3] memory _discounts
     ) {
@@ -81,6 +86,14 @@ contract PaymentPortal is Ownable {
         priceCampaign = _priceCampaign;
         priceCampaignExtension = _priceCampaignExtension;
         discounts = _discounts;
+    }
+
+    /** @dev Set payment receivers
+     * @param _paymentReceiverA First payment receiver
+     * @param _paymentReceiverB Second payment receiver
+     */
+    function setPaymentReceivers(address _paymentReceiverA, address _paymentReceiverB) external onlyOwner {
+        _setPaymentReceivers(_paymentReceiverA, _paymentReceiverB);
     }
 
     function _setPaymentReceivers(address _paymentReceiverA, address _paymentReceiverB) internal {
@@ -93,37 +106,45 @@ contract PaymentPortal is Ownable {
         paymentReceiverB = _paymentReceiverB;
     }
 
-    function setPaymentReceivers(address _paymentReceiverA, address _paymentReceiverB) external onlyOwner {
-        _setPaymentReceivers(_paymentReceiverA, _paymentReceiverB);
-    }
-
-    //Set prices of campaigns
+    /** @dev Set campaign prices
+     * @param _priceCampaign Array of prices it costs to deploy a campaign ( short, medium, long)
+     */
     function setPriceCampaign(uint256[3] calldata _priceCampaign) external onlyOwner {
         priceCampaign = _priceCampaign;
     }
 
-    //Set prices of campaigns
+    /** @dev Set price of campaign extensions
+     * @param _priceCampaignExtension Price it costs to extend a campaign
+     */
     function setPriceCampaignExtension(uint256 _priceCampaignExtension) external onlyOwner {
         priceCampaignExtension = _priceCampaignExtension;
     }
 
+    /** @dev Set discounts applied to users that have deployed multiple campaigns
+     * @param _discounts Array of discounts that are applied when a user has deployed campaigns before
+     */
     function setDiscounts(uint256[3] calldata _discounts) external onlyOwner {
         discounts = _discounts;
     }
 
-    //Whitelist functionalities
+    /** @dev Add users to a whitelist so they don't have to pay
+     * @param _wallet Wallet to add to whitelist
+     */
     function addToWhitelist(address _wallet) external onlyOwner {
         whitelist[_wallet] = true;
     }
 
+    /** @dev Remove user from whitelist
+     * @param _wallet Wallet to remove from whitelist
+     */
     function removeFromWhitelist(address _wallet) external onlyOwner {
         whitelist[_wallet] = false;
     }
 
-    function isWhitelisted(address _wallet) external view returns (bool) {
-        return whitelist[_wallet];
-    }
-
+    /** @dev Helper function to calculate what kind of campaign type it is based on amount of days.
+     * @param _days Amount of days to calculate campaign type ( short, medium, long)
+     * @return campaignType Returns a uint256 which represent that campaign type ( 0 = short, 1 = medium, 2 = long)
+     */
     function daysToCampaignType(uint256 _days) internal pure returns (uint256) {
         if (_days <= 35) {
             return uint256(CampaignTypes.SHORT);
@@ -136,16 +157,27 @@ contract PaymentPortal is Ownable {
         }
     }
 
-    function addCredit(address walletToGiveCredit, uint256 _days) external onlyOwner {
+    /** @dev Admin function to give a wallet a credit to deploy a campaign
+     * @param _walletToGiveCredit Wallet to give a credit
+     * @param _days Campaign duration in days
+     */
+    function addCredit(address _walletToGiveCredit, uint256 _days) external onlyOwner {
         uint256 campaignType = daysToCampaignType(_days);
-        creditsCampaigns[walletToGiveCredit][campaignType] += 1;
+        creditsCampaigns[_walletToGiveCredit][campaignType] += 1;
     }
 
-    function addCreditExtension(address walletToGiveCredit) external onlyOwner {
-        creditsCampaignExtension[walletToGiveCredit] += 1;
+    /** @dev Admin function to give a wallet a credit to extend a campaign
+     * @param _walletToGiveCredit Wallet to give a credit
+     */
+    function addCreditExtension(address _walletToGiveCredit) external onlyOwner {
+        creditsCampaignExtension[_walletToGiveCredit] += 1;
         refundWhitelistExtension[msg.sender] = false;
     }
 
+    /** @dev Returns campaign price based on campaign duration and applied discounts if user has deployed campaigns in the past.
+     * @param _days Campaign duration in days
+     * @return priceToPay Price to pay in USDT.
+     */
     function getCampaignPrice(uint256 _days) public view returns (uint256) {
         uint256 priceToPay;
         uint256 campaignPrice;
@@ -164,35 +196,50 @@ contract PaymentPortal is Ownable {
         return priceToPay;
     }
 
-    function pay(address walletToGiveCredit, uint256 _days) external {
+    /** @dev Payment function to buy a credit for deploying a campaign
+     * @param _walletToGiveCredit Wallet to give credit to
+     * @param _days Campaign duration in days
+     */
+    function pay(address _walletToGiveCredit, uint256 _days) external {
         uint256 priceToPay = getCampaignPrice(_days);
         uint256 campaignType = daysToCampaignType(_days);
         // usdtToken.safeTransferFrom(msg.sender, address(this), priceToPay);
         transferPayment(msg.sender, priceToPay);
 
-        creditsCampaigns[walletToGiveCredit][campaignType] += 1;
-        campaignsDeployed[walletToGiveCredit] += 1;
+        creditsCampaigns[_walletToGiveCredit][campaignType] += 1;
+        campaignsDeployed[_walletToGiveCredit] += 1;
     }
 
-    function payExtension(address walletToGiveCredit) external {
-        // usdtToken.safeTransferFrom(msg.sender, address(this), priceCampaignExtension);
+    /** @dev Payment function to buy a credit for extending a campaign
+     * @param _walletToGiveCredit Wallet to give credit to
+     */
+    function payExtension(address _walletToGiveCredit) external {
         transferPayment(msg.sender, priceCampaignExtension);
-        creditsCampaignExtension[walletToGiveCredit] += 1;
+        creditsCampaignExtension[_walletToGiveCredit] += 1;
     }
 
+    /** @dev Helper function to calculate the campaign duration in days from unix timestamps
+     * @param _startTimestamp Unix timestamp of start time
+     * @param _endTimestamp Unix timestamp of end time
+     * @return campaignDuration Campaign duration in days
+     */
     function calculateCampaignDuration(uint256 _startTimestamp, uint256 _endTimestamp) internal pure returns (uint256) {
         return (_endTimestamp - _startTimestamp) / SECONDS_PER_DAY;
     }
 
-    //msg.sender = LMC address
-
+    /** @dev Deducts a credit and schedules the start of a campaign
+     * @param _startTimestamp Unix timestamp of start time
+     * @param _endTimestamp Unix timestamp of end time
+     * @param _rewardPerSecond Amount of rewards per second
+     * @param _LMCPAddress Address of the Liquidity Mining Campaign Payment Contract
+     */
     function useCredit(
         uint256 _startTimestamp,
         uint256 _endTimestamp,
         uint256[] calldata _rewardPerSecond,
-        address _LMCAddress
+        address _LMCPAddress
     ) external {
-        LiquidityMiningCampaignPaymentInterface LMCPI = LiquidityMiningCampaignPaymentInterface(_LMCAddress);
+        LiquidityMiningCampaignPaymentInterface LMCPI = LiquidityMiningCampaignPaymentInterface(_LMCPAddress);
 
         uint256 campaignDuration = calculateCampaignDuration(_startTimestamp, _endTimestamp);
         uint256 campaignType = daysToCampaignType(campaignDuration);
@@ -204,10 +251,15 @@ contract PaymentPortal is Ownable {
         LMCPI.startWithPaymentContract(_startTimestamp, _endTimestamp, _rewardPerSecond);
     }
 
+    /** @dev Cancels a scheduled campaign and refunds a credit to the user
+     * @param _startTimestamp Unix timestamp of start time
+     * @param _endTimestamp Unix timestamp of end time
+     * @param _LMCPAddress Address of the Liquidity Mining Campaign Payment Contract
+     */
     function refundCredit(
         uint256 _startTimestamp,
         uint256 _endTimestamp,
-        address _LMCAddress
+        address _LMCPAddress
     ) external {
         require(refundWhitelist[msg.sender] == true, 'Wallet not whitelisted for a refund');
         uint256 campaignDuration = calculateCampaignDuration(_startTimestamp, _endTimestamp);
@@ -216,36 +268,47 @@ contract PaymentPortal is Ownable {
         creditsCampaigns[msg.sender][campaignType] += 1;
         refundWhitelist[msg.sender] = false;
 
-        LiquidityMiningCampaignPaymentInterface LMCPI = LiquidityMiningCampaignPaymentInterface(_LMCAddress);
+        LiquidityMiningCampaignPaymentInterface LMCPI = LiquidityMiningCampaignPaymentInterface(_LMCPAddress);
         LMCPI.cancelWithPaymentContract();
     }
 
+    /** @dev Deducts an extension credit and schedules the extension of a campaign
+     * @param _durationTime Campaign duration
+     * @param _rewardPerSecond Rewards per second
+     * @param _LMCPAddress Address of the Liquidity Mining Campaign Payment Contract
+     */
     function useCreditExtension(
         uint256 _durationTime,
         uint256[] calldata _rewardPerSecond,
-        address _LMCAddress
+        address _LMCPAddress
     ) external {
         require(creditsCampaignExtension[msg.sender] > 0, 'No credits available');
 
         creditsCampaignExtension[msg.sender] -= 1;
         refundWhitelistExtension[msg.sender] = true;
 
-        LiquidityMiningCampaignPaymentInterface LMCPI = LiquidityMiningCampaignPaymentInterface(_LMCAddress);
+        LiquidityMiningCampaignPaymentInterface LMCPI = LiquidityMiningCampaignPaymentInterface(_LMCPAddress);
         LMCPI.extendWithPaymentContract(_durationTime, _rewardPerSecond);
         (_durationTime, _rewardPerSecond);
     }
 
-    function refundCreditExtension(address _LMCAddress) external {
+    /** @dev Cancels a schedules campaign extensions and refunds the user a credit
+     * @param _LMCPAddress Address of the Liquidity Mining Campaign Payment Contract
+     */
+    function refundCreditExtension(address _LMCPAddress) external {
         require(refundWhitelistExtension[msg.sender] == true, 'Wallet not whitelisted for a refund');
 
         creditsCampaignExtension[msg.sender] += 1;
         refundWhitelistExtension[msg.sender] = false;
 
-        LiquidityMiningCampaignPaymentInterface LMCPI = LiquidityMiningCampaignPaymentInterface(_LMCAddress);
+        LiquidityMiningCampaignPaymentInterface LMCPI = LiquidityMiningCampaignPaymentInterface(_LMCPAddress);
         LMCPI.cancelExtensionWithPaymentContract();
     }
 
-    // Splits the payment among address A and B based on the share
+    /** @dev Splits the payment between receiver A and receiver B
+     * @param _from Address funds are sent from
+     * @param _amount Amount that's being split
+     */
     function transferPayment(address _from, uint256 _amount) internal {
         uint256 amountA = (_amount * paymentShareA) / HUNDRED_PERCENT;
         uint256 amountB = _amount - amountA;
