@@ -57,7 +57,7 @@ contract StakingCampaignPayment is NonCompoundingRewardsPool {
         uint256 _endTimestamp,
         uint256[] calldata _rewardPerSecond
     ) external onlyPaymentContract {
-        RewardsPoolBase._start(_startTimestamp, _endTimestamp, _rewardPerSecond);
+        NonCompoundingRewardsPool.start(_startTimestamp, _endTimestamp, _rewardPerSecond);
     }
 
     function cancel() external override(RewardsPoolBase) onlyOwner {
@@ -66,24 +66,5 @@ contract StakingCampaignPayment is NonCompoundingRewardsPool {
 
     function cancelWithPaymentContract() external onlyPaymentContract {
         RewardsPoolBase._cancel();
-    }
-
-    function extend(uint256 _durationTime, uint256[] calldata _rewardPerSecond) external override onlyOwner {
-        revert('Extend cannot be called direct, must be called through payment contract');
-    }
-
-    function extendWithPaymentContract(uint256 _durationTime, uint256[] calldata _rewardPerSecond)
-        external
-        onlyPaymentContract
-    {
-        RewardsPoolBase._extend(_durationTime, _rewardPerSecond);
-    }
-
-    function cancelExtension() external override(RewardsPoolBase) onlyOwner {
-        revert('Cancel extension cannot be called direct, must be called through payment contract');
-    }
-
-    function cancelExtensionWithPaymentContract() external onlyPaymentContract {
-        RewardsPoolBase._cancelExtension();
     }
 }
