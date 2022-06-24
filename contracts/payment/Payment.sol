@@ -171,7 +171,6 @@ contract PaymentPortal is Ownable {
      */
     function addCreditExtension(address _walletToGiveCredit) external onlyOwner {
         creditsCampaignExtension[_walletToGiveCredit] += 1;
-        refundWhitelistExtension[msg.sender] = false;
     }
 
     /** @dev Returns campaign price based on campaign duration and applied discounts if user has deployed campaigns in the past.
