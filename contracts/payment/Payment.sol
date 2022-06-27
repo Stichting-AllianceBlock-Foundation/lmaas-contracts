@@ -267,11 +267,11 @@ contract PaymentPortal is Ownable {
 
         require(refundWhitelist[msg.sender][campaignType] == true, 'Wallet not whitelisted for a refund');
 
-        creditsCampaigns[msg.sender][campaignType] += 1;
-        refundWhitelist[msg.sender][campaignType] = false;
-
         LiquidityMiningCampaignPaymentInterface LMCPI = LiquidityMiningCampaignPaymentInterface(_LMCPAddress);
         LMCPI.cancelWithPaymentContract();
+
+        creditsCampaigns[msg.sender][campaignType] += 1;
+        refundWhitelist[msg.sender][campaignType] = false;
     }
 
     /** @dev Deducts an extension credit and schedules the extension of a campaign
