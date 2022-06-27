@@ -9,24 +9,6 @@ import '../RewardsPoolBase.sol';
     This is done so that the payment contract can kick off functions from a liquidity mining campaign.
 */
 
-interface PaymentInterface {
-    function useCredit(
-        address walletToGiveAccess,
-        uint256 _startTimestamp,
-        uint256 _endTimestamp
-    ) external;
-
-    function refundCredit(
-        address walletToGiveAccess,
-        uint256 _startTimestamp,
-        uint256 _endTimestamp
-    ) external;
-
-    function useCreditExtension(address walletToGiveAccess) external;
-
-    function refundCreditExtension(address walletToGiveCredit) external;
-}
-
 contract LiquidityMiningCampaignPayment is LiquidityMiningCampaign {
     address paymentContract;
 

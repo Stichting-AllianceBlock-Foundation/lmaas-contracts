@@ -34,7 +34,17 @@ contract StakingCampaignPayment is NonCompoundingRewardsPool {
         uint256 _contractStakeLimit,
         string memory _name,
         address _paymentContract
-    ) NonCompoundingRewardsPool(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _name) {
+    )
+        NonCompoundingRewardsPool(
+            _stakingToken,
+            _rewardsTokens,
+            _stakeLimit,
+            _throttleRoundSeconds,
+            _throttleRoundCap,
+            _contractStakeLimit,
+            _name
+        )
+    {
         setThrottleParams(_throttleRoundSeconds, _throttleRoundCap);
         paymentContract = _paymentContract;
     }
@@ -48,7 +58,7 @@ contract StakingCampaignPayment is NonCompoundingRewardsPool {
         uint256 _startTimestamp,
         uint256 _endTimestamp,
         uint256[] calldata _rewardPerSecond
-    ) external override(RewardsPoolBase) onlyOwner {
+    ) public override(NonCompoundingRewardsPool) onlyOwner {
         revert('Start cannot be called direct, must be called through payment contract');
     }
 
@@ -66,5 +76,24 @@ contract StakingCampaignPayment is NonCompoundingRewardsPool {
 
     function cancelWithPaymentContract() external onlyPaymentContract {
         RewardsPoolBase._cancel();
+    }
+
+    function extend(uint256 _durationTime, uint256[] calldata _rewardPerSecond) public override onlyOwner {
+        revert('Extend cannot be called direct, must be called through payment contract');
+    }
+
+    function extendWithPaymentContract(uint256 _durationTime, uint256[] calldata _rewardPerSecond)
+        external
+        onlyPaymentContract
+    {
+        NonCompoundingRewardsPool.extend(_durationTime, _rewardPerSecond);
+    }
+
+    function cancelExtension() external override(RewardsPoolBase) onlyOwner {
+        revert('Cancel extension cannot be called direct, must be called through payment contract');
+    }
+
+    function cancelExtensionWithPaymentContract() external onlyPaymentContract {
+        RewardsPoolBase._cancelExtension();
     }
 }

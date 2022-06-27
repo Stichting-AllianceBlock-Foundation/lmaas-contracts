@@ -62,7 +62,7 @@ contract PaymentPortal is Ownable {
     mapping(address => uint256) public campaignsDeployed;
 
     mapping(address => bool) public whitelist;
-    mapping(address => bool) public refundWhitelist;
+    mapping(address => mapping(uint256 => bool)) public refundWhitelist;
     mapping(address => bool) public refundWhitelistExtension;
 
     /** @param _paymentReceiverA First payment receiver
@@ -177,22 +177,24 @@ contract PaymentPortal is Ownable {
      * @param _days Campaign duration in days
      * @return priceToPay Price to pay in USDT.
      */
-    function getCampaignPrice(uint256 _days) public view returns (uint256) {
+    function getCampaignPrice(uint256 _days) public view returns (uint256, uint256) {
         uint256 priceToPay;
         uint256 campaignPrice;
 
+        uint256 deployedCampaigns = campaignsDeployed[msg.sender];
         uint256 campaignType = daysToCampaignType(_days);
+
         campaignPrice = priceCampaign[campaignType];
-        if (campaignsDeployed[msg.sender] == 0) {
+        if (deployedCampaigns == 0) {
             priceToPay = campaignPrice;
-        } else if (campaignsDeployed[msg.sender] >= 1 && campaignsDeployed[msg.sender] <= 2) {
+        } else if (deployedCampaigns >= 1 && deployedCampaigns <= 2) {
             priceToPay = (campaignPrice * (100 - discounts[uint256(CampaignTypes.SHORT)])) / 100;
-        } else if (campaignsDeployed[msg.sender] > 2 && campaignsDeployed[msg.sender] <= 5) {
+        } else if (deployedCampaigns > 2 && deployedCampaigns <= 5) {
             priceToPay = (campaignPrice * (100 - discounts[uint256(CampaignTypes.MEDIUM)])) / 100;
-        } else if (campaignsDeployed[msg.sender] > 5) {
+        } else if (deployedCampaigns > 5) {
             priceToPay = (campaignPrice * (100 - discounts[uint256(CampaignTypes.LONG)])) / 100;
         }
-        return priceToPay;
+        return (priceToPay, campaignType);
     }
 
     /** @dev Payment function to buy a credit for deploying a campaign
@@ -200,8 +202,8 @@ contract PaymentPortal is Ownable {
      * @param _days Campaign duration in days
      */
     function pay(address _walletToGiveCredit, uint256 _days) external {
-        uint256 priceToPay = getCampaignPrice(_days);
-        uint256 campaignType = daysToCampaignType(_days);
+        (uint256 priceToPay, uint256 campaignType) = getCampaignPrice(_days);
+        // uint256 campaignType = daysToCampaignType(_days);
         // usdtToken.safeTransferFrom(msg.sender, address(this), priceToPay);
         transferPayment(msg.sender, priceToPay);
 
@@ -245,7 +247,7 @@ contract PaymentPortal is Ownable {
 
         require(creditsCampaigns[msg.sender][campaignType] > 0, 'No credits available');
         creditsCampaigns[msg.sender][campaignType] -= 1;
-        refundWhitelist[msg.sender] = true;
+        refundWhitelist[msg.sender][campaignType] = true;
 
         LMCPI.startWithPaymentContract(_startTimestamp, _endTimestamp, _rewardPerSecond);
     }
@@ -260,12 +262,13 @@ contract PaymentPortal is Ownable {
         uint256 _endTimestamp,
         address _LMCPAddress
     ) external {
-        require(refundWhitelist[msg.sender] == true, 'Wallet not whitelisted for a refund');
         uint256 campaignDuration = calculateCampaignDuration(_startTimestamp, _endTimestamp);
         uint256 campaignType = daysToCampaignType(campaignDuration);
 
+        require(refundWhitelist[msg.sender][campaignType] == true, 'Wallet not whitelisted for a refund');
+
         creditsCampaigns[msg.sender][campaignType] += 1;
-        refundWhitelist[msg.sender] = false;
+        refundWhitelist[msg.sender][campaignType] = false;
 
         LiquidityMiningCampaignPaymentInterface LMCPI = LiquidityMiningCampaignPaymentInterface(_LMCPAddress);
         LMCPI.cancelWithPaymentContract();
