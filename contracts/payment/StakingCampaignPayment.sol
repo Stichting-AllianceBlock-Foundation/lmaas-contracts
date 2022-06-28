@@ -45,7 +45,6 @@ contract StakingCampaignPayment is NonCompoundingRewardsPool {
             _name
         )
     {
-        setThrottleParams(_throttleRoundSeconds, _throttleRoundCap);
         paymentContract = _paymentContract;
     }
 
