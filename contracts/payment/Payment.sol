@@ -12,8 +12,7 @@ import 'hardhat/console.sol';
     Same goes for cancelling, extending and cancelling an extension.
     Prices for campaigns, extensions 
 */
-
-interface LiquidityMiningCampaignPaymentInterface {
+interface PoolPaymentInterface {
     function startWithPaymentContract(
         uint256 _startTimestamp,
         uint256 _endTimestamp,
@@ -25,6 +24,10 @@ interface LiquidityMiningCampaignPaymentInterface {
     function extendWithPaymentContract(uint256 _durationTime, uint256[] calldata _rewardPerSecond) external;
 
     function cancelExtensionWithPaymentContract() external;
+
+    function startTimestamp() external view returns (uint256);
+
+    function endTimestamp() external view returns (uint256);
 }
 
 // import ‘https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol’;
@@ -232,16 +235,14 @@ contract PaymentPortal is Ownable {
      * @param _startTimestamp Unix timestamp of start time
      * @param _endTimestamp Unix timestamp of end time
      * @param _rewardPerSecond Amount of rewards per second
-     * @param _LMCPAddress Address of the Liquidity Mining Campaign Payment Contract
+     * @param CampaignAddress Address of the Liquidity Mining Campaign Payment Contract
      */
     function useCredit(
         uint256 _startTimestamp,
         uint256 _endTimestamp,
         uint256[] calldata _rewardPerSecond,
-        address _LMCPAddress
+        address CampaignAddress
     ) external {
-        LiquidityMiningCampaignPaymentInterface LMCPI = LiquidityMiningCampaignPaymentInterface(_LMCPAddress);
-
         uint256 campaignDuration = calculateCampaignDuration(_startTimestamp, _endTimestamp);
         uint256 campaignType = daysToCampaignType(campaignDuration);
 
@@ -249,26 +250,22 @@ contract PaymentPortal is Ownable {
         creditsCampaigns[msg.sender][campaignType] -= 1;
         refundWhitelist[msg.sender][campaignType] = true;
 
-        LMCPI.startWithPaymentContract(_startTimestamp, _endTimestamp, _rewardPerSecond);
+        PoolPaymentInterface poolPaymentInterface = PoolPaymentInterface(CampaignAddress);
+        poolPaymentInterface.startWithPaymentContract(_startTimestamp, _endTimestamp, _rewardPerSecond);
     }
 
     /** @dev Cancels a scheduled campaign and refunds a credit to the user
-     * @param _startTimestamp Unix timestamp of start time
-     * @param _endTimestamp Unix timestamp of end time
-     * @param _LMCPAddress Address of the Liquidity Mining Campaign Payment Contract
+     * @param CampaignAddress Address of the Liquidity Mining Campaign Payment Contract
      */
-    function refundCredit(
-        uint256 _startTimestamp,
-        uint256 _endTimestamp,
-        address _LMCPAddress
-    ) external {
+    function refundCredit(address CampaignAddress) external {
+        PoolPaymentInterface poolPaymentInterface = PoolPaymentInterface(CampaignAddress);
+        uint256 _startTimestamp = poolPaymentInterface.startTimestamp();
+        uint256 _endTimestamp = poolPaymentInterface.endTimestamp();
         uint256 campaignDuration = calculateCampaignDuration(_startTimestamp, _endTimestamp);
         uint256 campaignType = daysToCampaignType(campaignDuration);
+        poolPaymentInterface.cancelWithPaymentContract();
 
         require(refundWhitelist[msg.sender][campaignType] == true, 'Wallet not whitelisted for a refund');
-
-        LiquidityMiningCampaignPaymentInterface LMCPI = LiquidityMiningCampaignPaymentInterface(_LMCPAddress);
-        LMCPI.cancelWithPaymentContract();
 
         creditsCampaigns[msg.sender][campaignType] += 1;
         refundWhitelist[msg.sender][campaignType] = false;
@@ -277,34 +274,34 @@ contract PaymentPortal is Ownable {
     /** @dev Deducts an extension credit and schedules the extension of a campaign
      * @param _durationTime Campaign duration
      * @param _rewardPerSecond Rewards per second
-     * @param _LMCPAddress Address of the Liquidity Mining Campaign Payment Contract
+     * @param CampaignAddress Address of the Liquidity Mining Campaign Payment Contract
      */
     function useCreditExtension(
         uint256 _durationTime,
         uint256[] calldata _rewardPerSecond,
-        address _LMCPAddress
+        address CampaignAddress
     ) external {
         require(creditsCampaignExtension[msg.sender] > 0, 'No credits available');
 
         creditsCampaignExtension[msg.sender] -= 1;
         refundWhitelistExtension[msg.sender] = true;
 
-        LiquidityMiningCampaignPaymentInterface LMCPI = LiquidityMiningCampaignPaymentInterface(_LMCPAddress);
-        LMCPI.extendWithPaymentContract(_durationTime, _rewardPerSecond);
+        PoolPaymentInterface poolPaymentInterface = PoolPaymentInterface(CampaignAddress);
+        poolPaymentInterface.extendWithPaymentContract(_durationTime, _rewardPerSecond);
         (_durationTime, _rewardPerSecond);
     }
 
     /** @dev Cancels a schedules campaign extensions and refunds the user a credit
-     * @param _LMCPAddress Address of the Liquidity Mining Campaign Payment Contract
+     * @param CampaignAddress Address of the Liquidity Mining Campaign Payment Contract
      */
-    function refundCreditExtension(address _LMCPAddress) external {
+    function refundCreditExtension(address CampaignAddress) external {
         require(refundWhitelistExtension[msg.sender] == true, 'Wallet not whitelisted for a refund');
 
         creditsCampaignExtension[msg.sender] += 1;
         refundWhitelistExtension[msg.sender] = false;
 
-        LiquidityMiningCampaignPaymentInterface LMCPI = LiquidityMiningCampaignPaymentInterface(_LMCPAddress);
-        LMCPI.cancelExtensionWithPaymentContract();
+        PoolPaymentInterface poolPaymentInterface = PoolPaymentInterface(CampaignAddress);
+        poolPaymentInterface.cancelExtensionWithPaymentContract();
     }
 
     /** @dev Splits the payment between receiver A and receiver B

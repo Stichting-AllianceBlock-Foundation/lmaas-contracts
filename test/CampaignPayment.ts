@@ -40,7 +40,7 @@ describe.only('Liquidity mining campaign payment', () => {
   let rewardPerSecond: BigNumber[];
   rewardPerSecond = [BigNumber.from('1')];
 
-  let LMCPaymentContractAddress: string;
+  let LMCPaymentInstanceAddress: string;
 
   let startTimestamp: any = new Date();
   let endTimestamp: any = new Date();
@@ -95,7 +95,7 @@ describe.only('Liquidity mining campaign payment', () => {
       PaymentInstance.address,
     ]);
 
-    LMCPaymentContractAddress = LmcPaymentInstance.address;
+    LMCPaymentInstanceAddress = LmcPaymentInstance.address;
 
     await erc20.approve(PaymentInstance.address, 10000000000);
     await tknInst.mint(LmcPaymentInstance.address, amount);
@@ -107,7 +107,7 @@ describe.only('Liquidity mining campaign payment', () => {
       await PaymentInstance.pay(testAccount.address, LongCampaignDays);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
 
-      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentContractAddress);
+      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentInstanceAddress);
       // await LmcPaymentInstance.start(starTimestamp, endTimestamp, rewardPerSecond);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
     });
@@ -117,11 +117,11 @@ describe.only('Liquidity mining campaign payment', () => {
       await PaymentInstance.pay(testAccount.address, LongCampaignDays);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
 
-      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentContractAddress);
+      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentInstanceAddress);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
       expect(await PaymentInstance.refundWhitelist(testAccount.address, 2)).to.equal(true);
 
-      await PaymentInstance.refundCredit(startTimestamp, endTimestamp, LMCPaymentContractAddress);
+      await PaymentInstance.refundCredit(LMCPaymentInstanceAddress);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
       expect(await PaymentInstance.refundWhitelist(testAccount.address, 2)).to.equal(false);
     });
@@ -133,12 +133,12 @@ describe.only('Liquidity mining campaign payment', () => {
       await PaymentInstance.pay(testAccount.address, LongCampaignDays);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
 
-      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentContractAddress);
+      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentInstanceAddress);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
       await PaymentInstance.payExtension(testAccount.address);
       expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(1);
 
-      await PaymentInstance.useCreditExtension(10, rewardPerSecond, LMCPaymentContractAddress);
+      await PaymentInstance.useCreditExtension(10, rewardPerSecond, LMCPaymentInstanceAddress);
       expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(0);
     });
 
@@ -147,17 +147,17 @@ describe.only('Liquidity mining campaign payment', () => {
       await PaymentInstance.pay(testAccount.address, LongCampaignDays);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
 
-      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentContractAddress);
+      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentInstanceAddress);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
 
       await PaymentInstance.payExtension(testAccount.address);
       expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(1);
 
-      await PaymentInstance.useCreditExtension(10, rewardPerSecond, LMCPaymentContractAddress);
+      await PaymentInstance.useCreditExtension(10, rewardPerSecond, LMCPaymentInstanceAddress);
       expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(0);
       expect(await PaymentInstance.refundWhitelistExtension(testAccount.address)).to.equal(true);
 
-      await PaymentInstance.refundCreditExtension(LMCPaymentContractAddress);
+      await PaymentInstance.refundCreditExtension(LMCPaymentInstanceAddress);
       expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(1);
       expect(await PaymentInstance.refundWhitelistExtension(testAccount.address)).to.equal(false);
     });
