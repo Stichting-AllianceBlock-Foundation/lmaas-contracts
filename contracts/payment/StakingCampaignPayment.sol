@@ -66,7 +66,7 @@ contract StakingCampaignPayment is NonCompoundingRewardsPool {
         uint256 _endTimestamp,
         uint256[] calldata _rewardPerSecond
     ) external onlyPaymentContract {
-        NonCompoundingRewardsPool.start(_startTimestamp, _endTimestamp, _rewardPerSecond);
+        NonCompoundingRewardsPool.internalStart(_startTimestamp, _endTimestamp, _rewardPerSecond);
     }
 
     function cancel() external view override(RewardsPoolBase) onlyOwner {
