@@ -4,17 +4,15 @@ const { deployContract } = waffle;
 
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import TestERC20Artifact from '../../lmaas-contracts/artifacts/contracts/TestERC20.sol/TestERC20.json';
-import LmcPaymentArtifact from '../../lmaas-contracts/artifacts/contracts/payment/LiquidityMiningCampaignPayment.sol/LiquidityMiningCampaignPayment.json';
+import StakingPaymentArtifact from '../../lmaas-contracts/artifacts/contracts/payment/StakingCampaignPayment.sol/StakingCampaignPayment.json';
 import PaymentArtifact from '../../lmaas-contracts/artifacts/contracts/payment/Payment.sol/PaymentPortal.json';
 import { TestERC20 } from '../typechain/TestERC20';
-import { LiquidityMiningCampaignPayment } from '../typechain/LiquidityMiningCampaignPayment';
-import { PaymentPortal } from '../typechain/PaymentPortal';
 import { BigNumber } from 'ethers';
 
-describe('Liquidity mining campaign payment', () => {
+describe.only('Staking campaign payment', () => {
   let PaymentInstance: any; //PaymentPortal;
   let erc20: any; //TestERC20;
-  let LmcPaymentInstance: any; //LiquidityMiningCampaignPayment;
+  let StakingCampaignInstance: any;
 
   const receiverA = '0x1750659358e53EddecEd0E818E2c65F9fD9A44e5';
   const receiverB = '0x1750659358e53EddecEd0E818E2c65F9fD9A44e5';
@@ -39,7 +37,7 @@ describe('Liquidity mining campaign payment', () => {
   let rewardPerSecond: BigNumber[];
   rewardPerSecond = [BigNumber.from('1')];
 
-  let LMCPaymentInstanceAddress: string;
+  let StakingCampaignInstanceAddress: string;
 
   let startTimestamp: any = new Date();
   let endTimestamp: any = new Date();
@@ -60,7 +58,9 @@ describe('Liquidity mining campaign payment', () => {
     const stakeLimit = amount;
     const contractStakeLimit = ethers.utils.parseEther('35'); // 10 tokens
     rewardTokensInstances = [];
-
+    const standardStakingAmount = ethers.utils.parseEther('5');
+    const _throttleRoundSeconds = 1000;
+    const _throttleRoundCap = standardStakingAmount.mul(2);
     //Unix timestamp of 1500 days
 
     //deploy erc20
@@ -84,20 +84,22 @@ describe('Liquidity mining campaign payment', () => {
     rewardTokensInstances.push(tknInst);
     rewardTokensAddresses.push(tknInst.address);
 
-    //Deploy liquidity mining payment instance
-    LmcPaymentInstance = await deployContract(testAccount, LmcPaymentArtifact, [
+    //Deploy staking payment instance
+    StakingCampaignInstance = await deployContract(testAccount, StakingPaymentArtifact, [
       stakingTokenAddress,
       rewardTokensAddresses,
       stakeLimit,
+      _throttleRoundSeconds,
+      _throttleRoundCap,
       contractStakeLimit,
       '',
       PaymentInstance.address,
     ]);
 
-    LMCPaymentInstanceAddress = LmcPaymentInstance.address;
+    StakingCampaignInstanceAddress = StakingCampaignInstance.address;
 
     await erc20.approve(PaymentInstance.address, 10000000000);
-    await tknInst.mint(LmcPaymentInstance.address, amount);
+    await tknInst.mint(StakingCampaignInstance.address, amount);
   });
 
   describe('Create campaign', async () => {
@@ -106,8 +108,8 @@ describe('Liquidity mining campaign payment', () => {
       await PaymentInstance.pay(testAccount.address, LongCampaignDays);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
 
-      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentInstanceAddress);
-      // await LmcPaymentInstance.start(starTimestamp, endTimestamp, rewardPerSecond);
+      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, StakingCampaignInstanceAddress);
+      // await StakingCampaignInstance.start(starTimestamp, endTimestamp, rewardPerSecond);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
     });
 
@@ -116,11 +118,11 @@ describe('Liquidity mining campaign payment', () => {
       await PaymentInstance.pay(testAccount.address, LongCampaignDays);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
 
-      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentInstanceAddress);
+      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, StakingCampaignInstanceAddress);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
       expect(await PaymentInstance.refundWhitelist(testAccount.address, 2)).to.equal(true);
 
-      await PaymentInstance.refundCredit(LMCPaymentInstanceAddress);
+      await PaymentInstance.refundCredit(StakingCampaignInstanceAddress);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
       expect(await PaymentInstance.refundWhitelist(testAccount.address, 2)).to.equal(false);
     });
@@ -132,12 +134,12 @@ describe('Liquidity mining campaign payment', () => {
       await PaymentInstance.pay(testAccount.address, LongCampaignDays);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
 
-      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentInstanceAddress);
+      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, StakingCampaignInstanceAddress);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
       await PaymentInstance.payExtension(testAccount.address);
       expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(1);
 
-      await PaymentInstance.useCreditExtension(10, rewardPerSecond, LMCPaymentInstanceAddress);
+      await PaymentInstance.useCreditExtension(10, rewardPerSecond, StakingCampaignInstanceAddress);
       expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(0);
     });
 
@@ -146,17 +148,17 @@ describe('Liquidity mining campaign payment', () => {
       await PaymentInstance.pay(testAccount.address, LongCampaignDays);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
 
-      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentInstanceAddress);
+      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, StakingCampaignInstanceAddress);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
 
       await PaymentInstance.payExtension(testAccount.address);
       expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(1);
 
-      await PaymentInstance.useCreditExtension(10, rewardPerSecond, LMCPaymentInstanceAddress);
+      await PaymentInstance.useCreditExtension(10, rewardPerSecond, StakingCampaignInstanceAddress);
       expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(0);
       expect(await PaymentInstance.refundWhitelistExtension(testAccount.address)).to.equal(true);
 
-      await PaymentInstance.refundCreditExtension(LMCPaymentInstanceAddress);
+      await PaymentInstance.refundCreditExtension(StakingCampaignInstanceAddress);
       expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(1);
       expect(await PaymentInstance.refundWhitelistExtension(testAccount.address)).to.equal(false);
     });
