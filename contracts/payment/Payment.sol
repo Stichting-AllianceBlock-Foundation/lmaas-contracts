@@ -180,11 +180,11 @@ contract PaymentPortal is Ownable {
      * @param _days Campaign duration in days
      * @return priceToPay Price to pay in USDT.
      */
-    function getCampaignPrice(uint256 _days) public view returns (uint256, uint256) {
+    function getCampaignPrice(uint256 _days, address _walletWithCredit) public view returns (uint256, uint256) {
         uint256 priceToPay;
         uint256 campaignPrice;
 
-        uint256 deployedCampaigns = campaignsDeployed[msg.sender];
+        uint256 deployedCampaigns = campaignsDeployed[_walletWithCredit];
         uint256 campaignType = daysToCampaignType(_days);
 
         campaignPrice = priceCampaign[campaignType];
@@ -205,7 +205,7 @@ contract PaymentPortal is Ownable {
      * @param _days Campaign duration in days
      */
     function pay(address _walletToGiveCredit, uint256 _days) external {
-        (uint256 priceToPay, uint256 campaignType) = getCampaignPrice(_days);
+        (uint256 priceToPay, uint256 campaignType) = getCampaignPrice(_days, _walletToGiveCredit);
         // uint256 campaignType = daysToCampaignType(_days);
         // usdtToken.safeTransferFrom(msg.sender, address(this), priceToPay);
         transferPayment(msg.sender, priceToPay);
