@@ -4,8 +4,6 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 
-import 'hardhat/console.sol';
-
 /** @dev Payment contract based on a credit system.
     User's pay in USDT for a short, medium or long campaign.
     When a credit is being used, this contract will kick off the start method in a liquidity mining campaign or staking campaign.
@@ -30,7 +28,6 @@ interface PoolPaymentInterface {
     function endTimestamp() external view returns (uint256);
 }
 
-// import ‘https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol’;
 contract PaymentPortal is Ownable {
     using SafeERC20 for IERC20;
     uint256 private constant HUNDRED_PERCENT = 1000;
@@ -206,8 +203,6 @@ contract PaymentPortal is Ownable {
      */
     function pay(address _walletToGiveCredit, uint256 _days) external {
         (uint256 priceToPay, uint256 campaignType) = getCampaignPrice(_days, _walletToGiveCredit);
-        // uint256 campaignType = daysToCampaignType(_days);
-        // usdtToken.safeTransferFrom(msg.sender, address(this), priceToPay);
         transferPayment(msg.sender, priceToPay);
 
         creditsCampaigns[_walletToGiveCredit][campaignType] += 1;
@@ -311,7 +306,6 @@ contract PaymentPortal is Ownable {
     function transferPayment(address _from, uint256 _amount) internal {
         uint256 amountA = (_amount * paymentShareA) / HUNDRED_PERCENT;
         uint256 amountB = _amount - amountA;
-        //Question: Why is this check in here, it’s always (address(this)) right?
         if (_from == address(this)) {
             if (amountA > 0) {
                 usdtToken.safeTransfer(paymentReceiverA, amountA);
