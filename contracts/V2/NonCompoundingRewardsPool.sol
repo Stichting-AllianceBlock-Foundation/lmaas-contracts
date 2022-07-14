@@ -53,7 +53,7 @@ contract NonCompoundingRewardsPool is
         internalStart(_startTimestamp, _endTimestamp, _rewardPerSecond);
     }
 
-    function internalStart(
+    function _internalStart(
         uint256 _startTimestamp,
         uint256 _endTimestamp,
         uint256[] calldata _rewardPerSecond
