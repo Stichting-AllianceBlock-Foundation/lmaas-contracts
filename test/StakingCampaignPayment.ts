@@ -9,7 +9,7 @@ import PaymentArtifact from '../../lmaas-contracts/artifacts/contracts/payment/P
 import { TestERC20 } from '../typechain/TestERC20';
 import { BigNumber } from 'ethers';
 
-describe.only('Staking campaign payment', () => {
+describe('Staking campaign payment', () => {
   let PaymentInstance: any; //PaymentPortal;
   let erc20: any; //TestERC20;
   let StakingCampaignInstance: any;

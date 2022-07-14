@@ -11,7 +11,7 @@ import { LiquidityMiningCampaignPayment } from '../typechain/LiquidityMiningCamp
 import { PaymentPortal } from '../typechain/PaymentPortal';
 import { BigNumber } from 'ethers';
 
-describe('Liquidity mining campaign payment', () => {
+describe.only('Liquidity mining campaign payment', () => {
   let PaymentInstance: any; //PaymentPortal;
   let erc20: any; //TestERC20;
   let LmcPaymentInstance: any; //LiquidityMiningCampaignPayment;
