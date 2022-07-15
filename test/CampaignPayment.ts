@@ -5,16 +5,14 @@ const { deployContract } = waffle;
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import TestERC20Artifact from '../../lmaas-contracts/artifacts/contracts/TestERC20.sol/TestERC20.json';
 import LmcPaymentArtifact from '../../lmaas-contracts/artifacts/contracts/payment/LiquidityMiningCampaignPayment.sol/LiquidityMiningCampaignPayment.json';
-import PaymentArtifact from '../../lmaas-contracts/artifacts/contracts/payment/Payment.sol/PaymentPortal.json';
+import PaymentArtifact from '../../lmaas-contracts/artifacts/contracts/payment/Payment.sol/Payment.json';
 import { TestERC20 } from '../typechain/TestERC20';
-import { LiquidityMiningCampaignPayment } from '../typechain/LiquidityMiningCampaignPayment';
-import { PaymentPortal } from '../typechain/PaymentPortal';
 import { BigNumber } from 'ethers';
 
 describe.only('Liquidity mining campaign payment', () => {
-  let PaymentInstance: any; //PaymentPortal;
-  let erc20: any; //TestERC20;
-  let LmcPaymentInstance: any; //LiquidityMiningCampaignPayment;
+  let PaymentInstance: any;
+  let erc20: any;
+  let LmcPaymentInstance: any;
 
   const receiverA = '0x1750659358e53EddecEd0E818E2c65F9fD9A44e5';
   const receiverB = '0x1750659358e53EddecEd0E818E2c65F9fD9A44e5';

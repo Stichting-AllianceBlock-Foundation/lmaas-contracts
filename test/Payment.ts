@@ -27,7 +27,7 @@ describe('Payment', () => {
     await erc20.deployed();
     await erc20.setDecimals(6);
 
-    const Payment = await ethers.getContractFactory('PaymentPortal');
+    const Payment = await ethers.getContractFactory('Payment');
 
     const args: [string, string, string, [BigNumber, BigNumber, BigNumber], number, [BigNumber, BigNumber, BigNumber]] =
       [receiverA, receiverB, erc20.address, campaignPrices, extensionPrice, discounts];

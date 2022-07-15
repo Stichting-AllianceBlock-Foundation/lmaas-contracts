@@ -27,6 +27,7 @@ contract LiquidityMiningCampaignPayment is LiquidityMiningCampaign {
         string memory _name,
         address _paymentContract
     ) LiquidityMiningCampaign(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _name) {
+        require(_paymentContract != address(0), 'Payment contract address cannot be 0');
         paymentContract = _paymentContract;
     }
 
@@ -38,10 +39,10 @@ contract LiquidityMiningCampaignPayment is LiquidityMiningCampaign {
     /** @dev Overrides the old start method so that it can only be called by the payment contract
      */
     function start(
-        uint256 _startTimestamp,
-        uint256 _endTimestamp,
-        uint256[] calldata _rewardPerSecond
-    ) external override(RewardsPoolBase) onlyOwner {
+        uint256,
+        uint256,
+        uint256[] calldata
+    ) external view override(RewardsPoolBase) onlyOwner {
         revert('Start cannot be called direct, must be called through payment contract');
     }
 
@@ -59,7 +60,7 @@ contract LiquidityMiningCampaignPayment is LiquidityMiningCampaign {
     }
 
     /// @dev Overrides the old cancel method so that it can only be called by the payment contract
-    function cancel() external override(RewardsPoolBase) onlyOwner {
+    function cancel() external view override(RewardsPoolBase) onlyOwner {
         revert('Cancel cannot be called direct, must be called through payment contract');
     }
 
@@ -69,7 +70,7 @@ contract LiquidityMiningCampaignPayment is LiquidityMiningCampaign {
     }
 
     /// @dev Overrides the old extend method so that it can only be called by the payment contract
-    function extend(uint256 _durationTime, uint256[] calldata _rewardPerSecond) external override onlyOwner {
+    function extend(uint256, uint256[] calldata) external view override onlyOwner {
         revert('Extend cannot be called direct, must be called through payment contract');
     }
 
@@ -87,7 +88,7 @@ contract LiquidityMiningCampaignPayment is LiquidityMiningCampaign {
     }
 
     /// @dev Overrides the cancel extend method so that it can only be called by the payment contract
-    function cancelExtension() external override(RewardsPoolBase) onlyOwner {
+    function cancelExtension() external view override(RewardsPoolBase) onlyOwner {
         revert('Cancel extension cannot be called direct, must be called through payment contract');
     }
 

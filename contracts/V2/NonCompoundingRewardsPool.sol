@@ -50,7 +50,7 @@ contract NonCompoundingRewardsPool is
         uint256 _endTimestamp,
         uint256[] calldata _rewardPerSecond
     ) external virtual override onlyOwner {
-        internalStart(_startTimestamp, _endTimestamp, _rewardPerSecond);
+        _internalStart(_startTimestamp, _endTimestamp, _rewardPerSecond);
     }
 
     function _internalStart(

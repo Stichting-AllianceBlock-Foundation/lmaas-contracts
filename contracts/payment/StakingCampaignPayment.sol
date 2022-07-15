@@ -45,6 +45,7 @@ contract StakingCampaignPayment is NonCompoundingRewardsPool {
             _name
         )
     {
+        require(_paymentContract != address(0), 'Payment contract address cannot be 0');
         paymentContract = _paymentContract;
     }
 
@@ -54,10 +55,10 @@ contract StakingCampaignPayment is NonCompoundingRewardsPool {
     }
 
     function start(
-        uint256 _startTimestamp,
-        uint256 _endTimestamp,
-        uint256[] calldata _rewardPerSecond
-    ) public override(NonCompoundingRewardsPool) onlyOwner {
+        uint256,
+        uint256,
+        uint256[] calldata
+    ) public view override(NonCompoundingRewardsPool) onlyOwner {
         revert('Start cannot be called direct, must be called through payment contract');
     }
 
@@ -66,7 +67,7 @@ contract StakingCampaignPayment is NonCompoundingRewardsPool {
         uint256 _endTimestamp,
         uint256[] calldata _rewardPerSecond
     ) external onlyPaymentContract {
-        NonCompoundingRewardsPool.internalStart(_startTimestamp, _endTimestamp, _rewardPerSecond);
+        NonCompoundingRewardsPool._internalStart(_startTimestamp, _endTimestamp, _rewardPerSecond);
     }
 
     function cancel() external view override(RewardsPoolBase) onlyOwner {
@@ -77,7 +78,7 @@ contract StakingCampaignPayment is NonCompoundingRewardsPool {
         RewardsPoolBase._cancel();
     }
 
-    function extend(uint256 _durationTime, uint256[] calldata _rewardPerSecond) public view override onlyOwner {
+    function extend(uint256, uint256[] calldata) public view override onlyOwner {
         revert('Extend cannot be called direct, must be called through payment contract');
     }
 

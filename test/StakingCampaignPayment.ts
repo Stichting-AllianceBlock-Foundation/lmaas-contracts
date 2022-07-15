@@ -5,13 +5,13 @@ const { deployContract } = waffle;
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import TestERC20Artifact from '../../lmaas-contracts/artifacts/contracts/TestERC20.sol/TestERC20.json';
 import StakingPaymentArtifact from '../../lmaas-contracts/artifacts/contracts/payment/StakingCampaignPayment.sol/StakingCampaignPayment.json';
-import PaymentArtifact from '../../lmaas-contracts/artifacts/contracts/payment/Payment.sol/PaymentPortal.json';
+import PaymentArtifact from '../../lmaas-contracts/artifacts/contracts/payment/Payment.sol/Payment.json';
 import { TestERC20 } from '../typechain/TestERC20';
 import { BigNumber } from 'ethers';
 
-describe('Staking campaign payment', () => {
-  let PaymentInstance: any; //PaymentPortal;
-  let erc20: any; //TestERC20;
+describe.only('Staking campaign payment', () => {
+  let PaymentInstance: any;
+  let erc20: any;
   let StakingCampaignInstance: any;
 
   const receiverA = '0x1750659358e53EddecEd0E818E2c65F9fD9A44e5';
@@ -125,42 +125,6 @@ describe('Staking campaign payment', () => {
       await PaymentInstance.refundCredit(StakingCampaignInstanceAddress);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
       expect(await PaymentInstance.refundWhitelist(testAccount.address, 2)).to.equal(false);
-    });
-  });
-
-  describe('Extend campaign', async () => {
-    it('Should extend a campaign and use a credit', async () => {
-      //0 = enum value for short campaign
-      await PaymentInstance.pay(testAccount.address, LongCampaignDays);
-      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
-
-      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, StakingCampaignInstanceAddress);
-      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
-      await PaymentInstance.payExtension(testAccount.address);
-      expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(1);
-
-      await PaymentInstance.useCreditExtension(10, rewardPerSecond, StakingCampaignInstanceAddress);
-      expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(0);
-    });
-
-    it('Should cancel an extension and refund a credit', async () => {
-      //0 = enum value for short campaign
-      await PaymentInstance.pay(testAccount.address, LongCampaignDays);
-      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
-
-      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, StakingCampaignInstanceAddress);
-      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
-
-      await PaymentInstance.payExtension(testAccount.address);
-      expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(1);
-
-      await PaymentInstance.useCreditExtension(10, rewardPerSecond, StakingCampaignInstanceAddress);
-      expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(0);
-      expect(await PaymentInstance.refundWhitelistExtension(testAccount.address)).to.equal(true);
-
-      await PaymentInstance.refundCreditExtension(StakingCampaignInstanceAddress);
-      expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(1);
-      expect(await PaymentInstance.refundWhitelistExtension(testAccount.address)).to.equal(false);
     });
   });
 });

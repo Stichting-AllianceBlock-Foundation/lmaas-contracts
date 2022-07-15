@@ -28,13 +28,13 @@ interface PoolPaymentInterface {
     function endTimestamp() external view returns (uint256);
 }
 
-contract PaymentPortal is Ownable {
+contract Payment is Ownable {
     using SafeERC20 for IERC20;
     uint256 private constant HUNDRED_PERCENT = 1000;
     uint256 private constant SECONDS_PER_DAY = 60 * 60 * 24;
     address public paymentReceiverA;
     address public paymentReceiverB;
-    uint256 public paymentShareA = HUNDRED_PERCENT;
+    uint256 public constant paymentShareA = HUNDRED_PERCENT;
 
     IERC20 private immutable usdtToken;
 
@@ -185,14 +185,14 @@ contract PaymentPortal is Ownable {
         uint256 campaignType = daysToCampaignType(_days);
 
         campaignPrice = priceCampaign[campaignType];
-        if (deployedCampaigns == 0) {
-            priceToPay = campaignPrice;
-        } else if (deployedCampaigns >= 1 && deployedCampaigns <= 2) {
+        if (deployedCampaigns >= 1 && deployedCampaigns <= 2) {
             priceToPay = (campaignPrice * (100 - discounts[uint256(CampaignTypes.SHORT)])) / 100;
         } else if (deployedCampaigns > 2 && deployedCampaigns <= 5) {
             priceToPay = (campaignPrice * (100 - discounts[uint256(CampaignTypes.MEDIUM)])) / 100;
         } else if (deployedCampaigns > 5) {
             priceToPay = (campaignPrice * (100 - discounts[uint256(CampaignTypes.LONG)])) / 100;
+        } else {
+            priceToPay = campaignPrice;
         }
         return (priceToPay, campaignType);
     }
