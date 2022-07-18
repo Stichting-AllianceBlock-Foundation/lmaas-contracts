@@ -116,11 +116,9 @@ describe.only('Liquidity mining campaign payment', () => {
 
       await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentInstanceAddress);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
-      expect(await PaymentInstance.refundWhitelist(testAccount.address, 2)).to.equal(1);
 
       await PaymentInstance.refundCredit(LMCPaymentInstanceAddress);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
-      expect(await PaymentInstance.refundWhitelist(testAccount.address, 2)).to.equal(0);
     });
   });
 
@@ -152,11 +150,9 @@ describe.only('Liquidity mining campaign payment', () => {
 
       await PaymentInstance.useCreditExtension(10, rewardPerSecond, LMCPaymentInstanceAddress);
       expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(0);
-      expect(await PaymentInstance.refundWhitelistExtension(testAccount.address)).to.equal(1);
 
       await PaymentInstance.refundCreditExtension(LMCPaymentInstanceAddress);
       expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(1);
-      expect(await PaymentInstance.refundWhitelistExtension(testAccount.address)).to.equal(0);
     });
   });
 });

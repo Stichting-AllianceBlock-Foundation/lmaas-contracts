@@ -120,11 +120,9 @@ describe.only('Staking campaign payment', () => {
 
       await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, StakingCampaignInstanceAddress);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
-      expect(await PaymentInstance.refundWhitelist(testAccount.address, 2)).to.equal(1);
 
       await PaymentInstance.refundCredit(StakingCampaignInstanceAddress);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
-      expect(await PaymentInstance.refundWhitelist(testAccount.address, 2)).to.equal(0);
     });
   });
 });

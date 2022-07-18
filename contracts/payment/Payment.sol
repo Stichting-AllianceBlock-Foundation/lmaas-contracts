@@ -26,6 +26,8 @@ interface PoolPaymentInterface {
     function startTimestamp() external view returns (uint256);
 
     function endTimestamp() external view returns (uint256);
+
+    function owner() external view returns (address);
 }
 
 contract Payment is Ownable {
@@ -62,8 +64,6 @@ contract Payment is Ownable {
     mapping(address => uint256) public totalCreditsPurchased;
 
     mapping(address => bool) public whitelist;
-    mapping(address => mapping(uint256 => uint256)) public refundWhitelist;
-    mapping(address => uint256) public refundWhitelistExtension;
 
     /** @param _paymentReceiverA First payment receiver
      * @param _paymentReceiverB Second payment receiver
@@ -243,12 +243,12 @@ contract Payment is Ownable {
     ) external {
         uint256 campaignDuration = calculateCampaignDuration(_startTimestamp, _endTimestamp);
         uint256 campaignType = daysToCampaignType(campaignDuration);
+        PoolPaymentInterface poolPaymentInterface = PoolPaymentInterface(campaignAddress);
 
+        require(msg.sender == poolPaymentInterface.owner(), 'Only the owner can use a credit');
         require(creditsCampaigns[msg.sender][campaignType] > 0, 'No credits available');
         creditsCampaigns[msg.sender][campaignType] -= 1;
-        refundWhitelist[msg.sender][campaignType] += 1;
 
-        PoolPaymentInterface poolPaymentInterface = PoolPaymentInterface(campaignAddress);
         poolPaymentInterface.startWithPaymentContract(_startTimestamp, _endTimestamp, _rewardPerSecond);
     }
 
@@ -261,12 +261,12 @@ contract Payment is Ownable {
         uint256 _endTimestamp = poolPaymentInterface.endTimestamp();
         uint256 campaignDuration = calculateCampaignDuration(_startTimestamp, _endTimestamp);
         uint256 campaignType = daysToCampaignType(campaignDuration);
-        require(refundWhitelist[msg.sender][campaignType] > 0, 'Wallet not whitelisted for a refund');
+
+        require(msg.sender == poolPaymentInterface.owner(), 'Only the owner can cancel a campaign');
 
         poolPaymentInterface.cancelWithPaymentContract();
 
         creditsCampaigns[msg.sender][campaignType] += 1;
-        refundWhitelist[msg.sender][campaignType] -= 1;
     }
 
     /** @dev Deducts an extension credit and schedules the extension of a campaign
@@ -279,12 +279,13 @@ contract Payment is Ownable {
         uint256[] calldata _rewardPerSecond,
         address campaignAddress
     ) external {
+        PoolPaymentInterface poolPaymentInterface = PoolPaymentInterface(campaignAddress);
+
         require(creditsCampaignExtension[msg.sender] > 0, 'No credits available');
+        require(msg.sender == poolPaymentInterface.owner(), 'Only the owner can extend a campaign');
 
         creditsCampaignExtension[msg.sender] -= 1;
-        refundWhitelistExtension[msg.sender] += 1;
 
-        PoolPaymentInterface poolPaymentInterface = PoolPaymentInterface(campaignAddress);
         poolPaymentInterface.extendWithPaymentContract(_durationTime, _rewardPerSecond);
         (_durationTime, _rewardPerSecond);
     }
@@ -293,12 +294,11 @@ contract Payment is Ownable {
      * @param campaignAddress Address of the Liquidity Mining Campaign Payment Contract
      */
     function refundCreditExtension(address campaignAddress) external {
-        require(refundWhitelistExtension[msg.sender] > 0, 'Wallet not whitelisted for a refund');
+        PoolPaymentInterface poolPaymentInterface = PoolPaymentInterface(campaignAddress);
+        require(msg.sender == poolPaymentInterface.owner(), 'Only the owner can cancel an extension');
 
         creditsCampaignExtension[msg.sender] += 1;
-        refundWhitelistExtension[msg.sender] -= 1;
 
-        PoolPaymentInterface poolPaymentInterface = PoolPaymentInterface(campaignAddress);
         poolPaymentInterface.cancelExtensionWithPaymentContract();
     }
 
