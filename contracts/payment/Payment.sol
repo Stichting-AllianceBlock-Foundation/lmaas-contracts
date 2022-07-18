@@ -59,11 +59,11 @@ contract Payment is Ownable {
     mapping(address => mapping(uint256 => uint256)) public creditsCampaigns;
 
     mapping(address => uint256) public creditsCampaignExtension;
-    mapping(address => uint256) public campaignsDeployed;
+    mapping(address => uint256) public totalCreditsPurchased;
 
     mapping(address => bool) public whitelist;
-    mapping(address => mapping(uint256 => bool)) public refundWhitelist;
-    mapping(address => bool) public refundWhitelistExtension;
+    mapping(address => mapping(uint256 => uint256)) public refundWhitelist;
+    mapping(address => uint256) public refundWhitelistExtension;
 
     /** @param _paymentReceiverA First payment receiver
      * @param _paymentReceiverB Second payment receiver
@@ -181,19 +181,22 @@ contract Payment is Ownable {
         uint256 priceToPay;
         uint256 campaignPrice;
 
-        uint256 deployedCampaigns = campaignsDeployed[_walletWithCredit];
+        uint256 deployedCampaigns = totalCreditsPurchased[_walletWithCredit];
         uint256 campaignType = daysToCampaignType(_days);
+
+        uint256 discount;
 
         campaignPrice = priceCampaign[campaignType];
         if (deployedCampaigns >= 1 && deployedCampaigns <= 2) {
-            priceToPay = (campaignPrice * (100 - discounts[uint256(CampaignTypes.SHORT)])) / 100;
+            discount = discounts[0];
         } else if (deployedCampaigns > 2 && deployedCampaigns <= 5) {
-            priceToPay = (campaignPrice * (100 - discounts[uint256(CampaignTypes.MEDIUM)])) / 100;
+            discount = discounts[1];
         } else if (deployedCampaigns > 5) {
-            priceToPay = (campaignPrice * (100 - discounts[uint256(CampaignTypes.LONG)])) / 100;
+            discount = discounts[2];
         } else {
             priceToPay = campaignPrice;
         }
+        priceToPay = (campaignPrice * (100 - discount)) / 100;
         return (priceToPay, campaignType);
     }
 
@@ -206,7 +209,7 @@ contract Payment is Ownable {
         transferPayment(msg.sender, priceToPay);
 
         creditsCampaigns[_walletToGiveCredit][campaignType] += 1;
-        campaignsDeployed[_walletToGiveCredit] += 1;
+        totalCreditsPurchased[_walletToGiveCredit] += 1;
     }
 
     /** @dev Payment function to buy a credit for extending a campaign
@@ -223,79 +226,79 @@ contract Payment is Ownable {
      * @return campaignDuration Campaign duration in days
      */
     function calculateCampaignDuration(uint256 _startTimestamp, uint256 _endTimestamp) internal pure returns (uint256) {
-        return (_endTimestamp - _startTimestamp) / SECONDS_PER_DAY;
+        return (_endTimestamp - _startTimestamp) / SECONDS_PER_DAY + 1;
     }
 
     /** @dev Deducts a credit and schedules the start of a campaign
      * @param _startTimestamp Unix timestamp of start time
      * @param _endTimestamp Unix timestamp of end time
      * @param _rewardPerSecond Amount of rewards per second
-     * @param CampaignAddress Address of the Liquidity Mining Campaign Payment Contract
+     * @param campaignAddress Address of the Liquidity Mining Campaign Payment Contract
      */
     function useCredit(
         uint256 _startTimestamp,
         uint256 _endTimestamp,
         uint256[] calldata _rewardPerSecond,
-        address CampaignAddress
+        address campaignAddress
     ) external {
         uint256 campaignDuration = calculateCampaignDuration(_startTimestamp, _endTimestamp);
         uint256 campaignType = daysToCampaignType(campaignDuration);
 
         require(creditsCampaigns[msg.sender][campaignType] > 0, 'No credits available');
         creditsCampaigns[msg.sender][campaignType] -= 1;
-        refundWhitelist[msg.sender][campaignType] = true;
+        refundWhitelist[msg.sender][campaignType] += 1;
 
-        PoolPaymentInterface poolPaymentInterface = PoolPaymentInterface(CampaignAddress);
+        PoolPaymentInterface poolPaymentInterface = PoolPaymentInterface(campaignAddress);
         poolPaymentInterface.startWithPaymentContract(_startTimestamp, _endTimestamp, _rewardPerSecond);
     }
 
     /** @dev Cancels a scheduled campaign and refunds a credit to the user
-     * @param CampaignAddress Address of the Liquidity Mining Campaign Payment Contract
+     * @param campaignAddress Address of the Liquidity Mining Campaign Payment Contract
      */
-    function refundCredit(address CampaignAddress) external {
-        PoolPaymentInterface poolPaymentInterface = PoolPaymentInterface(CampaignAddress);
+    function refundCredit(address campaignAddress) external {
+        PoolPaymentInterface poolPaymentInterface = PoolPaymentInterface(campaignAddress);
         uint256 _startTimestamp = poolPaymentInterface.startTimestamp();
         uint256 _endTimestamp = poolPaymentInterface.endTimestamp();
         uint256 campaignDuration = calculateCampaignDuration(_startTimestamp, _endTimestamp);
         uint256 campaignType = daysToCampaignType(campaignDuration);
         poolPaymentInterface.cancelWithPaymentContract();
 
-        require(refundWhitelist[msg.sender][campaignType] == true, 'Wallet not whitelisted for a refund');
+        require(refundWhitelist[msg.sender][campaignType] > 0, 'Wallet not whitelisted for a refund');
 
         creditsCampaigns[msg.sender][campaignType] += 1;
-        refundWhitelist[msg.sender][campaignType] = false;
+        refundWhitelist[msg.sender][campaignType] -= 1;
     }
 
     /** @dev Deducts an extension credit and schedules the extension of a campaign
      * @param _durationTime Campaign duration
      * @param _rewardPerSecond Rewards per second
-     * @param CampaignAddress Address of the Liquidity Mining Campaign Payment Contract
+     * @param campaignAddress Address of the Liquidity Mining Campaign Payment Contract
      */
     function useCreditExtension(
         uint256 _durationTime,
         uint256[] calldata _rewardPerSecond,
-        address CampaignAddress
+        address campaignAddress
     ) external {
         require(creditsCampaignExtension[msg.sender] > 0, 'No credits available');
 
         creditsCampaignExtension[msg.sender] -= 1;
-        refundWhitelistExtension[msg.sender] = true;
+        refundWhitelistExtension[msg.sender] += 1;
 
-        PoolPaymentInterface poolPaymentInterface = PoolPaymentInterface(CampaignAddress);
+        PoolPaymentInterface poolPaymentInterface = PoolPaymentInterface(campaignAddress);
         poolPaymentInterface.extendWithPaymentContract(_durationTime, _rewardPerSecond);
         (_durationTime, _rewardPerSecond);
     }
 
     /** @dev Cancels a schedules campaign extensions and refunds the user a credit
-     * @param CampaignAddress Address of the Liquidity Mining Campaign Payment Contract
+     * @param campaignAddress Address of the Liquidity Mining Campaign Payment Contract
      */
-    function refundCreditExtension(address CampaignAddress) external {
-        require(refundWhitelistExtension[msg.sender] == true, 'Wallet not whitelisted for a refund');
+    function refundCreditExtension(address campaignAddress) external {
+        require(refundWhitelistExtension[msg.sender] > 0, 'Wallet not whitelisted for a refund');
 
         creditsCampaignExtension[msg.sender] += 1;
-        refundWhitelistExtension[msg.sender] = false;
+        refundWhitelistExtension[msg.sender] -= 1;
 
-        PoolPaymentInterface poolPaymentInterface = PoolPaymentInterface(CampaignAddress);
+        PoolPaymentInterface poolPaymentInterface = PoolPaymentInterface(campaignAddress);
         poolPaymentInterface.cancelExtensionWithPaymentContract();
     }
 
