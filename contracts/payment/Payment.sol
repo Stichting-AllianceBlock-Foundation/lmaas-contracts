@@ -261,9 +261,9 @@ contract Payment is Ownable {
         uint256 _endTimestamp = poolPaymentInterface.endTimestamp();
         uint256 campaignDuration = calculateCampaignDuration(_startTimestamp, _endTimestamp);
         uint256 campaignType = daysToCampaignType(campaignDuration);
-        poolPaymentInterface.cancelWithPaymentContract();
-
         require(refundWhitelist[msg.sender][campaignType] > 0, 'Wallet not whitelisted for a refund');
+
+        poolPaymentInterface.cancelWithPaymentContract();
 
         creditsCampaigns[msg.sender][campaignType] += 1;
         refundWhitelist[msg.sender][campaignType] -= 1;
