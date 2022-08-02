@@ -10,7 +10,7 @@ import '../RewardsPoolBase.sol';
 */
 
 contract LiquidityMiningCampaignPayment is LiquidityMiningCampaign {
-    address paymentContract;
+    address internal immutable paymentContract;
 
     /** @param _stakingToken The token to stake
      * @param _rewardsTokens The reward tokens
