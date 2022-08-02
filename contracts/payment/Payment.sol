@@ -3,6 +3,7 @@ pragma solidity ^0.8.4;
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import '../interfaces/IPoolPayment.sol';
 
 /** @dev Payment contract based on a credit system.
     User's pay in USDT for a short, medium or long campaign.
@@ -10,29 +11,10 @@ import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
     Same goes for cancelling, extending and cancelling an extension.
     Prices for campaigns, extensions 
 */
-interface PoolPaymentInterface {
-    function startWithPaymentContract(
-        uint256 _startTimestamp,
-        uint256 _endTimestamp,
-        uint256[] calldata _rewardPerSecond
-    ) external;
-
-    function cancelWithPaymentContract() external;
-
-    function extendWithPaymentContract(uint256 _durationTime, uint256[] calldata _rewardPerSecond) external;
-
-    function cancelExtensionWithPaymentContract() external;
-
-    function startTimestamp() external view returns (uint256);
-
-    function endTimestamp() external view returns (uint256);
-
-    function owner() external view returns (address);
-}
 
 contract Payment is Ownable {
     using SafeERC20 for IERC20;
-    uint256 private constant HUNDRED_PERCENT = 1000;
+    uint256 private constant HUNDRED_PERCENT = 1e18;
     uint256 private constant SECONDS_PER_DAY = 60 * 60 * 24;
     address public paymentReceiverA;
     address public paymentReceiverB;
@@ -82,6 +64,9 @@ contract Payment is Ownable {
     ) {
         _setPaymentReceivers(_paymentReceiverA, _paymentReceiverB);
         require(_usdtToken != address(0), 'PaymentPortal: USDT token address cannot be 0');
+        for (uint256 i = 0; i < 3; i++) {
+            require(_discounts[i] <= 100, 'Discount percentage cannot be higher than 100 percent');
+        }
         usdtToken = IERC20(_usdtToken);
         priceCampaign = _priceCampaign;
         priceCampaignExtension = _priceCampaignExtension;
@@ -148,12 +133,10 @@ contract Payment is Ownable {
     function daysToCampaignType(uint256 _days) internal pure returns (uint256) {
         if (_days <= 35) {
             return uint256(CampaignTypes.SHORT);
-        } else if (_days > 35 && _days <= 179) {
+        } else if (_days <= 179) {
             return uint256(CampaignTypes.MEDIUM);
-        } else if (_days > 179) {
-            return uint256(CampaignTypes.LONG);
         } else {
-            return 0;
+            return uint256(CampaignTypes.LONG);
         }
     }
 
@@ -187,15 +170,16 @@ contract Payment is Ownable {
         uint256 discount;
 
         campaignPrice = priceCampaign[campaignType];
-        if (deployedCampaigns >= 1 && deployedCampaigns <= 2) {
-            discount = discounts[0];
-        } else if (deployedCampaigns > 2 && deployedCampaigns <= 5) {
-            discount = discounts[1];
-        } else if (deployedCampaigns > 5) {
-            discount = discounts[2];
-        } else {
-            priceToPay = campaignPrice;
+        if (deployedCampaigns != 0) {
+            if (deployedCampaigns >= 1 && deployedCampaigns <= 2) {
+                discount = discounts[0];
+            } else if (deployedCampaigns <= 5) {
+                discount = discounts[1];
+            } else if (deployedCampaigns > 5) {
+                discount = discounts[2];
+            }
         }
+
         priceToPay = (campaignPrice * (100 - discount)) / 100;
         return (priceToPay, campaignType);
     }
@@ -206,7 +190,7 @@ contract Payment is Ownable {
      */
     function pay(address _walletToGiveCredit, uint256 _days) external {
         (uint256 priceToPay, uint256 campaignType) = getCampaignPrice(_days, _walletToGiveCredit);
-        transferPayment(msg.sender, priceToPay);
+        transferPayment(priceToPay);
 
         creditsCampaigns[_walletToGiveCredit][campaignType] += 1;
         totalCreditsPurchased[_walletToGiveCredit] += 1;
@@ -216,7 +200,7 @@ contract Payment is Ownable {
      * @param _walletToGiveCredit Wallet to give credit to
      */
     function payExtension(address _walletToGiveCredit) external {
-        transferPayment(msg.sender, priceCampaignExtension);
+        transferPayment(priceCampaignExtension);
         creditsCampaignExtension[_walletToGiveCredit] += 1;
     }
 
@@ -243,11 +227,13 @@ contract Payment is Ownable {
     ) external {
         uint256 campaignDuration = calculateCampaignDuration(_startTimestamp, _endTimestamp);
         uint256 campaignType = daysToCampaignType(campaignDuration);
-        PoolPaymentInterface poolPaymentInterface = PoolPaymentInterface(campaignAddress);
+        IPoolPayment poolPaymentInterface = IPoolPayment(campaignAddress);
 
         require(msg.sender == poolPaymentInterface.owner(), 'Only the owner can use a credit');
         require(creditsCampaigns[msg.sender][campaignType] > 0, 'No credits available');
-        creditsCampaigns[msg.sender][campaignType] -= 1;
+        unchecked {
+            creditsCampaigns[msg.sender][campaignType] -= 1;
+        }
 
         poolPaymentInterface.startWithPaymentContract(_startTimestamp, _endTimestamp, _rewardPerSecond);
     }
@@ -256,7 +242,7 @@ contract Payment is Ownable {
      * @param campaignAddress Address of the Liquidity Mining Campaign Payment Contract
      */
     function refundCredit(address campaignAddress) external {
-        PoolPaymentInterface poolPaymentInterface = PoolPaymentInterface(campaignAddress);
+        IPoolPayment poolPaymentInterface = IPoolPayment(campaignAddress);
         uint256 _startTimestamp = poolPaymentInterface.startTimestamp();
         uint256 _endTimestamp = poolPaymentInterface.endTimestamp();
         uint256 campaignDuration = calculateCampaignDuration(_startTimestamp, _endTimestamp);
@@ -279,7 +265,7 @@ contract Payment is Ownable {
         uint256[] calldata _rewardPerSecond,
         address campaignAddress
     ) external {
-        PoolPaymentInterface poolPaymentInterface = PoolPaymentInterface(campaignAddress);
+        IPoolPayment poolPaymentInterface = IPoolPayment(campaignAddress);
 
         require(creditsCampaignExtension[msg.sender] > 0, 'No credits available');
         require(msg.sender == poolPaymentInterface.owner(), 'Only the owner can extend a campaign');
@@ -294,7 +280,7 @@ contract Payment is Ownable {
      * @param campaignAddress Address of the Liquidity Mining Campaign Payment Contract
      */
     function refundCreditExtension(address campaignAddress) external {
-        PoolPaymentInterface poolPaymentInterface = PoolPaymentInterface(campaignAddress);
+        IPoolPayment poolPaymentInterface = IPoolPayment(campaignAddress);
         require(msg.sender == poolPaymentInterface.owner(), 'Only the owner can cancel an extension');
 
         creditsCampaignExtension[msg.sender] += 1;
@@ -303,26 +289,16 @@ contract Payment is Ownable {
     }
 
     /** @dev Splits the payment between receiver A and receiver B
-     * @param _from Address funds are sent from
      * @param _amount Amount that's being split
      */
-    function transferPayment(address _from, uint256 _amount) internal {
+    function transferPayment(uint256 _amount) internal {
         uint256 amountA = (_amount * paymentShareA) / HUNDRED_PERCENT;
         uint256 amountB = _amount - amountA;
-        if (_from == address(this)) {
-            if (amountA > 0) {
-                usdtToken.safeTransfer(paymentReceiverA, amountA);
-            }
-            if (amountB > 0) {
-                usdtToken.safeTransfer(paymentReceiverB, amountB);
-            }
-        } else {
-            if (amountA > 0) {
-                usdtToken.safeTransferFrom(_from, paymentReceiverA, amountA);
-            }
-            if (amountB > 0) {
-                usdtToken.safeTransferFrom(_from, paymentReceiverB, amountB);
-            }
+        if (amountA > 0) {
+            usdtToken.safeTransferFrom(msg.sender, paymentReceiverA, amountA);
+        }
+        if (amountB > 0) {
+            usdtToken.safeTransferFrom(msg.sender, paymentReceiverB, amountB);
         }
     }
 }
