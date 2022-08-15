@@ -84,7 +84,7 @@ abstract contract ThrottledExit {
 
         emit ExitCompleted(msg.sender, infoExitStake);
 
-        return info.exitStake;
+        return infoExitStake;
     }
 
     function getAvailableExitTime(uint256 exitAmount) internal returns (uint256 exitTimestamp) {
