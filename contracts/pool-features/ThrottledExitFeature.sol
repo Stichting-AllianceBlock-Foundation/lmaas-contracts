@@ -23,7 +23,6 @@ abstract contract ThrottledExitFeature is StakeLockingFeature, ThrottledExit {
         uint256 amountStaked = user.amountStaked;
         uint256[] memory tokensOwed = user.tokensOwed;
 
-        totalStaked = totalStaked - amountStaked;
         user.amountStaked = 0;
 
         for (uint256 i = 0; i < rewardsTokens.length; i++) {
@@ -35,6 +34,7 @@ abstract contract ThrottledExitFeature is StakeLockingFeature, ThrottledExit {
     }
 
     function completeExit() public virtual onlyUnlocked {
-        finalizeExit(address(stakingToken), rewardsTokens);
+        uint256 removed = finalizeExit(address(stakingToken), rewardsTokens);
+        totalStaked = totalStaked - removed;
     }
 }

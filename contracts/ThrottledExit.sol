@@ -65,7 +65,7 @@ abstract contract ThrottledExit {
         emit ExitRequested(msg.sender, info.exitTimestamp);
     }
 
-    function finalizeExit(address _stakingToken, address[] memory _rewardsTokens) internal virtual {
+    function finalizeExit(address _stakingToken, address[] memory _rewardsTokens) internal virtual returns (uint256) {
         ExitInfo storage info = exitInfo[msg.sender];
         require(block.timestamp > info.exitTimestamp, 'finalizeExit::Trying to exit too early');
 
@@ -83,6 +83,8 @@ abstract contract ThrottledExit {
         }
 
         emit ExitCompleted(msg.sender, infoExitStake);
+
+        return info.exitStake;
     }
 
     function getAvailableExitTime(uint256 exitAmount) internal returns (uint256 exitTimestamp) {
