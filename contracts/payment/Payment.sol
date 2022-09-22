@@ -21,6 +21,7 @@ contract Payment is Ownable {
     uint256 public constant paymentShareA = HUNDRED_PERCENT;
 
     IERC20 private immutable usdtToken;
+    IERC20 private immutable wrappedUsdtToken;
 
     /** @dev Short campaign <= 35 days
         Medium campaign > 35 days <= 179 days
@@ -50,6 +51,7 @@ contract Payment is Ownable {
     /** @param _paymentReceiverA First payment receiver
      * @param _paymentReceiverB Second payment receiver
      * @param _usdtToken Address of USDT token used to pay
+     * @param _wrappedUsdtToken Address of the wrappedUSDT token used to pay
      * @param _priceCampaign Array of prices it costs to deploy a campaign ( short, medium, long)
      * @param _priceCampaignExtension Price it costs to extend a campaign
      * @param _discounts Array of discounts that are applied when a user has deployed campaigns before
@@ -58,6 +60,7 @@ contract Payment is Ownable {
         address _paymentReceiverA,
         address _paymentReceiverB,
         address _usdtToken,
+        address _wrappedUsdtToken,
         uint256[3] memory _priceCampaign,
         uint256 _priceCampaignExtension,
         uint256[3] memory _discounts
@@ -67,7 +70,9 @@ contract Payment is Ownable {
         for (uint256 i = 0; i < 3; i++) {
             require(_discounts[i] <= 100, 'Discount percentage cannot be higher than 100 percent');
         }
+        require(_wrappedUsdtToken != address(0), 'PaymentPortal: WUSDT token address cannot be 0');
         usdtToken = IERC20(_usdtToken);
+        wrappedUsdtToken = IERC20(_wrappedUsdtToken);
         priceCampaign = _priceCampaign;
         priceCampaignExtension = _priceCampaignExtension;
         discounts = _discounts;
@@ -187,20 +192,26 @@ contract Payment is Ownable {
     /** @dev Payment function to buy a credit for deploying a campaign
      * @param _walletToGiveCredit Wallet to give credit to
      * @param _days Campaign duration in days
+     * @param _wrapped Use the wrappedVersion of USDT
      */
-    function pay(address _walletToGiveCredit, uint256 _days) external {
+    function pay(
+        address _walletToGiveCredit,
+        uint256 _days,
+        bool _wrapped
+    ) external {
         (uint256 priceToPay, uint256 campaignType) = getCampaignPrice(_days, _walletToGiveCredit);
-        transferPayment(priceToPay);
-
+        transferPayment(priceToPay, _wrapped);
         creditsCampaigns[_walletToGiveCredit][campaignType] += 1;
         totalCreditsPurchased[_walletToGiveCredit] += 1;
     }
 
     /** @dev Payment function to buy a credit for extending a campaign
      * @param _walletToGiveCredit Wallet to give credit to
+     * @param _wrapped Use the wrappedVersion of USDT
      */
-    function payExtension(address _walletToGiveCredit) external {
-        transferPayment(priceCampaignExtension);
+
+    function payExtension(address _walletToGiveCredit, bool _wrapped) external {
+        transferPayment(priceCampaignExtension, _wrapped);
         creditsCampaignExtension[_walletToGiveCredit] += 1;
     }
 
@@ -296,15 +307,24 @@ contract Payment is Ownable {
 
     /** @dev Splits the payment between receiver A and receiver B
      * @param _amount Amount that's being split
+     * @param _wrapped If the payment is in wrapped USDT or USDT
      */
-    function transferPayment(uint256 _amount) internal {
+
+    function transferPayment(
+        address _from,
+        uint256 _amount,
+        bool _wrapped
+    ) internal {
         uint256 amountA = (_amount * paymentShareA) / HUNDRED_PERCENT;
         uint256 amountB = _amount - amountA;
+
+        IERC20 finalToken = _wrapped ? wrappedUsdtToken : usdtToken;
+
         if (amountA > 0) {
-            usdtToken.safeTransferFrom(msg.sender, paymentReceiverA, amountA);
+            finalToken.safeTransferFrom(msg.sender, paymentReceiverA, amountA);
         }
         if (amountB > 0) {
-            usdtToken.safeTransferFrom(msg.sender, paymentReceiverB, amountB);
+            finalToken.safeTransferFrom(msg.sender, paymentReceiverB, amountB);
         }
     }
 }

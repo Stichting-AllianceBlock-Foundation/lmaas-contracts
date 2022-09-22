@@ -25,7 +25,36 @@ module.exports = {
       },
     },
     rinkeby: {
-      url: `https://rinkeby.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      url: `https://rpc.ankr.com/eth_rinkeby`,
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    ethereum: {
+      url: `https://rpc.ankr.com/eth`,
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    binance: {
+      url: 'https://rpc.ankr.com/bsc',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    avalanche: {
+      url: 'https://rpc.ankr.com/avalanche',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    polygon: {
+      url: 'https://polygon-rpc.com',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    energywebchain: {
+      url: 'https://rpc.energyweb.org',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+      gasPrice: 20000000000,
+    },
+    moonbeam: {
+      url: 'https://rpc.ankr.com/moonbeam',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    songbird: {
+      url: 'https://songbird.towolabs.com/rpc	',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
   },

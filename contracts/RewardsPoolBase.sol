@@ -176,13 +176,26 @@ contract RewardsPoolBase is Ownable {
      * @param _tokenAmount The amount to be staked
      */
     function stake(uint256 _tokenAmount) public virtual {
-        _stake(_tokenAmount, msg.sender, true);
+        _stake(_tokenAmount, msg.sender, true, true);
+    }
+
+    /** @dev Stake an amount of tokens in a native way
+     */
+    function stakeNative() public payable virtual {
+        require(
+            address(stakingToken) == wrappedNativeToken,
+            'RewardsPoolBase: staking native not available for this campaign'
+        );
+
+        IWETH(address(stakingToken)).deposit{value: msg.value}();
+        _stake(msg.value, msg.sender, true, false);
     }
 
     function _stake(
         uint256 _tokenAmount,
         address _staker,
-        bool _chargeStaker
+        bool _chargeStaker,
+        bool _shouldTransfer
     ) internal {
         uint256 currentTimestamp = block.timestamp;
         require(
@@ -218,7 +231,8 @@ contract RewardsPoolBase is Ownable {
 
         emit Staked(_staker, _tokenAmount);
 
-        stakingToken.safeTransferFrom(address(_chargeStaker ? _staker : msg.sender), address(this), _tokenAmount);
+        if (_shouldTransfer)
+            stakingToken.safeTransferFrom(address(_chargeStaker ? _staker : msg.sender), address(this), _tokenAmount);
     }
 
     /** @dev Claim all your rewards, this will not remove your stake
@@ -614,4 +628,6 @@ contract RewardsPoolBase is Ownable {
         uint256 rewardsPeriodSeconds = _endTimestamp - _startTimestamp;
         return _rewardPerSecond * rewardsPeriodSeconds;
     }
+
+    receive() external payable {}
 }

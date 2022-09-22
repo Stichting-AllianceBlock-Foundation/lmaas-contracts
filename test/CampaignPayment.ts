@@ -9,9 +9,10 @@ import PaymentArtifact from '../../lmaas-contracts/artifacts/contracts/payment/P
 import { TestERC20 } from '../typechain/TestERC20';
 import { BigNumber } from 'ethers';
 
-describe.only('Liquidity mining campaign payment', () => {
+describe('Liquidity mining campaign payment', () => {
   let PaymentInstance: any;
-  let erc20: any;
+  let usdt: any;
+  let wusdt: any;
   let LmcPaymentInstance: any;
 
   const receiverA = '0x1750659358e53EddecEd0E818E2c65F9fD9A44e5';
@@ -62,12 +63,21 @@ describe.only('Liquidity mining campaign payment', () => {
     //Unix timestamp of 1500 days
 
     //deploy erc20
-    const UsdtToken = await ethers.getContractFactory('TestERC20');
-    erc20 = await UsdtToken.deploy(1000000000000);
-    await erc20.deployed();
+    const TERC20 = await ethers.getContractFactory('TestERC20');
+    usdt = await TERC20.deploy(1000000000000);
+    wusdt = await TERC20.deploy(1000000000000);
+    await usdt.deployed();
+    await wusdt.deployed();
 
-    const args: [string, string, string, [BigNumber, BigNumber, BigNumber], number, [BigNumber, BigNumber, BigNumber]] =
-      [receiverA, receiverB, erc20.address, campaignPrices, extensionPrice, discounts];
+    const args: [
+      string,
+      string,
+      string,
+      string,
+      [BigNumber, BigNumber, BigNumber],
+      number,
+      [BigNumber, BigNumber, BigNumber]
+    ] = [receiverA, receiverB, usdt.address, wusdt.address, campaignPrices, extensionPrice, discounts];
 
     //Deploy payment contract
     PaymentInstance = await deployContract(testAccount, PaymentArtifact, [...args]);
@@ -94,14 +104,15 @@ describe.only('Liquidity mining campaign payment', () => {
 
     LMCPaymentInstanceAddress = LmcPaymentInstance.address;
 
-    await erc20.approve(PaymentInstance.address, 10000000000);
+    await usdt.approve(PaymentInstance.address, 10000000000);
+    await wusdt.approve(PaymentInstance.address, 10000000000);
     await tknInst.mint(LmcPaymentInstance.address, amount);
   });
 
-  describe('Create campaign', async () => {
-    it('Should start a campaign and use a credit', async () => {
+  describe.only('Create campaign', async () => {
+    it('Should start a campaign and use a credit (USDT)', async () => {
       //0 = enum value for short campaign
-      await PaymentInstance.pay(testAccount.address, LongCampaignDays);
+      await PaymentInstance.pay(testAccount.address, LongCampaignDays, false);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
 
       await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentInstanceAddress);
@@ -109,9 +120,31 @@ describe.only('Liquidity mining campaign payment', () => {
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
     });
 
-    it('Should cancel a campaign and refund a credit', async () => {
+    it('Should cancel a campaign and refund a credit (USDT)', async () => {
       //0 = enum value for short campaign
-      await PaymentInstance.pay(testAccount.address, LongCampaignDays);
+      await PaymentInstance.pay(testAccount.address, LongCampaignDays, false);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
+
+      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentInstanceAddress);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
+
+      await PaymentInstance.refundCredit(LMCPaymentInstanceAddress);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
+    });
+
+    it('Should start a campaign and use a credit (WUSDT)', async () => {
+      //0 = enum value for short campaign
+      await PaymentInstance.pay(testAccount.address, LongCampaignDays, true);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
+
+      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentInstanceAddress);
+      // await LmcPaymentInstance.start(starTimestamp, endTimestamp, rewardPerSecond);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
+    });
+
+    it('Should cancel a campaign and refund a credit (WUSDT)', async () => {
+      //0 = enum value for short campaign
+      await PaymentInstance.pay(testAccount.address, LongCampaignDays, true);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
 
       await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentInstanceAddress);
@@ -123,29 +156,61 @@ describe.only('Liquidity mining campaign payment', () => {
   });
 
   describe('Extend campaign', async () => {
-    it('Should extend a campaign and use a credit', async () => {
+    it('Should extend a campaign and use a credit (USDT)', async () => {
       //0 = enum value for short campaign
-      await PaymentInstance.pay(testAccount.address, LongCampaignDays);
+      await PaymentInstance.pay(testAccount.address, LongCampaignDays, false);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
 
       await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentInstanceAddress);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
-      await PaymentInstance.payExtension(testAccount.address);
+      await PaymentInstance.payExtension(testAccount.address, false);
       expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(1);
 
       await PaymentInstance.useCreditExtension(10, rewardPerSecond, LMCPaymentInstanceAddress);
       expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(0);
     });
 
-    it('Should cancel an extension and refund a credit', async () => {
+    it('Should cancel an extension and refund a credit (USDT)', async () => {
       //0 = enum value for short campaign
-      await PaymentInstance.pay(testAccount.address, LongCampaignDays);
+      await PaymentInstance.pay(testAccount.address, LongCampaignDays, false);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
 
       await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentInstanceAddress);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
 
-      await PaymentInstance.payExtension(testAccount.address);
+      await PaymentInstance.payExtension(testAccount.address, false);
+      expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(1);
+
+      await PaymentInstance.useCreditExtension(10, rewardPerSecond, LMCPaymentInstanceAddress);
+      expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(0);
+
+      await PaymentInstance.refundCreditExtension(LMCPaymentInstanceAddress);
+      expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(1);
+    });
+
+    it('Should extend a campaign and use a credit (WUSDT)', async () => {
+      //0 = enum value for short campaign
+      await PaymentInstance.pay(testAccount.address, LongCampaignDays, true);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
+
+      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentInstanceAddress);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
+      await PaymentInstance.payExtension(testAccount.address, true);
+      expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(1);
+
+      await PaymentInstance.useCreditExtension(10, rewardPerSecond, LMCPaymentInstanceAddress);
+      expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(0);
+    });
+
+    it('Should cancel an extension and refund a credit (WUSDT)', async () => {
+      //0 = enum value for short campaign
+      await PaymentInstance.pay(testAccount.address, LongCampaignDays, true);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
+
+      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, LMCPaymentInstanceAddress);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
+
+      await PaymentInstance.payExtension(testAccount.address, true);
       expect(await PaymentInstance.creditsCampaignExtension(testAccount.address)).to.equal(1);
 
       await PaymentInstance.useCreditExtension(10, rewardPerSecond, LMCPaymentInstanceAddress);
