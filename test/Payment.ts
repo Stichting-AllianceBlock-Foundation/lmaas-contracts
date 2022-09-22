@@ -3,7 +3,7 @@ import { ethers } from 'hardhat';
 import { BigNumber } from 'ethers';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
-describe.only('Payment', () => {
+describe('Payment', () => {
   let payment: any;
   let deployer: SignerWithAddress;
   let usdt: any;

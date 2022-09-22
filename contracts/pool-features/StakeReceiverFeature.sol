@@ -15,6 +15,6 @@ abstract contract StakeReceiverFeature is RewardsPoolBase, StakeReceiver {
     function delegateStake(address _staker, uint256 _amount) public virtual override {
         require(_amount > 0, 'StakeReceiverFeature: No stake sent');
         require(_staker != address(0x0), 'StakeReceiverFeature: Invalid staker');
-        _stake(_amount, _staker, false, true);
+        _stake(_amount, _staker, false);
     }
 }

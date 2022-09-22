@@ -109,7 +109,7 @@ describe('Liquidity mining campaign payment', () => {
     await tknInst.mint(LmcPaymentInstance.address, amount);
   });
 
-  describe.only('Create campaign', async () => {
+  describe('Create campaign', async () => {
     it('Should start a campaign and use a credit (USDT)', async () => {
       //0 = enum value for short campaign
       await PaymentInstance.pay(testAccount.address, LongCampaignDays, false);
