@@ -9,7 +9,7 @@ import { TestERC20 } from '../typechain/TestERC20';
 import { NonCompoundingRewardsPool } from '../typechain/NonCompoundingRewardsPool';
 import { getTime, timeTravel } from './utils';
 
-describe('NonCompoundingRewardsPool', () => {
+describe.only('NonCompoundingRewardsPool', () => {
   let accounts: SignerWithAddress[];
   let testAccount: SignerWithAddress;
   let test1Account: SignerWithAddress;
@@ -76,7 +76,6 @@ describe('NonCompoundingRewardsPool', () => {
       _throttleRoundCap,
       contractStakeLimit,
       'TestCampaign',
-      ethers.constants.AddressZero,
     ])) as NonCompoundingRewardsPool;
 
     const reward = rewardPerSecond[0].mul(endTimestamp - startTimestamp);
@@ -313,7 +312,7 @@ describe('NonCompoundingRewardsPool', () => {
       await NonCompoundingRewardsPoolInstance.exit();
 
       await expect(NonCompoundingRewardsPoolInstance.completeExit()).to.be.revertedWith(
-        'finalizeExit:: Trying to exit too early'
+        'finalizeExit::Trying to exit too early'
       );
     });
 
