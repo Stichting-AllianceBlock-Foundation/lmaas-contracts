@@ -67,7 +67,7 @@ describe('NonCompoundingRewardsPool', () => {
     endTimestamp = startTimestamp + oneMinute * 2;
   };
 
-  const stake = async (_throttleRoundSeconds: number, _throttleRoundCap: BigNumber, _nativeStaking: boolean) => {
+  const stake = async (_throttleRoundSeconds: number, _throttleRoundCap: BigNumber) => {
     NonCompoundingRewardsPoolInstance = (await deployContract(testAccount, NonCompoundingRewardsPoolArtifact, [
       stakingTokenAddress,
       rewardTokensAddresses,
@@ -107,7 +107,7 @@ describe('NonCompoundingRewardsPool', () => {
 
       await setupRewardsPoolParameters();
 
-      await stake(throttleRoundSeconds, throttleRoundCap, false);
+      await stake(throttleRoundSeconds, throttleRoundCap);
     });
 
     it('[Should not claim or withdraw]:', async () => {
@@ -219,7 +219,7 @@ describe('NonCompoundingRewardsPool', () => {
       const _throttleRoundSeconds = 1000;
       const _throttleRoundCap = standardStakingAmount.mul(2);
 
-      await stake(_throttleRoundSeconds, _throttleRoundCap, false);
+      await stake(_throttleRoundSeconds, _throttleRoundCap);
       await timeTravel(190);
 
       await NonCompoundingRewardsPoolInstance.exit();
@@ -241,7 +241,7 @@ describe('NonCompoundingRewardsPool', () => {
       const _throttleRoundSeconds = 100;
       const _throttleRoundCap = standardStakingAmount.mul(2);
 
-      await stake(_throttleRoundSeconds, _throttleRoundCap, false);
+      await stake(_throttleRoundSeconds, _throttleRoundCap);
       await timeTravel(70);
       await NonCompoundingRewardsPoolInstance.connect(test2Account).stake(standardStakingAmount);
 
@@ -268,7 +268,7 @@ describe('NonCompoundingRewardsPool', () => {
       const _throttleRoundSeconds = 100;
       const _throttleRoundCap = standardStakingAmount.mul(2);
 
-      await stake(_throttleRoundSeconds, _throttleRoundCap, false);
+      await stake(_throttleRoundSeconds, _throttleRoundCap);
 
       await NonCompoundingRewardsPoolInstance.connect(test2Account).stake(standardStakingAmount);
 
@@ -304,7 +304,7 @@ describe('NonCompoundingRewardsPool', () => {
 
       await setupRewardsPoolParameters();
 
-      await stake(throttleRoundSeconds, throttleRoundCap, false);
+      await stake(throttleRoundSeconds, throttleRoundCap);
     });
 
     it('[Should not complete early]:', async () => {
