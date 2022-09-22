@@ -175,7 +175,7 @@ contract Payment is Ownable {
                 discount = discounts[0];
             } else if (deployedCampaigns <= 5) {
                 discount = discounts[1];
-            } else if (deployedCampaigns > 5) {
+            } else {
                 discount = discounts[2];
             }
         }
@@ -225,14 +225,17 @@ contract Payment is Ownable {
         uint256[] calldata _rewardPerSecond,
         address campaignAddress
     ) external {
-        uint256 campaignDuration = calculateCampaignDuration(_startTimestamp, _endTimestamp);
-        uint256 campaignType = daysToCampaignType(campaignDuration);
         IPoolPayment poolPaymentInterface = IPoolPayment(campaignAddress);
-
         require(msg.sender == poolPaymentInterface.owner(), 'Only the owner can use a credit');
-        require(creditsCampaigns[msg.sender][campaignType] > 0, 'No credits available');
-        unchecked {
-            creditsCampaigns[msg.sender][campaignType] -= 1;
+
+        if (!whitelist[msg.sender]) {
+            uint256 campaignDuration = calculateCampaignDuration(_startTimestamp, _endTimestamp);
+            uint256 campaignType = daysToCampaignType(campaignDuration);
+
+            require(creditsCampaigns[msg.sender][campaignType] > 0, 'No credits available');
+            unchecked {
+                creditsCampaigns[msg.sender][campaignType] -= 1;
+            }
         }
 
         poolPaymentInterface.startWithPaymentContract(_startTimestamp, _endTimestamp, _rewardPerSecond);
@@ -243,16 +246,17 @@ contract Payment is Ownable {
      */
     function refundCredit(address campaignAddress) external {
         IPoolPayment poolPaymentInterface = IPoolPayment(campaignAddress);
-        uint256 _startTimestamp = poolPaymentInterface.startTimestamp();
-        uint256 _endTimestamp = poolPaymentInterface.endTimestamp();
-        uint256 campaignDuration = calculateCampaignDuration(_startTimestamp, _endTimestamp);
-        uint256 campaignType = daysToCampaignType(campaignDuration);
-
         require(msg.sender == poolPaymentInterface.owner(), 'Only the owner can cancel a campaign');
 
         poolPaymentInterface.cancelWithPaymentContract();
 
-        creditsCampaigns[msg.sender][campaignType] += 1;
+        if (!whitelist[msg.sender]) {
+            uint256 _startTimestamp = poolPaymentInterface.startTimestamp();
+            uint256 _endTimestamp = poolPaymentInterface.endTimestamp();
+            uint256 campaignDuration = calculateCampaignDuration(_startTimestamp, _endTimestamp);
+            uint256 campaignType = daysToCampaignType(campaignDuration);
+            creditsCampaigns[msg.sender][campaignType] += 1;
+        }
     }
 
     /** @dev Deducts an extension credit and schedules the extension of a campaign
@@ -266,14 +270,14 @@ contract Payment is Ownable {
         address campaignAddress
     ) external {
         IPoolPayment poolPaymentInterface = IPoolPayment(campaignAddress);
-
-        require(creditsCampaignExtension[msg.sender] > 0, 'No credits available');
         require(msg.sender == poolPaymentInterface.owner(), 'Only the owner can extend a campaign');
 
-        creditsCampaignExtension[msg.sender] -= 1;
+        if (!whitelist[msg.sender]) {
+            require(creditsCampaignExtension[msg.sender] > 0, 'No credits available');
+            creditsCampaignExtension[msg.sender] -= 1;
+        }
 
         poolPaymentInterface.extendWithPaymentContract(_durationTime, _rewardPerSecond);
-        (_durationTime, _rewardPerSecond);
     }
 
     /** @dev Cancels a schedules campaign extensions and refunds the user a credit
@@ -283,7 +287,9 @@ contract Payment is Ownable {
         IPoolPayment poolPaymentInterface = IPoolPayment(campaignAddress);
         require(msg.sender == poolPaymentInterface.owner(), 'Only the owner can cancel an extension');
 
-        creditsCampaignExtension[msg.sender] += 1;
+        if (!whitelist[msg.sender]) {
+            creditsCampaignExtension[msg.sender] += 1;
+        }
 
         poolPaymentInterface.cancelExtensionWithPaymentContract();
     }
