@@ -11,7 +11,7 @@ import { TestERC20 } from '../typechain/TestERC20';
 import { LiquidityMiningCampaign } from '../typechain/LiquidityMiningCampaign';
 import { getTime, timeTravel, timeTravelTo } from './utils';
 
-describe.only('Liquidity mining campaign', () => {
+describe('Liquidity mining campaign', () => {
   let accounts: SignerWithAddress[];
   let testAccount: SignerWithAddress;
   let test1Account: SignerWithAddress;
