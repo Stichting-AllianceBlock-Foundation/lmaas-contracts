@@ -134,7 +134,7 @@ describe('ThrottledExitFeature', () => {
       expect(userFinalBalanceStaking).to.equal(userInitialBalanceStaking, 'Withdraw was not successfull');
       expect(userInfoFinal.amountStaked).to.equal(0, 'User staked amount is not updated properly');
       expect(finalTotalStkaedAmount).to.equal(
-        initialTotalStakedAmount.sub(standardStakingAmount),
+        initialTotalStakedAmount,
         'Contract total staked amount is not updated properly'
       );
 
@@ -173,7 +173,7 @@ describe('ThrottledExitFeature', () => {
       expect(userFinalBalanceStaking).to.equal(userInitialBalanceStaking, 'Withdraw was not successfull');
       expect(userInfoFinal.amountStaked).to.equal(0, 'User staked amount is not updated properly');
       expect(finalTotalStkaedAmount).to.equal(
-        initialTotalStakedAmount.sub(standardStakingAmount),
+        initialTotalStakedAmount,
         'Contract total staked amount is not updated properly'
       );
 

@@ -203,7 +203,7 @@ describe('NonCompoundingRewardsPool', () => {
       expect(finalRewardDebt).to.equal(0);
       expect(userFinalBalanceStaking).to.equal(userInitialBalanceStaking);
       expect(userInfoFinal.amountStaked).to.equal(0);
-      expect(finalTotalStkaedAmount).to.equal(initialTotalStakedAmount.sub(standardStakingAmount));
+      expect(finalTotalStkaedAmount).to.equal(initialTotalStakedAmount);
 
       const userExitInfo = await NonCompoundingRewardsPoolInstance.exitInfo(testAccount.address);
       const pendingReward = await NonCompoundingRewardsPoolInstance.getPendingReward(0);
@@ -239,7 +239,7 @@ describe('NonCompoundingRewardsPool', () => {
       expect(finalRewardDebt).to.equal(0);
       expect(userFinalBalanceStaking).to.equal(userInitialBalanceStaking);
       expect(userInfoFinal.amountStaked).to.equal(0);
-      expect(finalTotalStkaedAmount).to.equal(initialTotalStakedAmount.sub(standardStakingAmount));
+      expect(finalTotalStkaedAmount).to.equal(initialTotalStakedAmount);
 
       const userExitInfo = await NonCompoundingRewardsPoolInstance.exitInfo(testAccount.address);
       const pendingReward = await NonCompoundingRewardsPoolInstance.getPendingReward(0);
