@@ -11,7 +11,7 @@ import { TestERC20 } from '../typechain/TestERC20';
 import { LiquidityMiningCampaign } from '../typechain/LiquidityMiningCampaign';
 import { getTime, timeTravel, timeTravelTo } from './utils';
 
-describe('Liquidity mining campaign', () => {
+describe.only('Liquidity mining campaign', () => {
   let accounts: SignerWithAddress[];
   let testAccount: SignerWithAddress;
   let test1Account: SignerWithAddress;
@@ -91,7 +91,6 @@ describe('Liquidity mining campaign', () => {
       stakeLimit,
       contractStakeLimit,
       'TestCampaign',
-      ethers.constants.AddressZero,
     ])) as LiquidityMiningCampaign;
 
     await rewardTokensInstances[0].mint(LmcInstance.address, amount);
