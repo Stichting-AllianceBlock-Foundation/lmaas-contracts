@@ -8,6 +8,8 @@ import TestERC20Artifact from '../artifacts/contracts/TestERC20.sol/TestERC20.js
 import { TestERC20 } from '../typechain/TestERC20';
 import { NonCompoundingRewardsPool } from '../typechain/NonCompoundingRewardsPool';
 import { getTime, timeTravel } from './utils';
+import { WETH9 } from '../typechain';
+import WTTArtifact from '../artifacts/contracts/canonical-weth/WETH9.sol/WETH9.json';
 
 describe('NonCompoundingRewardsPool', () => {
   let accounts: SignerWithAddress[];
@@ -22,6 +24,7 @@ describe('NonCompoundingRewardsPool', () => {
   });
 
   let NonCompoundingRewardsPoolInstance: NonCompoundingRewardsPool;
+  let wrappedNativeTokenInstance: WETH9;
   let stakingTokenInstance: TestERC20;
   let stakingTokenAddress: string;
   let externalRewardsTokenInstance: TestERC20;
@@ -67,28 +70,52 @@ describe('NonCompoundingRewardsPool', () => {
     endTimestamp = startTimestamp + oneMinute * 2;
   };
 
-  const stake = async (_throttleRoundSeconds: number, _throttleRoundCap: BigNumber) => {
-    NonCompoundingRewardsPoolInstance = (await deployContract(testAccount, NonCompoundingRewardsPoolArtifact, [
-      stakingTokenAddress,
-      rewardTokensAddresses,
-      stakeLimit,
-      _throttleRoundSeconds,
-      _throttleRoundCap,
-      contractStakeLimit,
-    ])) as NonCompoundingRewardsPool;
+  const stake = async (_throttleRoundSeconds: number, _throttleRoundCap: BigNumber, _nativeStaking: boolean) => {
+    if (!_nativeStaking) {
+      NonCompoundingRewardsPoolInstance = (await deployContract(testAccount, NonCompoundingRewardsPoolArtifact, [
+        stakingTokenAddress,
+        rewardTokensAddresses,
+        stakeLimit,
+        _throttleRoundSeconds,
+        _throttleRoundCap,
+        contractStakeLimit,
+        'TestCampaign',
+        ethers.constants.AddressZero,
+      ])) as NonCompoundingRewardsPool;
 
-    const reward = rewardPerSecond[0].mul(endTimestamp - startTimestamp);
-    await rewardTokensInstances[0].mint(NonCompoundingRewardsPoolInstance.address, reward);
+      const reward = rewardPerSecond[0].mul(endTimestamp - startTimestamp);
+      await rewardTokensInstances[0].mint(NonCompoundingRewardsPoolInstance.address, reward);
 
-    await NonCompoundingRewardsPoolInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
+      await NonCompoundingRewardsPoolInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
 
-    await stakingTokenInstance.approve(NonCompoundingRewardsPoolInstance.address, standardStakingAmount);
-    await stakingTokenInstance
-      .connect(test2Account)
-      .approve(NonCompoundingRewardsPoolInstance.address, standardStakingAmount);
+      await stakingTokenInstance.approve(NonCompoundingRewardsPoolInstance.address, standardStakingAmount);
+      await stakingTokenInstance
+        .connect(test2Account)
+        .approve(NonCompoundingRewardsPoolInstance.address, standardStakingAmount);
 
-    await timeTravel(70);
-    await NonCompoundingRewardsPoolInstance.stake(standardStakingAmount);
+      await timeTravel(70);
+      await NonCompoundingRewardsPoolInstance.stake(standardStakingAmount);
+    } else {
+      wrappedNativeTokenInstance = (await deployContract(testAccount, WTTArtifact)) as WETH9;
+
+      NonCompoundingRewardsPoolInstance = (await deployContract(testAccount, NonCompoundingRewardsPoolArtifact, [
+        wrappedNativeTokenInstance.address,
+        rewardTokensAddresses,
+        stakeLimit,
+        _throttleRoundSeconds,
+        _throttleRoundCap,
+        contractStakeLimit,
+        'TestCampaign',
+        wrappedNativeTokenInstance.address,
+      ])) as NonCompoundingRewardsPool;
+
+      const reward = rewardPerSecond[0].mul(endTimestamp - startTimestamp);
+      await rewardTokensInstances[0].mint(NonCompoundingRewardsPoolInstance.address, reward);
+
+      await NonCompoundingRewardsPoolInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
+
+      await timeTravel(70);
+    }
   };
 
   describe('Interaction Mechanics', async function () {
@@ -106,7 +133,7 @@ describe('NonCompoundingRewardsPool', () => {
 
       await setupRewardsPoolParameters();
 
-      await stake(throttleRoundSeconds, throttleRoundCap);
+      await stake(throttleRoundSeconds, throttleRoundCap, false);
     });
 
     it('[Should not claim or withdraw]:', async () => {
@@ -129,6 +156,24 @@ describe('NonCompoundingRewardsPool', () => {
       await expect(NonCompoundingRewardsPoolInstance.exit()).to.be.revertedWith(
         'onlyUnlocked::cannot perform this action until the end of the lock'
       );
+    });
+
+    it('[Should stakeNative successfully]:', async () => {
+      await setupRewardsPoolParameters();
+      await stake(throttleRoundSeconds, throttleRoundCap, true);
+
+      let contractInitialBalance = await wrappedNativeTokenInstance.balanceOf(
+        NonCompoundingRewardsPoolInstance.address
+      );
+      let userInitialBalance = await testAccount.getBalance();
+
+      await NonCompoundingRewardsPoolInstance.stakeNative({ value: standardStakingAmount });
+
+      let contractFinalBalance = await wrappedNativeTokenInstance.balanceOf(NonCompoundingRewardsPoolInstance.address);
+      let userFinalBalance = await testAccount.getBalance();
+
+      expect(contractFinalBalance).to.equal(contractInitialBalance.add(standardStakingAmount));
+      expect(userFinalBalance).to.lt(userInitialBalance);
     });
 
     it('[Should request exit successfully]:', async () => {
@@ -218,7 +263,7 @@ describe('NonCompoundingRewardsPool', () => {
       const _throttleRoundSeconds = 1000;
       const _throttleRoundCap = standardStakingAmount.mul(2);
 
-      await stake(_throttleRoundSeconds, _throttleRoundCap);
+      await stake(_throttleRoundSeconds, _throttleRoundCap, false);
       await timeTravel(190);
 
       await NonCompoundingRewardsPoolInstance.exit();
@@ -240,7 +285,7 @@ describe('NonCompoundingRewardsPool', () => {
       const _throttleRoundSeconds = 100;
       const _throttleRoundCap = standardStakingAmount.mul(2);
 
-      await stake(_throttleRoundSeconds, _throttleRoundCap);
+      await stake(_throttleRoundSeconds, _throttleRoundCap, false);
       await timeTravel(70);
       await NonCompoundingRewardsPoolInstance.connect(test2Account).stake(standardStakingAmount);
 
@@ -267,7 +312,7 @@ describe('NonCompoundingRewardsPool', () => {
       const _throttleRoundSeconds = 100;
       const _throttleRoundCap = standardStakingAmount.mul(2);
 
-      await stake(_throttleRoundSeconds, _throttleRoundCap);
+      await stake(_throttleRoundSeconds, _throttleRoundCap, false);
 
       await NonCompoundingRewardsPoolInstance.connect(test2Account).stake(standardStakingAmount);
 
@@ -303,7 +348,7 @@ describe('NonCompoundingRewardsPool', () => {
 
       await setupRewardsPoolParameters();
 
-      await stake(throttleRoundSeconds, throttleRoundCap);
+      await stake(throttleRoundSeconds, throttleRoundCap, false);
     });
 
     it('[Should not complete early]:', async () => {
@@ -311,7 +356,7 @@ describe('NonCompoundingRewardsPool', () => {
       await NonCompoundingRewardsPoolInstance.exit();
 
       await expect(NonCompoundingRewardsPoolInstance.completeExit()).to.be.revertedWith(
-        'finalizeExit::Trying to exit too early'
+        'finalizeExit:: Trying to exit too early'
       );
     });
 
