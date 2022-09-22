@@ -310,11 +310,7 @@ contract Payment is Ownable {
      * @param _wrapped If the payment is in wrapped USDT or USDT
      */
 
-    function transferPayment(
-        address _from,
-        uint256 _amount,
-        bool _wrapped
-    ) internal {
+    function transferPayment(uint256 _amount, bool _wrapped) internal {
         uint256 amountA = (_amount * paymentShareA) / HUNDRED_PERCENT;
         uint256 amountB = _amount - amountA;
 
