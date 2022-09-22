@@ -1,59 +1,38 @@
 import { ethers } from 'hardhat';
 import { deployContract } from 'ethereum-waffle';
 
-import { TestERC20 } from '../typechain/TestERC20';
-
-import LMCArtifact from '../artifacts/contracts/LiquidityMiningCampaign.sol/LiquidityMiningCampaign.json';
-import { LiquidityMiningCampaign } from '../typechain/LiquidityMiningCampaign';
+import PaymentArtifact from '../artifacts/contracts/payment/Payment.sol/Payment.json';
 import { BigNumber } from 'ethers';
 
 async function main() {
   const accounts = await ethers.getSigners();
   const contractOwner = accounts[0];
 
-  const stakingTokenAddress = process.env.STAKING_TOKEN;
+  const paymentReceiver = process.env.PAYMENT_RECEIVER;
 
-  const rewardTokenAddresses = (process.env.REWARD_TOKENS as string).split(',');
-  const rewardTokenAmounts = (process.env.REWARD_AMOUNTS as string).split(',');
+  const usdtRinkeby = '0x851a410Cc18D8A1eB93Ccb6e37C2B19d8628fAF2';
+  const usdtMoonbeam = '0x122CDB7aCfDa67Fb2Ae308a9F8819c962622C324';
+  const usdtEth = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
+  const usdtBnb = '0x7CfdF292b18403Ff4C51AB7Aaeca051ef4a8F6cf';
+  const usdtEwt = '0x86109279df8270a16f3b41602e92d2453f3f6bac';
+  const usdtPoylgon = '0x35E9F3005656C9564D6C98b45eb046FDeA1C0199';
+  const usdtAvalanche = '0x315aD5DF2b70A45310df333C8Be7c095de2EA774';
+  const usdtSongbird = '0x6eB34761e627285994C6bE0E0d4Ea20F7132A736';
 
-  const stakeLimit = process.env.STAKE_LIMIT;
-  const contractStakeLimit = process.env.CONTRACT_STAKE_LIMIT;
+  const campaignPrice = [3500000000, 4000000000, 4500000000];
+  const campaignPriceExtension = process.env.CAMPAIGN_PRICE_EXTENSION;
+  const discounts = [10, 20, 35];
 
-  const LmcInstance = (await deployContract(contractOwner, LMCArtifact, [
-    stakingTokenAddress,
-    rewardTokenAddresses,
-    stakeLimit,
-    contractStakeLimit,
-    'Test LMC',
-  ])) as LiquidityMiningCampaign;
+  const PaymentInstance = (await deployContract(contractOwner, PaymentArtifact, [
+    paymentReceiver,
+    paymentReceiver,
+    usdtSongbird,
+    campaignPrice,
+    campaignPriceExtension,
+    discounts,
+  ])) as any;
 
-  console.log('LMC deployed at:', LmcInstance.address);
-
-  const duration = parseInt(process.env.DURATION as string);
-
-  const erc20 = await ethers.getContractFactory('TestERC20');
-  const txs = [];
-
-  for (let i = 0; i < rewardTokenAddresses.length; i++) {
-    const rewardTokenAddress = rewardTokenAddresses[i];
-    const rewardTokenAmount = BigNumber.from(rewardTokenAmounts[i]).mul(duration);
-
-    const contract = (await erc20.attach(rewardTokenAddress)) as TestERC20;
-    const tx = await contract.transfer(LmcInstance.address, rewardTokenAmount);
-
-    txs.push(tx.wait());
-
-    console.log('Sent ' + rewardTokenAmount + ' ' + rewardTokenAddress + ' to ' + LmcInstance.address);
-  }
-
-  await Promise.all(txs);
-
-  const currentTime = Math.round(new Date().getTime() / 1000);
-  const startTime = currentTime + 60;
-
-  await LmcInstance.start(startTime, startTime + duration, rewardTokenAmounts);
-
-  console.log('LMC starts at:', new Date(startTime * 1000));
+  console.log('LMC deployed at:', PaymentInstance.address);
 }
 
 main()
