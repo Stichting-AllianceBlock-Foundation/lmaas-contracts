@@ -159,7 +159,11 @@ contract RewardsPoolBase is Ownable {
 
     /** @dev Cancels the scheduled start. Can only be done before the start.
      */
-    function cancel() external onlyOwner {
+    function cancel() external virtual onlyOwner {
+        _cancel();
+    }
+
+    function _cancel() internal {
         require(block.timestamp < startTimestamp, 'RewardsPoolBase: No start scheduled or already started');
 
         rewardPerSecond = new uint256[](0);
@@ -316,7 +320,7 @@ contract RewardsPoolBase is Ownable {
 
         if (currentTimestamp > endTimestamp && extensionDuration > 0) {
             _updateRewardMultipliers(endTimestamp);
-            _extend(endTimestamp, endTimestamp + extensionDuration, extensionRewardPerSecond);
+            _applyExtension(endTimestamp, endTimestamp + extensionDuration, extensionRewardPerSecond);
             _updateRewardMultipliers(currentTimestamp);
         } else {
             _updateRewardMultipliers(currentTimestamp);
@@ -469,6 +473,10 @@ contract RewardsPoolBase is Ownable {
      * @param _rewardPerSecond array with new rewards per second for each token
      */
     function extend(uint256 _durationTime, uint256[] calldata _rewardPerSecond) external virtual onlyOwner {
+        _extend(_durationTime, _rewardPerSecond);
+    }
+
+    function _extend(uint256 _durationTime, uint256[] calldata _rewardPerSecond) internal virtual {
         require(extensionDuration == 0, 'RewardsPoolBase: there is already an extension');
 
         require(_durationTime > 0, 'RewardsPoolBase: duration must be greater than 0');
@@ -493,14 +501,14 @@ contract RewardsPoolBase is Ownable {
 
         if (ended) {
             _updateRewardMultipliers(endTimestamp);
-            _extend(newStartTimestamp, newEndTimestamp, _rewardPerSecond);
+            _applyExtension(newStartTimestamp, newEndTimestamp, _rewardPerSecond);
         } else {
             extensionDuration = _durationTime;
             extensionRewardPerSecond = _rewardPerSecond;
         }
     }
 
-    function _extend(
+    function _applyExtension(
         uint256 _startTimestamp,
         uint256 _endTimestamp,
         uint256[] memory _rewardPerSecond
@@ -527,7 +535,11 @@ contract RewardsPoolBase is Ownable {
     /**
      * @dev Cancels the schedules extension
      */
-    function cancelExtension() external onlyOwner {
+    function cancelExtension() external virtual onlyOwner {
+        _cancelExtension();
+    }
+
+    function _cancelExtension() internal {
         require(extensionDuration > 0, 'RewardsPoolBase: there is no extension scheduled');
         require(block.timestamp < endTimestamp, 'RewardsPoolBase: cannot cancel extension after it has started');
 

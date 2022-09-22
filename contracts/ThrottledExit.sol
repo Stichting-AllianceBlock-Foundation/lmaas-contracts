@@ -87,15 +87,7 @@ abstract contract ThrottledExit {
             uint256 infoRewards = info.rewards[i];
             info.rewards[i] = 0;
 
-            // Native staking
-            if (_rewardsTokens[i] == _wrappedNativeToken) {
-                IWETH(_rewardsTokens[i]).withdraw(infoRewards);
-
-                /* This will transfer the native token to the user, when he claim the rewards. */
-                payable(msg.sender).transfer(infoRewards);
-            } else {
-                IERC20(_rewardsTokens[i]).safeTransfer(msg.sender, infoRewards);
-            }
+            IERC20(_rewardsTokens[i]).safeTransfer(msg.sender, infoRewards);
         }
 
         emit ExitCompleted(msg.sender, infoExitStake);
