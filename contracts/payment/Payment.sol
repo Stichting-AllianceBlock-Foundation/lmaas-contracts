@@ -259,13 +259,14 @@ contract Payment is Ownable {
         IPoolPayment poolPaymentInterface = IPoolPayment(campaignAddress);
         require(msg.sender == poolPaymentInterface.owner(), 'Only the owner can cancel a campaign');
 
+        uint256 _startTimestamp = poolPaymentInterface.startTimestamp();
+        uint256 _endTimestamp = poolPaymentInterface.endTimestamp();
+        uint256 campaignDuration = calculateCampaignDuration(_startTimestamp, _endTimestamp);
+        uint256 campaignType = daysToCampaignType(campaignDuration);
+
         poolPaymentInterface.cancelWithPaymentContract();
 
         if (!whitelist[msg.sender]) {
-            uint256 _startTimestamp = poolPaymentInterface.startTimestamp();
-            uint256 _endTimestamp = poolPaymentInterface.endTimestamp();
-            uint256 campaignDuration = calculateCampaignDuration(_startTimestamp, _endTimestamp);
-            uint256 campaignType = daysToCampaignType(campaignDuration);
             creditsCampaigns[msg.sender][campaignType] += 1;
         }
     }
