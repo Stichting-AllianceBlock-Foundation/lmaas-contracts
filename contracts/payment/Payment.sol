@@ -326,37 +326,21 @@ contract Payment is Ownable {
         uint256 amountA = (_amount * paymentShareA) / HUNDRED_PERCENT;
         uint256 amountB = _amount - amountA;
 
-        if (_wrapped) {
-            if (_from == address(this)) {
-                if (amountA > 0) {
-                    wrappedUsdtToken.safeTransfer(paymentReceiverA, amountA);
-                }
-                if (amountB > 0) {
-                    wrappedUsdtToken.safeTransfer(paymentReceiverB, amountB);
-                }
-            } else {
-                if (amountA > 0) {
-                    wrappedUsdtToken.safeTransferFrom(_from, paymentReceiverA, amountA);
-                }
-                if (amountB > 0) {
-                    wrappedUsdtToken.safeTransferFrom(_from, paymentReceiverB, amountB);
-                }
+        IERC20 finalToken = _wrapped ? wrappedUsdtToken : usdtToken;
+
+        if (_from == address(this)) {
+            if (amountA > 0) {
+                finalToken.safeTransfer(paymentReceiverA, amountA);
+            }
+            if (amountB > 0) {
+                finalToken.safeTransfer(paymentReceiverB, amountB);
             }
         } else {
-            if (_from == address(this)) {
-                if (amountA > 0) {
-                    usdtToken.safeTransfer(paymentReceiverA, amountA);
-                }
-                if (amountB > 0) {
-                    usdtToken.safeTransfer(paymentReceiverB, amountB);
-                }
-            } else {
-                if (amountA > 0) {
-                    usdtToken.safeTransferFrom(_from, paymentReceiverA, amountA);
-                }
-                if (amountB > 0) {
-                    usdtToken.safeTransferFrom(_from, paymentReceiverB, amountB);
-                }
+            if (amountA > 0) {
+                finalToken.safeTransferFrom(_from, paymentReceiverA, amountA);
+            }
+            if (amountB > 0) {
+                finalToken.safeTransferFrom(_from, paymentReceiverB, amountB);
             }
         }
     }
