@@ -1,6 +1,7 @@
 import '@typechain/hardhat';
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-waffle';
+import '@nomiclabs/hardhat-etherscan';
 import 'hardhat-contract-sizer';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
@@ -54,7 +55,11 @@ module.exports = {
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
     songbird: {
-      url: 'https://songbird.towolabs.com/rpc	',
+      url: 'https://songbird.towolabs.com/rpc',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    goerli: {
+      url: 'https://nd-734-064-122.p2pify.com/62dc5c5a86cd193963ee39f48eb2cadf',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
   },
@@ -66,5 +71,8 @@ module.exports = {
   typechain: {
     outDir: 'typechain',
     target: 'ethers-v5',
+  },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY,
   },
 };
