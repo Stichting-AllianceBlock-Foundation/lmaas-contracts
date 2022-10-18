@@ -27,6 +27,7 @@ contract GeneralFaucet is Context, AccessControl {
 
     constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        _grantRole(MANAGER_ROLE, _msgSender());
     }
 
     /*
