@@ -18,6 +18,8 @@ contract ERC20Faucet is ERC20 {
     }
 
     function faucet(address _to, uint256 _amount) external {
+        require(_to != address(0), 'ERC20Faucet: Invalid address');
+        require(_amount > 0, 'ERC20Faucet: Should be greater than 0');
         _mint(_to, _amount);
     }
 

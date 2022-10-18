@@ -3,11 +3,26 @@ pragma solidity ^0.8.9;
 
 import '@openzeppelin/contracts/access/AccessControl.sol';
 import '@openzeppelin/contracts/utils/Context.sol';
-import './ERC20Faucet.sol';
+
+interface IFaucet {
+    function faucet(address _mintTo, uint256 _amountOrId) external;
+}
 
 contract GeneralFaucet is Context, AccessControl {
-    mapping(uint256 => address) public faucetsToMint;
-    uint256 public countOfFacets;
+    enum FaucetType {
+        ERC20,
+        ERC721,
+        ERC1155
+    }
+
+    mapping(uint256 => address) public ERC20Faucets;
+    mapping(uint256 => address) public ERC721Faucets;
+    mapping(uint256 => address) public ERC1155Faucets;
+
+    uint256 public countERC20Facets;
+    uint256 public countERC721Facets;
+    uint256 public countERC1155Facets;
+
     bytes32 public constant MANAGER_ROLE = keccak256('MANAGER_ROLE');
 
     constructor() {
@@ -15,15 +30,22 @@ contract GeneralFaucet is Context, AccessControl {
     }
 
     /*
-     * @notice mint a token to a msg.sender.
-     * @param _faucetToMint the address of the faucet to mint.
-     * @param _amountToMint the amount to mint.
+     * @notice mint multiple tokens to a specific address.
+     * @param _faucetToMint the addresses of the faucets to mint.
+     * @param _mintTo the address to mint to.
+     * @param _idToMint the id of the NFT to mint.
      */
-    function faucet(address _faucetToMint, uint256 _amountToMint) external returns (bool) {
-        for (uint256 i; i < countOfFacets; i++) {
-            if (faucetsToMint[i] == _faucetToMint) {
-                ERC20Faucet(_faucetToMint).faucet(_msgSender(), _amountToMint);
-                return true;
+    function faucetERC1155MintToMultiple(
+        address[] calldata _faucetToMint,
+        address _mintTo,
+        uint256 _idToMint
+    ) external returns (bool) {
+        for (uint256 i; i < countERC1155Facets; i++) {
+            for (uint256 j; j < _faucetToMint.length; j++) {
+                if (ERC1155Faucets[i] == _faucetToMint[j]) {
+                    IFaucet(_faucetToMint[j]).faucet(_mintTo, _idToMint);
+                    return true;
+                }
             }
         }
 
@@ -32,35 +54,19 @@ contract GeneralFaucet is Context, AccessControl {
 
     /*
      * @notice mint multiple tokens to a specific address.
-     * @param _faucetToMint the address of the faucet to mint.
-     * @param _mintTo the address to mint to.
-     * @param _amountToMint the amount to mint.
-     */
-    function faucetMintTo(
-        address _faucetToMint,
-        address _mintTo,
-        uint256 _amountToMint
-    ) external returns (bool) {
-        for (uint256 i; i < countOfFacets; i++) {
-            if (faucetsToMint[i] == _faucetToMint) {
-                ERC20Faucet(_faucetToMint).faucet(_mintTo, _amountToMint);
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /*
-     * @notice mint multiple tokens to a msg.sender.
      * @param _faucetToMint the addresses of the faucets to mint.
-     * @param _amountToMint the amount to mint.
+     * @param _mintTo the address to mint to.
+     * @param _idToMint the id of the NFT to mint.
      */
-    function faucetMultiple(address[] calldata _faucetToMint, uint256 _amountToMint) external returns (bool) {
-        for (uint256 i; i < countOfFacets; i++) {
+    function faucetERC721MintToMultiple(
+        address[] calldata _faucetToMint,
+        address _mintTo,
+        uint256 _idToMint
+    ) external returns (bool) {
+        for (uint256 i; i < countERC721Facets; i++) {
             for (uint256 j; j < _faucetToMint.length; j++) {
-                if (faucetsToMint[i] == _faucetToMint[j]) {
-                    ERC20Faucet(_faucetToMint[j]).faucet(_msgSender(), _amountToMint);
+                if (ERC721Faucets[i] == _faucetToMint[j]) {
+                    IFaucet(_faucetToMint[j]).faucet(_mintTo, _idToMint);
                     return true;
                 }
             }
@@ -75,15 +81,15 @@ contract GeneralFaucet is Context, AccessControl {
      * @param _mintTo the address to mint to.
      * @param _amountToMint the amount to mint.
      */
-    function faucetMintToMultiple(
+    function faucetERC20MintToMultiple(
         address[] calldata _faucetToMint,
         address _mintTo,
         uint256 _amountToMint
     ) external returns (bool) {
-        for (uint256 i; i < countOfFacets; i++) {
+        for (uint256 i; i < countERC20Facets; i++) {
             for (uint256 j; j < _faucetToMint.length; j++) {
-                if (faucetsToMint[i] == _faucetToMint[j]) {
-                    ERC20Faucet(_faucetToMint[j]).faucet(_mintTo, _amountToMint);
+                if (ERC20Faucets[i] == _faucetToMint[j]) {
+                    IFaucet(_faucetToMint[j]).faucet(_mintTo, _amountToMint);
                     return true;
                 }
             }
@@ -95,23 +101,57 @@ contract GeneralFaucet is Context, AccessControl {
     /*
      * @notice add a faucet to the list of faucets.
      */
-    function addFaucet(address _faucet) external onlyRole(MANAGER_ROLE) returns (bool) {
-        faucetsToMint[countOfFacets] = _faucet;
-        countOfFacets++;
-        return true;
+    function addFaucet(address _faucet, FaucetType _typeFacet) external onlyRole(MANAGER_ROLE) returns (bool) {
+        if (_typeFacet == FaucetType.ERC20) {
+            ERC20Faucets[countERC20Facets] = _faucet;
+            countERC20Facets++;
+            return true;
+        } else if (_typeFacet == FaucetType.ERC721) {
+            ERC721Faucets[countERC721Facets] = _faucet;
+            countERC721Facets++;
+            return true;
+        } else if (_typeFacet == FaucetType.ERC1155) {
+            ERC1155Faucets[countERC1155Facets] = _faucet;
+            countERC1155Facets++;
+            return true;
+        }
+
+        return false;
     }
 
     /*
      * @notice remove a faucet from the list of faucets.
      */
-    function deleteFaucet(address _faucet) external onlyRole(MANAGER_ROLE) returns (bool) {
-        for (uint256 i; i < countOfFacets; i++) {
-            if (faucetsToMint[i] == _faucet) {
-                faucetsToMint[i] = faucetsToMint[countOfFacets - 1];
-                delete faucetsToMint[countOfFacets - 1];
-                countOfFacets--;
+    function deleteFaucet(address _faucet, FaucetType _typeFacet) external onlyRole(MANAGER_ROLE) returns (bool) {
+        if (_typeFacet == FaucetType.ERC20) {
+            for (uint256 i; i < countERC20Facets; i++) {
+                if (ERC20Faucets[i] == _faucet) {
+                    ERC20Faucets[i] = ERC20Faucets[countERC20Facets - 1];
+                    delete ERC20Faucets[countERC20Facets - 1];
+                    countERC20Facets--;
 
-                return true;
+                    return true;
+                }
+            }
+        } else if (_typeFacet == FaucetType.ERC721) {
+            for (uint256 i; i < countERC721Facets; i++) {
+                if (ERC721Faucets[i] == _faucet) {
+                    ERC721Faucets[i] = ERC721Faucets[countERC721Facets - 1];
+                    delete ERC721Faucets[countERC721Facets - 1];
+                    countERC721Facets--;
+
+                    return true;
+                }
+            }
+        } else if (_typeFacet == FaucetType.ERC1155) {
+            for (uint256 i; i < countERC1155Facets; i++) {
+                if (ERC1155Faucets[i] == _faucet) {
+                    ERC1155Faucets[i] = ERC1155Faucets[countERC1155Facets - 1];
+                    delete ERC1155Faucets[countERC1155Facets - 1];
+                    countERC1155Facets--;
+
+                    return true;
+                }
             }
         }
 
