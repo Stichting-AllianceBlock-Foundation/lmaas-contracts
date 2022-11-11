@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 
 import '@openzeppelin/contracts/access/AccessControl.sol';
 import '@openzeppelin/contracts/utils/Context.sol';
+import '@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol';
 
 interface IFaucet {
     function faucet(address _mintTo, uint256 _amountOrId) external;
@@ -15,13 +16,9 @@ contract GeneralFaucet is Context, AccessControl {
         ERC1155
     }
 
-    mapping(uint256 => address) public ERC20Faucets;
-    mapping(uint256 => address) public ERC721Faucets;
-    mapping(uint256 => address) public ERC1155Faucets;
-
-    uint256 public countERC20Facets;
-    uint256 public countERC721Facets;
-    uint256 public countERC1155Facets;
+    mapping(address => bool) public ERC20Faucets;
+    mapping(address => bool) public ERC721Faucets;
+    mapping(address => bool) public ERC1155Faucets;
 
     bytes32 public constant MANAGER_ROLE = keccak256('MANAGER_ROLE');
 
@@ -40,13 +37,13 @@ contract GeneralFaucet is Context, AccessControl {
         address[] calldata _faucetToMint,
         address _mintTo,
         uint256 _idToMint
-    ) external returns (bool) {
-        for (uint256 i; i < countERC1155Facets; i++) {
-            for (uint256 j; j < _faucetToMint.length; j++) {
-                if (ERC1155Faucets[i] == _faucetToMint[j]) {
-                    IFaucet(_faucetToMint[j]).faucet(_mintTo, _idToMint);
-                    return true;
-                }
+    ) external returns (bool minted) {
+        for (uint256 i; i < _faucetToMint.length; i++) {
+            address faucetToMint = _faucetToMint[i];
+
+            if (ERC1155Faucets[faucetToMint]) {
+                IFaucet(faucetToMint).faucet(_mintTo, _idToMint);
+                minted = true;
             }
         }
 
@@ -63,13 +60,13 @@ contract GeneralFaucet is Context, AccessControl {
         address[] calldata _faucetToMint,
         address _mintTo,
         uint256 _idToMint
-    ) external returns (bool) {
-        for (uint256 i; i < countERC721Facets; i++) {
-            for (uint256 j; j < _faucetToMint.length; j++) {
-                if (ERC721Faucets[i] == _faucetToMint[j]) {
-                    IFaucet(_faucetToMint[j]).faucet(_mintTo, _idToMint);
-                    return true;
-                }
+    ) external returns (bool minted) {
+        for (uint256 i; i < _faucetToMint.length; i++) {
+            address faucetToMint = _faucetToMint[i];
+
+            if (ERC721Faucets[faucetToMint]) {
+                IFaucet(faucetToMint).faucet(_mintTo, _idToMint);
+                minted = true;
             }
         }
 
@@ -86,13 +83,15 @@ contract GeneralFaucet is Context, AccessControl {
         address[] calldata _faucetToMint,
         address _mintTo,
         uint256 _amountToMint
-    ) external returns (bool) {
-        for (uint256 i; i < countERC20Facets; i++) {
-            for (uint256 j; j < _faucetToMint.length; j++) {
-                if (ERC20Faucets[i] == _faucetToMint[j]) {
-                    IFaucet(_faucetToMint[j]).faucet(_mintTo, _amountToMint);
-                    return true;
-                }
+    ) external returns (bool minted) {
+        for (uint256 i; i < _faucetToMint.length; i++) {
+            address faucetToMint = _faucetToMint[i];
+
+            if (ERC20Faucets[faucetToMint]) {
+                uint8 decimals = IERC20Metadata(faucetToMint).decimals();
+
+                IFaucet(faucetToMint).faucet(_mintTo, _amountToMint * 10**decimals);
+                minted = true;
             }
         }
 
@@ -104,16 +103,13 @@ contract GeneralFaucet is Context, AccessControl {
      */
     function addFaucet(address _faucet, FaucetType _typeFacet) external onlyRole(MANAGER_ROLE) returns (bool) {
         if (_typeFacet == FaucetType.ERC20) {
-            ERC20Faucets[countERC20Facets] = _faucet;
-            countERC20Facets++;
+            ERC20Faucets[_faucet] = true;
             return true;
         } else if (_typeFacet == FaucetType.ERC721) {
-            ERC721Faucets[countERC721Facets] = _faucet;
-            countERC721Facets++;
+            ERC721Faucets[_faucet] = true;
             return true;
         } else if (_typeFacet == FaucetType.ERC1155) {
-            ERC1155Faucets[countERC1155Facets] = _faucet;
-            countERC1155Facets++;
+            ERC1155Faucets[_faucet] = true;
             return true;
         }
 
@@ -125,34 +121,22 @@ contract GeneralFaucet is Context, AccessControl {
      */
     function deleteFaucet(address _faucet, FaucetType _typeFacet) external onlyRole(MANAGER_ROLE) returns (bool) {
         if (_typeFacet == FaucetType.ERC20) {
-            for (uint256 i; i < countERC20Facets; i++) {
-                if (ERC20Faucets[i] == _faucet) {
-                    ERC20Faucets[i] = ERC20Faucets[countERC20Facets - 1];
-                    delete ERC20Faucets[countERC20Facets - 1];
-                    countERC20Facets--;
+            if (ERC20Faucets[_faucet]) {
+                ERC20Faucets[_faucet] = false;
 
-                    return true;
-                }
+                return true;
             }
         } else if (_typeFacet == FaucetType.ERC721) {
-            for (uint256 i; i < countERC721Facets; i++) {
-                if (ERC721Faucets[i] == _faucet) {
-                    ERC721Faucets[i] = ERC721Faucets[countERC721Facets - 1];
-                    delete ERC721Faucets[countERC721Facets - 1];
-                    countERC721Facets--;
+            if (ERC721Faucets[_faucet]) {
+                ERC721Faucets[_faucet] = false;
 
-                    return true;
-                }
+                return true;
             }
         } else if (_typeFacet == FaucetType.ERC1155) {
-            for (uint256 i; i < countERC1155Facets; i++) {
-                if (ERC1155Faucets[i] == _faucet) {
-                    ERC1155Faucets[i] = ERC1155Faucets[countERC1155Facets - 1];
-                    delete ERC1155Faucets[countERC1155Facets - 1];
-                    countERC1155Facets--;
+            if (ERC1155Faucets[_faucet]) {
+                ERC1155Faucets[_faucet] = false;
 
-                    return true;
-                }
+                return true;
             }
         }
 
