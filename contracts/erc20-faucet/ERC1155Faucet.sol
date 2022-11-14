@@ -10,7 +10,7 @@ contract ERC1155Faucet is ERC1155 {
     constructor() ERC1155('') {}
 
     function faucet(address _to, uint256 _idToMint) external {
-        require(_to != address(0), 'ERC20Faucet: Invalid address');
+        require(_to != address(0), 'ERC1155Faucet: Invalid address');
         _mint(_to, _idToMint, 1000000 * 1 ether, '');
     }
 }
