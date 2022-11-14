@@ -62,6 +62,10 @@ module.exports = {
       url: 'https://nd-734-064-122.p2pify.com/62dc5c5a86cd193963ee39f48eb2cadf',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
+    mumbai: {
+      url: 'https://rpc-mumbai.maticvigil.com/',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
   },
   gasReporter: {
     currency: 'USD',
