@@ -651,10 +651,10 @@
     widest-line "^3.1.0"
     wrap-ansi "^6.2.0"
 
-"@openzeppelin/contracts@^4.3.2":
-  version "4.4.2"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.4.2.tgz#4e889c9c66e736f7de189a53f8ba5b8d789425c2"
-  integrity sha512-NyJV7sJgoGYqbtNUWgzzOGW4T6rR19FmX1IJgXGdapGPWsuMelGJn9h03nos0iqfforCbCB0iYIR0MtIuIFLLw==
+"@openzeppelin/contracts@^4.7.3":
+  version "4.7.3"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.7.3.tgz#939534757a81f8d69cc854c7692805684ff3111e"
+  integrity sha512-dGRS0agJzu8ybo44pCIf3xBaPQN/65AIXNgK8+4gzKd5kbvlqyxryUYVLJv7fK98Seyd2hDZzVEHSWAh0Bt1Yw==
 
 "@resolver-engine/core@^0.3.3":
   version "0.3.3"
@@ -4558,6 +4558,11 @@ hardhat-deploy@^0.9.6:
     match-all "^1.2.6"
     murmur-128 "^0.2.1"
     qs "^6.9.4"
+
+hardhat-etherscan@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/hardhat-etherscan/-/hardhat-etherscan-1.0.1.tgz#db22142ccd101c4a2c6c6b12232a4daf4657e4a1"
+  integrity sha512-FShbbcrmxLK0n1JJfRO0xq6CfEsbynt0HiNHQYvY9GOQ9UDTHRAtZT4+P20cn/yAqfyQl4bgw3URxvvNN85HXA==
 
 hardhat-gas-reporter@^1.0.4:
   version "1.0.7"
