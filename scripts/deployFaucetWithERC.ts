@@ -27,6 +27,8 @@ async function main() {
   const generalFaucet = await GeneralFaucet.deploy();
 
   await generalFaucet.deployed();
+  await generalFaucet.deployTransaction.wait(1);
+
   console.log(`GeneralFaucet deployed to ${generalFaucet.address}`);
 
   //   Deploy ERC20 tokens
