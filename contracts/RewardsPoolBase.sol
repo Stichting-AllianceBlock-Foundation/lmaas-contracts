@@ -26,6 +26,7 @@ contract RewardsPoolBase is Ownable {
     uint256 internal constant PRECISION = 1 ether;
 
     uint256 public totalStaked;
+
     uint256[] private totalClaimed;
     uint256[] private totalSpentRewards;
 
