@@ -20,7 +20,7 @@ contract ILiquidityPoolReputation {
     With some extra functionality for tier lists.
 */
 
-contract LiquidityMiningCampaignPayment is LiquidityMiningCampaign {
+contract LiquidityMiningCampaignPaymentTier is LiquidityMiningCampaign {
     enum TierList {
         BRONZE,
         SILVER,
