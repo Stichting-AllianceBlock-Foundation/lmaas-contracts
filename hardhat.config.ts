@@ -66,6 +66,10 @@ module.exports = {
       url: 'https://rpc-mumbai.maticvigil.com/',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
+    fuji: {
+      url: 'https://api.avax-test.network/ext/C/rpc',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
   },
   gasReporter: {
     currency: 'USD',

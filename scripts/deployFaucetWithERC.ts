@@ -8,11 +8,11 @@ interface TokenProps {
 
 const tokens: { erc20: TokenProps[]; erc721: TokenProps[]; erc1155: {}[] } = {
   erc20: [
-    { name: 'Test ALBT', symbol: 'tALBT', decimals: 18 },
-    { name: 'Test USDT', symbol: 'tUSDT', decimals: 6 },
-    { name: 'Test USDC', symbol: 'tUSDC', decimals: 6 },
+    { name: 'Test ALBT', symbol: 'ALBT', decimals: 18 },
+    { name: 'Test USDT', symbol: 'USDT', decimals: 6 },
+    { name: 'Test USDC', symbol: 'USDC', decimals: 6 },
   ],
-  erc721: [{ name: 'Test NFT', symbol: 'tNFT' }],
+  erc721: [{ name: 'Test NFT', symbol: 'NFT' }],
   erc1155: [{}],
 };
 
