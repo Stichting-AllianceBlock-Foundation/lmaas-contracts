@@ -25,6 +25,10 @@ module.exports = {
         interval: 0,
       },
     },
+    localhost: {
+      url: 'http://127.0.0.1:8545/',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
     rinkeby: {
       url: `https://rpc.ankr.com/eth_rinkeby`,
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
@@ -68,6 +72,10 @@ module.exports = {
     },
     fuji: {
       url: 'https://api.avax-test.network/ext/C/rpc',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    volta: {
+      url: 'https://volta-rpc.energyweb.org/',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
   },
