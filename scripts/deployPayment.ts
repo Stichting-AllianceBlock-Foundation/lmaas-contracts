@@ -27,14 +27,14 @@ async function main() {
   const PaymentInstance = (await deployContract(contractOwner, PaymentArtifact, [
     paymentReceiver,
     paymentReceiver,
-    '0xa136427a92615114347d04cb636891c5785a46cc',
-    '0xa136427a92615114347d04cb636891c5785a46cc',
+    '0xD20fE952b9a12daC4b2C8Bdde80B0Df0655f6B89',
+    '0xD20fE952b9a12daC4b2C8Bdde80B0Df0655f6B89',
     campaignPrice,
     campaignPriceExtension,
     discounts,
   ])) as any;
 
-  console.log('LMC deployed at:', PaymentInstance.address);
+  console.log('Payment deployed at:', PaymentInstance.address);
 }
 
 main()
