@@ -10,7 +10,6 @@ interface ILiquidityPoolReputation {
     function checkTierAndBurnReputation(
         address account,
         uint256 requestedTier,
-        uint256 tokenAmount,
         bytes memory signature,
         uint256 maxTier,
         uint256 deadline
@@ -107,7 +106,6 @@ contract LiquidityMiningCampaignPaymentTier is LiquidityMiningCampaign {
         ILiquidityPoolReputation(reputationContract).checkTierAndBurnReputation(
             msg.sender,
             uint256(tierCampaign),
-            _tokenAmount,
             _signature,
             _maxTier,
             _deadline
