@@ -12,7 +12,8 @@ interface ILiquidityPoolReputation {
         uint256 requestedTier,
         bytes memory signature,
         uint256 maxTier,
-        uint256 deadline
+        uint256 deadline,
+        bool burnCheck
     ) external;
 }
 
@@ -35,6 +36,7 @@ contract LiquidityMiningCampaignPaymentTier is LiquidityMiningCampaign {
     address internal immutable paymentContract;
     TierList public tierCampaign;
     address public immutable reputationContract;
+    mapping(address => bool) public burnCheck;
 
     /** @param _stakingToken The token to stake
      * @param _rewardsTokens The reward tokens
@@ -108,8 +110,11 @@ contract LiquidityMiningCampaignPaymentTier is LiquidityMiningCampaign {
             uint256(tierCampaign),
             _signature,
             _maxTier,
-            _deadline
+            _deadline,
+            burnCheck[msg.sender]
         );
+
+        burnCheck[msg.sender] = true;
     }
 
     /** @dev Stake an amount of tokens
