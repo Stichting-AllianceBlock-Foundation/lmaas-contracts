@@ -115,7 +115,7 @@ contract RewardsPoolBaseInfinite is Ownable {
     }
 
     /** @dev Start the pool. Funds for rewards will be checked and staking will be opened.
-     * @param _epochDuration the duration of the infiniti pool ex: (7 days = 604800 seconds)
+     * @param _epochDuration the duration of the infinite pool ex: (7 days = 604800 seconds)
      */
     function start(uint256 _epochDuration) external virtual onlyOwner {
         epochDuration = _epochDuration;
