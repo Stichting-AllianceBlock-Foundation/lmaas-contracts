@@ -134,6 +134,7 @@ contract RewardsPoolBaseInfinite is Ownable {
         );
 
         uint256 rewardsTokensLength = rewardsTokens.length;
+        rewardPerSecond = new uint256[](rewardsTokensLength);
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
             uint256 balance = IERC20(rewardsTokens[i]).balanceOf(address(this));
