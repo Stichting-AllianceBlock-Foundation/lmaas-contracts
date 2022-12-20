@@ -114,7 +114,7 @@ contract RewardsPoolBaseInfinite is Ownable {
         name = _name;
     }
 
-    /** @dev Start the pool now. Funds for rewards will be checked and staking will be opened.
+    /** @dev Start the pool. Funds for rewards will be checked and staking will be opened.
      * @param _epochDuration the duration of the infinite pool ex: (7 days = 604800 seconds)
      */
     function start(uint256 _epochDuration) external virtual onlyOwner {
@@ -124,18 +124,6 @@ contract RewardsPoolBaseInfinite is Ownable {
         uint256 _endTimestamp = _startTimestamp + _epochDuration;
 
         _start(_startTimestamp, _endTimestamp);
-    }
-
-    /** @dev Start the pool at a specific time. Funds for rewards will be checked and staking will be opened.
-     * @param _epochDuration the duration of the infinite pool ex: (7 days = 604800 seconds)
-     * @param _startTimeStamp The start time of the pool
-     */
-
-    function start(uint256 _epochDuration, uint256 _startTimeStamp) external virtual onlyOwner {
-        epochDuration = _epochDuration;
-
-        uint256 _endTimeStamp = _startTimeStamp + _epochDuration;
-        _start(_startTimeStamp, _endTimeStamp);
     }
 
     function _start(uint256 _startTimestamp, uint256 _endTimestamp) internal {
