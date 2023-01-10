@@ -130,7 +130,6 @@ contract RewardsPoolBaseInfinite is Ownable {
      * @param _epochDuration the duration of the infinite pool ex: (7 days = 604800 seconds)
      * @param _startTimeStamp The start time of the pool
      */
-
     function start(uint256 _epochDuration, uint256 _startTimeStamp) external virtual onlyOwner {
         epochDuration = _epochDuration;
 
@@ -146,7 +145,7 @@ contract RewardsPoolBaseInfinite is Ownable {
         );
 
         uint256 rewardsTokensLength = rewardsTokens.length;
-        rewardPerSecond = new uint256[](rewardsTokensLength);
+        uint256[] memory _rewardPerSecond = new uint256[](rewardsTokensLength);
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
             uint256 balance = IERC20(rewardsTokens[i]).balanceOf(address(this));
@@ -155,13 +154,13 @@ contract RewardsPoolBaseInfinite is Ownable {
             // we need to cut off 1% or 5% whatever the business decides
             // IERC20(rewardsTokens[i]).transferFrom(address(this), feeRecipient, (balance * CUT_FEE) / MAX_FEE);
 
-            rewardPerSecond[i] = (balance * PRECISION) / (_endTimestamp - _startTimestamp); // calculate the rewards per second
-
-            uint256 rewardsAmount = calculateRewardsAmount(_startTimestamp, _endTimestamp, rewardPerSecond[i]);
+            _rewardPerSecond[i] = (balance * PRECISION) / (_endTimestamp - _startTimestamp); // calculate the rewards per second
+            uint256 rewardsAmount = calculateRewardsAmount(_startTimestamp, _endTimestamp, _rewardPerSecond[i]);
 
             require(balance >= rewardsAmount, 'RewardsPoolBaseInfinite: not enough rewards');
         }
 
+        rewardPerSecond = _rewardPerSecond;
         startTimestamp = _startTimestamp;
         endTimestamp = _endTimestamp;
         lastRewardTimestamp = _startTimestamp;
@@ -501,14 +500,12 @@ contract RewardsPoolBaseInfinite is Ownable {
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
             uint256 balance = IERC20(rewardsTokens[i]).balanceOf(address(this));
-            // require(balance > 0, 'RewardsPoolBaseInfinite: no rewards for this token');
 
             // we need to cut off 1% or 5% whatever the business decides
             // IERC20(rewardsTokens[i]).transferFrom(address(this), feeRecipient, (balance * CUT_FEE) / MAX_FEE);
 
             _rewardPerSecond[i] = (balance * PRECISION) / (_endTimestamp - _startTimestamp); // calculate the rewards per second
-
-            uint256 rewardsAmount = calculateRewardsAmount(_startTimestamp, _endTimestamp, rewardPerSecond[i]);
+            uint256 rewardsAmount = calculateRewardsAmount(_startTimestamp, _endTimestamp, _rewardPerSecond[i]);
 
             require(balance >= rewardsAmount, 'RewardsPoolBaseInfinite: not enough rewards');
         }
