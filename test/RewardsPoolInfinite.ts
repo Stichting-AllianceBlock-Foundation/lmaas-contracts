@@ -107,7 +107,7 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await rewardsPoolBaseInfinite.name()).to.be.eq('Test pool');
     });
 
-    it.only('Should be able to start the contract', async () => {
+    it('Should be able to start the contract', async () => {
       const amount = ethers.utils.parseEther('10');
       await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
 
@@ -117,22 +117,16 @@ describe('RewardsPoolBaseInfinite', () => {
       const receipt = await tx.wait(1);
       const blockTimeStamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
 
-      expect(await stakingToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(amount);
+      expect(await rewardToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(amount);
       expect(await rewardsPoolBaseInfinite.startTimestamp()).to.be.eq(blockTimeStamp);
       expect(await rewardsPoolBaseInfinite.endTimestamp()).to.be.eq(blockTimeStamp + 3600 * 24 * 5);
       expect(await rewardsPoolBaseInfinite.getRewardTokensCount()).to.be.eq(1);
       expect(await rewardsPoolBaseInfinite.epochDuration()).to.be.eq(3600 * 24 * 5);
       expect(await rewardsPoolBaseInfinite.hasStakingStarted()).to.be.true;
-
-      console.log(await rewardsPoolBaseInfinite.rewardPerSecond(0));
-
-      //   TODO: this is probably wrong in the contract
-      //   expect(await rewardsPoolBaseInfinite.rewardPerSecond(0)).to.be.eq(
-      //     amount.mul(ethers.utils.parseEther('1').div(3600 * 24 * 5))
-      //   );
+      expect(await rewardsPoolBaseInfinite.rewardPerSecond(0)).to.be.eq(amount.div(3600 * 24 * 5));
     });
 
-    it.only('Should be able to start the contract at a certain timestamp', async () => {
+    it('Should be able to start the contract at a certain timestamp', async () => {
       const amount = ethers.utils.parseEther('10');
       await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
 
@@ -146,12 +140,7 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await rewardsPoolBaseInfinite.getRewardTokensCount()).to.be.eq(1);
       expect(await rewardsPoolBaseInfinite.epochDuration()).to.be.eq(3600 * 24 * 5);
       expect(await rewardsPoolBaseInfinite.hasStakingStarted()).to.be.false;
-
-      console.log(await rewardsPoolBaseInfinite.rewardPerSecond(0));
-      //   TODO: this is probably wrong in the contract
-      //   expect(await rewardsPoolBaseInfinite.rewardPerSecond(0)).to.be.eq(
-      //     amount.mul(ethers.utils.parseEther('1').div(3600 * 24 * 5))
-      //   );
+      expect(await rewardsPoolBaseInfinite.rewardPerSecond(0)).to.be.eq(amount.div(3600 * 24 * 5));
     });
 
     it('Cannot start the pool twice', async () => {
@@ -285,16 +274,17 @@ describe('RewardsPoolBaseInfinite', () => {
       amount = ethers.utils.parseEther('10000');
       const staker = stakers[0];
 
-      stakingToken.faucet(staker.address, amount);
+      await stakingToken.faucet(staker.address, amount);
       await stakingToken.connect(staker).approve(rewardsPoolBaseInfinite.address, amount);
 
       await rewardsPoolBaseInfinite.connect(staker).stake(amount);
       expect(await stakingToken.balanceOf(staker.address)).to.be.eq(0);
       expect(await stakingToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(amount);
 
-      await rewardsPoolBaseInfinite.connect(staker).withdraw(amount.add(1));
-      expect(await stakingToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(0);
-      expect(await stakingToken.balanceOf(staker.address)).to.be.eq(amount);
+      expect(rewardsPoolBaseInfinite.connect(staker).withdraw(amount.add(1))).to.be.revertedWith(
+        'RewardsPoolBaseInfinite: not enough funds to withdraw'
+      );
+      expect(await stakingToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(amount);
     });
 
     it('Should not be able to call onlyOwner functions', async () => {

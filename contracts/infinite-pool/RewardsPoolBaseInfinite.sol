@@ -2,6 +2,7 @@
 pragma solidity 0.8.9;
 
 import '@openzeppelin/contracts/access/Ownable.sol';
+import 'hardhat/console.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 
@@ -154,7 +155,7 @@ contract RewardsPoolBaseInfinite is Ownable {
             // we need to cut off 1% or 5% whatever the business decides
             // IERC20(rewardsTokens[i]).transferFrom(address(this), feeRecipient, (balance * CUT_FEE) / MAX_FEE);
 
-            _rewardPerSecond[i] = (balance * PRECISION) / (_endTimestamp - _startTimestamp); // calculate the rewards per second
+            _rewardPerSecond[i] = balance / (_endTimestamp - _startTimestamp); // calculate the rewards per second
             uint256 rewardsAmount = calculateRewardsAmount(_startTimestamp, _endTimestamp, _rewardPerSecond[i]);
 
             require(balance >= rewardsAmount, 'RewardsPoolBaseInfinite: not enough rewards');
@@ -504,7 +505,7 @@ contract RewardsPoolBaseInfinite is Ownable {
             // we need to cut off 1% or 5% whatever the business decides
             // IERC20(rewardsTokens[i]).transferFrom(address(this), feeRecipient, (balance * CUT_FEE) / MAX_FEE);
 
-            _rewardPerSecond[i] = (balance * PRECISION) / (_endTimestamp - _startTimestamp); // calculate the rewards per second
+            _rewardPerSecond[i] = balance / (_endTimestamp - _startTimestamp); // calculate the rewards per second
             uint256 rewardsAmount = calculateRewardsAmount(_startTimestamp, _endTimestamp, _rewardPerSecond[i]);
 
             require(balance >= rewardsAmount, 'RewardsPoolBaseInfinite: not enough rewards');
