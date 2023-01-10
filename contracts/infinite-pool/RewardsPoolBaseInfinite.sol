@@ -155,7 +155,7 @@ contract RewardsPoolBaseInfinite is Ownable {
             // we need to cut off 1% or 5% whatever the business decides
             // IERC20(rewardsTokens[i]).transferFrom(address(this), feeRecipient, (balance * CUT_FEE) / MAX_FEE);
 
-            rewardPerSecond[i] = (balance / PRECISION) / (_endTimestamp - _startTimestamp); // calculate the rewards per second
+            rewardPerSecond[i] = (balance * PRECISION) / (_endTimestamp - _startTimestamp); // calculate the rewards per second
 
             uint256 rewardsAmount = calculateRewardsAmount(_startTimestamp, _endTimestamp, rewardPerSecond[i]);
 
@@ -269,6 +269,8 @@ contract RewardsPoolBaseInfinite is Ownable {
 
         UserInfo storage user = userInfo[_withdrawer];
 
+        require(_tokenAmount <= user.amountStaked, 'RewardsPoolBaseInfinite: not enough funds to withdraw');
+
         updateRewardMultipliers(); // Update the accumulated multipliers for everyone
         _updateUserAccruedReward(_withdrawer); // Update the accrued reward for this specific user
 
@@ -310,6 +312,10 @@ contract RewardsPoolBaseInfinite is Ownable {
         return user.amountStaked;
     }
 
+    /**
+     * @dev Returns a boolean if the campaign can be extended, depending on the rewards that
+     * the campaign has
+     */
     function _canBeExtended() internal view returns (bool) {
         for (uint256 i = 0; i < rewardsTokens.length; i++) {
             uint256 balance = IERC20(rewardsTokens[i]).balanceOf(address(this));
@@ -500,7 +506,7 @@ contract RewardsPoolBaseInfinite is Ownable {
             // we need to cut off 1% or 5% whatever the business decides
             // IERC20(rewardsTokens[i]).transferFrom(address(this), feeRecipient, (balance * CUT_FEE) / MAX_FEE);
 
-            _rewardPerSecond[i] = (balance / PRECISION) / (_endTimestamp - _startTimestamp); // calculate the rewards per second
+            _rewardPerSecond[i] = (balance * PRECISION) / (_endTimestamp - _startTimestamp); // calculate the rewards per second
 
             uint256 rewardsAmount = calculateRewardsAmount(_startTimestamp, _endTimestamp, rewardPerSecond[i]);
 
@@ -539,6 +545,21 @@ contract RewardsPoolBaseInfinite is Ownable {
         }
 
         return availableBalance;
+    }
+
+    /** @dev Withdraw excess rewards not needed for current campaign and extension
+     * @param _recipient The address to whom the rewards will be transferred
+     */
+    function withdrawExcessRewards(address _recipient) external onlyOwner {
+        uint256 rewardsTokensLength = rewardsTokens.length;
+
+        for (uint256 i = 0; i < rewardsTokensLength; i++) {
+            uint256 balance = getAvailableBalance(i);
+
+            if (balance > 0) {
+                IERC20(rewardsTokens[i]).safeTransfer(_recipient, balance);
+            }
+        }
     }
 
     /** @dev Withdraw tokens other than the staking and reward token, for example rewards from liquidity mining
