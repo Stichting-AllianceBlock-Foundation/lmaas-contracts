@@ -2,7 +2,6 @@
 pragma solidity 0.8.9;
 
 import '@openzeppelin/contracts/access/Ownable.sol';
-import 'hardhat/console.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 
@@ -500,7 +499,7 @@ contract RewardsPoolBaseInfinite is Ownable {
         }
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
-            uint256 balance = IERC20(rewardsTokens[i]).balanceOf(address(this));
+            uint256 balance = getAvailableBalance(i);
 
             // we need to cut off 1% or 5% whatever the business decides
             // IERC20(rewardsTokens[i]).transferFrom(address(this), feeRecipient, (balance * CUT_FEE) / MAX_FEE);
@@ -533,10 +532,7 @@ contract RewardsPoolBaseInfinite is Ownable {
             return balance;
         }
 
-        uint256 spentRewards = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerSecond[_rewardTokenIndex]);
-
-        uint256 availableBalance = balance -
-            (totalSpentRewards[_rewardTokenIndex] + spentRewards - totalClaimed[_rewardTokenIndex]);
+        uint256 availableBalance = balance - (totalSpentRewards[_rewardTokenIndex] - totalClaimed[_rewardTokenIndex]);
 
         if (rewardToken == address(stakingToken)) {
             availableBalance = availableBalance - totalStaked;
