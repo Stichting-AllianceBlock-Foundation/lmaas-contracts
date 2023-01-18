@@ -343,7 +343,7 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await rewards[0].balanceOf(stakers[0].address)).to.be.eq(0);
     });
 
-    it('Test excess rewards withdrawal bug', async () => {
+    it.only('Test excess rewards withdrawal bug #1', async () => {
       let amount = ethers.utils.parseEther('10000');
       await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
 
@@ -352,69 +352,49 @@ describe('RewardsPoolBaseInfinite', () => {
       amount = ethers.utils.parseEther('10000');
       const staker = stakers[0];
       const staker2 = stakers[1];
-      const staker3 = stakers[2];
-      const staker4 = stakers[3];
 
-      stakingToken.faucet(staker.address, amount);
+      await stakingToken.faucet(staker.address, amount);
       await stakingToken.connect(staker).approve(rewardsPoolBaseInfinite.address, amount);
       await rewardsPoolBaseInfinite.connect(staker).stake(amount);
-
-      stakingToken.faucet(staker4.address, amount);
-      await stakingToken.connect(staker4).approve(rewardsPoolBaseInfinite.address, amount);
-      await rewardsPoolBaseInfinite.connect(staker4).stake(amount);
-
-      //   expect(await stakingToken.balanceOf(staker.address)).to.be.eq(0);
-      //   expect(await stakingToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(amount);
-      //   expect(await rewardsPoolBaseInfinite.balanceOf(staker.address)).to.be.eq(amount);
 
       await timeTravel(3600 * 24 * 2);
       //  day 2 of 5 he deposits reward tokens for the next epoch
       await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
 
+      await timeTravel(3600 * 24 * 5);
       // day 7 next epoch did start #2
-      await timeTravel(3600 * 24 * 5);
       await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
 
+      await timeTravel(3600 * 24 * 5);
       // day 12 yet another epoch #3
-      await timeTravel(3600 * 24 * 5);
       await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
 
-      stakingToken.faucet(staker3.address, amount);
-      await stakingToken.connect(staker3).approve(rewardsPoolBaseInfinite.address, amount);
-      await rewardsPoolBaseInfinite.connect(staker3).stake(amount);
-
+      await timeTravel(3600 * 24 * 5);
       // day 17 yet another epoch #4
-      await timeTravel(3600 * 24 * 5);
       await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
 
-      // day 22 yet another epoch #5
-      await timeTravel(3600 * 24 * 5);
-      await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
-
-      stakingToken.faucet(staker2.address, amount);
+      await stakingToken.faucet(staker2.address, amount);
       await stakingToken.connect(staker2).approve(rewardsPoolBaseInfinite.address, amount);
       await rewardsPoolBaseInfinite.connect(staker2).stake(amount);
 
       await timeTravel(3600 * 24 * 5);
-      console.log('staker before', ethers.utils.formatEther(await rewardToken.balanceOf(staker.address)));
-      console.log('staker2 before', ethers.utils.formatEther(await rewardToken.balanceOf(staker2.address)));
+      // day 22 next epoch did start #5
+      await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
 
-      //   await rewardsPoolBaseInfinite.connect(staker).exit();
+      // console.log(
+      //   'contract balance',
+      //   ethers.utils.formatEther(await rewardToken.balanceOf(rewardsPoolBaseInfinite.address))
+      // );
+      // console.log('staker before', ethers.utils.formatEther(await rewardToken.balanceOf(staker.address)));
+      await rewardsPoolBaseInfinite.connect(staker).exit();
+      // console.log('staker after', ethers.utils.formatEther(await rewardToken.balanceOf(staker.address)));
+
+      // console.log('staker2 before', ethers.utils.formatEther(await rewardToken.balanceOf(staker2.address)));
       await rewardsPoolBaseInfinite.connect(staker2).exit();
-      await rewardsPoolBaseInfinite.connect(staker3).exit();
-
-      console.log('staker after', ethers.utils.formatEther(await rewardToken.balanceOf(staker.address)));
-      console.log('staker2 after', ethers.utils.formatEther(await rewardToken.balanceOf(staker2.address)));
-      //   console.log(await rewardsPoolBaseInfinite.startTimestamp());
-      //   console.log(await rewardsPoolBaseInfinite.endTimestamp());
-      //   console.log(Math.floor(Date.now() / 1000), Math.floor(Date.now() / 1000 + 3600 * 24 * 5));
-
-      //   console.log(await rewardToken.balanceOf(staker2.address));
-      //   //   await rewardsPoolBaseInfinite.withdrawExcessRewards(signers[0].address);
-      //   console.log(await rewardToken.balanceOf(staker2.address));
+      // console.log('staker2 after', ethers.utils.formatEther(await rewardToken.balanceOf(staker2.address)));
     });
 
-    it.only('Test excess rewards withdrawal bug', async () => {
+    it.only('Test excess rewards withdrawal bug #2', async () => {
       let amount = ethers.utils.parseEther('10000');
       await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
 
@@ -456,26 +436,31 @@ describe('RewardsPoolBaseInfinite', () => {
 
       await timeTravel(3600 * 24 * 5);
       // day 17 yet another epoch #4
+      await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
 
-      console.log(
-        'contract balance',
-        ethers.utils.formatEther(await rewardToken.balanceOf(rewardsPoolBaseInfinite.address))
-      );
-      console.log('staker before', ethers.utils.formatEther(await rewardToken.balanceOf(staker.address)));
+      await timeTravel(3600 * 24 * 5);
+      // day 22 next epoch did start #5
+      await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
+
+      // console.log(
+      //   'contract balance',
+      //   ethers.utils.formatEther(await rewardToken.balanceOf(rewardsPoolBaseInfinite.address))
+      // );
+      // console.log('staker before', ethers.utils.formatEther(await rewardToken.balanceOf(staker.address)));
       await rewardsPoolBaseInfinite.connect(staker).exit();
-      console.log('staker after', ethers.utils.formatEther(await rewardToken.balanceOf(staker.address)));
+      // console.log('staker after', ethers.utils.formatEther(await rewardToken.balanceOf(staker.address)));
 
-      console.log('staker2 before', ethers.utils.formatEther(await rewardToken.balanceOf(staker2.address)));
+      // console.log('staker2 before', ethers.utils.formatEther(await rewardToken.balanceOf(staker2.address)));
       await rewardsPoolBaseInfinite.connect(staker2).exit();
-      console.log('staker2 after', ethers.utils.formatEther(await rewardToken.balanceOf(staker2.address)));
+      // console.log('staker2 after', ethers.utils.formatEther(await rewardToken.balanceOf(staker2.address)));
 
-      console.log('staker3 before', ethers.utils.formatEther(await rewardToken.balanceOf(staker3.address)));
+      // console.log('staker3 before', ethers.utils.formatEther(await rewardToken.balanceOf(staker3.address)));
       await rewardsPoolBaseInfinite.connect(staker3).exit();
-      console.log('staker3 after', ethers.utils.formatEther(await rewardToken.balanceOf(staker3.address)));
+      // console.log('staker3 after', ethers.utils.formatEther(await rewardToken.balanceOf(staker3.address)));
 
-      console.log('staker4 before', ethers.utils.formatEther(await rewardToken.balanceOf(staker4.address)));
+      // console.log('staker4 before', ethers.utils.formatEther(await rewardToken.balanceOf(staker4.address)));
       await rewardsPoolBaseInfinite.connect(staker4).exit();
-      console.log('staker4 after', ethers.utils.formatEther(await rewardToken.balanceOf(staker4.address)));
+      // console.log('staker4 after', ethers.utils.formatEther(await rewardToken.balanceOf(staker4.address)));
     });
 
     it('Test excess rewards withdrawal bug #2 should fail', async () => {
