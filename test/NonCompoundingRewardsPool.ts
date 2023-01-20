@@ -75,6 +75,7 @@ describe('NonCompoundingRewardsPool', () => {
       _throttleRoundSeconds,
       _throttleRoundCap,
       contractStakeLimit,
+      'TestCampaign',
     ])) as NonCompoundingRewardsPool;
 
     const reward = rewardPerSecond[0].mul(endTimestamp - startTimestamp);

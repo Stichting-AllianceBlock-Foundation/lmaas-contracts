@@ -90,6 +90,7 @@ describe('Liquidity mining campaign', () => {
       rewardTokensAddresses,
       stakeLimit,
       contractStakeLimit,
+      'TestCampaign',
     ])) as LiquidityMiningCampaign;
 
     await rewardTokensInstances[0].mint(LmcInstance.address, amount);
@@ -97,7 +98,7 @@ describe('Liquidity mining campaign', () => {
     await LmcInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
   });
 
-  it('[Should deploy the lock scheme successfully]:', async () => {
+  it('[Should deploy the lmc successfully]:', async () => {
     expect(LmcInstance.address);
   });
 
@@ -108,7 +109,7 @@ describe('Liquidity mining campaign', () => {
       await timeTravel(70);
     });
 
-    it('[Should stake and lock sucessfully]:', async () => {
+    it('[Should stake sucessfully]:', async () => {
       let contractInitialBalance = await stakingTokenInstance.balanceOf(LmcInstance.address);
       let userInitialBalance = await stakingTokenInstance.balanceOf(testAccount.address);
 
@@ -137,7 +138,7 @@ describe('Liquidity mining campaign', () => {
       expect(accumulatedReward).to.equal(bOne.mul(checkTime - stakeTime));
     });
 
-    it("[Should stake and lock sucessfully in two different lmc's]:", async () => {
+    it("[Should stake sucessfully in two different lmc's]:", async () => {
       let contractInitialBalance = await stakingTokenInstance.balanceOf(LmcInstance.address);
 
       await LmcInstance.stake(bTen);
@@ -254,6 +255,7 @@ describe('Liquidity mining campaign', () => {
         rewardTokensAddresses,
         stakeLimit,
         _contractStakeLimit,
+        'TestCampaign',
       ])) as LiquidityMiningCampaign;
 
       await rewardTokensInstances[0].mint(NewLmcInstance.address, amount);
@@ -274,6 +276,7 @@ describe('Liquidity mining campaign', () => {
           throttleRoundSeconds,
           throttleRoundCap,
           _contractStakeLimit,
+          'TestNonCompoundingCampaign',
         ]
       )) as NonCompoundingRewardsPool;
 

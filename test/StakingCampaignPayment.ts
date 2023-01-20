@@ -9,9 +9,10 @@ import PaymentArtifact from '../../lmaas-contracts/artifacts/contracts/payment/P
 import { TestERC20 } from '../typechain/TestERC20';
 import { BigNumber } from 'ethers';
 
-describe.only('Staking campaign payment', () => {
+describe('Staking campaign payment', () => {
   let PaymentInstance: any;
-  let erc20: any;
+  let usdt: any;
+  let wusdt: any;
   let StakingCampaignInstance: any;
 
   const receiverA = '0x1750659358e53EddecEd0E818E2c65F9fD9A44e5';
@@ -64,12 +65,21 @@ describe.only('Staking campaign payment', () => {
     //Unix timestamp of 1500 days
 
     //deploy erc20
-    const UsdtToken = await ethers.getContractFactory('TestERC20');
-    erc20 = await UsdtToken.deploy(1000000000000);
-    await erc20.deployed();
+    const TERC20 = await ethers.getContractFactory('TestERC20');
+    usdt = await TERC20.deploy(1000000000000);
+    wusdt = await TERC20.deploy(1000000000000);
+    await usdt.deployed();
+    await wusdt.deployed();
 
-    const args: [string, string, string, [BigNumber, BigNumber, BigNumber], number, [BigNumber, BigNumber, BigNumber]] =
-      [receiverA, receiverB, erc20.address, campaignPrices, extensionPrice, discounts];
+    const args: [
+      string,
+      string,
+      string,
+      string,
+      [BigNumber, BigNumber, BigNumber],
+      number,
+      [BigNumber, BigNumber, BigNumber]
+    ] = [receiverA, receiverB, usdt.address, wusdt.address, campaignPrices, extensionPrice, discounts];
 
     //Deploy payment contract
     PaymentInstance = await deployContract(testAccount, PaymentArtifact, [...args]);
@@ -98,14 +108,15 @@ describe.only('Staking campaign payment', () => {
 
     StakingCampaignInstanceAddress = StakingCampaignInstance.address;
 
-    await erc20.approve(PaymentInstance.address, 10000000000);
+    await usdt.approve(PaymentInstance.address, 10000000000);
+    await wusdt.approve(PaymentInstance.address, 10000000000);
     await tknInst.mint(StakingCampaignInstance.address, amount);
   });
 
   describe('Create campaign', async () => {
-    it('Should start a campaign and use a credit', async () => {
+    it('Should start a campaign and use a credit (USDT)', async () => {
       //0 = enum value for short campaign
-      await PaymentInstance.pay(testAccount.address, LongCampaignDays);
+      await PaymentInstance.pay(testAccount.address, LongCampaignDays, false);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
 
       await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, StakingCampaignInstanceAddress);
@@ -113,9 +124,31 @@ describe.only('Staking campaign payment', () => {
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
     });
 
-    it('Should cancel a campaign and refund a credit', async () => {
+    it('Should cancel a campaign and refund a credit (USDT)', async () => {
       //0 = enum value for short campaign
-      await PaymentInstance.pay(testAccount.address, LongCampaignDays);
+      await PaymentInstance.pay(testAccount.address, LongCampaignDays, false);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
+
+      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, StakingCampaignInstanceAddress);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
+
+      await PaymentInstance.refundCredit(StakingCampaignInstanceAddress);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
+    });
+
+    it('Should start a campaign and use a credit (WUSDT)', async () => {
+      //0 = enum value for short campaign
+      await PaymentInstance.pay(testAccount.address, LongCampaignDays, true);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
+
+      await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, StakingCampaignInstanceAddress);
+      // await StakingCampaignInstance.start(starTimestamp, endTimestamp, rewardPerSecond);
+      expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(0);
+    });
+
+    it('Should cancel a campaign and refund a credit (WUSDT)', async () => {
+      //0 = enum value for short campaign
+      await PaymentInstance.pay(testAccount.address, LongCampaignDays, true);
       expect(await PaymentInstance.creditsCampaigns(testAccount.address, 2)).to.equal(1);
 
       await PaymentInstance.useCredit(startTimestamp, endTimestamp, rewardPerSecond, StakingCampaignInstanceAddress);

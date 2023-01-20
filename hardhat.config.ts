@@ -1,6 +1,7 @@
 import '@typechain/hardhat';
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-waffle';
+import '@nomiclabs/hardhat-etherscan';
 import 'hardhat-contract-sizer';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
@@ -24,8 +25,61 @@ module.exports = {
         interval: 0,
       },
     },
+    localhost: {
+      url: 'http://127.0.0.1:8545/',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
     rinkeby: {
-      url: `https://rinkeby.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      url: `https://rpc.ankr.com/eth_rinkeby`,
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    ethereum: {
+      url: `https://rpc.ankr.com/eth`,
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    binance: {
+      url: 'https://rpc.ankr.com/bsc',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    avalanche: {
+      url: 'https://api.avax-test.network/ext/bc/C/rpc',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    // avalanche: {
+    //   url: 'https://rpc.ankr.com/avalanche',
+    //   accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    // },
+    polygon: {
+      url: 'https://polygon-rpc.com',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    energywebchain: {
+      url: 'https://rpc.energyweb.org',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+      gasPrice: 20000000000,
+    },
+    moonbeam: {
+      url: 'https://rpc.ankr.com/moonbeam',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    songbird: {
+      url: 'https://songbird.towolabs.com/rpc',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    goerli: {
+      url: 'https://nd-734-064-122.p2pify.com/62dc5c5a86cd193963ee39f48eb2cadf',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    mumbai: {
+      url: 'https://rpc-mumbai.maticvigil.com/',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    fuji: {
+      url: 'https://api.avax-test.network/ext/C/rpc',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    volta: {
+      url: 'https://volta-rpc.energyweb.org/',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
   },
@@ -37,5 +91,8 @@ module.exports = {
   typechain: {
     outDir: 'typechain',
     target: 'ethers-v5',
+  },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY,
   },
 };
