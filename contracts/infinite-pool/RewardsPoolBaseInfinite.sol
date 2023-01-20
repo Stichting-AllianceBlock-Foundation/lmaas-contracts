@@ -29,8 +29,8 @@ contract RewardsPoolBaseInfinite is Ownable {
 
     uint256 public totalStaked;
 
-    uint256[] private totalClaimed;
-    uint256[] private totalSpentRewards;
+    uint256[] internal totalClaimed;
+    uint256[] internal totalSpentRewards;
 
     uint256[] public rewardPerSecond;
     address[] public rewardsTokens;
@@ -40,7 +40,7 @@ contract RewardsPoolBaseInfinite is Ownable {
     uint256 public epochDuration;
     uint256 public startTimestamp;
     uint256 public endTimestamp;
-    uint256 private lastRewardTimestamp;
+    uint256 internal lastRewardTimestamp;
 
     uint256[] public accumulatedRewardMultiplier;
 
@@ -488,7 +488,7 @@ contract RewardsPoolBaseInfinite is Ownable {
         return previousCampaigns.length;
     }
 
-    function _applyExtension(uint256 _startTimestamp, uint256 _endTimestamp) internal {
+    function _applyExtension(uint256 _startTimestamp, uint256 _endTimestamp) internal virtual {
         uint256 rewardPerSecondLength = rewardPerSecond.length;
         uint256 rewardsTokensLength = rewardsTokens.length;
         uint256[] memory _rewardPerSecond = new uint256[](rewardsTokensLength);

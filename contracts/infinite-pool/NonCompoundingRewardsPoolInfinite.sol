@@ -39,12 +39,45 @@ contract NonCompoundingRewardsPoolInfinite is
      * @param _tokenAmount The amount to be staked
      */
     function stake(uint256 _tokenAmount) public override {
-        epochCount++;
+        uint256 userEpochIn = userStakedEpoch[msg.sender];
 
         // we save on which epoch the user started to stake
-        userStakedEpoch[msg.sender] = epochCount;
+        if (userEpochIn == 0) userStakedEpoch[msg.sender] = epochCount;
 
         _stake(_tokenAmount, msg.sender, true);
+    }
+
+    function _applyExtension(uint256 _startTimestamp, uint256 _endTimestamp) internal override {
+        uint256 rewardPerSecondLength = rewardPerSecond.length;
+        uint256 rewardsTokensLength = rewardsTokens.length;
+        uint256[] memory _rewardPerSecond = new uint256[](rewardsTokensLength);
+
+        for (uint256 i = 0; i < rewardPerSecondLength; i++) {
+            uint256 spentRewards = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerSecond[i]);
+            totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
+        }
+
+        for (uint256 i = 0; i < rewardsTokensLength; i++) {
+            uint256 balance = getAvailableBalance(i);
+
+            // we need to cut off 1% or 5% whatever the business decides
+            // IERC20(rewardsTokens[i]).transferFrom(address(this), feeRecipient, (balance * CUT_FEE) / MAX_FEE);
+
+            _rewardPerSecond[i] = balance / (_endTimestamp - _startTimestamp); // calculate the rewards per second
+            uint256 rewardsAmount = calculateRewardsAmount(_startTimestamp, _endTimestamp, _rewardPerSecond[i]);
+
+            require(balance >= rewardsAmount, 'RewardsPoolBaseInfinite: not enough rewards');
+        }
+
+        previousCampaigns.push(Campaign(startTimestamp, endTimestamp, rewardPerSecond));
+
+        rewardPerSecond = _rewardPerSecond;
+        startTimestamp = _startTimestamp;
+        endTimestamp = _endTimestamp;
+        lastRewardTimestamp = _startTimestamp;
+        epochCount++;
+
+        emit Extended(_startTimestamp, _endTimestamp, rewardPerSecond);
     }
 
     /// @dev Not allowed
