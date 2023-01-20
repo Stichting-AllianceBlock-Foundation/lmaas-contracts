@@ -42,9 +42,13 @@ module.exports = {
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
     avalanche: {
-      url: 'https://rpc.ankr.com/avalanche',
+      url: 'https://api.avax-test.network/ext/bc/C/rpc',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
+    // avalanche: {
+    //   url: 'https://rpc.ankr.com/avalanche',
+    //   accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    // },
     polygon: {
       url: 'https://polygon-rpc.com',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
