@@ -25,6 +25,10 @@ module.exports = {
         interval: 0,
       },
     },
+    localhost: {
+      url: 'http://127.0.0.1:8545/',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
     rinkeby: {
       url: `https://rpc.ankr.com/eth_rinkeby`,
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
@@ -60,6 +64,18 @@ module.exports = {
     },
     goerli: {
       url: 'https://nd-734-064-122.p2pify.com/62dc5c5a86cd193963ee39f48eb2cadf',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    mumbai: {
+      url: 'https://rpc-mumbai.maticvigil.com/',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    fuji: {
+      url: 'https://api.avax-test.network/ext/C/rpc',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    volta: {
+      url: 'https://volta-rpc.energyweb.org/',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
   },
