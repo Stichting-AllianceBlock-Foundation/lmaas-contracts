@@ -47,37 +47,35 @@ contract NonCompoundingRewardsPoolInfinite is
         _stake(_tokenAmount, msg.sender, true);
     }
 
-    function _applyExtension(uint256 _startTimestamp, uint256 _endTimestamp) internal override {
-        uint256 rewardPerSecondLength = rewardPerSecond.length;
-        uint256 rewardsTokensLength = rewardsTokens.length;
-        uint256[] memory _rewardPerSecond = new uint256[](rewardsTokensLength);
+    /** @dev Start the pool now. Funds for rewards will be checked and staking will be opened.
+     * @param _epochDuration the duration of the infinite pool ex: (7 days = 604800 seconds)
+     */
+    function start(uint256 _epochDuration) external override onlyOwner {
+        epochDuration = _epochDuration;
 
-        for (uint256 i = 0; i < rewardPerSecondLength; i++) {
-            uint256 spentRewards = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerSecond[i]);
-            totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
+        epochCount = epochCount + 1;
+        uint256 _startTimestamp = block.timestamp;
+        uint256 _endTimestamp = _startTimestamp + _epochDuration;
+
+        _start(_startTimestamp, _endTimestamp);
+    }
+
+    /**
+     * @dev Updates the accumulated reward multipliers for everyone and each token
+     */
+    function updateRewardMultipliers() public override {
+        uint256 currentTimestamp = block.timestamp;
+
+        if (currentTimestamp > endTimestamp) {
+            _updateRewardMultipliers(endTimestamp);
+            if (_canBeExtended()) {
+                epochCount = epochCount + 1;
+                _applyExtension(endTimestamp, endTimestamp + epochDuration);
+                _updateRewardMultipliers(currentTimestamp);
+            }
+        } else {
+            _updateRewardMultipliers(currentTimestamp);
         }
-
-        for (uint256 i = 0; i < rewardsTokensLength; i++) {
-            uint256 balance = getAvailableBalance(i);
-
-            // we need to cut off 1% or 5% whatever the business decides
-            // IERC20(rewardsTokens[i]).transferFrom(address(this), feeRecipient, (balance * CUT_FEE) / MAX_FEE);
-
-            _rewardPerSecond[i] = balance / (_endTimestamp - _startTimestamp); // calculate the rewards per second
-            uint256 rewardsAmount = calculateRewardsAmount(_startTimestamp, _endTimestamp, _rewardPerSecond[i]);
-
-            require(balance >= rewardsAmount, 'RewardsPoolBaseInfinite: not enough rewards');
-        }
-
-        previousCampaigns.push(Campaign(startTimestamp, endTimestamp, rewardPerSecond));
-
-        rewardPerSecond = _rewardPerSecond;
-        startTimestamp = _startTimestamp;
-        endTimestamp = _endTimestamp;
-        lastRewardTimestamp = _startTimestamp;
-        epochCount++;
-
-        emit Extended(_startTimestamp, _endTimestamp, rewardPerSecond);
     }
 
     /// @dev Not allowed

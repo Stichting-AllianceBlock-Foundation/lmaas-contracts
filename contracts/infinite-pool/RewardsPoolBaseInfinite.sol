@@ -336,7 +336,7 @@ contract RewardsPoolBaseInfinite is Ownable {
     /**
 		@dev Updates the accumulated reward multipliers for everyone and each token
 	 */
-    function updateRewardMultipliers() public {
+    function updateRewardMultipliers() public virtual {
         uint256 currentTimestamp = block.timestamp;
 
         if (currentTimestamp > endTimestamp) {
@@ -488,7 +488,7 @@ contract RewardsPoolBaseInfinite is Ownable {
         return previousCampaigns.length;
     }
 
-    function _applyExtension(uint256 _startTimestamp, uint256 _endTimestamp) internal virtual {
+    function _applyExtension(uint256 _startTimestamp, uint256 _endTimestamp) internal {
         uint256 rewardPerSecondLength = rewardPerSecond.length;
         uint256 rewardsTokensLength = rewardsTokens.length;
         uint256[] memory _rewardPerSecond = new uint256[](rewardsTokensLength);
