@@ -340,14 +340,28 @@ describe('RewardsPoolBase', () => {
         expect(userRewardDebt).to.equal(0, "User's reward debt is not correct");
         expect(userOwedToken).to.equal(0, "User's reward debt is not correct");
 
+        // before recalculation
+        // 3600s = 1 hour
+        // 3600 rewards through 1 hour
+        // 1 rward per second
+
+        // after recalculation
+        // 1800s = 30 minutes
+        // 3600 rewards through 30 minutes
+        // 2 rward per second
+
         for (let i = 0; i < rewardPerSecond.length; i++) {
+          const currentRewardPerSecond = await RewardsPoolBaseInstance.rewardPerSecond(i);
           const accumulatedReward = await RewardsPoolBaseInstance.getUserAccumulatedReward(
             aliceAccount.address,
             i,
             stakeTime + oneMinute
           );
 
-          expect(accumulatedReward).to.equal(rewardPerSecond[i].mul(oneMinute), 'The reward accrued was not 1 token');
+          expect(accumulatedReward).to.equal(
+            currentRewardPerSecond.mul(oneMinute),
+            'The reward accrued was not 1 token'
+          );
         }
       });
 
@@ -363,8 +377,9 @@ describe('RewardsPoolBase', () => {
         const tokenMultiplier = '1000000000000000000';
 
         for (let i = 0; i < rewardPerSecond.length; i++) {
+          const currentRewardPerSecond = await RewardsPoolBaseInstance.rewardPerSecond(i);
           const accumulatedMultiplier = await RewardsPoolBaseInstance.accumulatedRewardMultiplier(i);
-          const rewardMultiplierPerMinute = rewardPerSecond[i].mul(oneMinute).mul(tokenMultiplier);
+          const rewardMultiplierPerMinute = currentRewardPerSecond.mul(oneMinute).mul(tokenMultiplier);
 
           // at the time of update (when bob staked) there has only been one minute staked with standardStakingAmount
           expect(accumulatedMultiplier).to.equal(
@@ -374,12 +389,13 @@ describe('RewardsPoolBase', () => {
         }
 
         for (let i = 0; i < rewardPerSecond.length; i++) {
+          const currentRewardPerSecond = await RewardsPoolBaseInstance.rewardPerSecond(i);
           const accumulatedRewardAlice = await RewardsPoolBaseInstance.getUserAccumulatedReward(
             aliceAccount.address,
             i,
             startTimestamp + oneMinute * 3
           );
-          const totalReward = rewardPerSecond[i].mul(oneMinute * 2).mul(tokenMultiplier);
+          const totalReward = currentRewardPerSecond.mul(oneMinute * 2).mul(tokenMultiplier);
 
           // use 3/4 here because alice staked the full first period and half of the second period (-1/4)
           expect(accumulatedRewardAlice).to.equal(
@@ -389,12 +405,13 @@ describe('RewardsPoolBase', () => {
         }
 
         for (let i = 0; i < rewardPerSecond.length; i++) {
+          const currentRewardPerSecond = await RewardsPoolBaseInstance.rewardPerSecond(i);
           const accumulatedRewardBob = await RewardsPoolBaseInstance.getUserAccumulatedReward(
             bobAccount.address,
             i,
             startTimestamp + oneMinute * 3
           );
-          const totalReward = rewardPerSecond[i].mul(oneMinute * 2).mul(tokenMultiplier);
+          const totalReward = currentRewardPerSecond.mul(oneMinute * 2).mul(tokenMultiplier);
 
           // use 1/4 here because bob didn't stake the first period (-2/4) and half of the second period (-1/4)
           expect(accumulatedRewardBob).to.equal(
@@ -407,8 +424,9 @@ describe('RewardsPoolBase', () => {
         await RewardsPoolBaseInstance.updateRewardMultipliers();
 
         for (let i = 0; i < rewardPerSecond.length; i++) {
+          const currentRewardPerSecond = await RewardsPoolBaseInstance.rewardPerSecond(i);
           const accumulatedMultiplier = await RewardsPoolBaseInstance.accumulatedRewardMultiplier(i);
-          const rewardMultiplierPerMinute = rewardPerSecond[i].mul(oneMinute).mul(tokenMultiplier);
+          const rewardMultiplierPerMinute = currentRewardPerSecond.mul(oneMinute).mul(tokenMultiplier);
 
           // at the time of update (now) there has been one minute staked with standardStakingAmount and one minute staked with standardStakingAmount * 2
           expect(accumulatedMultiplier).to.equal(

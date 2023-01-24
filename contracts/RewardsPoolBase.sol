@@ -4,6 +4,7 @@ pragma solidity 0.8.9;
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import 'hardhat/console.sol';
 
 /** @dev Base pool contract used in all other pools. 
 Users can stake tokens and get rewards based on the percentage of total staked tokens.
@@ -35,6 +36,7 @@ contract RewardsPoolBase is Ownable {
 
     IERC20 public immutable stakingToken;
 
+    uint256 public originalTimestamp;
     uint256 public startTimestamp;
     uint256 public endTimestamp;
     uint256 private lastRewardTimestamp;
@@ -152,6 +154,7 @@ contract RewardsPoolBase is Ownable {
         }
 
         startTimestamp = _startTimestamp;
+        originalTimestamp = _startTimestamp;
         endTimestamp = _endTimestamp;
         lastRewardTimestamp = _startTimestamp;
 
@@ -170,6 +173,7 @@ contract RewardsPoolBase is Ownable {
         uint256 rewardsTokensLength = rewardsTokens.length;
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
+            accumulatedRewardMultiplier[i] = 0;
             uint256 balance = IERC20(rewardsTokens[i]).balanceOf(address(this));
 
             if (balance > 0) {
@@ -336,19 +340,26 @@ contract RewardsPoolBase is Ownable {
         }
 
         uint256 applicableTimestamp = (_currentTimestamp < endTimestamp) ? _currentTimestamp : endTimestamp;
-
         uint256 secondsSinceLastReward = applicableTimestamp - lastRewardTimestamp;
+        uint256 rewardsTokensLength = rewardsTokens.length;
 
         if (secondsSinceLastReward == 0) {
             return;
         }
 
         if (totalStaked == 0) {
+            uint256[] memory _rewardPerSecond = new uint256[](rewardsTokensLength);
+
+            for (uint256 i = 0; i < rewardsTokensLength; i++) {
+                uint256 currentTotalRewards = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerSecond[i]);
+                _rewardPerSecond[i] = currentTotalRewards / (endTimestamp - _currentTimestamp); // calculate the rewards per second
+            }
+
+            startTimestamp = _currentTimestamp;
+            rewardPerSecond = _rewardPerSecond;
             lastRewardTimestamp = applicableTimestamp;
             return;
         }
-
-        uint256 rewardsTokensLength = rewardsTokens.length;
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
             uint256 newReward = secondsSinceLastReward * rewardPerSecond[i]; // Get newly accumulated reward
