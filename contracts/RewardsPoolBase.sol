@@ -164,13 +164,26 @@ contract RewardsPoolBase is Ownable {
         _cancel();
     }
 
-    function _cancel() internal {
-        require(block.timestamp < startTimestamp, 'RewardsPoolBase: No start scheduled or already started');
+    function _returnRewards() internal {
+        require(totalStaked != 0, 'RewardsPoolBase: somebody has staked into the campaign');
 
+        uint256 rewardsTokensLength = rewardsTokens.length;
+
+        for (uint256 i = 0; i < rewardsTokensLength; i++) {
+            uint256 balance = IERC20(rewardsTokens[i]).balanceOf(address(this));
+
+            if (balance > 0) {
+                IERC20(rewardsTokens[i]).safeTransfer(msg.sender, balance);
+            }
+        }
+    }
+
+    function _cancel() internal {
         rewardPerSecond = new uint256[](0);
         startTimestamp = 0;
         endTimestamp = 0;
         lastRewardTimestamp = 0;
+        _returnRewards();
     }
 
     /** @dev Stake an amount of tokens
