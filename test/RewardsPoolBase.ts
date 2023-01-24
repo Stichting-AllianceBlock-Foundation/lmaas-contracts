@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { ethers, network } from 'hardhat';
+import { ethers } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { BigNumber } from 'ethers';
 
@@ -258,7 +258,15 @@ describe('RewardsPoolBase', () => {
   });
 
   describe('Cancel', function () {
-    it('[Should cancel when start is scheduled but not started]:', async () => {
+    it('[Should cancel when campaign is not started]:', async () => {
+      const instance = await createPool();
+
+      await instance.cancel();
+
+      expect(await instance.startTimestamp()).to.equal(0);
+    });
+
+    it('[Should cancel when campaign is  started]:', async () => {
       const instance = await createPool();
 
       await instance.start(startTimestamp, endTimestamp, rewardPerSecond);
@@ -267,29 +275,13 @@ describe('RewardsPoolBase', () => {
 
       expect(await instance.startTimestamp()).to.equal(0);
     });
-
-    it('[Should fail if already started]:', async () => {
-      const instance = await createPool();
-
-      await instance.start(startTimestamp, endTimestamp, rewardPerSecond);
-
-      await timeTravelTo(startTimestamp + 1);
-
-      await expect(instance.cancel()).to.be.revertedWith('RewardsPoolBase: No start scheduled or already started');
-    });
-
-    it('[Should fail if no start scheduled]:', async () => {
-      const instance = await createPool();
-
-      await expect(instance.cancel()).to.be.revertedWith('RewardsPoolBase: No start scheduled or already started');
-    });
   });
 
   describe('Staking', function () {
     it('[Should not stake before staking start]:', async () => {
       await stakingTokenInstance.approve(RewardsPoolBaseInstance.address, standardStakingAmount);
       await expect(RewardsPoolBaseInstance.stake(standardStakingAmount)).to.be.revertedWith(
-        'RewardsPoolBase: staking is not started or is finished'
+        'RewardsPoolBase: staking is not started or is finished or no extension taking in place'
       );
     });
 
@@ -298,18 +290,29 @@ describe('RewardsPoolBase', () => {
       expect(await RewardsPoolBaseInstance.startTimestamp()).to.equal(0, 'The start timestamp was not reset');
     });
 
-    it('[Should not cancel after staking start]:', async () => {
+    it('[Should cancel after staking start and give rewards back to owner]:', async () => {
       await timeTravel(70);
 
-      await expect(RewardsPoolBaseInstance.cancel()).to.be.revertedWith(
-        'RewardsPoolBase: No start scheduled or already started'
-      );
+      //here
+      const ownerInitialBalance = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
+      await RewardsPoolBaseInstance.cancel();
+      const ownerAfterBalance = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
+      expect(ownerAfterBalance).gt(ownerInitialBalance);
     });
 
     it('[Should be able to restart after cancel]:', async () => {
       await RewardsPoolBaseInstance.cancel();
 
+      // Send the required amount of tokens to the contract
+      for (let i = 0; i < rewardTokensCount; i++) {
+        await rewardTokensInstances[i].mint(
+          RewardsPoolBaseInstance.address,
+          rewardPerSecond[i].mul(endTimestamp - startTimestamp)
+        );
+      }
+
       await RewardsPoolBaseInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
+
       expect(await RewardsPoolBaseInstance.startTimestamp()).to.equal(startTimestamp, 'Was not able to restart');
     });
 
@@ -855,32 +858,24 @@ describe('RewardsPoolBase', () => {
   });
 
   describe('Withdrawing LP rewards', async function () {
-    it('[Should not withdtaw if the caller is not the factory contract]:', async () => {
+    it('[Should not withdtaw if the caller is not the owner of the contract]:', async () => {
       const lpContractInstance = await deployERC20(amount);
       await lpContractInstance.mint(RewardsPoolBaseInstance.address, '100000000000');
 
       await expect(
         RewardsPoolBaseInstance.connect(bobAccount).withdrawTokens(carolAccount.address, lpContractInstance.address)
-      ).to.be.revertedWith('');
-    });
-
-    it('[Should revert if the token to withdraw is part of the rewards]:', async () => {
-      for (let i = 0; i < rewardTokensCount; i++) {
-        await expect(
-          RewardsPoolBaseInstance.withdrawTokens(carolAccount.address, rewardTokensAddresses[i])
-        ).to.be.revertedWith('');
-      }
+      ).to.be.revertedWith('Ownable: caller is not the owner');
     });
   });
 
   describe('Withdrawing excess rewards', async function () {
-    it('[Should not withdraw if the caller is not the factory contract]:', async () => {
+    it('[Should not withdraw if the caller is not the owner of the contract]:', async () => {
       const lpContractInstance = await deployERC20(amount);
       await lpContractInstance.mint(RewardsPoolBaseInstance.address, '100000000000');
 
       await expect(
         RewardsPoolBaseInstance.connect(bobAccount).withdrawExcessRewards(carolAccount.address)
-      ).to.be.revertedWith('');
+      ).to.be.revertedWith('Ownable: caller is not the owner');
     });
 
     it('[Should withdraw excess rewards]:', async () => {

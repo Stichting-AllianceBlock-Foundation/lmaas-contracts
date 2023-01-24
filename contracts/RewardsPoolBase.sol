@@ -165,7 +165,7 @@ contract RewardsPoolBase is Ownable {
     }
 
     function _returnRewards() internal {
-        require(totalStaked != 0, 'RewardsPoolBase: somebody has staked into the campaign');
+        require(totalStaked == 0, 'RewardsPoolBase: somebody has staked into the campaign');
 
         uint256 rewardsTokensLength = rewardsTokens.length;
 
