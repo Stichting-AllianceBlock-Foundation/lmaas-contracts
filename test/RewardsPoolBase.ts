@@ -421,7 +421,6 @@ describe('RewardsPoolBase', () => {
 
         userOwedToken = await RewardsPoolBaseInstance.getUserOwedTokens(aliceAccount.address, 0);
         accumulatedMultiplier = await RewardsPoolBaseInstance.accumulatedRewardMultiplier(0);
-        console.log(accumulatedMultiplier.toString());
 
         let currentMultiplier = rewardPerSecond.mul(600).mul(ethers.utils.parseEther('1')).div(totalStaked);
 
