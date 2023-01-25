@@ -181,11 +181,15 @@ contract RewardsPoolBase is Ownable {
     }
 
     function _cancel() internal {
-        rewardPerSecond = new uint256[](0);
         startTimestamp = 0;
         originalTimestamp = 0;
         endTimestamp = 0;
         lastRewardTimestamp = 0;
+
+        uint256[] memory empty = new uint256[](rewardsTokens.length);
+        accumulatedRewardMultiplier = empty;
+        totalClaimed = empty;
+        totalSpentRewards = empty;
 
         _returnRewards();
     }
