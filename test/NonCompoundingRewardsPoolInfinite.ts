@@ -71,30 +71,5 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await nonCompoundingRewardsPoolInfinite.balanceOf(staker.address)).to.be.eq(0);
       expect(await stakingToken.balanceOf(staker.address)).to.be.eq(amount);
     });
-
-    it('Should be able to withdraw stake out of dead pool to another account', async function () {
-      let amount = ethers.utils.parseEther('10');
-      await rewardToken.faucet(nonCompoundingRewardsPoolInfinite.address, amount);
-
-      await nonCompoundingRewardsPoolInfinite['start(uint256)'](3600 * 24 * 5);
-      amount = ethers.utils.parseEther('10000');
-      const staker = stakers[0];
-
-      stakingToken.faucet(staker.address, amount);
-      await stakingToken.connect(staker).approve(nonCompoundingRewardsPoolInfinite.address, amount);
-
-      await nonCompoundingRewardsPoolInfinite.connect(staker).stake(amount);
-      expect(await stakingToken.balanceOf(staker.address)).to.be.eq(0);
-      expect(await stakingToken.balanceOf(nonCompoundingRewardsPoolInfinite.address)).to.be.eq(amount);
-      expect(await nonCompoundingRewardsPoolInfinite.balanceOf(staker.address)).to.be.eq(amount);
-
-      timeTravel(3600 * 24 * 5);
-
-      await nonCompoundingRewardsPoolInfinite.connect(staker).exit();
-
-      expect(await stakingToken.balanceOf(nonCompoundingRewardsPoolInfinite.address)).to.be.eq(0);
-      expect(await nonCompoundingRewardsPoolInfinite.balanceOf(staker.address)).to.be.eq(0);
-      expect(await stakingToken.balanceOf(staker.address)).to.be.eq(amount);
-    });
   });
 });

@@ -12,12 +12,7 @@ import './../pool-features/infinite-pool/StakeReceiverFeatureInfinite.sol';
     Inherits all staking logic from RewardsPoolBase.
     Only allows exit at the end of the time lock and via the throttling mechanism.
 */
-contract NonCompoundingRewardsPoolInfinite is
-    RewardsPoolBaseInfinite,
-    OnlyExitFeatureInfinite,
-    StakeTransfererFeatureInfinite,
-    StakeReceiverFeatureInfinite
-{
+contract NonCompoundingRewardsPoolInfinite is RewardsPoolBaseInfinite, OnlyExitFeatureInfinite {
     uint256 public epochCount;
     mapping(address => uint256) userStakedEpoch;
 
@@ -95,20 +90,6 @@ contract NonCompoundingRewardsPoolInfinite is
             'exit::you can only exit at the end of the epoch'
         );
         RewardsPoolBaseInfinite.exit();
-
-        // we reset the epoch count for the user
-        userStakedEpoch[msg.sender] = 0;
-    }
-
-    /** @dev Exits the pool and tranfer to another pool
-     * @param transferTo The new pool to tranfer to
-     */
-    function exitAndTransfer(address transferTo) public virtual override(StakeTransfererFeatureInfinite) {
-        require(
-            userStakedEpoch[msg.sender] < epochCount || block.timestamp > endTimestamp,
-            'exitAndTransfer::you can only exit at the end of the epoch'
-        );
-        StakeTransfererFeatureInfinite.exitAndTransfer(transferTo);
 
         // we reset the epoch count for the user
         userStakedEpoch[msg.sender] = 0;
