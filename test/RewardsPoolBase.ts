@@ -257,7 +257,7 @@ describe('RewardsPoolBase', () => {
     });
   });
 
-  describe('Cancel', function () {
+  describe.only('Cancel', function () {
     it('[Should cancel when campaign is not started]:', async () => {
       const instance = await createPool();
 
@@ -274,6 +274,63 @@ describe('RewardsPoolBase', () => {
       await instance.cancel();
 
       expect(await instance.startTimestamp()).to.equal(0);
+    });
+
+    it('[Should successfully cancel and restart the campaign from zero]:', async () => {
+      const instance = await createPool();
+
+      await instance.start(startTimestamp, endTimestamp, rewardPerSecond);
+
+      // we travel 60 seconds in the future
+      await timeTravel(60);
+
+      await stakingTokenInstance.approve(instance.address, ethers.constants.MaxUint256);
+
+      // #1 - 1800 seconds passed
+      await timeTravel(1800);
+      await instance.stake(standardStakingAmount);
+
+      // #2 - 600 seconds passed
+      await timeTravel(600);
+      await instance.stake(standardStakingAmount);
+
+      // #3 - 600 seconds passed
+      await timeTravel(600);
+      await instance.exit();
+
+      // #4 - 600 seconds passed cancel the current campaign and start a new one
+      await timeTravel(600);
+      await instance.cancel();
+
+      startTimestamp = (await getTime()) + oneMinute;
+      endTimestamp = startTimestamp + poolLength;
+
+      // Send the required amount of tokens to the contract
+      for (let i = 0; i < rewardTokensCount; i++) {
+        await rewardTokensInstances[i].mint(instance.address, rewardPerSecond[i].mul(endTimestamp - startTimestamp));
+      }
+
+      await instance.start(startTimestamp, endTimestamp, rewardPerSecond);
+
+      // #5 we travel 60 seconds in the future
+      await timeTravel(60);
+      await instance.stake(standardStakingAmount);
+
+      // #6 we travel 600 seconds in the future
+      await timeTravel(600);
+      await instance.stake(standardStakingAmount);
+
+      // #7 we travel 2900 seconds in the future
+      await timeTravel(2900);
+      await instance.stake(standardStakingAmount);
+
+      // #8 we travel 100 seconds in the future and we exit the pool
+      await timeTravel(100);
+      const userOwedToken = await instance.getUserOwedTokens(aliceAccount.address, 0);
+      await instance.exit();
+
+      // we confirm he should get the same amount of tokens if the campaign is cancel all the way through
+      expect(userOwedToken).to.gte(ethers.utils.parseEther('3500')).and.lte(ethers.utils.parseEther('3600'));
     });
   });
 

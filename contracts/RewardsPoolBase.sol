@@ -160,7 +160,7 @@ contract RewardsPoolBase is Ownable {
         emit Started(startTimestamp, endTimestamp, rewardPerSecond);
     }
 
-    /** @dev Cancels the scheduled start. Can only be done before the start.
+    /** @dev Cancels the scheduled start.
      */
     function cancel() external virtual onlyOwner {
         _cancel();
@@ -172,7 +172,6 @@ contract RewardsPoolBase is Ownable {
         uint256 rewardsTokensLength = rewardsTokens.length;
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
-            accumulatedRewardMultiplier[i] = 0;
             uint256 balance = IERC20(rewardsTokens[i]).balanceOf(address(this));
 
             if (balance > 0) {
@@ -187,7 +186,6 @@ contract RewardsPoolBase is Ownable {
         originalTimestamp = 0;
         endTimestamp = 0;
         lastRewardTimestamp = 0;
-        accumulatedRewardMultiplier = new uint256[](0);
 
         _returnRewards();
     }
