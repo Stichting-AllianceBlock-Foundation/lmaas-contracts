@@ -14,7 +14,7 @@ import './../pool-features/infinite-pool/StakeReceiverFeatureInfinite.sol';
 */
 contract NonCompoundingRewardsPoolInfinite is RewardsPoolBaseInfinite, OnlyExitFeatureInfinite {
     uint256 public epochCount;
-    mapping(address => uint256) userStakedEpoch;
+    mapping(address => uint256) public userStakedEpoch;
 
     /** @param _stakingToken The token to stake
      * @param _rewardsTokens The reward tokens
