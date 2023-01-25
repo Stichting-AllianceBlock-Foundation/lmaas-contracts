@@ -90,7 +90,10 @@ contract NonCompoundingRewardsPoolInfinite is
 
     /// @dev which you can withdraw your stake and rewards.
     function exit() public override(RewardsPoolBaseInfinite) {
-        require(userStakedEpoch[msg.sender] < epochCount, 'exit::you can only exit at the end of the epoch');
+        require(
+            userStakedEpoch[msg.sender] < epochCount || block.timestamp > endTimestamp,
+            'exit::you can only exit at the end of the epoch'
+        );
         RewardsPoolBaseInfinite.exit();
 
         // we reset the epoch count for the user
@@ -101,7 +104,10 @@ contract NonCompoundingRewardsPoolInfinite is
      * @param transferTo The new pool to tranfer to
      */
     function exitAndTransfer(address transferTo) public virtual override(StakeTransfererFeatureInfinite) {
-        require(userStakedEpoch[msg.sender] < epochCount, 'exitAndTransfer::you can only exit at the end of the epoch');
+        require(
+            userStakedEpoch[msg.sender] < epochCount || block.timestamp > endTimestamp,
+            'exitAndTransfer::you can only exit at the end of the epoch'
+        );
         StakeTransfererFeatureInfinite.exitAndTransfer(transferTo);
 
         // we reset the epoch count for the user
