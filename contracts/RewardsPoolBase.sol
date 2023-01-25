@@ -187,6 +187,8 @@ contract RewardsPoolBase is Ownable {
         startTimestamp = 0;
         endTimestamp = 0;
         lastRewardTimestamp = 0;
+        accumulatedRewardMultiplier = new uint256[](0);
+
         _returnRewards();
     }
 
