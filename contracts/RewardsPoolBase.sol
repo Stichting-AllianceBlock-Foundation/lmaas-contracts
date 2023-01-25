@@ -185,6 +185,7 @@ contract RewardsPoolBase is Ownable {
     function _cancel() internal {
         rewardPerSecond = new uint256[](0);
         startTimestamp = 0;
+        originalTimestamp = 0;
         endTimestamp = 0;
         lastRewardTimestamp = 0;
         accumulatedRewardMultiplier = new uint256[](0);
@@ -536,6 +537,7 @@ contract RewardsPoolBase is Ownable {
 
         rewardPerSecond = _rewardPerSecond;
         startTimestamp = _startTimestamp;
+        originalTimestamp = _startTimestamp;
         endTimestamp = _endTimestamp;
         lastRewardTimestamp = _startTimestamp;
 
