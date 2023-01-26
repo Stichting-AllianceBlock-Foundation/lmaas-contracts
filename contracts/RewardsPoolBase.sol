@@ -167,8 +167,6 @@ contract RewardsPoolBase is Ownable {
     }
 
     function _returnRewards() internal {
-        require(totalStaked == 0, 'RewardsPoolBase: somebody has staked into the campaign');
-
         uint256 rewardsTokensLength = rewardsTokens.length;
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
@@ -181,6 +179,8 @@ contract RewardsPoolBase is Ownable {
     }
 
     function _cancel() internal {
+        require(totalStaked == 0, 'RewardsPoolBase: somebody has staked into the campaign');
+
         startTimestamp = 0;
         originalTimestamp = 0;
         endTimestamp = 0;
