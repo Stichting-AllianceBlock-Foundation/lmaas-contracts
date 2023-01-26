@@ -38,6 +38,7 @@ contract RewardsPoolBaseInfinite is Ownable {
     IERC20 public immutable stakingToken;
 
     uint256 public epochDuration;
+    uint256 public originalTimestamp;
     uint256 public startTimestamp;
     uint256 public endTimestamp;
     uint256 internal lastRewardTimestamp;
@@ -158,6 +159,7 @@ contract RewardsPoolBaseInfinite is Ownable {
         }
 
         rewardPerSecond = _rewardPerSecond;
+        originalTimestamp = _startTimestamp;
         startTimestamp = _startTimestamp;
         endTimestamp = _endTimestamp;
         lastRewardTimestamp = _startTimestamp;
@@ -482,11 +484,6 @@ contract RewardsPoolBaseInfinite is Ownable {
         uint256 rewardsTokensLength = rewardsTokens.length;
         uint256[] memory _rewardPerSecond = new uint256[](rewardsTokensLength);
 
-        for (uint256 i = 0; i < rewardPerSecondLength; i++) {
-            uint256 spentRewards = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerSecond[i]);
-            totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
-        }
-
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
             uint256 balance = getAvailableBalance(i);
             require(balance > 0, 'RewardsPoolBaseInfinite: no rewards for this token');
@@ -497,9 +494,15 @@ contract RewardsPoolBaseInfinite is Ownable {
             _rewardPerSecond[i] = balance / (_endTimestamp - _startTimestamp); // calculate the rewards per second
         }
 
+        for (uint256 i = 0; i < rewardPerSecondLength; i++) {
+            uint256 spentRewards = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerSecond[i]);
+            totalSpentRewards[i] = totalSpentRewards[i] + spentRewards;
+        }
+
         previousCampaigns.push(Campaign(startTimestamp, endTimestamp, rewardPerSecond));
 
         rewardPerSecond = _rewardPerSecond;
+        originalTimestamp = _startTimestamp;
         startTimestamp = _startTimestamp;
         endTimestamp = _endTimestamp;
         lastRewardTimestamp = _startTimestamp;
@@ -519,7 +522,10 @@ contract RewardsPoolBaseInfinite is Ownable {
             return balance;
         }
 
-        uint256 availableBalance = balance - (totalSpentRewards[_rewardTokenIndex] - totalClaimed[_rewardTokenIndex]);
+        uint256 spentRewards = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerSecond[_rewardTokenIndex]);
+
+        uint256 availableBalance = balance -
+            (totalSpentRewards[_rewardTokenIndex] + spentRewards - totalClaimed[_rewardTokenIndex]);
 
         if (rewardToken == address(stakingToken)) {
             availableBalance = availableBalance - totalStaked;

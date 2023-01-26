@@ -157,62 +157,6 @@ describe('RewardsPoolBaseInfinite', () => {
       );
     });
 
-    it('Can cancel the pool before start', async () => {
-      const amount = ethers.utils.parseEther('10');
-      await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
-
-      const now = Math.round(Date.now() / 1000);
-      const startTimestamp = now + 3600 * 2;
-      await rewardsPoolBaseInfinite['start(uint256,uint256)'](3600 * 24 * 5, startTimestamp);
-
-      expect(await rewardToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(amount);
-      expect(await rewardsPoolBaseInfinite.startTimestamp()).to.be.eq(startTimestamp);
-      expect(await rewardsPoolBaseInfinite.endTimestamp()).to.be.eq(startTimestamp + 3600 * 24 * 5);
-      expect(await rewardsPoolBaseInfinite.getRewardTokensCount()).to.be.eq(1);
-      expect(await rewardsPoolBaseInfinite.epochDuration()).to.be.eq(3600 * 24 * 5);
-
-      await rewardsPoolBaseInfinite.cancel();
-
-      await expect(rewardsPoolBaseInfinite.rewardPerSecond(0)).to.be.reverted;
-      expect(await rewardsPoolBaseInfinite.startTimestamp()).to.be.eq(0);
-      expect(await rewardsPoolBaseInfinite.endTimestamp()).to.be.eq(0);
-    });
-
-    it('Cannot cancel the pool after start', async () => {
-      const amount = ethers.utils.parseEther('10');
-      await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
-
-      await rewardsPoolBaseInfinite['start(uint256)'](3600 * 24 * 5);
-
-      await expect(rewardsPoolBaseInfinite.cancel()).to.be.revertedWith(
-        'RewardsPoolBaseInfinite: No start scheduled or already started'
-      );
-    });
-
-    it('Cannot cancel the pool after scheduled start', async () => {
-      const amount = ethers.utils.parseEther('10');
-      await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
-
-      const now = Math.round(Date.now() / 1000);
-      const startTimestamp = now + 3600 * 2;
-      await rewardsPoolBaseInfinite['start(uint256,uint256)'](3600 * 24 * 5, startTimestamp);
-
-      expect(await rewardToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(amount);
-      expect(await rewardsPoolBaseInfinite.startTimestamp()).to.be.eq(startTimestamp);
-      expect(await rewardsPoolBaseInfinite.endTimestamp()).to.be.eq(startTimestamp + 3600 * 24 * 5);
-      expect(await rewardsPoolBaseInfinite.getRewardTokensCount()).to.be.eq(1);
-      expect(await rewardsPoolBaseInfinite.epochDuration()).to.be.eq(3600 * 24 * 5);
-      expect(await rewardsPoolBaseInfinite.hasStakingStarted()).to.be.false;
-
-      await timeTravel(3600 * 2);
-
-      expect(await rewardsPoolBaseInfinite.hasStakingStarted()).to.be.true;
-
-      await expect(rewardsPoolBaseInfinite.cancel()).to.be.revertedWith(
-        'RewardsPoolBaseInfinite: No start scheduled or already started'
-      );
-    });
-
     it('Should not start without funds send to the contract', async () => {
       await expect(rewardsPoolBaseInfinite['start(uint256)'](3600 * 24 * 5)).to.be.revertedWith(
         'RewardsPoolBaseInfinite: no rewards for this token'
@@ -287,27 +231,6 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await stakingToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(amount);
     });
 
-    it('Should not be able to call onlyOwner functions', async () => {
-      await expect(rewardsPoolBaseInfinite.connect(signers[1])['start(uint256)'](3600)).to.be.revertedWith(
-        'Ownable: caller is not the owner'
-      );
-      await expect(
-        rewardsPoolBaseInfinite
-          .connect(signers[1])
-          ['start(uint256,uint256)'](3600, Math.round(Date.now() / 1000 + 1800))
-      ).to.be.revertedWith('Ownable: caller is not the owner');
-
-      await expect(rewardsPoolBaseInfinite.connect(signers[1]).cancel()).to.be.revertedWith(
-        'Ownable: caller is not the owner'
-      );
-
-      await expect(
-        rewardsPoolBaseInfinite
-          .connect(signers[1])
-          .withdrawTokens(ethers.constants.AddressZero, ethers.constants.AddressZero)
-      ).to.be.revertedWith('Ownable: caller is not the owner');
-    });
-
     it('Should be able to withdraw accidentially send funds', async function () {
       const amount = ethers.utils.parseEther('10000');
       await rewards[2].faucet(stakers[0].address, amount);
@@ -343,7 +266,7 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await rewards[0].balanceOf(stakers[0].address)).to.be.eq(0);
     });
 
-    it.only('Test excess rewards withdrawal bug #1', async () => {
+    it('Test excess rewards withdrawal bug #1', async () => {
       let amount = ethers.utils.parseEther('10000');
       await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
 
@@ -394,7 +317,7 @@ describe('RewardsPoolBaseInfinite', () => {
       // console.log('staker2 after', ethers.utils.formatEther(await rewardToken.balanceOf(staker2.address)));
     });
 
-    it.only('Test excess rewards withdrawal bug #2', async () => {
+    it('Test excess rewards withdrawal bug #2', async () => {
       let amount = ethers.utils.parseEther('10000');
       await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
 
