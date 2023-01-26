@@ -486,7 +486,6 @@ contract RewardsPoolBaseInfinite is Ownable {
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
             uint256 balance = getAvailableBalance(i);
-            require(balance > 0, 'RewardsPoolBaseInfinite: no rewards for this token');
 
             // we need to cut off 1% or 5% whatever the business decides
             // IERC20(rewardsTokens[i]).transferFrom(address(this), feeRecipient, (balance * CUT_FEE) / MAX_FEE);
