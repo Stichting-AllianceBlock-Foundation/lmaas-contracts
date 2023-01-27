@@ -231,6 +231,23 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await stakingToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(amount);
     });
 
+    it('Should not be able to call onlyOwner functions', async () => {
+      await expect(rewardsPoolBaseInfinite.connect(signers[1])['start(uint256)'](3600)).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      );
+      await expect(
+        rewardsPoolBaseInfinite
+          .connect(signers[1])
+          ['start(uint256,uint256)'](3600, Math.round(Date.now() / 1000 + 1800))
+      ).to.be.revertedWith('Ownable: caller is not the owner');
+
+      await expect(
+        rewardsPoolBaseInfinite
+          .connect(signers[1])
+          .withdrawTokens(ethers.constants.AddressZero, ethers.constants.AddressZero)
+      ).to.be.revertedWith('Ownable: caller is not the owner');
+    });
+
     it('Should be able to withdraw accidentially send funds', async function () {
       const amount = ethers.utils.parseEther('10000');
       await rewards[2].faucet(stakers[0].address, amount);
