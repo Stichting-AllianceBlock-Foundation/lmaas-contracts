@@ -7,6 +7,7 @@ import { ERC20Faucet, RewardsPoolbaseInfiniteTest } from '../typechain';
 import { timeTravel } from './utils';
 
 let snapshotId: string;
+let signer: SignerWithAddress;
 let signers: SignerWithAddress[];
 let stakers: SignerWithAddress[];
 let provider: Provider;
@@ -18,7 +19,8 @@ let rewardToken: ERC20Faucet;
 describe('RewardsPoolBaseInfinite', () => {
   before(async () => {
     signers = await ethers.getSigners();
-    stakers = signers.slice(5);
+    stakers = signers.slice(1, 5);
+    signer = signers[0];
     provider = signers[0].provider!;
 
     const ERC20Faucet = await ethers.getContractFactory('ERC20Faucet');
@@ -287,8 +289,7 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await stakingToken.balanceOf(stakers[0].address)).to.be.eq(0);
     });
 
-    // TODO: not sure if this is proper design
-    it('Should not be able to withdraw staking tokens', async function () {
+    it('Should not be able to withdraw reward tokens', async function () {
       const amount = ethers.utils.parseEther('10000');
       await rewards[0].faucet(stakers[0].address, amount);
 
@@ -423,43 +424,82 @@ describe('RewardsPoolBaseInfinite', () => {
     it.only('Should be able to get available balance', async function () {
       const staker = stakers[0];
       let amount = ethers.utils.parseEther('10000');
-      console.log(await rewardsPoolBaseInfinite.getAvailableBalance(0));
+      expect(await rewardsPoolBaseInfinite.getAvailableBalance(0)).to.be.eq(ethers.utils.parseEther('0'));
 
       await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
-      console.log(await rewardsPoolBaseInfinite.getAvailableBalance(0));
+      expect(await rewardsPoolBaseInfinite.getAvailableBalance(0)).to.be.eq(ethers.utils.parseEther('10000'));
 
       await rewardsPoolBaseInfinite['start(uint256)'](3600 * 24 * 5);
-      console.log(await rewardsPoolBaseInfinite.getAvailableBalance(0));
-
+      expect(await rewardsPoolBaseInfinite.getAvailableBalance(0))
+        .to.be.lt(3600 * 24 * 5)
+        .and.gte(0);
       await stakingToken.faucet(staker.address, amount);
       await stakingToken.connect(staker).approve(rewardsPoolBaseInfinite.address, amount);
+      await rewardsPoolBaseInfinite.connect(staker).stake(amount);
 
-      console.log(await rewardsPoolBaseInfinite.startTimestamp());
-      console.log(await rewardsPoolBaseInfinite.getAvailableBalance(0));
+      expect(await rewardsPoolBaseInfinite.getAvailableBalance(0))
+        .to.be.lt(3600 * 24 * 5 * 2)
+        .and.gte(0);
       await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
-      console.log(await rewardsPoolBaseInfinite.getAvailableBalance(0));
+      expect((await rewardsPoolBaseInfinite.getAvailableBalance(0)).sub(amount))
+        .to.be.lt(3600 * 24 * 5 * 2)
+        .and.gte(0);
     });
 
     it.only('Should not be able to withdraw assigned rewards', async function () {
       const staker = stakers[0];
       let amount = ethers.utils.parseEther('10000');
-      console.log(await rewardsPoolBaseInfinite.getAvailableBalance(0));
 
       await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
-      console.log(await rewardsPoolBaseInfinite.getAvailableBalance(0));
-
       await rewardsPoolBaseInfinite['start(uint256)'](3600 * 24 * 5);
-      console.log(await rewardsPoolBaseInfinite.getAvailableBalance(0));
 
       await stakingToken.faucet(staker.address, amount);
       await stakingToken.connect(staker).approve(rewardsPoolBaseInfinite.address, amount);
+      await rewardsPoolBaseInfinite.connect(staker).stake(amount);
 
-      console.log(await rewardsPoolBaseInfinite.startTimestamp());
-      console.log(await rewardsPoolBaseInfinite.getAvailableBalance(0));
+      expect(await rewardsPoolBaseInfinite.getAvailableBalance(0))
+        .to.be.lt(3600 * 24 * 5 * 2)
+        .and.gte(0);
 
-      await rewardsPoolBaseInfinite.withdrawExcessRewards(staker.address);
-      //   await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
-      console.log(await rewardsPoolBaseInfinite.getAvailableBalance(0));
+      expect(await rewardToken.balanceOf(signer.address)).to.be.eq(0);
+      await rewardsPoolBaseInfinite.withdrawExcessRewards(signer.address);
+      expect(await rewardsPoolBaseInfinite.getAvailableBalance(0)).to.be.eq(0);
+      expect(await rewardToken.balanceOf(signer.address))
+        .to.be.lt(3600 * 24 * 5 * 2)
+        .and.gte(0);
+
+      expect(await rewardsPoolBaseInfinite.getAvailableBalance(0)).to.be.eq(0);
+    });
+
+    // TODO: check if it can be extended with 0 rewards
+    // TODO: check if it can be extended with < epoch time rewards
+    it.only('Can be extended', async function () {
+      const staker = stakers[0];
+      let amount = ethers.utils.parseEther('10000');
+
+      await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
+
+      await rewardsPoolBaseInfinite['start(uint256)'](3600 * 24 * 5);
+
+      await stakingToken.faucet(staker.address, amount);
+      await stakingToken.connect(staker).approve(rewardsPoolBaseInfinite.address, amount);
+      await rewardsPoolBaseInfinite.connect(staker).stake(amount);
+
+      await rewards[1].faucet(rewardsPoolBaseInfinite.address, ethers.utils.parseEther('10000'));
+      await rewards[2].faucet(rewardsPoolBaseInfinite.address, ethers.utils.parseEther('10000'));
+
+      expect(await rewards[1].balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(ethers.utils.parseEther('10000'));
+      expect(await rewards[2].balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(ethers.utils.parseEther('10000'));
+      expect(await rewards[1].balanceOf(signer.address)).to.be.eq(0);
+      expect(await rewards[2].balanceOf(signer.address)).to.be.eq(0);
+
+      await rewardsPoolBaseInfinite.withdrawTokens(signer.address, rewards[1].address);
+      expect(await rewards[1].balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(0);
+      expect(await rewards[1].balanceOf(signer.address)).to.be.eq(ethers.utils.parseEther('10000'));
+
+      await rewardsPoolBaseInfinite.withdrawTokens(signer.address, rewards[2].address);
+      expect(await rewards[2].balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(0);
+      expect(await rewards[2].balanceOf(signer.address)).to.be.eq(ethers.utils.parseEther('10000'));
     });
   });
 });
