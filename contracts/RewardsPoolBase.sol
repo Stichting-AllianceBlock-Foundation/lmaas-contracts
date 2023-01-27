@@ -35,6 +35,7 @@ contract RewardsPoolBase is Ownable {
 
     IERC20 public immutable stakingToken;
 
+    uint256 public originalTimestamp;
     uint256 public startTimestamp;
     uint256 public endTimestamp;
     uint256 private lastRewardTimestamp;
@@ -152,25 +153,45 @@ contract RewardsPoolBase is Ownable {
         }
 
         startTimestamp = _startTimestamp;
+        originalTimestamp = _startTimestamp;
         endTimestamp = _endTimestamp;
         lastRewardTimestamp = _startTimestamp;
 
         emit Started(startTimestamp, endTimestamp, rewardPerSecond);
     }
 
-    /** @dev Cancels the scheduled start. Can only be done before the start.
+    /** @dev Cancels the scheduled start.
      */
     function cancel() external virtual onlyOwner {
         _cancel();
     }
 
-    function _cancel() internal {
-        require(block.timestamp < startTimestamp, 'RewardsPoolBase: No start scheduled or already started');
+    function _returnRewards() internal {
+        uint256 rewardsTokensLength = rewardsTokens.length;
 
-        rewardPerSecond = new uint256[](0);
+        for (uint256 i = 0; i < rewardsTokensLength; i++) {
+            uint256 balance = IERC20(rewardsTokens[i]).balanceOf(address(this));
+
+            if (balance > 0) {
+                IERC20(rewardsTokens[i]).safeTransfer(msg.sender, balance);
+            }
+        }
+    }
+
+    function _cancel() internal {
+        require(totalStaked == 0, 'RewardsPoolBase: somebody has staked into the campaign');
+
         startTimestamp = 0;
+        originalTimestamp = 0;
         endTimestamp = 0;
         lastRewardTimestamp = 0;
+
+        uint256[] memory empty = new uint256[](rewardsTokens.length);
+        accumulatedRewardMultiplier = empty;
+        totalClaimed = empty;
+        totalSpentRewards = empty;
+
+        _returnRewards();
     }
 
     /** @dev Stake an amount of tokens
@@ -323,19 +344,26 @@ contract RewardsPoolBase is Ownable {
         }
 
         uint256 applicableTimestamp = (_currentTimestamp < endTimestamp) ? _currentTimestamp : endTimestamp;
-
         uint256 secondsSinceLastReward = applicableTimestamp - lastRewardTimestamp;
+        uint256 rewardsTokensLength = rewardsTokens.length;
 
         if (secondsSinceLastReward == 0) {
             return;
         }
 
         if (totalStaked == 0) {
+            uint256[] memory _rewardPerSecond = new uint256[](rewardsTokensLength);
+
+            for (uint256 i = 0; i < rewardsTokensLength; i++) {
+                uint256 currentTotalRewards = calculateRewardsAmount(startTimestamp, endTimestamp, rewardPerSecond[i]);
+                _rewardPerSecond[i] = currentTotalRewards / (endTimestamp - _currentTimestamp); // calculate the rewards per second
+            }
+
+            startTimestamp = _currentTimestamp;
+            rewardPerSecond = _rewardPerSecond;
             lastRewardTimestamp = applicableTimestamp;
             return;
         }
-
-        uint256 rewardsTokensLength = rewardsTokens.length;
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
             uint256 newReward = secondsSinceLastReward * rewardPerSecond[i]; // Get newly accumulated reward
@@ -510,6 +538,7 @@ contract RewardsPoolBase is Ownable {
 
         rewardPerSecond = _rewardPerSecond;
         startTimestamp = _startTimestamp;
+        originalTimestamp = _startTimestamp;
         endTimestamp = _endTimestamp;
         lastRewardTimestamp = _startTimestamp;
 
