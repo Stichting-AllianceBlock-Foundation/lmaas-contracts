@@ -299,18 +299,12 @@ contract RewardsPoolBaseInfinite is Ownable {
      * @dev Returns a boolean if the campaign can be extended, depending on the rewards that
      * the campaign has
      */
-    // TODO: probably bugged, test this
     function _canBeExtended() internal view returns (bool) {
         for (uint256 i = 0; i < rewardsTokens.length; i++) {
-            uint256 balance = IERC20(rewardsTokens[i]).balanceOf(address(this));
-            uint8 counter;
+            uint256 balance = getAvailableBalance(i);
 
-            // if we have any rewardsTokens with balance 0, don't apply the extension
+            // if we have any rewardsTokens with a balance, the pool should be scheduled
             if (balance > 0) {
-                counter++;
-            }
-
-            if (counter == rewardsTokens.length) {
                 return true;
             }
         }
