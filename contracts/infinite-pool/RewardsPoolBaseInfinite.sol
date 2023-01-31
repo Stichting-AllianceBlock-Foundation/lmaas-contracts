@@ -123,7 +123,7 @@ contract RewardsPoolBaseInfinite is RewardsPoolBase {
      */
     function _canBeExtended() internal view returns (bool) {
         for (uint256 i = 0; i < rewardsTokens.length; i++) {
-            uint256 balance = IERC20(rewardsTokens[i]).balanceOf(address(this));
+            uint256 balance = getAvailableBalance(i);
             uint8 counter;
 
             // if we have any rewardsTokens with balance 0, don't apply the extension
