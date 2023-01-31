@@ -47,13 +47,10 @@ contract NonCompoundingRewardsPoolInfinite is RewardsPoolBaseInfinite, OnlyExitF
      */
     function start(uint256 _epochDuration) external override onlyOwner {
         epochDuration = _epochDuration;
-
         epochCount = epochCount + 1;
         uint256 _startTimestamp = block.timestamp;
         uint256 _endTimestamp = _startTimestamp + _epochDuration;
-
-        _recalculation(_startTimestamp, _endTimestamp);
-        _start(_startTimestamp, _endTimestamp, rewardPerSecond);
+        _start(_startTimestamp, _endTimestamp, _recalculation(_startTimestamp, _endTimestamp));
     }
 
     /**
@@ -67,8 +64,11 @@ contract NonCompoundingRewardsPoolInfinite is RewardsPoolBaseInfinite, OnlyExitF
             _updateRewardMultipliers(endTimestamp);
             if (_canBeExtended()) {
                 epochCount = epochCount + 1;
-                _applyExtension(endTimestamp, endTimestamp + epochDuration, rewardPerSecond);
-                _recalculation(endTimestamp, endTimestamp + epochDuration);
+                _applyExtension(
+                    endTimestamp,
+                    endTimestamp + epochDuration,
+                    _recalculation(endTimestamp, endTimestamp + epochDuration)
+                );
                 _updateRewardMultipliers(currentTimestamp);
             }
         } else {
