@@ -340,6 +340,7 @@ contract RewardsPoolBaseInfinite is Ownable {
         uint256 applicableTimestamp = (_currentTimestamp < endTimestamp) ? _currentTimestamp : endTimestamp;
         uint256 secondsSinceLastReward = applicableTimestamp - lastRewardTimestamp;
         uint256 rewardsTokensLength = rewardsTokens.length;
+        
 
         if (secondsSinceLastReward == 0) {
             return;
