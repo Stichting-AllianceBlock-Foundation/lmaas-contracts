@@ -124,7 +124,7 @@ contract RewardsPoolBase is Ownable {
     function start(
         uint256 _startTimestamp,
         uint256 _endTimestamp,
-        uint256[] calldata _rewardPerSecond
+        uint256[] memory _rewardPerSecond
     ) external virtual onlyOwner {
         _start(_startTimestamp, _endTimestamp, _rewardPerSecond);
     }
@@ -132,7 +132,7 @@ contract RewardsPoolBase is Ownable {
     function _start(
         uint256 _startTimestamp,
         uint256 _endTimestamp,
-        uint256[] calldata _rewardPerSecond
+        uint256[] memory _rewardPerSecond
     ) internal {
         require(realStartTimestamp == 0, 'RewardsPoolBase: already started');
         require(
@@ -161,11 +161,11 @@ contract RewardsPoolBase is Ownable {
         emit Started(realStartTimestamp, realEndTimestamp, rewardPerSecond);
     }
 
-    function startTimestamp() external view returns (uint256) {
+    function startTimestamp() public view returns (uint256) {
         return originalStartTimestamp; // we keep this to have the originalTimestamp and not the modified one
     }
 
-    function endTimestamp() external view returns (uint256) {
+    function endTimestamp() public view returns (uint256) {
         return realEndTimestamp;
     }
 
@@ -194,6 +194,7 @@ contract RewardsPoolBase is Ownable {
         originalStartTimestamp = 0;
         realEndTimestamp = 0;
         lastRewardTimestamp = 0;
+        firstTimeStaked = false;
 
         uint256[] memory empty = new uint256[](rewardsTokens.length);
         accumulatedRewardMultiplier = empty;
@@ -214,7 +215,7 @@ contract RewardsPoolBase is Ownable {
         uint256 _tokenAmount,
         address _staker,
         bool _chargeStaker
-    ) internal {
+    ) internal virtual {
         uint256 currentTimestamp = block.timestamp;
         require(
             (realStartTimestamp > 0 && currentTimestamp > realStartTimestamp) &&
@@ -288,6 +289,8 @@ contract RewardsPoolBase is Ownable {
 
         UserInfo storage user = userInfo[_withdrawer];
 
+        require(_tokenAmount <= user.amountStaked, 'RewardsPoolBase: not enough funds to withdraw');
+
         updateRewardMultipliers(); // Update the accumulated multipliers for everyone
         _updateUserAccruedReward(_withdrawer); // Update the accrued reward for this specific user
 
@@ -332,7 +335,7 @@ contract RewardsPoolBase is Ownable {
     /**
 		@dev Updates the accumulated reward multipliers for everyone and each token
 	 */
-    function updateRewardMultipliers() public {
+    function updateRewardMultipliers() public virtual {
         uint256 currentTimestamp = block.timestamp;
 
         if (currentTimestamp > realEndTimestamp && extensionDuration > 0) {

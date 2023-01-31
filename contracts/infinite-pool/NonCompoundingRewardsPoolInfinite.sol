@@ -57,7 +57,8 @@ contract NonCompoundingRewardsPoolInfinite is
         uint256 _startTimestamp = block.timestamp;
         uint256 _endTimestamp = _startTimestamp + _epochDuration;
 
-        _start(_startTimestamp, _endTimestamp);
+        _recalculation(_startTimestamp, _endTimestamp);
+        _start(_startTimestamp, _endTimestamp, rewardPerSecond);
     }
 
     /**
@@ -65,12 +66,14 @@ contract NonCompoundingRewardsPoolInfinite is
      */
     function updateRewardMultipliers() public override {
         uint256 currentTimestamp = block.timestamp;
+        uint256 endTimestamp = endTimestamp();
 
         if (currentTimestamp > endTimestamp) {
             _updateRewardMultipliers(endTimestamp);
             if (_canBeExtended()) {
                 epochCount = epochCount + 1;
-                _applyExtension(endTimestamp, endTimestamp + epochDuration);
+                _applyExtension(endTimestamp, endTimestamp + epochDuration, rewardPerSecond);
+                _recalculation(endTimestamp, endTimestamp + epochDuration);
                 _updateRewardMultipliers(currentTimestamp);
             }
         } else {
@@ -79,19 +82,19 @@ contract NonCompoundingRewardsPoolInfinite is
     }
 
     /// @dev Not allowed
-    function withdraw(uint256 _tokenAmount) public override(OnlyExitFeatureInfinite, RewardsPoolBaseInfinite) {
+    function withdraw(uint256 _tokenAmount) public override(OnlyExitFeatureInfinite, RewardsPoolBase) {
         OnlyExitFeatureInfinite.withdraw(_tokenAmount);
     }
 
     /// @dev Not allowed
-    function claim() public override(OnlyExitFeatureInfinite, RewardsPoolBaseInfinite) {
+    function claim() public override(OnlyExitFeatureInfinite, RewardsPoolBase) {
         OnlyExitFeatureInfinite.claim();
     }
 
     /// @dev which you can withdraw your stake and rewards.
-    function exit() public override(RewardsPoolBaseInfinite) {
+    function exit() public override(RewardsPoolBase) {
         require(userStakedEpoch[msg.sender] < epochCount, 'exit::you can only exit at the end of the epoch');
-        RewardsPoolBaseInfinite.exit();
+        RewardsPoolBase.exit();
 
         // we reset the epoch count for the user
         userStakedEpoch[msg.sender] = 0;
