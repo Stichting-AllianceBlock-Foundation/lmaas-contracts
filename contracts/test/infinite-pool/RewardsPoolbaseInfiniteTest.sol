@@ -14,18 +14,6 @@ contract RewardsPoolbaseInfiniteTest is RewardsPoolBaseInfinite {
         string memory _name
     ) RewardsPoolBaseInfinite(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _name) {}
 
-    function getTotalClaimed(uint256 index) public view returns (uint256) {
-        return totalClaimed[index];
-    }
-
-    function getTotalSpentRewards(uint256 index) public view returns (uint256) {
-        return totalSpentRewards[index];
-    }
-
-    function getLastRewardTimestamp() public view returns (uint256) {
-        return lastRewardTimestamp;
-    }
-
     function canBeExtended() public view returns (bool) {
         return _canBeExtended();
     }
@@ -35,6 +23,6 @@ contract RewardsPoolbaseInfiniteTest is RewardsPoolBaseInfinite {
         uint256 _endTimestamp,
         uint256 _rewardPerSecond
     ) public pure returns (uint256) {
-        return RewardsPoolBaseInfinite.calculateRewardsAmount(_startTimestamp, _endTimestamp, _rewardPerSecond);
+        return RewardsPoolBase.calculateRewardsAmount(_startTimestamp, _endTimestamp, _rewardPerSecond);
     }
 }
