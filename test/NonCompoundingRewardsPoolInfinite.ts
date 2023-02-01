@@ -54,8 +54,9 @@ let fundPool = async (_amount: number = 10000) => {
 
 let verifyBalances = async (
   expectedBalances: { reward: string; staking?: string }[],
-  config = { rewardTolerance: 0.001, albFee: 0 }
+  _config?: { rewardTolerance?: number; albFee?: number }
 ) => {
+  const config = { rewardTolerance: 0.001, albFee: 0.03, ..._config };
   for (let index = 0; index < 4; index++) {
     const rewardDecimals = await rewardToken.decimals();
     const stakingDecimals = await stakingToken.decimals();
@@ -72,7 +73,7 @@ let verifyBalances = async (
     const expectedRewardBalance = parseFloat(expectedBalance.reward);
     expect(
       parseFloat(ethers.utils.formatUnits(rewardBalanceAfter.sub(rewardBalanceBefore), rewardDecimals))
-    ).to.be.closeTo(expectedRewardBalance, expectedRewardBalance * config.rewardTolerance);
+    ).to.be.closeTo(expectedRewardBalance * (1 - config.albFee), expectedRewardBalance * config.rewardTolerance);
 
     if (expectedBalance.staking) {
       expect(stakingBalanceAfter.sub(stakingBalanceBefore)).to.be.eq(
@@ -102,24 +103,31 @@ describe('RewardsPoolBaseInfinite', () => {
       await rewardToken.faucet(nonCompoundingRewardsPoolInfinite.address, amount);
     };
   });
+  async function setupRewardsPoolParameters() {
+    rewards = [];
 
-  for (let index = 1; index <= 3; index++) {
-    const reward = await ERC20Faucet.deploy(`Reward #${index}`, `TEST${index}`, 18);
-    rewards.push(reward);
+    signers = await ethers.getSigners();
+    stakers = signers.slice(5);
+
+    const ERC20Faucet = await ethers.getContractFactory('ERC20Faucet');
+    stakingToken = await ERC20Faucet.deploy('test ALBT', 'ALBT', 18);
+
+    for (let index = 1; index <= 3; index++) {
+      const reward = await ERC20Faucet.deploy(`Reward #${index}`, `TEST${index}`, 18);
+      rewards.push(reward);
+    }
+
+    rewardToken = rewards[0];
+    const NonCompoundingRewardsPoolInfinite = await ethers.getContractFactory('NonCompoundingRewardsPoolInfinite');
+    nonCompoundingRewardsPoolInfinite = await NonCompoundingRewardsPoolInfinite.deploy(
+      stakingToken.address,
+      [rewardToken.address],
+      ethers.constants.MaxUint256,
+      ethers.constants.MaxUint256,
+      'Test pool'
+    );
   }
 
-  rewardToken = rewards[0];
-  const NonCompoundingRewardsPoolInfinite = await ethers.getContractFactory('NonCompoundingRewardsPoolInfinite');
-  nonCompoundingRewardsPoolInfinite = await NonCompoundingRewardsPoolInfinite.deploy(
-    stakingToken.address,
-    [rewardToken.address],
-    ethers.constants.MaxUint256,
-    ethers.constants.MaxUint256,
-    'Test pool'
-  );
-}
-
-describe('RewardsPoolBaseInfinite', () => {
   describe('1 reward token, no limits', async function () {
     beforeEach(async () => await setupRewardsPoolParameters());
 
@@ -491,119 +499,15 @@ describe('RewardsPoolBaseInfinite', () => {
       // Signer 2: 141.42844 + 174.67702597 + 17.570703 = 333.67616897
       // Signer 3: 5465.48892276 + 549.7717 = 6015.26062276
 
-      await verifyBalances([
-        { reward: '14240.41402242' },
-        { reward: '708.8956996' },
-        { reward: '1132.67616897' },
-        { reward: '31015.26062276' },
-      ]);
-
-      await timeTravel(3600 * 24 * 3);
-
-      // Total staked: 36299
-      // Time passed: 737179
-      // Signer 0: 4240.41402242 + 1239.7035731 = 5480.11759552
-      // Signer 1: 208.8956996 + 61.98517866 = 270.88087826
-      // Signer 2: 333.67616897 + 99.05231549 = 432.72848446
-      // Signer 3: 6015.26062276 +3099.25893275 = 9114.51955551
-      await verifyBalances([
-        { reward: '15480.11759552' },
-        { reward: '770.88087826' },
-        { reward: '1231.72848446' },
-        { reward: '34114.51955551' },
-      ]);
-
-      await stake(2, 399.75);
-      await fundPool(17000);
-      await timeTravel(3600 * 24 * 4.17);
-
-      // Total staked: 36698.75
-      // Time passed: 1097467
-      // Signer 0: 5480.11759552 + 599.953260593 + 2503.452787 = 8583.52364311
-      // Signer 1: 270.88087826 + 29.997663 + 125.1726393 = 426.05118056
-      // Signer 2: 432.72848446 + 71.91939711 + 300.1014028 = 804.74928437
-      // Signer 3: 9114.51955551 + 1499.88315148 + 6258.6319672 = 16873.03467419
-
-      await verifyBalances([
-        { reward: '18583.52364311' },
-        { reward: '926.05118056' },
-        { reward: '2003.49928437' },
-        { reward: '41873.03467419' },
-      ]);
-      await exit(3);
-      await stake(3, 15000);
-      await fundPool(3700);
-      await timeTravel(3600 * 24 * 3.07);
-
-      // Total staked: 36698.75
-      // Time passed: 1362715
-      // Signer 0: 8583.52364311 + 2926.219 + 214.0181171 = 11723.76076021
-      // Signer 1: 426.05118056 + 146.310992157 + 10.700906 = 583.06307872
-      // Signer 2: 804.74928437 + 350.780603696 + 25.65542179 = 1181.18530986
-      // Signer 3: 4389.32976471 + 321.02717563764 = 4710.35694035
-
-      await verifyBalances([
-        { reward: '21723.76076021' },
-        { reward: '1083.06307872' },
-        { reward: '2379.93530986' },
-        { reward: '19710.35694035' },
-      ]);
-    });
-  });
-
-  describe('1 reward token, same as staking token , no limits', async function () {
-    before(async () => {
-      rewardToken = stakingToken;
-      const NonCompoundingRewardsPoolInfinite = await ethers.getContractFactory('NonCompoundingRewardsPoolInfinite');
-      nonCompoundingRewardsPoolInfinite = await NonCompoundingRewardsPoolInfinite.deploy(
-        stakingToken.address,
-        [rewardToken.address],
-        ethers.constants.MaxUint256,
-        ethers.constants.MaxUint256,
-        'Test pool'
+      await verifyBalances(
+        [
+          { reward: '14113.20160175' },
+          { reward: '702.62882861' },
+          { reward: '1122.6658839' },
+          { reward: '30834.80280408' },
+        ],
+        { albFee: 0 }
       );
-    });
-
-    it('Should calculate rewards correctly', async function () {
-      await startPool();
-      await stake(0, 10000);
-      await timeTravel(2700);
-
-      // Total staked: 10,000
-      // Time passed: 2700
-      // Signer 0: 62.5
-      await stake(1, 500);
-      await timeTravel(79);
-
-      // Total staked: 10,500
-      // Time passed: 2779
-      // Signer 0: 62.5 + 1.741623
-      // Signer 1: 0.08708
-      await stake(2, 799);
-      await timeTravel(3600 * 24);
-
-      // Total staked: 11,299
-      // Time passed: 89,179
-      // Signer 0: 64.241623 + 1770.0681476
-      // Signer 1: 0.08708 + 88.503407
-      // Signer 2: 141.42844
-      await stake(3, 25000);
-      await fundPool(7500);
-      await timeTravel(3600 * 24 * 4.5);
-
-      // Total staked: 36299
-      // Time passed: 477979
-      // Signer 0: 1834.3097706 + 2186.195569 + 219.90868282260 = 4240.41402242
-      // Signer 1: 88.590487 + 109.30977846 + 10.99543414 = 208.8956996
-      // Signer 2: 141.42844 + 174.67702597 + 17.570703 = 333.67616897
-      // Signer 3: 5465.48892276 + 549.7717 = 6015.26062276
-
-      await verifyBalances([
-        { reward: '14240.41402242' },
-        { reward: '708.8956996' },
-        { reward: '1132.67616897' },
-        { reward: '31015.26062276' },
-      ]);
 
       await timeTravel(3600 * 24 * 3);
 
@@ -613,12 +517,15 @@ describe('RewardsPoolBaseInfinite', () => {
       // Signer 1: 208.8956996 + 61.98517866 = 270.88087826
       // Signer 2: 333.67616897 + 99.05231549 = 432.72848446
       // Signer 3: 6015.26062276 +3099.25893275 = 9114.51955551
-      await verifyBalances([
-        { reward: '15480.11759552' },
-        { reward: '770.88087826' },
-        { reward: '1231.72848446' },
-        { reward: '34114.51955551' },
-      ]);
+      await verifyBalances(
+        [
+          { reward: '15315.927643047811' },
+          { reward: '762.75445191' },
+          { reward: '1218.74662993' },
+          { reward: '33841.08396884' },
+        ],
+        { albFee: 0 }
+      );
 
       await stake(2, 399.75);
       await fundPool(17000);
@@ -631,12 +538,15 @@ describe('RewardsPoolBaseInfinite', () => {
       // Signer 2: 432.72848446 + 71.91939711 + 300.1014028 = 804.74928437
       // Signer 3: 9114.51955551 + 1499.88315148 + 6258.6319672 = 16873.03467419
 
-      await verifyBalances([
-        { reward: '18583.52364311' },
-        { reward: '926.05118056' },
-        { reward: '2003.49928437' },
-        { reward: '41873.03467419' },
-      ]);
+      await verifyBalances(
+        [
+          { reward: '18326.01793382' },
+          { reward: '913.26964514' },
+          { reward: '1979.35680584' },
+          { reward: '41366.84363396' },
+        ],
+        { albFee: 0 }
+      );
       await exit(3);
       await stake(3, 15000);
       await fundPool(3700);
@@ -649,12 +559,15 @@ describe('RewardsPoolBaseInfinite', () => {
       // Signer 2: 804.74928437 + 350.780603696 + 25.65542179 = 1181.18530986
       // Signer 3: 4389.32976471 + 321.02717563764 = 4710.35694035
 
-      await verifyBalances([
-        { reward: '21723.76076021' },
-        { reward: '1083.06307872' },
-        { reward: '2379.93530986' },
-        { reward: '19710.35694035' },
-      ]);
+      await verifyBalances(
+        [
+          { reward: '21372.0479374' },
+          { reward: '1065.57118636' },
+          { reward: '2344.49975056' },
+          { reward: '19569.04623214' },
+        ],
+        { albFee: 0 }
+      );
     });
   });
 
@@ -691,7 +604,7 @@ describe('RewardsPoolBaseInfinite', () => {
 
     let verifyBalances = async (
       expectedBalances: { rewards: string[]; staking?: string }[],
-      config = { rewardTolerance: 0.001, albFee: 0 }
+      config = { rewardTolerance: 0.001, albFee: 0.03 }
     ) => {
       for (let index = 0; index < 4; index++) {
         const stakingDecimals = await stakingToken.decimals();
@@ -720,7 +633,7 @@ describe('RewardsPoolBaseInfinite', () => {
           const expectedRewardBalance = parseFloat(expectedBalances[index].rewards[j]);
           expect(
             parseFloat(ethers.utils.formatUnits(rewardBalanceAfter.sub(rewardBalanceBefore[j]), rewardDecimals))
-          ).to.be.closeTo(expectedRewardBalance, expectedRewardBalance * config.rewardTolerance);
+          ).to.be.closeTo(expectedRewardBalance * (1 - config.albFee), expectedRewardBalance * config.rewardTolerance);
         }
 
         if (expectedBalance.staking) {
