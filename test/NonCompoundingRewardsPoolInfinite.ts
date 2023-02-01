@@ -156,8 +156,12 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await nonCompoundingRewardsPoolInfinite.epochCount()).to.be.eq(2);
 
       await timeTravel(3600 * 24 * 5);
-      expect(await nonCompoundingRewardsPoolInfinite.epochCount()).to.be.eq(2);
+      await stake(0, 10000);
+      expect(await nonCompoundingRewardsPoolInfinite.epochCount()).to.be.eq(3);
+
+      await timeTravel(3600 * 24 * 15);
       await exit(0);
+      expect(await nonCompoundingRewardsPoolInfinite.epochCount()).to.be.eq(5);
     });
 
     it('Should be able to stake and withdraw', async function () {
@@ -182,6 +186,8 @@ describe('RewardsPoolBaseInfinite', () => {
       await expect(nonCompoundingRewardsPoolInfinite.connect(staker).exit()).to.be.revertedWith(
         'exit::you can only exit at the end of the epoch'
       );
+
+      await timeTravel(3600 * 24 * 5);
       await exit(0);
       expect(await stakingToken.balanceOf(staker.address)).to.be.eq(utils.parseEther('10000'));
     });
@@ -225,7 +231,7 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await stakingToken.balanceOf(staker.address)).to.be.eq(amount);
     });
 
-    it.only('Should calculate rewards correctly', async function () {
+    it('Should calculate rewards correctly', async function () {
       await startPool();
       await stake(0, 10000);
       await timeTravel(2700);
@@ -346,7 +352,7 @@ describe('RewardsPoolBaseInfinite', () => {
       functionSlots = [];
     });
 
-    it.only('Should calculate rewards correctly', async function () {
+    it('Should calculate rewards correctly', async function () {
       await startPool({ rewardAmount: BigNumber.from(10000) });
       await stake(0, 10000);
       await timeTravel(2700);
@@ -453,7 +459,7 @@ describe('RewardsPoolBaseInfinite', () => {
       );
     });
 
-    it.only('Should calculate rewards correctly', async function () {
+    it('Should calculate rewards correctly', async function () {
       await startPool();
       await stake(0, 10000);
       await timeTravel(2700);
@@ -560,7 +566,7 @@ describe('RewardsPoolBaseInfinite', () => {
       );
     });
 
-    it.only('Should calculate rewards correctly', async function () {
+    it('Should calculate rewards correctly', async function () {
       await startPool();
       await stake(0, 10000);
       await timeTravel(2700);
@@ -740,7 +746,7 @@ describe('RewardsPoolBaseInfinite', () => {
       );
     });
 
-    it.only('Should calculate rewards correctly', async function () {
+    it('Should calculate rewards correctly', async function () {
       await startPool();
       await stake(0, 10000);
       await timeTravel(2700);

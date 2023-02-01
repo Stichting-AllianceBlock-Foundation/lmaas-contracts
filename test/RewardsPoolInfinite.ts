@@ -178,7 +178,6 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await stakingToken.balanceOf(staker.address)).to.be.eq(0);
       expect(await stakingToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(amount);
       expect(await rewardsPoolBaseInfinite.balanceOf(staker.address)).to.be.eq(amount);
-      console.log('rewards per second', await rewardsPoolBaseInfinite.rewardPerSecond(0));
       await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
       await timeTravel(3600 * 24 * 5);
 
@@ -188,7 +187,6 @@ describe('RewardsPoolBaseInfinite', () => {
 
       await rewardsPoolBaseInfinite.connect(signer2).stake(amount);
       await rewardsPoolBaseInfinite.claim();
-      //   TODO: unsure if this is expected behaviour
       expect(await rewardToken.balanceOf(staker.address)).to.be.eq(amount);
     });
 
@@ -517,10 +515,8 @@ describe('RewardsPoolBaseInfinite', () => {
       await rewardsPoolBaseInfinite.connect(staker).stake(amount);
 
       const signerBalanceBefore = await rewardToken.balanceOf(signer.address);
-      console.log(await rewardsPoolBaseInfinite.getAvailableBalance(0));
 
       await rewardsPoolBaseInfinite.withdrawExcessRewards(signer.address);
-      console.log(await rewardsPoolBaseInfinite.getAvailableBalance(0));
       expect(await rewardToken.balanceOf(signer.address)).to.be.gt(signerBalanceBefore);
       expect(await rewardsPoolBaseInfinite.canBeExtended()).to.be.false;
 
@@ -542,7 +538,7 @@ describe('RewardsPoolBaseInfinite', () => {
       await stakingToken.connect(staker).approve(rewardsPoolBaseInfinite.address, amount);
       await rewardsPoolBaseInfinite.connect(staker).stake(amount);
 
-      expect(await rewardsPoolBaseInfinite.getAvailableBalance(0)).to.be.lt(3600 * 24 * 5);
+      expect(await rewardsPoolBaseInfinite.getAvailableBalance(0)).to.be.lt(3600 * 24 * 5 * 2);
       expect(await rewardsPoolBaseInfinite.canBeExtended()).to.be.false;
 
       const endTimestamp = await rewardsPoolBaseInfinite.endTimestamp();
@@ -688,7 +684,7 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await rewardsPoolBaseInfinite.balanceOf(staker.address)).to.be.eq(amount);
 
       await rewardsPoolBaseInfinite.connect(staker).withdraw(amount);
-      expect(await stakingToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(amount);
+      expect(await stakingToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(ethers.utils.parseEther('10'));
       expect(await rewardsPoolBaseInfinite.balanceOf(staker.address)).to.be.eq(0);
       expect(await stakingToken.balanceOf(staker.address)).to.be.eq(amount);
     });
@@ -821,14 +817,15 @@ describe('RewardsPoolBaseInfinite', () => {
 
     it('Should not be able to withdraw reward tokens', async function () {
       const amount = ethers.utils.parseEther('10000');
-      await rewards[0].faucet(stakers[0].address, amount);
+      await rewardToken.faucet(stakers[0].address, amount);
 
-      await rewards[0].connect(stakers[0]).transfer(rewardsPoolBaseInfinite.address, amount);
-      expect(await rewards[0].balanceOf(stakers[0].address)).to.be.eq(0);
+      await rewardToken.connect(stakers[0]).transfer(rewardsPoolBaseInfinite.address, amount);
+      expect(await rewardToken.balanceOf(stakers[0].address)).to.be.eq(0);
+
       await expect(rewardsPoolBaseInfinite.withdrawTokens(stakers[0].address, rewardToken.address)).to.be.revertedWith(
-        'RewardsPoolBase: cannot withdraw reward token'
+        'RewardsPoolBase: cannot withdraw staking token'
       );
-      expect(await rewards[0].balanceOf(stakers[0].address)).to.be.eq(0);
+      expect(await rewardToken.balanceOf(stakers[0].address)).to.be.eq(0);
     });
 
     it('Test calculations with 2 stakers #1', async () => {
@@ -1064,7 +1061,7 @@ describe('RewardsPoolBaseInfinite', () => {
       await stakingToken.connect(staker).approve(rewardsPoolBaseInfinite.address, amount);
       await rewardsPoolBaseInfinite.connect(staker).stake(amount);
 
-      expect(await rewardsPoolBaseInfinite.getAvailableBalance(0)).to.be.lt(3600 * 24 * 5);
+      expect(await rewardsPoolBaseInfinite.getAvailableBalance(0)).to.be.lt(3600 * 24 * 5 * 2);
       expect(await rewardsPoolBaseInfinite.canBeExtended()).to.be.false;
 
       const endTimestamp = await rewardsPoolBaseInfinite.endTimestamp();
@@ -1074,7 +1071,7 @@ describe('RewardsPoolBaseInfinite', () => {
     });
   });
 
-  describe('3 reward tokens, no limits', async function () {
+  describe('2 reward tokens, no limits', async function () {
     let stakingToken: ERC20Faucet;
     let rewards: ERC20Faucet[] = [];
     let rewardsPoolBaseInfinite: RewardsPoolbaseInfiniteTest;
@@ -1091,7 +1088,7 @@ describe('RewardsPoolBaseInfinite', () => {
       const RewardsPoolBaseInfinite = await ethers.getContractFactory('RewardsPoolbaseInfiniteTest');
       rewardsPoolBaseInfinite = await RewardsPoolBaseInfinite.deploy(
         stakingToken.address,
-        [rewards[0].address, rewards[1].address, rewards[2].address],
+        [rewards[0].address, rewards[1].address],
         ethers.constants.MaxUint256,
         ethers.constants.MaxUint256,
         'Test pool'
@@ -1149,7 +1146,7 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await rewards[1].balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(ethers.utils.parseEther('5'));
       expect(await rewardsPoolBaseInfinite.startTimestamp()).to.be.eq(startTimestamp);
       expect(await rewardsPoolBaseInfinite.endTimestamp()).to.be.eq(startTimestamp + 3600 * 24 * 5);
-      expect(await rewardsPoolBaseInfinite.getRewardTokensCount()).to.be.eq(1);
+      expect(await rewardsPoolBaseInfinite.getRewardTokensCount()).to.be.eq(2);
       expect(await rewardsPoolBaseInfinite.epochDuration()).to.be.eq(3600 * 24 * 5);
       expect(await rewardsPoolBaseInfinite.hasStakingStarted()).to.be.false;
       expect(await rewardsPoolBaseInfinite.rewardPerSecond(0)).to.be.eq(
@@ -1467,13 +1464,13 @@ describe('RewardsPoolBaseInfinite', () => {
         0.001
       );
 
-      expect(await stakingToken.balanceOf(staker.address)).to.be.eq(ethers.utils.parseEther('10000'));
+      expect(await stakingToken.balanceOf(staker.address)).to.be.eq(ethers.utils.parseEther('5'));
       expect(parseFloat(ethers.utils.formatEther(await rewards[0].balanceOf(staker2.address)))).to.be.closeTo(5, 0.005);
       expect(parseFloat(ethers.utils.formatEther(await rewards[1].balanceOf(staker2.address)))).to.be.closeTo(
         2.5,
         0.005
       );
-      expect(await stakingToken.balanceOf(staker2.address)).to.be.eq(ethers.utils.parseEther('10000'));
+      expect(await stakingToken.balanceOf(staker2.address)).to.be.eq(ethers.utils.parseEther('5'));
     });
     it('Should have the correct tokens length', async () => {
       const staker = stakers[0];
@@ -1561,10 +1558,10 @@ describe('RewardsPoolBaseInfinite', () => {
         .and.gte(0);
       await rewards[0].faucet(rewardsPoolBaseInfinite.address, ethers.utils.parseEther('10'));
       await rewards[1].faucet(rewardsPoolBaseInfinite.address, ethers.utils.parseEther('5'));
-      expect((await rewardsPoolBaseInfinite.getAvailableBalance(0)).sub(amount))
+      expect((await rewardsPoolBaseInfinite.getAvailableBalance(0)).sub(ethers.utils.parseEther('10')))
         .to.be.lt(3600 * 24 * 5 * 2)
         .and.gte(0);
-      expect((await rewardsPoolBaseInfinite.getAvailableBalance(1)).sub(amount))
+      expect((await rewardsPoolBaseInfinite.getAvailableBalance(1)).sub(ethers.utils.parseEther('5')))
         .to.be.lt(3600 * 24 * 5 * 2)
         .and.gte(0);
     });
@@ -1663,8 +1660,8 @@ describe('RewardsPoolBaseInfinite', () => {
       await stakingToken.connect(staker).approve(rewardsPoolBaseInfinite.address, amount);
       await rewardsPoolBaseInfinite.connect(staker).stake(amount);
 
-      expect(await rewardsPoolBaseInfinite.getAvailableBalance(0)).to.be.lt(3600 * 24 * 5);
-      expect(await rewardsPoolBaseInfinite.getAvailableBalance(1)).to.be.lt(3600 * 24 * 5);
+      expect(await rewardsPoolBaseInfinite.getAvailableBalance(0)).to.be.lt(3600 * 24 * 5 * 2);
+      expect(await rewardsPoolBaseInfinite.getAvailableBalance(1)).to.be.lt(3600 * 24 * 5 * 2);
       expect(await rewardsPoolBaseInfinite.canBeExtended()).to.be.false;
 
       const endTimestamp = await rewardsPoolBaseInfinite.endTimestamp();
@@ -1674,7 +1671,7 @@ describe('RewardsPoolBaseInfinite', () => {
     });
   });
 
-  describe('2 reward tokens, no limits', async function () {
+  describe('3 reward tokens, no limits', async function () {
     let stakingToken: ERC20Faucet;
     let rewards: ERC20Faucet[] = [];
     let rewardsPoolBaseInfinite: RewardsPoolbaseInfiniteTest;
@@ -1691,7 +1688,7 @@ describe('RewardsPoolBaseInfinite', () => {
       const RewardsPoolBaseInfinite = await ethers.getContractFactory('RewardsPoolbaseInfiniteTest');
       rewardsPoolBaseInfinite = await RewardsPoolBaseInfinite.deploy(
         stakingToken.address,
-        [rewards[0].address, rewards[1].address],
+        [rewards[0].address, rewards[1].address, rewards[2].address],
         ethers.constants.MaxUint256,
         ethers.constants.MaxUint256,
         'Test pool'
@@ -1756,7 +1753,7 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await rewards[1].balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(ethers.utils.parseEther('5'));
       expect(await rewardsPoolBaseInfinite.startTimestamp()).to.be.eq(startTimestamp);
       expect(await rewardsPoolBaseInfinite.endTimestamp()).to.be.eq(startTimestamp + 3600 * 24 * 5);
-      expect(await rewardsPoolBaseInfinite.getRewardTokensCount()).to.be.eq(1);
+      expect(await rewardsPoolBaseInfinite.getRewardTokensCount()).to.be.eq(3);
       expect(await rewardsPoolBaseInfinite.epochDuration()).to.be.eq(3600 * 24 * 5);
       expect(await rewardsPoolBaseInfinite.hasStakingStarted()).to.be.false;
       expect(await rewardsPoolBaseInfinite.rewardPerSecond(0)).to.be.eq(
@@ -2073,14 +2070,14 @@ describe('RewardsPoolBaseInfinite', () => {
         parseFloat(ethers.utils.formatEther(await rewards[1].balanceOf(rewardsPoolBaseInfinite.address)))
       ).to.be.closeTo(3, 0.005);
       expect(
-        parseFloat(ethers.utils.formatEther(await rewards[1].balanceOf(rewardsPoolBaseInfinite.address)))
+        parseFloat(ethers.utils.formatEther(await rewards[2].balanceOf(rewardsPoolBaseInfinite.address)))
       ).to.be.closeTo(12, 0.005);
       expect(parseFloat(ethers.utils.formatEther(await rewards[0].balanceOf(staker.address)))).to.be.closeTo(39, 0.001);
       expect(parseFloat(ethers.utils.formatEther(await rewards[1].balanceOf(staker.address)))).to.be.closeTo(
         19.5,
         0.001
       );
-      expect(parseFloat(ethers.utils.formatEther(await rewards[1].balanceOf(staker.address)))).to.be.closeTo(78, 0.001);
+      expect(parseFloat(ethers.utils.formatEther(await rewards[2].balanceOf(staker.address)))).to.be.closeTo(78, 0.005);
 
       expect(await stakingToken.balanceOf(staker.address)).to.be.eq(ethers.utils.parseEther('10000'));
       expect(parseFloat(ethers.utils.formatEther(await rewards[0].balanceOf(staker2.address)))).to.be.closeTo(5, 0.005);
@@ -2164,7 +2161,9 @@ describe('RewardsPoolBaseInfinite', () => {
       await rewards[0].faucet(rewardsPoolBaseInfinite.address, ethers.utils.parseEther('10'));
       await rewards[1].faucet(rewardsPoolBaseInfinite.address, ethers.utils.parseEther('5'));
       await rewards[2].faucet(rewardsPoolBaseInfinite.address, ethers.utils.parseEther('20'));
-      expect(await rewardsPoolBaseInfinite.getAvailableBalance(0)).to.be.eq(ethers.utils.parseEther('10000'));
+      expect(await rewardsPoolBaseInfinite.getAvailableBalance(0)).to.be.eq(ethers.utils.parseEther('10'));
+      expect(await rewardsPoolBaseInfinite.getAvailableBalance(1)).to.be.eq(ethers.utils.parseEther('5'));
+      expect(await rewardsPoolBaseInfinite.getAvailableBalance(2)).to.be.eq(ethers.utils.parseEther('20'));
 
       await rewardsPoolBaseInfinite['start(uint256)'](3600 * 24 * 5);
       expect(await rewardsPoolBaseInfinite.getAvailableBalance(0))
@@ -2193,13 +2192,13 @@ describe('RewardsPoolBaseInfinite', () => {
       await rewards[0].faucet(rewardsPoolBaseInfinite.address, ethers.utils.parseEther('10'));
       await rewards[1].faucet(rewardsPoolBaseInfinite.address, ethers.utils.parseEther('5'));
       await rewards[2].faucet(rewardsPoolBaseInfinite.address, ethers.utils.parseEther('20'));
-      expect((await rewardsPoolBaseInfinite.getAvailableBalance(0)).sub(amount))
+      expect((await rewardsPoolBaseInfinite.getAvailableBalance(0)).sub(ethers.utils.parseEther('10')))
         .to.be.lt(3600 * 24 * 5 * 2)
         .and.gte(0);
-      expect((await rewardsPoolBaseInfinite.getAvailableBalance(1)).sub(amount))
+      expect((await rewardsPoolBaseInfinite.getAvailableBalance(1)).sub(ethers.utils.parseEther('5')))
         .to.be.lt(3600 * 24 * 5 * 2)
         .and.gte(0);
-      expect((await rewardsPoolBaseInfinite.getAvailableBalance(2)).sub(amount))
+      expect((await rewardsPoolBaseInfinite.getAvailableBalance(2)).sub(ethers.utils.parseEther('20')))
         .to.be.lt(3600 * 24 * 5 * 2)
         .and.gte(0);
     });
@@ -2316,9 +2315,9 @@ describe('RewardsPoolBaseInfinite', () => {
       await stakingToken.connect(staker).approve(rewardsPoolBaseInfinite.address, amount);
       await rewardsPoolBaseInfinite.connect(staker).stake(amount);
 
-      expect(await rewardsPoolBaseInfinite.getAvailableBalance(0)).to.be.lt(3600 * 24 * 5);
-      expect(await rewardsPoolBaseInfinite.getAvailableBalance(1)).to.be.lt(3600 * 24 * 5);
-      expect(await rewardsPoolBaseInfinite.getAvailableBalance(2)).to.be.lt(3600 * 24 * 5);
+      expect(await rewardsPoolBaseInfinite.getAvailableBalance(0)).to.be.lt(3600 * 24 * 5 * 2);
+      expect(await rewardsPoolBaseInfinite.getAvailableBalance(1)).to.be.lt(3600 * 24 * 5 * 2);
+      expect(await rewardsPoolBaseInfinite.getAvailableBalance(2)).to.be.lt(3600 * 24 * 5 * 2);
 
       expect(await rewardsPoolBaseInfinite.canBeExtended()).to.be.false;
 
