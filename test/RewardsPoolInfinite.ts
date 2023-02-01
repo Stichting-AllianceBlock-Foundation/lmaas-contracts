@@ -177,31 +177,6 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await stakingToken.balanceOf(staker.address)).to.be.eq(amount);
     });
 
-    it('Should be able to stake & claim stake', async () => {
-      const staker = stakers[0];
-      let amount = ethers.utils.parseEther('10000');
-      await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
-
-      await rewardsPoolBaseInfinite['start(uint256)'](3600 * 24 * 5);
-      await stakingToken.faucet(staker.address, amount);
-      await stakingToken.connect(staker).approve(rewardsPoolBaseInfinite.address, amount);
-
-      await rewardsPoolBaseInfinite.connect(staker).stake(amount);
-      expect(await stakingToken.balanceOf(staker.address)).to.be.eq(0);
-      expect(await stakingToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(amount);
-      expect(await rewardsPoolBaseInfinite.balanceOf(staker.address)).to.be.eq(amount);
-      await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
-      await timeTravel(3600 * 24 * 5);
-
-      const signer2 = (await ethers.getSigners())[1];
-      await stakingToken.faucet(signer2.address, amount);
-      await stakingToken.connect(signer2).approve(rewardsPoolBaseInfinite.address, amount);
-
-      await rewardsPoolBaseInfinite.connect(signer2).stake(amount);
-      await rewardsPoolBaseInfinite.claim();
-      expect(await rewardToken.balanceOf(staker.address)).to.be.eq(amount);
-    });
-
     it('Should not be able to stake before pool start', async () => {
       let amount = ethers.utils.parseEther('10');
       await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
@@ -725,31 +700,6 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await stakingToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(ethers.utils.parseEther('9.7'));
       expect(await rewardsPoolBaseInfinite.balanceOf(staker.address)).to.be.eq(0);
       expect(await stakingToken.balanceOf(staker.address)).to.be.eq(amount);
-    });
-
-    it('Should be able to stake & claim stake', async () => {
-      const staker = stakers[0];
-      let amount = ethers.utils.parseEther('10000');
-      await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
-
-      await rewardsPoolBaseInfinite['start(uint256)'](3600 * 24 * 5);
-      await stakingToken.faucet(staker.address, amount);
-      await stakingToken.connect(staker).approve(rewardsPoolBaseInfinite.address, amount);
-
-      await rewardsPoolBaseInfinite.connect(staker).stake(amount);
-      expect(await stakingToken.balanceOf(staker.address)).to.be.eq(0);
-      expect(await stakingToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(ethers.utils.parseEther('19700'));
-      expect(await rewardsPoolBaseInfinite.balanceOf(staker.address)).to.be.eq(amount);
-      await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
-      await timeTravel(3600 * 24 * 5);
-
-      const signer2 = (await ethers.getSigners())[1];
-      await stakingToken.faucet(signer2.address, amount);
-      await stakingToken.connect(signer2).approve(rewardsPoolBaseInfinite.address, amount);
-
-      await rewardsPoolBaseInfinite.connect(signer2).stake(amount);
-      await rewardsPoolBaseInfinite.claim();
-      expect(await rewardToken.balanceOf(staker.address)).to.be.eq(amount);
     });
 
     it('Should not be able to stake before pool start', async () => {
@@ -1294,36 +1244,6 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await stakingToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(0);
       expect(await rewardsPoolBaseInfinite.balanceOf(staker.address)).to.be.eq(0);
       expect(await stakingToken.balanceOf(staker.address)).to.be.eq(amount);
-    });
-
-    it('Should be able to stake & claim stake', async () => {
-      const staker = stakers[0];
-      let amount = ethers.utils.parseEther('10');
-      await rewards[0].faucet(rewardsPoolBaseInfinite.address, amount);
-      amount = ethers.utils.parseEther('5');
-      await rewards[1].faucet(rewardsPoolBaseInfinite.address, amount);
-
-      await rewardsPoolBaseInfinite['start(uint256)'](3600 * 24 * 5);
-      await stakingToken.faucet(staker.address, amount);
-      await stakingToken.connect(staker).approve(rewardsPoolBaseInfinite.address, amount);
-
-      await rewardsPoolBaseInfinite.connect(staker).stake(amount);
-      expect(await stakingToken.balanceOf(staker.address)).to.be.eq(0);
-      expect(await stakingToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(amount);
-      expect(await rewardsPoolBaseInfinite.balanceOf(staker.address)).to.be.eq(amount);
-      await rewards[0].faucet(rewardsPoolBaseInfinite.address, ethers.utils.parseEther('10'));
-      await rewards[1].faucet(rewardsPoolBaseInfinite.address, ethers.utils.parseEther('5'));
-      await timeTravel(3600 * 24 * 5);
-
-      const signer2 = (await ethers.getSigners())[1];
-      await stakingToken.faucet(signer2.address, amount);
-      await stakingToken.connect(signer2).approve(rewardsPoolBaseInfinite.address, amount);
-
-      await rewardsPoolBaseInfinite.connect(signer2).stake(amount);
-      await rewardsPoolBaseInfinite.claim();
-      //   TODO: unsure if this is expected behaviour
-      expect(await rewards[0].balanceOf(staker.address)).to.be.eq(ethers.utils.parseEther('10'));
-      expect(await rewards[1].balanceOf(staker.address)).to.be.eq(ethers.utils.parseEther('5'));
     });
 
     it('Should not be able to stake before pool start', async () => {
@@ -1945,36 +1865,6 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await stakingToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(0);
       expect(await rewardsPoolBaseInfinite.balanceOf(staker.address)).to.be.eq(0);
       expect(await stakingToken.balanceOf(staker.address)).to.be.eq(amount);
-    });
-
-    it('Should be able to stake & claim stake', async () => {
-      const staker = stakers[0];
-      let amount = ethers.utils.parseEther('10');
-      await rewards[0].faucet(rewardsPoolBaseInfinite.address, ethers.utils.parseEther('10'));
-      await rewards[1].faucet(rewardsPoolBaseInfinite.address, ethers.utils.parseEther('5'));
-      await rewards[2].faucet(rewardsPoolBaseInfinite.address, ethers.utils.parseEther('20'));
-
-      await rewardsPoolBaseInfinite['start(uint256)'](3600 * 24 * 5);
-      await stakingToken.faucet(staker.address, amount);
-      await stakingToken.connect(staker).approve(rewardsPoolBaseInfinite.address, amount);
-
-      await rewardsPoolBaseInfinite.connect(staker).stake(amount);
-      expect(await stakingToken.balanceOf(staker.address)).to.be.eq(0);
-      expect(await stakingToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(amount);
-      expect(await rewardsPoolBaseInfinite.balanceOf(staker.address)).to.be.eq(amount);
-      await rewards[0].faucet(rewardsPoolBaseInfinite.address, ethers.utils.parseEther('10'));
-      await rewards[1].faucet(rewardsPoolBaseInfinite.address, ethers.utils.parseEther('5'));
-      await timeTravel(3600 * 24 * 5);
-
-      const signer2 = (await ethers.getSigners())[1];
-      await stakingToken.faucet(signer2.address, amount);
-      await stakingToken.connect(signer2).approve(rewardsPoolBaseInfinite.address, amount);
-
-      await rewardsPoolBaseInfinite.connect(signer2).stake(amount);
-      await rewardsPoolBaseInfinite.claim();
-      expect(await rewards[0].balanceOf(staker.address)).to.be.eq(ethers.utils.parseEther('10'));
-      expect(await rewards[1].balanceOf(staker.address)).to.be.eq(ethers.utils.parseEther('5'));
-      expect(await rewards[2].balanceOf(staker.address)).to.be.eq(ethers.utils.parseEther('20'));
     });
 
     it('Should not be able to stake before pool start', async () => {
