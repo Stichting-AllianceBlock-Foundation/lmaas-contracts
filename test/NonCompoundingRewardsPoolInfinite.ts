@@ -5,7 +5,6 @@ import { ethers, network } from 'hardhat';
 import { ERC20Faucet, NonCompoundingRewardsPoolInfinite } from '../typechain';
 import { timeTravel } from './utils';
 
-let snapshotId: string;
 let signers: SignerWithAddress[];
 let stakers: SignerWithAddress[];
 let stakingToken: ERC20Faucet;
@@ -104,26 +103,25 @@ describe('RewardsPoolBaseInfinite', () => {
     };
   });
 
-  beforeEach(async () => {
-    snapshotId = await network.provider.send('evm_snapshot');
-  });
+  for (let index = 1; index <= 3; index++) {
+    const reward = await ERC20Faucet.deploy(`Reward #${index}`, `TEST${index}`, 18);
+    rewards.push(reward);
+  }
 
-  afterEach(async () => {
-    await network.provider.send('evm_revert', [snapshotId]);
-  });
+  rewardToken = rewards[0];
+  const NonCompoundingRewardsPoolInfinite = await ethers.getContractFactory('NonCompoundingRewardsPoolInfinite');
+  nonCompoundingRewardsPoolInfinite = await NonCompoundingRewardsPoolInfinite.deploy(
+    stakingToken.address,
+    [rewardToken.address],
+    ethers.constants.MaxUint256,
+    ethers.constants.MaxUint256,
+    'Test pool'
+  );
+}
 
+describe('RewardsPoolBaseInfinite', () => {
   describe('1 reward token, no limits', async function () {
-    before(async () => {
-      rewardToken = rewards[0];
-      const NonCompoundingRewardsPoolInfinite = await ethers.getContractFactory('NonCompoundingRewardsPoolInfinite');
-      nonCompoundingRewardsPoolInfinite = await NonCompoundingRewardsPoolInfinite.deploy(
-        stakingToken.address,
-        [rewardToken.address],
-        ethers.constants.MaxUint256,
-        ethers.constants.MaxUint256,
-        'Test pool'
-      );
-    });
+    beforeEach(async () => await setupRewardsPoolParameters());
 
     it('Should initialize correctly', async function () {
       await startPool();
