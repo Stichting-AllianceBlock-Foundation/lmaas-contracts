@@ -661,7 +661,7 @@ contract RewardsPoolBase is Ownable {
         uint256 _startTimestamp,
         uint256 _endTimestamp,
         uint256 _rewardPerSecond
-    ) internal view returns (uint256) {
+    ) internal pure returns (uint256) {
         uint256 rewardsPeriodSeconds = _endTimestamp - _startTimestamp;
         return (_rewardPerSecond * rewardsPeriodSeconds) / PRECISION;
     }
