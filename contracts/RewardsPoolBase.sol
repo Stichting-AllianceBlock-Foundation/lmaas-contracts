@@ -372,7 +372,7 @@ contract RewardsPoolBase is Ownable {
                     realEndTimestamp,
                     rewardPerSecond[i]
                 );
-                _rewardPerSecond[i] = currentTotalRewards / (realEndTimestamp - _currentTimestamp); // calculate the rewards per second
+                _rewardPerSecond[i] = (currentTotalRewards * PRECISION) / (realEndTimestamp - _currentTimestamp); // calculate the rewards per second
             }
 
             realStartTimestamp = _currentTimestamp;
@@ -384,7 +384,7 @@ contract RewardsPoolBase is Ownable {
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
             uint256 newReward = secondsSinceLastReward * rewardPerSecond[i]; // Get newly accumulated reward
-            uint256 rewardMultiplierIncrease = (newReward * PRECISION) / totalStaked; // Calculate the multiplier increase
+            uint256 rewardMultiplierIncrease = newReward / totalStaked; // Calculate the multiplier increase
             accumulatedRewardMultiplier[i] = accumulatedRewardMultiplier[i] + rewardMultiplierIncrease; // Add the multiplier increase to the accumulated multiplier
         }
 
@@ -461,7 +461,7 @@ contract RewardsPoolBase is Ownable {
         uint256 secondsSinceLastReward = applicableTimestamp - lastRewardTimestamp;
 
         uint256 newReward = secondsSinceLastReward * rewardPerSecond[_tokenIndex]; // Get newly accumulated reward
-        uint256 rewardMultiplierIncrease = (newReward * PRECISION) / totalStaked; // Calculate the multiplier increase
+        uint256 rewardMultiplierIncrease = newReward / totalStaked; // Calculate the multiplier increase
         uint256 currentMultiplier = accumulatedRewardMultiplier[_tokenIndex] + rewardMultiplierIncrease; // Simulate the multiplier increase to the accumulated multiplier
 
         UserInfo storage user = userInfo[_userAddress];
@@ -661,9 +661,9 @@ contract RewardsPoolBase is Ownable {
         uint256 _startTimestamp,
         uint256 _endTimestamp,
         uint256 _rewardPerSecond
-    ) internal pure returns (uint256) {
+    ) internal view returns (uint256) {
         uint256 rewardsPeriodSeconds = _endTimestamp - _startTimestamp;
-        return _rewardPerSecond * rewardsPeriodSeconds;
+        return (_rewardPerSecond * rewardsPeriodSeconds) / PRECISION;
     }
 
     receive() external payable {}

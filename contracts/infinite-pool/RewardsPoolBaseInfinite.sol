@@ -111,7 +111,7 @@ contract RewardsPoolBaseInfinite is RewardsPoolBase {
             // and we transfer the fee to the feeRecipient
             IERC20(rewardsTokens[i]).transfer(feeRecipient, fee);
 
-            _rewardPerSecond[i] = balance / (_endTimestamp - _startTimestamp); // calculate the rewards per second
+            _rewardPerSecond[i] = (balance * PRECISION) / (_endTimestamp - _startTimestamp); // calculate the rewards per second
         }
 
         return _rewardPerSecond;

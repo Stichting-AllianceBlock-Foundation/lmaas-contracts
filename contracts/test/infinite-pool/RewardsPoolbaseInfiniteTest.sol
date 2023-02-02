@@ -22,7 +22,7 @@ contract RewardsPoolbaseInfiniteTest is RewardsPoolBaseInfinite {
         uint256 _startTimestamp,
         uint256 _endTimestamp,
         uint256 _rewardPerSecond
-    ) public pure returns (uint256) {
+    ) public view returns (uint256) {
         return RewardsPoolBase.calculateRewardsAmount(_startTimestamp, _endTimestamp, _rewardPerSecond);
     }
 }
