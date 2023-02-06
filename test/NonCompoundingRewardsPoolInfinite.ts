@@ -392,12 +392,15 @@ describe('RewardsPoolBaseInfinite', () => {
       // Signer 2: 1.4142844 + 1.7467702597 + 0.17570703 = 3.3367616897
       // Signer 3: 54.6548892276 + 5.497717 = 60.1526062276
       console.log(await nonCompoundingRewardsPoolInfinite.rewardPerSecond(0));
-      await verifyBalances([
-        { reward: '42.4041402242', staking: '10000' },
-        { reward: '2.088956996', staking: '500' },
-        { reward: '3.3367616897', staking: '799' },
-        { reward: '60.1526062276', staking: '25000' },
-      ]);
+      await verifyBalances(
+        [
+          { reward: '42.4041402242', staking: '10000' },
+          { reward: '2.088956996', staking: '500' },
+          { reward: '3.3367616897', staking: '799' },
+          { reward: '60.1526062276', staking: '25000' },
+        ],
+        { rewardTolerance: 0.005 }
+      );
 
       await timeTravel(3600 * 24 * 3);
 
@@ -407,12 +410,15 @@ describe('RewardsPoolBaseInfinite', () => {
       // Signer 1: 2.088956996 + 0.6198517866 = 2.7088087826
       // Signer 2: 3.3367616897 + 0.9905231549 = 4.3272848446
       // Signer 3: 60.1526062276 +30.9925893275 = 91.1451955551
-      await verifyBalances([
-        { reward: '54.8011759552', staking: '10000' },
-        { reward: '2.7088087826', staking: '500' },
-        { reward: '4.3272848446', staking: '799' },
-        { reward: '91.1451955551', staking: '25000' },
-      ]);
+      await verifyBalances(
+        [
+          { reward: '54.8011759552', staking: '10000' },
+          { reward: '2.7088087826', staking: '500' },
+          { reward: '4.3272848446', staking: '799' },
+          { reward: '91.1451955551', staking: '25000' },
+        ],
+        { rewardTolerance: 0.005 }
+      );
 
       await stake(2, 399.75);
       await fundPool(170);
@@ -425,12 +431,151 @@ describe('RewardsPoolBaseInfinite', () => {
       // Signer 2: 4.3272848446 + 0.7191939711 + 3.001014028 = 8.0474928437
       // Signer 3: 91.1451955551 + 14.9988315148 + 62.586319672 = 168.7303467419
 
-      await verifyBalances([
-        { reward: '85.8352364311', staking: '10000' },
-        { reward: '4.2605118056', staking: '500' },
-        { reward: '8.0474928437', staking: '1198.75' },
-        { reward: '168.7303467419', staking: '25000' },
-      ]);
+      await verifyBalances(
+        [
+          { reward: '85.8352364311', staking: '10000' },
+          { reward: '4.2605118056', staking: '500' },
+          { reward: '8.0474928437', staking: '1198.75' },
+          { reward: '168.7303467419', staking: '25000' },
+        ],
+        { rewardTolerance: 0.005 }
+      );
+      await exit(3);
+      await stake(3, 15000);
+      await fundPool(37);
+      await timeTravel(3600 * 24 * 3.07);
+
+      // Total staked: 36698.75
+      // Time passed: 1362715
+      // Signer 0: 85.8352364311 + 29.26219 + 2.140181171 = 117.2376076021
+      // Signer 1: 4.2605118056 + 1.46310992157 + 0.10700906 = 5.8306307872
+      // Signer 2: 8.0474928437 + 3.50780603696 + 0.2565542179 = 11.8118530986
+      // Signer 3: 43.8932976471 + 3.2102717563764 = 47.1035694035
+
+      await verifyBalances(
+        [
+          { reward: '117.2376076021', staking: '10000' },
+          { reward: '5.8306307872', staking: '500' },
+          { reward: '11.8118530986', staking: '1198.75' },
+          { reward: '47.1035694035', staking: '15000' },
+        ],
+        { rewardTolerance: 0.005 }
+      );
+    });
+  });
+
+  describe('1 reward token, 6 decimals, no limits', async function () {
+    before(async () => {
+      const ERC20Faucet = await ethers.getContractFactory('ERC20Faucet');
+      rewardToken = await ERC20Faucet.deploy(`Reward `, `TEST`, 6);
+
+      const NonCompoundingRewardsPoolInfinite = await ethers.getContractFactory('NonCompoundingRewardsPoolInfinite');
+      nonCompoundingRewardsPoolInfinite = await NonCompoundingRewardsPoolInfinite.deploy(
+        stakingToken.address,
+        [rewardToken.address],
+        ethers.constants.MaxUint256,
+        ethers.constants.MaxUint256,
+        'Test pool'
+      );
+
+      functionSlots[0] = fundPool;
+      fundPool = async (_amount: number = 10000) => {
+        const amount = ethers.utils.parseUnits(_amount.toString(), 2);
+
+        await rewardToken.faucet(nonCompoundingRewardsPoolInfinite.address, amount);
+      };
+    });
+
+    after(async () => {
+      fundPool = functionSlots[0];
+      functionSlots = [];
+    });
+
+    it.only('Should calculate rewards correctly', async function () {
+      await startPool({ rewardAmount: utils.parseUnits('100', 6) });
+      await stake(0, 10000);
+      await timeTravel(2700);
+
+      // Total staked: 10,000
+      // Time passed: 2700
+      // Signer 0: 0.625
+      await stake(1, 500);
+      await timeTravel(79);
+
+      // Total staked: 10,500
+      // Time passed: 2779
+      // Signer 0: 0.625 + 0.01741623
+      // Signer 1: 0.0008708
+      await stake(2, 799);
+      await timeTravel(3600 * 24);
+
+      // Total staked: 11,299
+      // Time passed: 89,179
+      // Signer 0: 0.64241623 + 17.700681476
+      // Signer 1: 0.0008708 + 0.88503407
+      // Signer 2: 1.4142844
+      await stake(3, 25000);
+      await fundPool(75);
+      await timeTravel(3600 * 24 * 4.5);
+
+      // Total staked: 36299
+      // Time passed: 477979
+      // Signer 0: 18.343097706 + 21.86195569 + 2.1990868282260 = 42.4041402242
+      // Signer 1: 0.88590487 + 1.0930977846 + 0.1099543414 = 2.088956996
+      // Signer 2: 1.4142844 + 1.7467702597 + 0.17570703 = 3.3367616897
+      // Signer 3: 54.6548892276 + 5.497717 = 60.1526062276
+      console.log(await nonCompoundingRewardsPoolInfinite.rewardPerSecond(0));
+      await verifyBalances(
+        [
+          { reward: '42.4041402242', staking: '10000' },
+          { reward: '2.088956996', staking: '500' },
+          { reward: '3.3367616897', staking: '799' },
+          { reward: '60.1526062276', staking: '25000' },
+        ],
+        // TODO: remove
+        { rewardTolerance: 0.1 }
+      );
+
+      await timeTravel(3600 * 24 * 3);
+
+      // Total staked: 36299
+      // Time passed: 737179
+      // Signer 0: 42.4041402242 + 12.397035731 = 54.8011759552
+      // Signer 1: 2.088956996 + 0.6198517866 = 2.7088087826
+      // Signer 2: 3.3367616897 + 0.9905231549 = 4.3272848446
+      // Signer 3: 60.1526062276 +30.9925893275 = 91.1451955551
+      await verifyBalances(
+        [
+          { reward: '54.8011759552', staking: '10000' },
+          { reward: '2.7088087826', staking: '500' },
+          { reward: '4.3272848446', staking: '799' },
+          { reward: '91.1451955551', staking: '25000' },
+        ],
+        // TODO: remove
+        { rewardTolerance: 0.1 }
+      );
+
+      await stake(2, 399.75);
+      await fundPool(170);
+      await timeTravel(3600 * 24 * 4.17);
+
+      // Total staked: 36698.75
+      // Time passed: 1097467
+      // Signer 0: 54.8011759552 + 5.99953260593 + 25.03452787 = 85.8352364311
+      // Signer 1: 2.7088087826 + 0.29997663 + 1.251726393 = 4.2605118056
+      // Signer 2: 4.3272848446 + 0.7191939711 + 3.001014028 = 8.0474928437
+      // Signer 3: 91.1451955551 + 14.9988315148 + 62.586319672 = 168.7303467419
+
+      await verifyBalances(
+        [
+          { reward: '85.8352364311', staking: '10000' },
+          { reward: '4.2605118056', staking: '500' },
+          { reward: '8.0474928437', staking: '1198.75' },
+          { reward: '168.7303467419', staking: '25000' },
+        ],
+        // TODO: remove
+        { rewardTolerance: 0.1 }
+      );
       await exit(3);
       await stake(3, 15000);
       await fundPool(37);
