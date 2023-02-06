@@ -252,8 +252,6 @@ contract RewardsPoolBase is Ownable {
             user.rewardDebt[i] =
                 (user.amountStaked * accumulatedRewardMultiplier[i] * (10**rewardTokenDecimals)) /
                 (PRECISION * (10**stakingTokenDecimals)); // Update user reward debt for each token
-
-            console.log('_stake: user.rewardDebt[i]', user.rewardDebt[i]);
         }
 
         emit Staked(_staker, _tokenAmount);
@@ -281,7 +279,7 @@ contract RewardsPoolBase is Ownable {
 
             emit Claimed(_claimer, reward, rewardsTokens[i]);
 
-            console.log('reward', reward);
+            // console.log('reward', reward);
 
             IERC20(rewardsTokens[i]).safeTransfer(_claimer, reward);
         }
@@ -315,8 +313,6 @@ contract RewardsPoolBase is Ownable {
             uint256 totalDebt = (user.amountStaked * accumulatedRewardMultiplier[i] * (10**rewardTokenDecimals)) /
                 (PRECISION * (10**stakingTokenDecimals)); // Update user reward debt for each token
             user.rewardDebt[i] = totalDebt;
-
-            console.log('_withdraw: user.rewardDebt[i]', user.rewardDebt[i]);
         }
 
         emit Withdrawn(_withdrawer, _tokenAmount);
@@ -432,15 +428,13 @@ contract RewardsPoolBase is Ownable {
 
         uint8 stakingTokenDecimals = IERC20Metadata(address(stakingToken)).decimals();
         for (uint256 tokenIndex = 0; tokenIndex < rewardsTokensLength; tokenIndex++) {
-            console.log('amount staked', user.amountStaked);
-            console.log('accumulatedRewardMultiplier', accumulatedRewardMultiplier[tokenIndex]);
+            // console.log('amount staked', user.amountStaked);
+            // console.log('accumulatedRewardMultiplier', accumulatedRewardMultiplier[tokenIndex]);
             uint8 rewardTokenDecimals = IERC20Metadata(rewardsTokens[tokenIndex]).decimals();
 
             uint256 totalDebt = (user.amountStaked *
                 accumulatedRewardMultiplier[tokenIndex] *
                 (10**rewardTokenDecimals)) / (PRECISION * (10**stakingTokenDecimals));
-            console.log('totalDebt', totalDebt);
-            console.log('user.rewardDebt[tokenIndex]', user.rewardDebt[tokenIndex]);
 
             uint256 pendingDebt = totalDebt - user.rewardDebt[tokenIndex];
 
