@@ -237,7 +237,7 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await stakingToken.balanceOf(staker.address)).to.be.eq(amount);
     });
 
-    it('Should calculate rewards correctly', async function () {
+    it.only('Should calculate rewards correctly', async function () {
       await startPool();
       await stake(0, 10000);
       await timeTravel(2700);
@@ -358,7 +358,7 @@ describe('RewardsPoolBaseInfinite', () => {
       functionSlots = [];
     });
 
-    it('Should calculate rewards correctly', async function () {
+    it.only('Should calculate rewards correctly', async function () {
       await startPool({ rewardAmount: BigNumber.from(10000) });
       await stake(0, 10000);
       await timeTravel(2700);
@@ -391,7 +391,7 @@ describe('RewardsPoolBaseInfinite', () => {
       // Signer 1: 0.88590487 + 1.0930977846 + 0.1099543414 = 2.088956996
       // Signer 2: 1.4142844 + 1.7467702597 + 0.17570703 = 3.3367616897
       // Signer 3: 54.6548892276 + 5.497717 = 60.1526062276
-
+      console.log(await nonCompoundingRewardsPoolInfinite.rewardPerSecond(0));
       await verifyBalances([
         { reward: '42.4041402242', staking: '10000' },
         { reward: '2.088956996', staking: '500' },
