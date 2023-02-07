@@ -5,7 +5,6 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
-import 'hardhat/console.sol';
 
 /** @dev Base pool contract used in all other pools. 
 Users can stake tokens and get rewards based on the percentage of total staked tokens.
@@ -279,8 +278,6 @@ contract RewardsPoolBase is Ownable {
 
             emit Claimed(_claimer, reward, rewardsTokens[i]);
 
-            // console.log('reward', reward);
-
             IERC20(rewardsTokens[i]).safeTransfer(_claimer, reward);
         }
     }
@@ -428,8 +425,6 @@ contract RewardsPoolBase is Ownable {
 
         uint8 stakingTokenDecimals = IERC20Metadata(address(stakingToken)).decimals();
         for (uint256 tokenIndex = 0; tokenIndex < rewardsTokensLength; tokenIndex++) {
-            // console.log('amount staked', user.amountStaked);
-            // console.log('accumulatedRewardMultiplier', accumulatedRewardMultiplier[tokenIndex]);
             uint8 rewardTokenDecimals = IERC20Metadata(rewardsTokens[tokenIndex]).decimals();
 
             uint256 totalDebt = (user.amountStaked *
