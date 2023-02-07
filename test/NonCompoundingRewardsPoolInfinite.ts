@@ -164,6 +164,16 @@ const multipleRewardsHelpers = {
 };
 
 describe('RewardsPoolBaseInfinite', () => {
+  let snapshotId: string;
+
+  beforeEach(async () => {
+    snapshotId = await network.provider.send('evm_snapshot');
+  });
+
+  afterEach(async () => {
+    await network.provider.send('evm_revert', [snapshotId]);
+  });
+
   before(async () => {
     signers = await ethers.getSigners();
     stakers = signers.slice(2, 8);
@@ -174,39 +184,158 @@ describe('RewardsPoolBaseInfinite', () => {
       const reward = await ERC20Faucet.deploy(`Reward #${index}`, `TEST${index}`, 18);
       rewards.push(reward);
     }
-    fundPool = async (_amount: number = 10000) => {
-      const amount = ethers.utils.parseEther(_amount.toString());
-
-      await rewardToken.faucet(nonCompoundingRewardsPoolInfinite.address, amount);
-    };
-  });
-  async function setupRewardsPoolParameters() {
-    rewards = [];
-
-    signers = await ethers.getSigners();
-    stakers = signers.slice(5);
-
-    const ERC20Faucet = await ethers.getContractFactory('ERC20Faucet');
-    stakingToken = await ERC20Faucet.deploy('test ALBT', 'ALBT', 18);
-
-    for (let index = 1; index <= 3; index++) {
-      const reward = await ERC20Faucet.deploy(`Reward #${index}`, `TEST${index}`, 18);
-      rewards.push(reward);
-    }
 
     rewardToken = rewards[0];
-    const NonCompoundingRewardsPoolInfinite = await ethers.getContractFactory('NonCompoundingRewardsPoolInfinite');
-    nonCompoundingRewardsPoolInfinite = await NonCompoundingRewardsPoolInfinite.deploy(
-      stakingToken.address,
-      [rewardToken.address],
-      ethers.constants.MaxUint256,
-      ethers.constants.MaxUint256,
-      'Test pool'
-    );
-  }
+  });
+
+  describe('Limit contracts', async function () {
+    describe('Test contract limits', async () => {
+      const stakeLimit = utils.parseEther('100');
+      const contractStakeLimit = utils.parseEther('250');
+
+      before(async () => {
+        const NonCompoundingRewardsPoolInfinite = await ethers.getContractFactory('NonCompoundingRewardsPoolInfinite');
+        nonCompoundingRewardsPoolInfinite = await NonCompoundingRewardsPoolInfinite.deploy(
+          stakingToken.address,
+          [rewardToken.address],
+          stakeLimit,
+          contractStakeLimit,
+          'Test pool'
+        );
+        await startPool();
+      });
+
+      it('Should not be able to stake more then limit as a signer', async () => {
+        const staker = stakers[0];
+        stakingToken.faucet(staker.address, stakeLimit.add(1));
+        await stakingToken.connect(staker).approve(nonCompoundingRewardsPoolInfinite.address, stakeLimit.add(1));
+        await expect(nonCompoundingRewardsPoolInfinite.connect(staker).stake(stakeLimit.add(1))).to.be.revertedWith(
+          'RewardsPoolBase: stake limit reached'
+        );
+      });
+
+      it('Should not be able to stake more then limit as a signer in multiple stakings', async () => {
+        await stake(0, 100);
+
+        const staker = stakers[0];
+        stakingToken.faucet(staker.address, 1);
+        await stakingToken.connect(staker).approve(nonCompoundingRewardsPoolInfinite.address, 1);
+        await expect(nonCompoundingRewardsPoolInfinite.connect(staker).stake(1)).to.be.revertedWith(
+          'RewardsPoolBase: stake limit reached'
+        );
+      });
+
+      it('Should not be able to stake more then contract stake limit at limit', async () => {
+        await stake(0, 100);
+        await stake(1, 100);
+        await stake(2, 50);
+
+        const staker = stakers[3];
+        stakingToken.faucet(staker.address, 1);
+        await stakingToken.connect(staker).approve(nonCompoundingRewardsPoolInfinite.address, 1);
+        await expect(nonCompoundingRewardsPoolInfinite.connect(staker).stake(1)).to.be.revertedWith(
+          'RewardsPoolBase: stake limit reached'
+        );
+      });
+
+      it('Should not be able to stake more then contract stake limit before limit', async () => {
+        await stake(0, 100);
+        await stake(1, 100);
+
+        const staker = stakers[2];
+        const amount = utils.parseEther('50').add(1);
+        stakingToken.faucet(staker.address, amount);
+        await stakingToken.connect(staker).approve(nonCompoundingRewardsPoolInfinite.address, amount);
+        await expect(nonCompoundingRewardsPoolInfinite.connect(staker).stake(amount)).to.be.revertedWith(
+          'RewardsPoolBase: stake limit reached'
+        );
+      });
+    });
+
+    describe('Test contract limits with 6 decimal staking token', async () => {
+      const stakeLimit = utils.parseUnits('100', 6);
+      const contractStakeLimit = utils.parseUnits('250', 6);
+      let _stakingToken: ERC20Faucet;
+
+      before(async () => {
+        _stakingToken = stakingToken;
+        const ERC20Faucet = await ethers.getContractFactory('ERC20Faucet');
+
+        stakingToken = await ERC20Faucet.deploy('Staking token', 'STAKE', 6);
+        const NonCompoundingRewardsPoolInfinite = await ethers.getContractFactory('NonCompoundingRewardsPoolInfinite');
+        nonCompoundingRewardsPoolInfinite = await NonCompoundingRewardsPoolInfinite.deploy(
+          stakingToken.address,
+          [rewardToken.address],
+          stakeLimit,
+          contractStakeLimit,
+          'Test pool'
+        );
+        await startPool();
+      });
+
+      after(async () => {
+        stakingToken = _stakingToken;
+      });
+
+      it('Should not be able to stake more then limit as a signer', async () => {
+        const staker = stakers[0];
+        stakingToken.faucet(staker.address, stakeLimit.add(1));
+        await stakingToken.connect(staker).approve(nonCompoundingRewardsPoolInfinite.address, stakeLimit.add(1));
+        await expect(nonCompoundingRewardsPoolInfinite.connect(staker).stake(stakeLimit.add(1))).to.be.revertedWith(
+          'RewardsPoolBase: stake limit reached'
+        );
+      });
+
+      it('Should not be able to stake more then limit as a signer in multiple stakings', async () => {
+        await stake(0, 100);
+
+        const staker = stakers[0];
+        stakingToken.faucet(staker.address, 1);
+        await stakingToken.connect(staker).approve(nonCompoundingRewardsPoolInfinite.address, 1);
+        await expect(nonCompoundingRewardsPoolInfinite.connect(staker).stake(1)).to.be.revertedWith(
+          'RewardsPoolBase: stake limit reached'
+        );
+      });
+
+      it('Should not be able to stake more then contract stake limit at limit', async () => {
+        await stake(0, 100);
+        await stake(1, 100);
+        await stake(2, 50);
+
+        const staker = stakers[3];
+        stakingToken.faucet(staker.address, 1);
+        await stakingToken.connect(staker).approve(nonCompoundingRewardsPoolInfinite.address, 1);
+        await expect(nonCompoundingRewardsPoolInfinite.connect(staker).stake(1)).to.be.revertedWith(
+          'RewardsPoolBase: stake limit reached'
+        );
+      });
+
+      it('Should not be able to stake more then contract stake limit before limit', async () => {
+        await stake(0, 100);
+        await stake(1, 100);
+
+        const staker = stakers[2];
+        const amount = utils.parseUnits('50', 6).add(1);
+        stakingToken.faucet(staker.address, amount);
+        await stakingToken.connect(staker).approve(nonCompoundingRewardsPoolInfinite.address, amount);
+        await expect(nonCompoundingRewardsPoolInfinite.connect(staker).stake(amount)).to.be.revertedWith(
+          'RewardsPoolBase: stake limit reached'
+        );
+      });
+    });
+  });
 
   describe('1 reward token, no limits', async function () {
-    beforeEach(async () => await setupRewardsPoolParameters());
+    before(async () => {
+      const NonCompoundingRewardsPoolInfinite = await ethers.getContractFactory('NonCompoundingRewardsPoolInfinite');
+      nonCompoundingRewardsPoolInfinite = await NonCompoundingRewardsPoolInfinite.deploy(
+        stakingToken.address,
+        [rewardToken.address],
+        ethers.constants.MaxUint256,
+        ethers.constants.MaxUint256,
+        'Test pool'
+      );
+    });
 
     it('Should initialize correctly', async function () {
       await startPool();
@@ -468,7 +597,6 @@ describe('RewardsPoolBaseInfinite', () => {
       // Signer 1: 0.88590487 + 1.0930977846 + 0.1099543414 = 2.088956996
       // Signer 2: 1.4142844 + 1.7467702597 + 0.17570703 = 3.3367616897
       // Signer 3: 54.6548892276 + 5.497717 = 60.1526062276
-      console.log(await nonCompoundingRewardsPoolInfinite.rewardPerSecond(0));
       await verifyBalances(
         [
           { reward: '42.4041402242', staking: '10000' },
@@ -555,20 +683,20 @@ describe('RewardsPoolBaseInfinite', () => {
         'Test pool'
       );
 
-      functionSlots[0] = fundPool;
-      fundPool = async (_amount: number = 10000) => {
-        const amount = ethers.utils.parseUnits(_amount.toString(), 2);
+      //   functionSlots[0] = fundPool;
+      //   fundPool = async (_amount: number = 10000) => {
+      //     const amount = ethers.utils.parseUnits(_amount.toString(), 6);
 
-        await rewardToken.faucet(nonCompoundingRewardsPoolInfinite.address, amount);
-      };
+      //     await rewardToken.faucet(nonCompoundingRewardsPoolInfinite.address, amount);
+      //   };
     });
 
     after(async () => {
-      fundPool = functionSlots[0];
-      functionSlots = [];
+      //   fundPool = functionSlots[0];
+      //   functionSlots = [];
     });
 
-    it.only('Should calculate rewards correctly', async function () {
+    it('Should calculate rewards correctly', async function () {
       await startPool({ rewardAmount: utils.parseUnits('100', 6) });
       await stake(0, 10000);
       await timeTravel(2700);
@@ -593,6 +721,7 @@ describe('RewardsPoolBaseInfinite', () => {
       // Signer 2: 1.4142844
       await stake(3, 25000);
       await fundPool(75);
+
       await timeTravel(3600 * 24 * 4.5);
 
       // Total staked: 36299
@@ -601,7 +730,6 @@ describe('RewardsPoolBaseInfinite', () => {
       // Signer 1: 0.88590487 + 1.0930977846 + 0.1099543414 = 2.088956996
       // Signer 2: 1.4142844 + 1.7467702597 + 0.17570703 = 3.3367616897
       // Signer 3: 54.6548892276 + 5.497717 = 60.1526062276
-      console.log(await nonCompoundingRewardsPoolInfinite.rewardPerSecond(0));
       await verifyBalances([
         { reward: '42.4041402242', staking: '10000' },
         { reward: '2.088956996', staking: '500' },
@@ -810,8 +938,7 @@ describe('RewardsPoolBaseInfinite', () => {
     after(async () => {
       stakingToken = _stakingtoken;
     });
-
-    it.only('Should calculate rewards correctly', async function () {
+    it('Should calculate rewards correctly', async function () {
       await startPool();
       await stake(0, 10000);
       await timeTravel(2700);
@@ -945,7 +1072,7 @@ describe('RewardsPoolBaseInfinite', () => {
       rewards = _rewards;
     });
 
-    it.only('Should calculate rewards correctly', async function () {
+    it('Should calculate rewards correctly', async function () {
       await startPool({
         rewardAmount: [
           utils.parseUnits('10000', 2),
@@ -1077,7 +1204,7 @@ describe('RewardsPoolBaseInfinite', () => {
       stakingToken = _stakingtoken;
     });
 
-    it.only('Should calculate rewards correctly', async function () {
+    it('Should calculate rewards correctly', async function () {
       await startPool({
         rewardAmount: [
           utils.parseUnits('10000', 2),
