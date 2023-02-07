@@ -87,7 +87,10 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await rewardsPoolBaseInfinite.epochDuration()).to.be.eq(3600 * 24 * 5);
       expect(await rewardsPoolBaseInfinite.hasStakingStarted()).to.be.true;
       expect(await rewardsPoolBaseInfinite.rewardPerSecond(0)).to.be.eq(
-        amount.sub(amount.mul(300).div(10000)).div(3600 * 24 * 5)
+        amount
+          .sub(amount.mul(300).div(10000))
+          .mul(ethers.utils.parseEther('1'))
+          .div(3600 * 24 * 5)
       );
     });
 
@@ -108,7 +111,7 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await rewardsPoolBaseInfinite.epochDuration()).to.be.eq(3600 * 24 * 5);
       expect(await rewardsPoolBaseInfinite.hasStakingStarted()).to.be.false;
       expect(await rewardsPoolBaseInfinite.rewardPerSecond(0)).to.be.eq(
-        amount.sub(amount.mul(300).div(10000)).div(3600 * 24 * 5)
+        amount.sub(amount.mul(300).div(10000)).mul(ethers.utils.parseEther('1')).div(3600 * 24 * 5)
       );
     });
 
@@ -354,9 +357,7 @@ describe('RewardsPoolBaseInfinite', () => {
       //  Staker 2: 5k rewards
       //   Pool 6k rewards
 
-      expect(await rewardToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(
-        BigNumber.from('48499999999999999965326')
-      );
+      expect(await rewardToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(ethers.utils.parseEther('48500'));
       expect(await rewardToken.balanceOf(staker.address)).to.be.eq(0);
       expect(await stakingToken.balanceOf(staker.address)).to.be.eq(0);
       expect(await rewardToken.balanceOf(staker2.address)).to.be.eq(0);
@@ -606,6 +607,7 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await rewardsPoolBaseInfinite.rewardPerSecond(0)).to.be.eq(
         amount
           .mul(97)
+          .mul(ethers.utils.parseEther('1'))
           .div(100)
           .div(3600 * 24 * 5)
       );
@@ -628,6 +630,7 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await rewardsPoolBaseInfinite.rewardPerSecond(0)).to.be.eq(
         amount
           .mul(97)
+          .mul(ethers.utils.parseEther('1'))
           .div(100)
           .div(3600 * 24 * 5)
       );
@@ -876,9 +879,7 @@ describe('RewardsPoolBaseInfinite', () => {
       //  Staker 2: 5k rewards
       //   Pool 6k rewards
 
-      expect(await rewardToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(
-        BigNumber.from('68499999999999999965326')
-      );
+      expect(await rewardToken.balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(ethers.utils.parseEther('68500'));
       expect(await rewardToken.balanceOf(staker.address)).to.be.eq(0);
       expect(await stakingToken.balanceOf(staker.address)).to.be.eq(0);
       expect(await rewardToken.balanceOf(staker2.address)).to.be.eq(0);
@@ -1130,6 +1131,7 @@ describe('RewardsPoolBaseInfinite', () => {
         ethers.utils
           .parseEther('10')
           .mul(97)
+          .mul(ethers.utils.parseEther('1'))
           .div(100)
           .div(3600 * 24 * 5)
       );
@@ -1137,6 +1139,7 @@ describe('RewardsPoolBaseInfinite', () => {
         ethers.utils
           .parseEther('5')
           .mul(97)
+          .mul(ethers.utils.parseEther('1'))
           .div(100)
           .div(3600 * 24 * 5)
       );
@@ -1167,6 +1170,7 @@ describe('RewardsPoolBaseInfinite', () => {
         ethers.utils
           .parseEther('10')
           .mul(97)
+          .mul(ethers.utils.parseEther('1'))
           .div(100)
           .div(3600 * 24 * 5)
       );
@@ -1174,6 +1178,7 @@ describe('RewardsPoolBaseInfinite', () => {
         ethers.utils
           .parseEther('5')
           .mul(97)
+          .mul(ethers.utils.parseEther('1'))
           .div(100)
           .div(3600 * 24 * 5)
       );
@@ -1431,12 +1436,8 @@ describe('RewardsPoolBaseInfinite', () => {
       //  Staker 2: 5k rewards
       //   Pool 6k rewards
 
-      expect(await rewards[0].balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(
-        BigNumber.from('48499999999999960924')
-      );
-      expect(await rewards[1].balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(
-        BigNumber.from('24249999999999961784')
-      );
+      expect(await rewards[0].balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(ethers.utils.parseEther('48.5'));
+      expect(await rewards[1].balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(ethers.utils.parseEther('24.25'));
 
       expect(await rewards[0].balanceOf(staker.address)).to.be.eq(0);
       expect(await rewards[1].balanceOf(staker.address)).to.be.eq(0);
@@ -1741,6 +1742,7 @@ describe('RewardsPoolBaseInfinite', () => {
         ethers.utils
           .parseEther('10')
           .mul(97)
+          .mul(ethers.utils.parseEther('1'))
           .div(100)
           .div(3600 * 24 * 5)
       );
@@ -1748,6 +1750,7 @@ describe('RewardsPoolBaseInfinite', () => {
         ethers.utils
           .parseEther('5')
           .mul(97)
+          .mul(ethers.utils.parseEther('1'))
           .div(100)
           .div(3600 * 24 * 5)
       );
@@ -1755,6 +1758,7 @@ describe('RewardsPoolBaseInfinite', () => {
         ethers.utils
           .parseEther('20')
           .mul(97)
+          .mul(ethers.utils.parseEther('1'))
           .div(100)
           .div(3600 * 24 * 5)
       );
@@ -1784,6 +1788,7 @@ describe('RewardsPoolBaseInfinite', () => {
         ethers.utils
           .parseEther('10')
           .mul(97)
+          .mul(ethers.utils.parseEther('1'))
           .div(100)
           .div(3600 * 24 * 5)
       );
@@ -1791,6 +1796,7 @@ describe('RewardsPoolBaseInfinite', () => {
         ethers.utils
           .parseEther('5')
           .mul(97)
+          .mul(ethers.utils.parseEther('1'))
           .div(100)
           .div(3600 * 24 * 5)
       );
@@ -1798,6 +1804,7 @@ describe('RewardsPoolBaseInfinite', () => {
         ethers.utils
           .parseEther('20')
           .mul(97)
+          .mul(ethers.utils.parseEther('1'))
           .div(100)
           .div(3600 * 24 * 5)
       );
@@ -1991,7 +1998,7 @@ describe('RewardsPoolBaseInfinite', () => {
       }
     });
 
-    it('Test calculations with 2 stakers #1', async () => {
+    it('Test calculations with 3 stakers #1', async () => {
       let amount = ethers.utils.parseEther('10000');
       await rewards[0].faucet(rewardsPoolBaseInfinite.address, ethers.utils.parseEther('10'));
       await rewards[1].faucet(rewardsPoolBaseInfinite.address, ethers.utils.parseEther('5'));
@@ -2053,15 +2060,9 @@ describe('RewardsPoolBaseInfinite', () => {
       //  Staker 2: 5k rewards
       //   Pool 6k rewards
 
-      expect(await rewards[0].balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(
-        BigNumber.from('48499999999999960924')
-      );
-      expect(await rewards[1].balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(
-        BigNumber.from('24249999999999961784')
-      );
-      expect(await rewards[2].balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(
-        BigNumber.from('96999999999999971034')
-      );
+      expect(await rewards[0].balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(ethers.utils.parseEther('48.5'));
+      expect(await rewards[1].balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(ethers.utils.parseEther('24.25'));
+      expect(await rewards[2].balanceOf(rewardsPoolBaseInfinite.address)).to.be.eq(ethers.utils.parseEther('97'));
 
       expect(await rewards[0].balanceOf(staker.address)).to.be.eq(0);
       expect(await rewards[1].balanceOf(staker.address)).to.be.eq(0);
