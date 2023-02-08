@@ -33,6 +33,8 @@ contract RewardsPoolBase is Ownable {
 
     uint256[] public rewardPerSecond;
     address[] public rewardsTokens;
+    uint8 public stakingTokenDecimals;
+    uint8[] public rewardTokenDecimals;
 
     IERC20 public immutable stakingToken;
 
@@ -94,8 +96,12 @@ contract RewardsPoolBase is Ownable {
         require(_stakeLimit != 0 && _contractStakeLimit != 0, 'RewardsPoolBase: invalid stake limit');
 
         require(_rewardsTokens.length > 0, 'RewardsPoolBase: empty rewardsTokens');
+        stakingTokenDecimals = IERC20Metadata(address(_stakingToken)).decimals();
+        rewardTokenDecimals = new uint8[](_rewardsTokens.length);
 
         for (uint256 i = 0; i < _rewardsTokens.length; i++) {
+            rewardTokenDecimals[i] = IERC20Metadata(_rewardsTokens[i]).decimals();
+
             for (uint256 j = i + 1; j < _rewardsTokens.length; j++) {
                 require(
                     address(_rewardsTokens[i]) != address(_rewardsTokens[j]),
@@ -245,11 +251,9 @@ contract RewardsPoolBase is Ownable {
 
         uint256 rewardsTokensLength = rewardsTokens.length;
 
-        uint8 stakingTokenDecimals = IERC20Metadata(address(stakingToken)).decimals();
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
-            uint8 rewardTokenDecimals = IERC20Metadata(rewardsTokens[i]).decimals();
             user.rewardDebt[i] =
-                (user.amountStaked * accumulatedRewardMultiplier[i] * (10**rewardTokenDecimals)) /
+                (user.amountStaked * accumulatedRewardMultiplier[i] * (10**rewardTokenDecimals[i])) /
                 (PRECISION * (10**stakingTokenDecimals)); // Update user reward debt for each token
         }
 
@@ -304,10 +308,8 @@ contract RewardsPoolBase is Ownable {
 
         uint256 rewardsTokensLength = rewardsTokens.length;
 
-        uint8 stakingTokenDecimals = IERC20Metadata(address(stakingToken)).decimals();
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
-            uint8 rewardTokenDecimals = IERC20Metadata(rewardsTokens[i]).decimals();
-            uint256 totalDebt = (user.amountStaked * accumulatedRewardMultiplier[i] * (10**rewardTokenDecimals)) /
+            uint256 totalDebt = (user.amountStaked * accumulatedRewardMultiplier[i] * (10**rewardTokenDecimals[i])) /
                 (PRECISION * (10**stakingTokenDecimals)); // Update user reward debt for each token
             user.rewardDebt[i] = totalDebt;
         }
@@ -390,13 +392,10 @@ contract RewardsPoolBase is Ownable {
             return;
         }
 
-        uint8 stakingTokenDecimals = IERC20Metadata(address(stakingToken)).decimals();
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
-            uint8 rewardTokenDecimals = IERC20Metadata(rewardsTokens[i]).decimals();
-
             uint256 newReward = secondsSinceLastReward * rewardPerSecond[i]; // Get newly accumulated reward
             uint256 rewardMultiplierIncrease = (newReward * (10**stakingTokenDecimals)) /
-                (totalStaked * (10**rewardTokenDecimals)); // Calculate the multiplier increase
+                (totalStaked * (10**rewardTokenDecimals[i])); // Calculate the multiplier increase
             accumulatedRewardMultiplier[i] = accumulatedRewardMultiplier[i] + rewardMultiplierIncrease; // Add the multiplier increase to the accumulated multiplier
         }
 
@@ -423,13 +422,10 @@ contract RewardsPoolBase is Ownable {
             return;
         }
 
-        uint8 stakingTokenDecimals = IERC20Metadata(address(stakingToken)).decimals();
         for (uint256 tokenIndex = 0; tokenIndex < rewardsTokensLength; tokenIndex++) {
-            uint8 rewardTokenDecimals = IERC20Metadata(rewardsTokens[tokenIndex]).decimals();
-
             uint256 totalDebt = (user.amountStaked *
                 accumulatedRewardMultiplier[tokenIndex] *
-                (10**rewardTokenDecimals)) / (PRECISION * (10**stakingTokenDecimals));
+                (10**rewardTokenDecimals[tokenIndex])) / (PRECISION * (10**stakingTokenDecimals));
 
             uint256 pendingDebt = totalDebt - user.rewardDebt[tokenIndex];
 
@@ -475,20 +471,17 @@ contract RewardsPoolBase is Ownable {
         uint256 _tokenIndex,
         uint256 _time
     ) external view returns (uint256) {
-        uint8 stakingTokenDecimals = IERC20Metadata(address(stakingToken)).decimals();
-        uint8 rewardTokenDecimals = IERC20Metadata(rewardsTokens[_tokenIndex]).decimals();
-
         uint256 applicableTimestamp = (_time < realEndTimestamp) ? _time : realEndTimestamp;
         uint256 secondsSinceLastReward = applicableTimestamp - lastRewardTimestamp;
 
         uint256 rewardMultiplierIncrease = (secondsSinceLastReward *
             rewardPerSecond[_tokenIndex] *
-            (10**stakingTokenDecimals)) / (totalStaked**(10**rewardTokenDecimals)); // Calculate the multiplier increase
+            (10**stakingTokenDecimals)) / (totalStaked**(10**rewardTokenDecimals[_tokenIndex])); // Calculate the multiplier increase
         uint256 currentMultiplier = accumulatedRewardMultiplier[_tokenIndex] + rewardMultiplierIncrease; // Simulate the multiplier increase to the accumulated multiplier
 
         UserInfo storage user = userInfo[_userAddress];
 
-        uint256 totalDebt = (user.amountStaked * currentMultiplier * (10**rewardTokenDecimals)) /
+        uint256 totalDebt = (user.amountStaked * currentMultiplier * (10**rewardTokenDecimals[_tokenIndex])) /
             (PRECISION * (10**stakingTokenDecimals)); // Simulate the current debt
         uint256 pendingDebt = totalDebt - user.rewardDebt[_tokenIndex]; // Simulate the pending debt
         return user.tokensOwed[_tokenIndex] + pendingDebt;

@@ -83,11 +83,9 @@ contract RewardsPoolBaseInfinite is RewardsPoolBase {
         totalStaked = totalStaked + _tokenAmount;
 
         uint256 rewardsTokensLength = rewardsTokens.length;
-        uint8 stakingTokenDecimals = IERC20Metadata(address(stakingToken)).decimals();
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
-            uint8 rewardTokenDecimals = IERC20Metadata(rewardsTokens[i]).decimals();
             user.rewardDebt[i] =
-                (user.amountStaked * accumulatedRewardMultiplier[i] * (10**rewardTokenDecimals)) /
+                (user.amountStaked * accumulatedRewardMultiplier[i] * (10**rewardTokenDecimals[i])) /
                 (PRECISION * (10**stakingTokenDecimals)); // Update user reward debt for each token
         }
 
