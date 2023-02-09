@@ -476,7 +476,7 @@ contract RewardsPoolBase is Ownable {
 
         uint256 rewardMultiplierIncrease = (secondsSinceLastReward *
             rewardPerSecond[_tokenIndex] *
-            (10**stakingTokenDecimals)) / (totalStaked*(10**rewardTokenDecimals[_tokenIndex])); // Calculate the multiplier increase
+            (10**stakingTokenDecimals)) / (totalStaked * (10**rewardTokenDecimals[_tokenIndex])); // Calculate the multiplier increase
         uint256 currentMultiplier = accumulatedRewardMultiplier[_tokenIndex] + rewardMultiplierIncrease; // Simulate the multiplier increase to the accumulated multiplier
 
         UserInfo storage user = userInfo[_userAddress];
