@@ -5,6 +5,7 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import './../RewardsPoolBase.sol';
 
+// TODO: check gas cost from storing decimal in contract vs calling it everytime
 /** @dev RewardsPoolBase Inifnite
 Inherits all staking logic from RewardsPoolBase.
 The extra functionality, should be the recalculation of the rewards and epoch times.
@@ -82,9 +83,10 @@ contract RewardsPoolBaseInfinite is RewardsPoolBase {
         totalStaked = totalStaked + _tokenAmount;
 
         uint256 rewardsTokensLength = rewardsTokens.length;
-
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
-            user.rewardDebt[i] = (user.amountStaked * accumulatedRewardMultiplier[i]) / PRECISION; // Update user reward debt for each token
+            user.rewardDebt[i] =
+                (user.amountStaked * accumulatedRewardMultiplier[i] * (10**rewardTokenDecimals[i])) /
+                (PRECISION * (10**stakingTokenDecimals)); // Update user reward debt for each token
         }
 
         emit Staked(_staker, _tokenAmount);
@@ -111,7 +113,7 @@ contract RewardsPoolBaseInfinite is RewardsPoolBase {
             // and we transfer the fee to the feeRecipient
             IERC20(rewardsTokens[i]).transfer(feeRecipient, fee);
 
-            _rewardPerSecond[i] = balance / (_endTimestamp - _startTimestamp); // calculate the rewards per second
+            _rewardPerSecond[i] = (balance * PRECISION) / (_endTimestamp - _startTimestamp); // calculate the rewards per second
         }
 
         return _rewardPerSecond;

@@ -3,6 +3,7 @@ pragma solidity 0.8.9;
 
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import '@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 
 /** @dev Base pool contract used in all other pools. 
@@ -32,6 +33,8 @@ contract RewardsPoolBase is Ownable {
 
     uint256[] public rewardPerSecond;
     address[] public rewardsTokens;
+    uint8 public stakingTokenDecimals;
+    uint8[] public rewardTokenDecimals;
 
     IERC20 public immutable stakingToken;
 
@@ -54,7 +57,7 @@ contract RewardsPoolBase is Ownable {
     struct UserInfo {
         uint256 firstStakedTimestamp;
         uint256 amountStaked; // How many tokens the user has staked.
-        uint256[] rewardDebt; //
+        uint256[] rewardDebt; // Helper for calculating tokensdebt
         uint256[] tokensOwed; // How many tokens the contract owes to the user.
     }
 
@@ -93,8 +96,12 @@ contract RewardsPoolBase is Ownable {
         require(_stakeLimit != 0 && _contractStakeLimit != 0, 'RewardsPoolBase: invalid stake limit');
 
         require(_rewardsTokens.length > 0, 'RewardsPoolBase: empty rewardsTokens');
+        stakingTokenDecimals = IERC20Metadata(address(_stakingToken)).decimals();
+        rewardTokenDecimals = new uint8[](_rewardsTokens.length);
 
         for (uint256 i = 0; i < _rewardsTokens.length; i++) {
+            rewardTokenDecimals[i] = IERC20Metadata(_rewardsTokens[i]).decimals();
+
             for (uint256 j = i + 1; j < _rewardsTokens.length; j++) {
                 require(
                     address(_rewardsTokens[i]) != address(_rewardsTokens[j]),
@@ -245,7 +252,9 @@ contract RewardsPoolBase is Ownable {
         uint256 rewardsTokensLength = rewardsTokens.length;
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
-            user.rewardDebt[i] = (user.amountStaked * accumulatedRewardMultiplier[i]) / PRECISION; // Update user reward debt for each token
+            user.rewardDebt[i] =
+                (user.amountStaked * accumulatedRewardMultiplier[i] * (10**rewardTokenDecimals[i])) /
+                (PRECISION * (10**stakingTokenDecimals)); // Update user reward debt for each token
         }
 
         emit Staked(_staker, _tokenAmount);
@@ -300,7 +309,8 @@ contract RewardsPoolBase is Ownable {
         uint256 rewardsTokensLength = rewardsTokens.length;
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
-            uint256 totalDebt = (user.amountStaked * accumulatedRewardMultiplier[i]) / PRECISION; // Update user reward debt for each token
+            uint256 totalDebt = (user.amountStaked * accumulatedRewardMultiplier[i] * (10**rewardTokenDecimals[i])) /
+                (PRECISION * (10**stakingTokenDecimals)); // Update user reward debt for each token
             user.rewardDebt[i] = totalDebt;
         }
 
@@ -372,7 +382,7 @@ contract RewardsPoolBase is Ownable {
                     realEndTimestamp,
                     rewardPerSecond[i]
                 );
-                _rewardPerSecond[i] = currentTotalRewards / (realEndTimestamp - _currentTimestamp); // calculate the rewards per second
+                _rewardPerSecond[i] = (currentTotalRewards * PRECISION) / (realEndTimestamp - _currentTimestamp); // calculate the rewards per second
             }
 
             realStartTimestamp = _currentTimestamp;
@@ -384,7 +394,8 @@ contract RewardsPoolBase is Ownable {
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
             uint256 newReward = secondsSinceLastReward * rewardPerSecond[i]; // Get newly accumulated reward
-            uint256 rewardMultiplierIncrease = (newReward * PRECISION) / totalStaked; // Calculate the multiplier increase
+            uint256 rewardMultiplierIncrease = (newReward * (10**stakingTokenDecimals)) /
+                (totalStaked * (10**rewardTokenDecimals[i])); // Calculate the multiplier increase
             accumulatedRewardMultiplier[i] = accumulatedRewardMultiplier[i] + rewardMultiplierIncrease; // Add the multiplier increase to the accumulated multiplier
         }
 
@@ -412,7 +423,10 @@ contract RewardsPoolBase is Ownable {
         }
 
         for (uint256 tokenIndex = 0; tokenIndex < rewardsTokensLength; tokenIndex++) {
-            uint256 totalDebt = (user.amountStaked * accumulatedRewardMultiplier[tokenIndex]) / PRECISION;
+            uint256 totalDebt = (user.amountStaked *
+                accumulatedRewardMultiplier[tokenIndex] *
+                (10**rewardTokenDecimals[tokenIndex])) / (PRECISION * (10**stakingTokenDecimals));
+
             uint256 pendingDebt = totalDebt - user.rewardDebt[tokenIndex];
 
             if (pendingDebt > 0) {
@@ -460,13 +474,15 @@ contract RewardsPoolBase is Ownable {
         uint256 applicableTimestamp = (_time < realEndTimestamp) ? _time : realEndTimestamp;
         uint256 secondsSinceLastReward = applicableTimestamp - lastRewardTimestamp;
 
-        uint256 newReward = secondsSinceLastReward * rewardPerSecond[_tokenIndex]; // Get newly accumulated reward
-        uint256 rewardMultiplierIncrease = (newReward * PRECISION) / totalStaked; // Calculate the multiplier increase
+        uint256 rewardMultiplierIncrease = (secondsSinceLastReward *
+            rewardPerSecond[_tokenIndex] *
+            (10**stakingTokenDecimals)) / (totalStaked * (10**rewardTokenDecimals[_tokenIndex])); // Calculate the multiplier increase
         uint256 currentMultiplier = accumulatedRewardMultiplier[_tokenIndex] + rewardMultiplierIncrease; // Simulate the multiplier increase to the accumulated multiplier
 
         UserInfo storage user = userInfo[_userAddress];
 
-        uint256 totalDebt = (user.amountStaked * currentMultiplier) / PRECISION; // Simulate the current debt
+        uint256 totalDebt = (user.amountStaked * currentMultiplier * (10**rewardTokenDecimals[_tokenIndex])) /
+            (PRECISION * (10**stakingTokenDecimals)); // Simulate the current debt
         uint256 pendingDebt = totalDebt - user.rewardDebt[_tokenIndex]; // Simulate the pending debt
         return user.tokensOwed[_tokenIndex] + pendingDebt;
     }
@@ -663,7 +679,7 @@ contract RewardsPoolBase is Ownable {
         uint256 _rewardPerSecond
     ) internal pure returns (uint256) {
         uint256 rewardsPeriodSeconds = _endTimestamp - _startTimestamp;
-        return _rewardPerSecond * rewardsPeriodSeconds;
+        return (_rewardPerSecond * rewardsPeriodSeconds) / PRECISION;
     }
 
     receive() external payable {}
