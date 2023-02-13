@@ -108,6 +108,7 @@ describe('RewardsPoolBase', () => {
 
     await stakingTokenInstance.mint(aliceAccount.address, amount);
     await stakingTokenInstance.mint(bobAccount.address, amount);
+    await stakingTokenInstance.mint(carolAccount.address, amount);
 
     stakingTokenAddress = stakingTokenInstance.address;
 
@@ -433,30 +434,20 @@ describe('RewardsPoolBase', () => {
         userOwedToken = await RewardsPoolBaseInstance.getUserOwedTokens(aliceAccount.address, 0);
         accumulatedMultiplier = await RewardsPoolBaseInstance.accumulatedRewardMultiplier(0);
 
-        let currentMultiplier = rewardPerSecond.mul(600).mul(ethers.utils.parseEther('1')).div(totalStaked);
+        let currentMultiplier = rewardPerSecond.mul(600).mul(accuracy).div(totalStaked);
 
         expect(accumulatedMultiplier)
           .to.gte(currentMultiplier)
           .and.to.lte(currentMultiplier.add(ethers.utils.parseEther('10')));
         expect(userOwedToken)
-          .to.gte(currentMultiplier.mul(currentStakedAmount).div(ethers.utils.parseEther('1')).sub(userRewardDebt))
-          .and.lte(
-            currentMultiplier
-              .mul(currentStakedAmount)
-              .div(ethers.utils.parseEther('1'))
-              .add(ethers.utils.parseEther('30'))
-          );
+          .to.gte(currentMultiplier.mul(currentStakedAmount).div(accuracy).sub(userRewardDebt))
+          .and.lte(currentMultiplier.mul(currentStakedAmount).div(accuracy).add(ethers.utils.parseEther('30')));
 
         userRewardDebt = await RewardsPoolBaseInstance.getUserRewardDebt(aliceAccount.address, 0);
 
         expect(userRewardDebt)
-          .to.gte(currentMultiplier.mul(totalStakedAmount).div(ethers.utils.parseEther('1')))
-          .and.to.lte(
-            currentMultiplier
-              .mul(totalStakedAmount)
-              .div(ethers.utils.parseEther('1'))
-              .add(ethers.utils.parseEther('100'))
-          );
+          .to.gte(currentMultiplier.mul(totalStakedAmount).div(accuracy))
+          .and.to.lte(currentMultiplier.mul(totalStakedAmount).div(accuracy).add(ethers.utils.parseEther('100')));
 
         totalStaked = await RewardsPoolBaseInstance.totalStaked();
         expect(totalStaked).to.equal(totalStakedAmount);
@@ -470,16 +461,12 @@ describe('RewardsPoolBase', () => {
         userOwedToken = await RewardsPoolBaseInstance.getUserOwedTokens(aliceAccount.address, 0);
         accumulatedMultiplier = await RewardsPoolBaseInstance.accumulatedRewardMultiplier(0);
 
-        currentMultiplier = rewardPerSecond
-          .mul(600)
-          .mul(ethers.utils.parseEther('1'))
-          .div(totalStaked)
-          .add(currentMultiplier);
+        currentMultiplier = rewardPerSecond.mul(600).mul(accuracy).div(totalStaked).add(currentMultiplier);
         expect(accumulatedMultiplier)
           .to.gte(currentMultiplier)
           .and.to.lte(currentMultiplier.add(ethers.utils.parseEther('10')));
         expect(userOwedToken)
-          .to.gte(currentMultiplier.mul(currentStakedAmount).div(ethers.utils.parseEther('1')).sub(userRewardDebt))
+          .to.gte(currentMultiplier.mul(currentStakedAmount).div(accuracy).sub(userRewardDebt))
           .and.lte(
             currentMultiplier
               .mul(currentStakedAmount)
@@ -490,13 +477,8 @@ describe('RewardsPoolBase', () => {
         userRewardDebt = await RewardsPoolBaseInstance.getUserRewardDebt(aliceAccount.address, 0);
 
         expect(userRewardDebt)
-          .to.gte(currentMultiplier.mul(totalStakedAmount).div(ethers.utils.parseEther('1')))
-          .and.to.lte(
-            currentMultiplier
-              .mul(totalStakedAmount)
-              .div(ethers.utils.parseEther('1'))
-              .add(ethers.utils.parseEther('100'))
-          );
+          .to.gte(currentMultiplier.mul(totalStakedAmount).div(accuracy))
+          .and.to.lte(currentMultiplier.mul(totalStakedAmount).div(accuracy).add(ethers.utils.parseEther('100')));
 
         totalStaked = await RewardsPoolBaseInstance.totalStaked();
         expect(totalStaked).to.equal(totalStakedAmount);
@@ -510,51 +492,33 @@ describe('RewardsPoolBase', () => {
         userOwedToken = await RewardsPoolBaseInstance.getUserOwedTokens(aliceAccount.address, 0);
         accumulatedMultiplier = await RewardsPoolBaseInstance.accumulatedRewardMultiplier(0);
 
-        currentMultiplier = rewardPerSecond
-          .mul(500)
-          .mul(ethers.utils.parseEther('1'))
-          .div(totalStaked)
-          .add(currentMultiplier);
+        currentMultiplier = rewardPerSecond.mul(500).mul(accuracy).div(totalStaked).add(currentMultiplier);
         expect(accumulatedMultiplier)
           .to.gte(currentMultiplier)
           .and.to.lte(currentMultiplier.add(ethers.utils.parseEther('10')));
         expect(userOwedToken)
-          .to.gte(currentMultiplier.mul(currentStakedAmount).div(ethers.utils.parseEther('1')).sub(userRewardDebt))
-          .and.lte(
-            currentMultiplier
-              .mul(currentStakedAmount)
-              .div(ethers.utils.parseEther('1'))
-              .add(ethers.utils.parseEther('30'))
-          );
+          .to.gte(currentMultiplier.mul(currentStakedAmount).div(accuracy).sub(userRewardDebt))
+          .and.lte(currentMultiplier.mul(currentStakedAmount).div(accuracy).add(ethers.utils.parseEther('30')));
 
         userRewardDebt = await RewardsPoolBaseInstance.getUserRewardDebt(aliceAccount.address, 0);
 
         expect(userRewardDebt)
-          .to.gte(currentMultiplier.mul(totalStakedAmount).div(ethers.utils.parseEther('1')))
-          .and.to.lte(
-            currentMultiplier
-              .mul(totalStakedAmount)
-              .div(ethers.utils.parseEther('1'))
-              .add(ethers.utils.parseEther('100'))
-          );
+          .to.gte(currentMultiplier.mul(totalStakedAmount).div(accuracy))
+          .and.to.lte(currentMultiplier.mul(totalStakedAmount).div(accuracy).add(ethers.utils.parseEther('100')));
 
         totalStaked = await RewardsPoolBaseInstance.totalStaked();
         expect(totalStaked).to.equal(totalStakedAmount);
 
         // #5 - 100 seconds passed
         await timeTravel(100);
-        await RewardsPoolBaseInstance.claim();
+        await RewardsPoolBaseInstance.exit();
         currentStakedAmount = ethers.utils.parseEther('15');
         totalStakedAmount = ethers.utils.parseEther('20');
 
         userOwedToken = await RewardsPoolBaseInstance.getUserOwedTokens(aliceAccount.address, 0);
         accumulatedMultiplier = await RewardsPoolBaseInstance.accumulatedRewardMultiplier(0);
 
-        currentMultiplier = rewardPerSecond
-          .mul(100)
-          .mul(ethers.utils.parseEther('1'))
-          .div(totalStaked)
-          .add(currentMultiplier);
+        currentMultiplier = rewardPerSecond.mul(100).mul(accuracy).div(totalStaked).add(currentMultiplier);
         expect(accumulatedMultiplier)
           .to.gte(currentMultiplier)
           .and.to.lte(currentMultiplier.add(ethers.utils.parseEther('10')));
@@ -563,16 +527,58 @@ describe('RewardsPoolBase', () => {
         userRewardDebt = await RewardsPoolBaseInstance.getUserRewardDebt(aliceAccount.address, 0);
 
         expect(userRewardDebt)
-          .to.gte(currentMultiplier.mul(totalStakedAmount).div(ethers.utils.parseEther('1')))
-          .and.to.lte(
-            currentMultiplier
-              .mul(totalStakedAmount)
-              .div(ethers.utils.parseEther('1'))
-              .add(ethers.utils.parseEther('100'))
-          );
+          .to.gte(currentMultiplier.mul(totalStakedAmount).div(accuracy))
+          .and.to.lte(currentMultiplier.mul(totalStakedAmount).div(accuracy).add(ethers.utils.parseEther('100')));
 
         totalStaked = await RewardsPoolBaseInstance.totalStaked();
         expect(totalStaked).to.equal(totalStakedAmount);
+      });
+
+      it('[(3 stakers) Should successfully stake and accumulate rewards even if the pool already is half time]:', async () => {
+        // before recalculation
+        // 3600s = 1 hour
+        // 3600 rewards through 1 hour
+        // 1 rward per second
+
+        // after recalculation
+        // 1800s = 30 minutes
+        // 3600 rewards through 30 minutes
+        // 2 rward per second
+
+        await stakingTokenInstance.approve(RewardsPoolBaseInstance.address, ethers.constants.MaxUint256);
+        await stakingTokenInstance
+          .connect(bobAccount)
+          .approve(RewardsPoolBaseInstance.address, ethers.constants.MaxUint256);
+        await stakingTokenInstance
+          .connect(carolAccount)
+          .approve(RewardsPoolBaseInstance.address, ethers.constants.MaxUint256);
+
+        // #1 - 1800 seconds passed
+        await timeTravel(1800);
+        await RewardsPoolBaseInstance.stake(standardStakingAmount);
+        await RewardsPoolBaseInstance.connect(bobAccount).stake(standardStakingAmount);
+        await RewardsPoolBaseInstance.connect(carolAccount).stake(standardStakingAmount);
+
+        // #2 - 600 seconds passed
+        await timeTravel(600);
+        await RewardsPoolBaseInstance.stake(standardStakingAmount);
+        await RewardsPoolBaseInstance.connect(bobAccount).stake(standardStakingAmount);
+
+        // #3 - 600 seconds passed
+        await timeTravel(600);
+        await RewardsPoolBaseInstance.stake(standardStakingAmount);
+        await RewardsPoolBaseInstance.connect(bobAccount).stake(standardStakingAmount);
+
+        // #4 - 500 seconds passed
+        await timeTravel(500);
+        await RewardsPoolBaseInstance.stake(standardStakingAmount);
+        await RewardsPoolBaseInstance.connect(bobAccount).stake(standardStakingAmount);
+
+        // #5 - 100 seconds passed
+        await timeTravel(100);
+        await RewardsPoolBaseInstance.exit();
+        await RewardsPoolBaseInstance.connect(bobAccount).exit();
+        await RewardsPoolBaseInstance.connect(carolAccount).exit();
       });
 
       it('[Should successfully stake and accumulate reward]:', async () => {
@@ -617,7 +623,7 @@ describe('RewardsPoolBase', () => {
         }
       });
 
-      it.only('[Should accumulate reward and update multipliers]:', async () => {
+      it('[Should accumulate reward and update multipliers]:', async () => {
         await timeTravelTo(startTimestamp + oneMinute);
 
         await RewardsPoolBaseInstance.stake(standardStakingAmount);

@@ -159,11 +159,11 @@ contract RewardsPoolBaseInfinite is RewardsPoolBase {
     }
 
     // not implemented functions on infinite pools
-    function extend(uint256 _durationTime, uint256[] calldata _rewardPerSecond) external override {
+    function extend(uint256 _durationTime, uint256[] calldata _rewardPerSecond) external pure override {
         revert('RewardsPoolBase: not implemented on infinite pools');
     }
 
-    function cancel() external override {
+    function cancel() external pure override {
         revert('RewardsPoolBase: not implemented on infinite pools');
     }
 }

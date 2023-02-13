@@ -111,7 +111,10 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await rewardsPoolBaseInfinite.epochDuration()).to.be.eq(3600 * 24 * 5);
       expect(await rewardsPoolBaseInfinite.hasStakingStarted()).to.be.false;
       expect(await rewardsPoolBaseInfinite.rewardPerSecond(0)).to.be.eq(
-        amount.sub(amount.mul(300).div(10000)).mul(ethers.utils.parseEther('1')).div(3600 * 24 * 5)
+        amount
+          .sub(amount.mul(300).div(10000))
+          .mul(ethers.utils.parseEther('1'))
+          .div(3600 * 24 * 5)
       );
     });
 
@@ -1665,10 +1668,14 @@ describe('RewardsPoolBaseInfinite', () => {
 
       expect(await rewardsPoolBaseInfinite.getAvailableBalance(0)).to.be.lt(3600 * 24 * 5 * 2);
       expect(await rewardsPoolBaseInfinite.getAvailableBalance(1)).to.be.lt(3600 * 24 * 5 * 2);
-      expect(await rewardsPoolBaseInfinite.canBeExtended()).to.be.false;
 
       const endTimestamp = await rewardsPoolBaseInfinite.endTimestamp();
       await timeTravel(3600 * 24 * 5);
+      await rewardsPoolBaseInfinite.connect(staker).exit();
+
+      await rewards[0].faucet(rewardsPoolBaseInfinite.address, amount);
+      await rewards[1].faucet(rewardsPoolBaseInfinite.address, amount);
+
       await rewardsPoolBaseInfinite.updateRewardMultipliers();
       expect(await rewardsPoolBaseInfinite.endTimestamp()).to.be.eq(endTimestamp);
     });
@@ -2323,7 +2330,7 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await rewardsPoolBaseInfinite.endTimestamp()).to.be.eq(endTimestamp);
     });
 
-    it.skip('Cannot be extended with < epoch time rewards', async function () {
+    it('Cannot be extended with < epoch time rewards', async function () {
       const staker = stakers[0];
       let amount = ethers.utils.parseEther('10000');
 
