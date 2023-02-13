@@ -126,9 +126,8 @@ contract RewardsPoolBaseInfinite is RewardsPoolBase {
     function _canBeExtended() internal view returns (bool) {
         for (uint256 i = 0; i < rewardsTokens.length; i++) {
             uint256 balance = getAvailableBalance(i);
-
             // if we have any rewardsTokens with a balance, the pool should be scheduled
-            if (balance > 0) {
+            if ((rewardTokenDecimals[i] > 10 && balance >= (10**(rewardTokenDecimals[i] - 10))) || (rewardTokenDecimals[i] <=10 && balance >= 2)) {
                 return true;
             }
         }

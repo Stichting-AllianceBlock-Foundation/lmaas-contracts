@@ -2,7 +2,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import { BigNumber } from 'ethers';
 import { ethers, network } from 'hardhat';
-import { ERC20Faucet, RewardsPoolBaseInfinite, RewardsPoolbaseInfiniteTest } from '../typechain';
+import { ERC20Faucet, RewardsPoolbaseInfiniteTest } from '../typechain';
 import { timeTravel } from './utils';
 
 let snapshotId: string;
@@ -58,6 +58,34 @@ describe('RewardsPoolBaseInfinite', () => {
 
   describe('1 reward token, no limits', async function () {
     beforeEach(async () => await setupRewardsPoolParameters());
+
+    it('Should extend a campaign when it needs to be extended', async () => {
+      for (let decimals = 0; decimals <= 18; decimals++) {
+        const rewardToken = await (
+          await ethers.getContractFactory('ERC20Faucet')
+        ).deploy('Test token', 'TEST', decimals);
+
+        const rewardsPoolBaseInfinite = await (
+          await ethers.getContractFactory('RewardsPoolbaseInfiniteTest')
+        ).deploy(
+          stakingToken.address,
+          [rewardToken.address],
+          ethers.constants.MaxUint256,
+          ethers.constants.MaxUint256,
+          'Test Pool'
+        );
+
+        expect(await rewardsPoolBaseInfinite.canBeExtended()).to.be.false;
+
+        const minimalAmount = decimals > 10 ? BigNumber.from(10).pow(decimals - 10) : BigNumber.from(2);
+
+        await rewardToken.faucet(rewardsPoolBaseInfinite.address, minimalAmount.sub(1));
+        expect(await rewardsPoolBaseInfinite.canBeExtended()).to.be.false;
+
+        await rewardToken.faucet(rewardsPoolBaseInfinite.address, 1);
+        expect(await rewardsPoolBaseInfinite.canBeExtended()).to.be.true;
+      }
+    });
 
     it('Should have initialized pool properly', async () => {
       expect(await rewardsPoolBaseInfinite.stakingToken()).to.be.eq(stakingToken.address);
@@ -531,7 +559,7 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await rewardsPoolBaseInfinite.endTimestamp()).to.be.eq(endTimestamp);
     });
 
-    it.skip('Cannot be extended with < epoch time rewards', async function () {
+    it('Cannot be extended with < epoch time rewards', async function () {
       const staker = stakers[0];
       let amount = ethers.utils.parseEther('10000');
 
@@ -543,10 +571,8 @@ describe('RewardsPoolBaseInfinite', () => {
       await stakingToken.connect(staker).approve(rewardsPoolBaseInfinite.address, amount);
       await rewardsPoolBaseInfinite.connect(staker).stake(amount);
 
-      console.log(await rewardsPoolBaseInfinite.getAvailableBalance(0));
-
       expect(await rewardsPoolBaseInfinite.getAvailableBalance(0)).to.be.lt(3600 * 24 * 5 * 2);
-      //   expect(await rewardsPoolBaseInfinite.canBeExtended()).to.be.false;
+      expect(await rewardsPoolBaseInfinite.canBeExtended()).to.be.false;
 
       const endTimestamp = await rewardsPoolBaseInfinite.endTimestamp();
       await timeTravel(3600 * 24 * 5);
@@ -1051,7 +1077,7 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await rewardsPoolBaseInfinite.endTimestamp()).to.be.eq(endTimestamp);
     });
 
-    it.skip('Cannot be extended with < epoch time rewards', async function () {
+    it('Cannot be extended with < epoch time rewards', async function () {
       const staker = stakers[0];
       let amount = ethers.utils.parseEther('10000');
 
@@ -1653,7 +1679,7 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await rewardsPoolBaseInfinite.endTimestamp()).to.be.eq(endTimestamp);
     });
 
-    it.skip('Cannot be extended with < epoch time rewards', async function () {
+    it('Cannot be extended with < epoch time rewards', async function () {
       const staker = stakers[0];
       let amount = ethers.utils.parseEther('10000');
 
@@ -1672,9 +1698,6 @@ describe('RewardsPoolBaseInfinite', () => {
       const endTimestamp = await rewardsPoolBaseInfinite.endTimestamp();
       await timeTravel(3600 * 24 * 5);
       await rewardsPoolBaseInfinite.connect(staker).exit();
-
-      await rewards[0].faucet(rewardsPoolBaseInfinite.address, amount);
-      await rewards[1].faucet(rewardsPoolBaseInfinite.address, amount);
 
       await rewardsPoolBaseInfinite.updateRewardMultipliers();
       expect(await rewardsPoolBaseInfinite.endTimestamp()).to.be.eq(endTimestamp);
