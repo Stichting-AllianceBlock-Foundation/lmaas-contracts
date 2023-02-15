@@ -398,12 +398,12 @@ describe('RewardsPoolBase', () => {
         // before recalculation
         // 3600s = 1 hour
         // 3600 rewards through 1 hour
-        // 1 rward per second
+        // 1 reward per second
 
         // after recalculation
         // 1800s = 30 minutes
         // 3600 rewards through 30 minutes
-        // 2 rward per second
+        // 2 reward per second
 
         await stakingTokenInstance.approve(RewardsPoolBaseInstance.address, ethers.constants.MaxUint256);
         const rewardPerSecond = ethers.utils.parseEther('2'); // 2 rewardPerSecond
@@ -606,7 +606,6 @@ describe('RewardsPoolBase', () => {
         // 3600 rewards through 30 minutes
         // 2 rward per second
 
-        // TODO: check if this can be fixed
         const corrections = [0, 0, 0, -1, -1];
         for (let i = 0; i < rewardPerSecond.length; i++) {
           const currentRewardPerSecond = await RewardsPoolBaseInstance.rewardPerSecond(i);
@@ -650,7 +649,6 @@ describe('RewardsPoolBase', () => {
           );
         }
 
-        // TODO: check if this can be fixed
         let corrections = [-2, 0, -6, -3, -5];
         for (let i = 0; i < rewardPerSecond.length; i++) {
           const currentRewardPerSecond = await RewardsPoolBaseInstance.rewardPerSecond(i);
@@ -662,13 +660,11 @@ describe('RewardsPoolBase', () => {
           const totalReward = currentRewardPerSecond.mul(oneMinute * 2);
           // use 3/4 here because alice staked the full first period and half of the second period (-1/4)
           expect(accumulatedRewardAlice).to.eq(
-            // TODO: check if this can be fixed
             totalReward.mul(3).div(4).div(accuracy).add(corrections[i]),
             'The reward accrued was not correct'
           );
         }
 
-        // TODO: check if this can be fixed
         corrections = [0, 0, -2, -2, -3];
         for (let i = 0; i < rewardPerSecond.length; i++) {
           const currentRewardPerSecond = await RewardsPoolBaseInstance.rewardPerSecond(i);
@@ -681,7 +677,6 @@ describe('RewardsPoolBase', () => {
 
           // use 1/4 here because bob didn't stake the first period (-2/4) and half of the second period (-1/4)
           expect(accumulatedRewardBob).to.equal(
-            // TODO: check if this can be fixed
             totalReward.mul(1).div(4).div(accuracy).add(corrections[i]),
             'The reward accrued was not correct'
           );

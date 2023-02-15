@@ -363,17 +363,20 @@ describe('RewardsPoolBaseInfinite', () => {
       await stake(0, 10000);
 
       expect(await nonCompoundingRewardsPoolInfinite.epochCount()).to.be.eq(1);
+      await fundPool();
       await timeTravel(3600 * 24 * 5);
       await stake(0, 10000);
       expect(await nonCompoundingRewardsPoolInfinite.epochCount()).to.be.eq(2);
 
+      await fundPool();
       await timeTravel(3600 * 24 * 5);
       await stake(0, 10000);
       expect(await nonCompoundingRewardsPoolInfinite.epochCount()).to.be.eq(3);
 
+      await fundPool();
       await timeTravel(3600 * 24 * 15);
       await exit(0);
-      expect(await nonCompoundingRewardsPoolInfinite.epochCount()).to.be.eq(5);
+      expect(await nonCompoundingRewardsPoolInfinite.epochCount()).to.be.eq(6);
     });
 
     it('Should be able to stake and withdraw', async function () {

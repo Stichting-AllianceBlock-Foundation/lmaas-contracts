@@ -5,7 +5,6 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import './../RewardsPoolBase.sol';
 
-// TODO: check gas cost from storing decimal in contract vs calling it everytime
 /** @dev RewardsPoolBase Inifnite
 Inherits all staking logic from RewardsPoolBase.
 The extra functionality, should be the recalculation of the rewards and epoch times.
@@ -126,9 +125,8 @@ contract RewardsPoolBaseInfinite is RewardsPoolBase {
     function _canBeExtended() internal view returns (bool) {
         for (uint256 i = 0; i < rewardsTokens.length; i++) {
             uint256 balance = getAvailableBalance(i);
-
             // if we have any rewardsTokens with a balance, the pool should be scheduled
-            if (balance > 0) {
+            if ((rewardTokenDecimals[i] > 10 && balance >= (10**(rewardTokenDecimals[i] - 10))) || (rewardTokenDecimals[i] <=10 && balance >= 2)) {
                 return true;
             }
         }

@@ -63,7 +63,7 @@ contract NonCompoundingRewardsPoolInfinite is RewardsPoolBaseInfinite, OnlyExitF
         if (currentTimestamp > endTimestamp) {
             _updateRewardMultipliers(endTimestamp);
             if (_canBeExtended()) {
-                epochCount = epochCount + 1;
+                epochCount = epochCount + 1 + ((currentTimestamp - endTimestamp) / epochDuration);
                 _applyExtension(
                     endTimestamp,
                     endTimestamp + epochDuration,
