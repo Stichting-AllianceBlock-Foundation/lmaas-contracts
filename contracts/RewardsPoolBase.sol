@@ -39,7 +39,7 @@ contract RewardsPoolBase is Ownable {
     IERC20 public immutable stakingToken;
 
     uint256 private originalStartTimestamp;
-    uint256 private realStartTimestamp;
+    uint256 public realStartTimestamp;
     uint256 private realEndTimestamp;
     uint256 private lastRewardTimestamp;
     bool private firstTimeStaked;
