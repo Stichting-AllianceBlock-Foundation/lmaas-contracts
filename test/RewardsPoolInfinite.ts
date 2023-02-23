@@ -336,6 +336,23 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await rewards[0].balanceOf(stakers[0].address)).to.be.eq(0);
     });
 
+    it.only('Should be able to stake after 1 epoch with no stakers have passed', async () => {
+      const staker = stakers[0];
+
+      let amount = ethers.utils.parseEther('10000');
+      await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
+
+      await rewardsPoolBaseInfinite['start(uint256)'](3600 * 24 * 5);
+
+      await timeTravel(3600 * 24 * 5);
+
+      await stakingToken.faucet(staker.address, amount);
+      await stakingToken.connect(staker).approve(rewardsPoolBaseInfinite.address, amount);
+      await rewardsPoolBaseInfinite.connect(staker).stake(amount);
+
+      
+    });
+
     it('Test calculations with 2 stakers #1', async () => {
       let amount = ethers.utils.parseEther('10000');
       await rewardToken.faucet(rewardsPoolBaseInfinite.address, amount);
