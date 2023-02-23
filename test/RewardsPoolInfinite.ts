@@ -349,8 +349,6 @@ describe('RewardsPoolBaseInfinite', () => {
       await stakingToken.faucet(staker.address, amount);
       await stakingToken.connect(staker).approve(rewardsPoolBaseInfinite.address, amount);
       await rewardsPoolBaseInfinite.connect(staker).stake(amount);
-
-      
     });
 
     it('Test calculations with 2 stakers #1', async () => {
