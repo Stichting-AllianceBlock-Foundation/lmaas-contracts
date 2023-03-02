@@ -31,7 +31,7 @@ var (
 
 // StakerMetaData contains all meta data concerning the Staker contract.
 var StakerMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"contractIERC20\",\"name\":\"_stakingToken\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"_rewardsTokens\",\"type\":\"address[]\"},{\"internalType\":\"uint256\",\"name\":\"_stakeLimit\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_contractStakeLimit\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"Claimed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Exited\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newStartTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newEndTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"newRewardsPerSecond\",\"type\":\"uint256[]\"}],\"name\":\"Extended\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Staked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"startTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"endTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"rewardsPerSecond\",\"type\":\"uint256[]\"}],\"name\":\"Started\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Withdrawn\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"accumulatedRewardMultiplier\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cancel\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cancelExtension\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"claim\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"contractStakeLimit\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"endTimestamp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"exit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"transferTo\",\"type\":\"address\"}],\"name\":\"exitAndTransfer\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_durationTime\",\"type\":\"uint256\"},{\"internalType\":\"uint256[]\",\"name\":\"_rewardPerSecond\",\"type\":\"uint256[]\"}],\"name\":\"extend\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"extensionDuration\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"extensionRewardPerSecond\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_rewardTokenIndex\",\"type\":\"uint256\"}],\"name\":\"getAvailableBalance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getPreviousCampaignsCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getRewardTokensCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_time\",\"type\":\"uint256\"}],\"name\":\"getUserAccumulatedReward\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"getUserOwedTokens\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"getUserRewardDebt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"}],\"name\":\"getUserRewardDebtLength\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"}],\"name\":\"getUserTokensOwedLength\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"hasStakingStarted\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"previousCampaigns\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"startTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endTimestamp\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"realStartTimestamp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"receiversWhitelist\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"rewardPerSecond\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"rewardTokenDecimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"rewardsTokens\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_receiver\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"_whitelisted\",\"type\":\"bool\"}],\"name\":\"setReceiverWhitelisted\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenAmount\",\"type\":\"uint256\"}],\"name\":\"stake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"stakeLimit\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"stakingToken\",\"outputs\":[{\"internalType\":\"contractIERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"stakingTokenDecimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_startTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_endTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256[]\",\"name\":\"_rewardPerSecond\",\"type\":\"uint256[]\"}],\"name\":\"start\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"startTimestamp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalStaked\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"updateRewardMultipliers\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"userInfo\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"firstStakedTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"amountStaked\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenAmount\",\"type\":\"uint256\"}],\"name\":\"withdraw\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_recipient\",\"type\":\"address\"}],\"name\":\"withdrawExcessRewards\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_recipient\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"}],\"name\":\"withdrawTokens\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}]",
+	ABI: "[{\"inputs\":[{\"internalType\":\"contractIERC20\",\"name\":\"_stakingToken\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"_rewardsTokens\",\"type\":\"address[]\"},{\"internalType\":\"uint256\",\"name\":\"_stakeLimit\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_contractStakeLimit\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"Claimed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Exited\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newStartTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newEndTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"newRewardsPerSecond\",\"type\":\"uint256[]\"}],\"name\":\"Extended\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Staked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"startTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"endTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"rewardsPerSecond\",\"type\":\"uint256[]\"}],\"name\":\"Started\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Withdrawn\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"accumulatedRewardMultiplier\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cancel\",\"outputs\":[],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cancelExtension\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"claim\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"contractStakeLimit\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"endTimestamp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"epochCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"epochDuration\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"exit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"}],\"name\":\"extend\",\"outputs\":[],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"extensionDuration\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"extensionRewardPerSecond\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_rewardTokenIndex\",\"type\":\"uint256\"}],\"name\":\"getAvailableBalance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getPreviousCampaignsCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getRewardTokensCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_time\",\"type\":\"uint256\"}],\"name\":\"getUserAccumulatedReward\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"getUserOwedTokens\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"getUserRewardDebt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"}],\"name\":\"getUserRewardDebtLength\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"}],\"name\":\"getUserTokensOwedLength\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"hasStakingStarted\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"previousCampaigns\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"startTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endTimestamp\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"realStartTimestamp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"rewardPerSecond\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"rewardTokenDecimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"rewardsTokens\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenAmount\",\"type\":\"uint256\"}],\"name\":\"stake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"stakeLimit\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"stakingToken\",\"outputs\":[{\"internalType\":\"contractIERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"stakingTokenDecimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_startTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_endTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256[]\",\"name\":\"_rewardPerSecond\",\"type\":\"uint256[]\"}],\"name\":\"start\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_epochDuration\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_startTimestamp\",\"type\":\"uint256\"}],\"name\":\"start\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_epochDuration\",\"type\":\"uint256\"}],\"name\":\"start\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"startTimestamp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalStaked\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"updateRewardMultipliers\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"userInfo\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"firstStakedTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"amountStaked\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"userStakedEpoch\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenAmount\",\"type\":\"uint256\"}],\"name\":\"withdraw\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_recipient\",\"type\":\"address\"}],\"name\":\"withdrawExcessRewards\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_recipient\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"}],\"name\":\"withdrawTokens\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}]",
 }
 
 // StakerABI is the input ABI used to generate the binding from.
@@ -242,6 +242,35 @@ func (_Staker *StakerCallerSession) BalanceOf(_userAddress common.Address) (*big
 	return _Staker.Contract.BalanceOf(&_Staker.CallOpts, _userAddress)
 }
 
+// Cancel is a free data retrieval call binding the contract method 0xea8a1af0.
+//
+// Solidity: function cancel() pure returns()
+func (_Staker *StakerCaller) Cancel(opts *bind.CallOpts) error {
+	var out []interface{}
+	err := _Staker.contract.Call(opts, &out, "cancel")
+
+	if err != nil {
+		return err
+	}
+
+	return err
+
+}
+
+// Cancel is a free data retrieval call binding the contract method 0xea8a1af0.
+//
+// Solidity: function cancel() pure returns()
+func (_Staker *StakerSession) Cancel() error {
+	return _Staker.Contract.Cancel(&_Staker.CallOpts)
+}
+
+// Cancel is a free data retrieval call binding the contract method 0xea8a1af0.
+//
+// Solidity: function cancel() pure returns()
+func (_Staker *StakerCallerSession) Cancel() error {
+	return _Staker.Contract.Cancel(&_Staker.CallOpts)
+}
+
 // ContractStakeLimit is a free data retrieval call binding the contract method 0x03d1dae0.
 //
 // Solidity: function contractStakeLimit() view returns(uint256)
@@ -302,6 +331,97 @@ func (_Staker *StakerSession) EndTimestamp() (*big.Int, error) {
 // Solidity: function endTimestamp() view returns(uint256)
 func (_Staker *StakerCallerSession) EndTimestamp() (*big.Int, error) {
 	return _Staker.Contract.EndTimestamp(&_Staker.CallOpts)
+}
+
+// EpochCount is a free data retrieval call binding the contract method 0x829965cc.
+//
+// Solidity: function epochCount() view returns(uint256)
+func (_Staker *StakerCaller) EpochCount(opts *bind.CallOpts) (*big.Int, error) {
+	var out []interface{}
+	err := _Staker.contract.Call(opts, &out, "epochCount")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// EpochCount is a free data retrieval call binding the contract method 0x829965cc.
+//
+// Solidity: function epochCount() view returns(uint256)
+func (_Staker *StakerSession) EpochCount() (*big.Int, error) {
+	return _Staker.Contract.EpochCount(&_Staker.CallOpts)
+}
+
+// EpochCount is a free data retrieval call binding the contract method 0x829965cc.
+//
+// Solidity: function epochCount() view returns(uint256)
+func (_Staker *StakerCallerSession) EpochCount() (*big.Int, error) {
+	return _Staker.Contract.EpochCount(&_Staker.CallOpts)
+}
+
+// EpochDuration is a free data retrieval call binding the contract method 0x4ff0876a.
+//
+// Solidity: function epochDuration() view returns(uint256)
+func (_Staker *StakerCaller) EpochDuration(opts *bind.CallOpts) (*big.Int, error) {
+	var out []interface{}
+	err := _Staker.contract.Call(opts, &out, "epochDuration")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// EpochDuration is a free data retrieval call binding the contract method 0x4ff0876a.
+//
+// Solidity: function epochDuration() view returns(uint256)
+func (_Staker *StakerSession) EpochDuration() (*big.Int, error) {
+	return _Staker.Contract.EpochDuration(&_Staker.CallOpts)
+}
+
+// EpochDuration is a free data retrieval call binding the contract method 0x4ff0876a.
+//
+// Solidity: function epochDuration() view returns(uint256)
+func (_Staker *StakerCallerSession) EpochDuration() (*big.Int, error) {
+	return _Staker.Contract.EpochDuration(&_Staker.CallOpts)
+}
+
+// Extend is a free data retrieval call binding the contract method 0x6c32bf69.
+//
+// Solidity: function extend(uint256 , uint256[] ) pure returns()
+func (_Staker *StakerCaller) Extend(opts *bind.CallOpts, arg0 *big.Int, arg1 []*big.Int) error {
+	var out []interface{}
+	err := _Staker.contract.Call(opts, &out, "extend", arg0, arg1)
+
+	if err != nil {
+		return err
+	}
+
+	return err
+
+}
+
+// Extend is a free data retrieval call binding the contract method 0x6c32bf69.
+//
+// Solidity: function extend(uint256 , uint256[] ) pure returns()
+func (_Staker *StakerSession) Extend(arg0 *big.Int, arg1 []*big.Int) error {
+	return _Staker.Contract.Extend(&_Staker.CallOpts, arg0, arg1)
+}
+
+// Extend is a free data retrieval call binding the contract method 0x6c32bf69.
+//
+// Solidity: function extend(uint256 , uint256[] ) pure returns()
+func (_Staker *StakerCallerSession) Extend(arg0 *big.Int, arg1 []*big.Int) error {
+	return _Staker.Contract.Extend(&_Staker.CallOpts, arg0, arg1)
 }
 
 // ExtensionDuration is a free data retrieval call binding the contract method 0x2037424b.
@@ -783,37 +903,6 @@ func (_Staker *StakerCallerSession) RealStartTimestamp() (*big.Int, error) {
 	return _Staker.Contract.RealStartTimestamp(&_Staker.CallOpts)
 }
 
-// ReceiversWhitelist is a free data retrieval call binding the contract method 0x363291dc.
-//
-// Solidity: function receiversWhitelist(address ) view returns(bool)
-func (_Staker *StakerCaller) ReceiversWhitelist(opts *bind.CallOpts, arg0 common.Address) (bool, error) {
-	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "receiversWhitelist", arg0)
-
-	if err != nil {
-		return *new(bool), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
-
-	return out0, err
-
-}
-
-// ReceiversWhitelist is a free data retrieval call binding the contract method 0x363291dc.
-//
-// Solidity: function receiversWhitelist(address ) view returns(bool)
-func (_Staker *StakerSession) ReceiversWhitelist(arg0 common.Address) (bool, error) {
-	return _Staker.Contract.ReceiversWhitelist(&_Staker.CallOpts, arg0)
-}
-
-// ReceiversWhitelist is a free data retrieval call binding the contract method 0x363291dc.
-//
-// Solidity: function receiversWhitelist(address ) view returns(bool)
-func (_Staker *StakerCallerSession) ReceiversWhitelist(arg0 common.Address) (bool, error) {
-	return _Staker.Contract.ReceiversWhitelist(&_Staker.CallOpts, arg0)
-}
-
 // RewardPerSecond is a free data retrieval call binding the contract method 0xfd67fd7c.
 //
 // Solidity: function rewardPerSecond(uint256 ) view returns(uint256)
@@ -1107,25 +1196,35 @@ func (_Staker *StakerCallerSession) UserInfo(arg0 common.Address) (struct {
 	return _Staker.Contract.UserInfo(&_Staker.CallOpts, arg0)
 }
 
-// Cancel is a paid mutator transaction binding the contract method 0xea8a1af0.
+// UserStakedEpoch is a free data retrieval call binding the contract method 0xb7b8e51d.
 //
-// Solidity: function cancel() returns()
-func (_Staker *StakerTransactor) Cancel(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Staker.contract.Transact(opts, "cancel")
+// Solidity: function userStakedEpoch(address ) view returns(uint256)
+func (_Staker *StakerCaller) UserStakedEpoch(opts *bind.CallOpts, arg0 common.Address) (*big.Int, error) {
+	var out []interface{}
+	err := _Staker.contract.Call(opts, &out, "userStakedEpoch", arg0)
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
 }
 
-// Cancel is a paid mutator transaction binding the contract method 0xea8a1af0.
+// UserStakedEpoch is a free data retrieval call binding the contract method 0xb7b8e51d.
 //
-// Solidity: function cancel() returns()
-func (_Staker *StakerSession) Cancel() (*types.Transaction, error) {
-	return _Staker.Contract.Cancel(&_Staker.TransactOpts)
+// Solidity: function userStakedEpoch(address ) view returns(uint256)
+func (_Staker *StakerSession) UserStakedEpoch(arg0 common.Address) (*big.Int, error) {
+	return _Staker.Contract.UserStakedEpoch(&_Staker.CallOpts, arg0)
 }
 
-// Cancel is a paid mutator transaction binding the contract method 0xea8a1af0.
+// UserStakedEpoch is a free data retrieval call binding the contract method 0xb7b8e51d.
 //
-// Solidity: function cancel() returns()
-func (_Staker *StakerTransactorSession) Cancel() (*types.Transaction, error) {
-	return _Staker.Contract.Cancel(&_Staker.TransactOpts)
+// Solidity: function userStakedEpoch(address ) view returns(uint256)
+func (_Staker *StakerCallerSession) UserStakedEpoch(arg0 common.Address) (*big.Int, error) {
+	return _Staker.Contract.UserStakedEpoch(&_Staker.CallOpts, arg0)
 }
 
 // CancelExtension is a paid mutator transaction binding the contract method 0x2af9b070.
@@ -1191,48 +1290,6 @@ func (_Staker *StakerTransactorSession) Exit() (*types.Transaction, error) {
 	return _Staker.Contract.Exit(&_Staker.TransactOpts)
 }
 
-// ExitAndTransfer is a paid mutator transaction binding the contract method 0x2240e63c.
-//
-// Solidity: function exitAndTransfer(address transferTo) returns()
-func (_Staker *StakerTransactor) ExitAndTransfer(opts *bind.TransactOpts, transferTo common.Address) (*types.Transaction, error) {
-	return _Staker.contract.Transact(opts, "exitAndTransfer", transferTo)
-}
-
-// ExitAndTransfer is a paid mutator transaction binding the contract method 0x2240e63c.
-//
-// Solidity: function exitAndTransfer(address transferTo) returns()
-func (_Staker *StakerSession) ExitAndTransfer(transferTo common.Address) (*types.Transaction, error) {
-	return _Staker.Contract.ExitAndTransfer(&_Staker.TransactOpts, transferTo)
-}
-
-// ExitAndTransfer is a paid mutator transaction binding the contract method 0x2240e63c.
-//
-// Solidity: function exitAndTransfer(address transferTo) returns()
-func (_Staker *StakerTransactorSession) ExitAndTransfer(transferTo common.Address) (*types.Transaction, error) {
-	return _Staker.Contract.ExitAndTransfer(&_Staker.TransactOpts, transferTo)
-}
-
-// Extend is a paid mutator transaction binding the contract method 0x6c32bf69.
-//
-// Solidity: function extend(uint256 _durationTime, uint256[] _rewardPerSecond) returns()
-func (_Staker *StakerTransactor) Extend(opts *bind.TransactOpts, _durationTime *big.Int, _rewardPerSecond []*big.Int) (*types.Transaction, error) {
-	return _Staker.contract.Transact(opts, "extend", _durationTime, _rewardPerSecond)
-}
-
-// Extend is a paid mutator transaction binding the contract method 0x6c32bf69.
-//
-// Solidity: function extend(uint256 _durationTime, uint256[] _rewardPerSecond) returns()
-func (_Staker *StakerSession) Extend(_durationTime *big.Int, _rewardPerSecond []*big.Int) (*types.Transaction, error) {
-	return _Staker.Contract.Extend(&_Staker.TransactOpts, _durationTime, _rewardPerSecond)
-}
-
-// Extend is a paid mutator transaction binding the contract method 0x6c32bf69.
-//
-// Solidity: function extend(uint256 _durationTime, uint256[] _rewardPerSecond) returns()
-func (_Staker *StakerTransactorSession) Extend(_durationTime *big.Int, _rewardPerSecond []*big.Int) (*types.Transaction, error) {
-	return _Staker.Contract.Extend(&_Staker.TransactOpts, _durationTime, _rewardPerSecond)
-}
-
 // RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
 //
 // Solidity: function renounceOwnership() returns()
@@ -1252,27 +1309,6 @@ func (_Staker *StakerSession) RenounceOwnership() (*types.Transaction, error) {
 // Solidity: function renounceOwnership() returns()
 func (_Staker *StakerTransactorSession) RenounceOwnership() (*types.Transaction, error) {
 	return _Staker.Contract.RenounceOwnership(&_Staker.TransactOpts)
-}
-
-// SetReceiverWhitelisted is a paid mutator transaction binding the contract method 0xa861a7a3.
-//
-// Solidity: function setReceiverWhitelisted(address _receiver, bool _whitelisted) returns()
-func (_Staker *StakerTransactor) SetReceiverWhitelisted(opts *bind.TransactOpts, _receiver common.Address, _whitelisted bool) (*types.Transaction, error) {
-	return _Staker.contract.Transact(opts, "setReceiverWhitelisted", _receiver, _whitelisted)
-}
-
-// SetReceiverWhitelisted is a paid mutator transaction binding the contract method 0xa861a7a3.
-//
-// Solidity: function setReceiverWhitelisted(address _receiver, bool _whitelisted) returns()
-func (_Staker *StakerSession) SetReceiverWhitelisted(_receiver common.Address, _whitelisted bool) (*types.Transaction, error) {
-	return _Staker.Contract.SetReceiverWhitelisted(&_Staker.TransactOpts, _receiver, _whitelisted)
-}
-
-// SetReceiverWhitelisted is a paid mutator transaction binding the contract method 0xa861a7a3.
-//
-// Solidity: function setReceiverWhitelisted(address _receiver, bool _whitelisted) returns()
-func (_Staker *StakerTransactorSession) SetReceiverWhitelisted(_receiver common.Address, _whitelisted bool) (*types.Transaction, error) {
-	return _Staker.Contract.SetReceiverWhitelisted(&_Staker.TransactOpts, _receiver, _whitelisted)
 }
 
 // Stake is a paid mutator transaction binding the contract method 0xa694fc3a.
@@ -1315,6 +1351,48 @@ func (_Staker *StakerSession) Start(_startTimestamp *big.Int, _endTimestamp *big
 // Solidity: function start(uint256 _startTimestamp, uint256 _endTimestamp, uint256[] _rewardPerSecond) returns()
 func (_Staker *StakerTransactorSession) Start(_startTimestamp *big.Int, _endTimestamp *big.Int, _rewardPerSecond []*big.Int) (*types.Transaction, error) {
 	return _Staker.Contract.Start(&_Staker.TransactOpts, _startTimestamp, _endTimestamp, _rewardPerSecond)
+}
+
+// Start0 is a paid mutator transaction binding the contract method 0x8fb4b573.
+//
+// Solidity: function start(uint256 _epochDuration, uint256 _startTimestamp) returns()
+func (_Staker *StakerTransactor) Start0(opts *bind.TransactOpts, _epochDuration *big.Int, _startTimestamp *big.Int) (*types.Transaction, error) {
+	return _Staker.contract.Transact(opts, "start0", _epochDuration, _startTimestamp)
+}
+
+// Start0 is a paid mutator transaction binding the contract method 0x8fb4b573.
+//
+// Solidity: function start(uint256 _epochDuration, uint256 _startTimestamp) returns()
+func (_Staker *StakerSession) Start0(_epochDuration *big.Int, _startTimestamp *big.Int) (*types.Transaction, error) {
+	return _Staker.Contract.Start0(&_Staker.TransactOpts, _epochDuration, _startTimestamp)
+}
+
+// Start0 is a paid mutator transaction binding the contract method 0x8fb4b573.
+//
+// Solidity: function start(uint256 _epochDuration, uint256 _startTimestamp) returns()
+func (_Staker *StakerTransactorSession) Start0(_epochDuration *big.Int, _startTimestamp *big.Int) (*types.Transaction, error) {
+	return _Staker.Contract.Start0(&_Staker.TransactOpts, _epochDuration, _startTimestamp)
+}
+
+// Start1 is a paid mutator transaction binding the contract method 0x95805dad.
+//
+// Solidity: function start(uint256 _epochDuration) returns()
+func (_Staker *StakerTransactor) Start1(opts *bind.TransactOpts, _epochDuration *big.Int) (*types.Transaction, error) {
+	return _Staker.contract.Transact(opts, "start1", _epochDuration)
+}
+
+// Start1 is a paid mutator transaction binding the contract method 0x95805dad.
+//
+// Solidity: function start(uint256 _epochDuration) returns()
+func (_Staker *StakerSession) Start1(_epochDuration *big.Int) (*types.Transaction, error) {
+	return _Staker.Contract.Start1(&_Staker.TransactOpts, _epochDuration)
+}
+
+// Start1 is a paid mutator transaction binding the contract method 0x95805dad.
+//
+// Solidity: function start(uint256 _epochDuration) returns()
+func (_Staker *StakerTransactorSession) Start1(_epochDuration *big.Int) (*types.Transaction, error) {
+	return _Staker.Contract.Start1(&_Staker.TransactOpts, _epochDuration)
 }
 
 // TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
