@@ -29,113 +29,113 @@ var (
 	_ = abi.ConvertType
 )
 
-// StakerMetaData contains all meta data concerning the Staker contract.
-var StakerMetaData = &bind.MetaData{
+// LmaasIsMetaData contains all meta data concerning the LmaasIs contract.
+var LmaasIsMetaData = &bind.MetaData{
 	ABI: "[{\"inputs\":[{\"internalType\":\"contractIERC20\",\"name\":\"_stakingToken\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"_rewardsTokens\",\"type\":\"address[]\"},{\"internalType\":\"uint256\",\"name\":\"_stakeLimit\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_contractStakeLimit\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"Claimed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Exited\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newStartTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newEndTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"newRewardsPerSecond\",\"type\":\"uint256[]\"}],\"name\":\"Extended\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Staked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"startTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"endTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"rewardsPerSecond\",\"type\":\"uint256[]\"}],\"name\":\"Started\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Withdrawn\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"accumulatedRewardMultiplier\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cancel\",\"outputs\":[],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cancelExtension\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"claim\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"contractStakeLimit\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"endTimestamp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"epochCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"epochDuration\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"exit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"}],\"name\":\"extend\",\"outputs\":[],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"extensionDuration\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"extensionRewardPerSecond\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_rewardTokenIndex\",\"type\":\"uint256\"}],\"name\":\"getAvailableBalance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getPreviousCampaignsCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getRewardTokensCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_time\",\"type\":\"uint256\"}],\"name\":\"getUserAccumulatedReward\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"getUserOwedTokens\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"getUserRewardDebt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"}],\"name\":\"getUserRewardDebtLength\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"}],\"name\":\"getUserTokensOwedLength\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"hasStakingStarted\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"previousCampaigns\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"startTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endTimestamp\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"realStartTimestamp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"rewardPerSecond\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"rewardTokenDecimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"rewardsTokens\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenAmount\",\"type\":\"uint256\"}],\"name\":\"stake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"stakeLimit\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"stakingToken\",\"outputs\":[{\"internalType\":\"contractIERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"stakingTokenDecimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_startTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_endTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256[]\",\"name\":\"_rewardPerSecond\",\"type\":\"uint256[]\"}],\"name\":\"start\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_epochDuration\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_startTimestamp\",\"type\":\"uint256\"}],\"name\":\"start\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_epochDuration\",\"type\":\"uint256\"}],\"name\":\"start\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"startTimestamp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalStaked\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"updateRewardMultipliers\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"userInfo\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"firstStakedTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"amountStaked\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"userStakedEpoch\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenAmount\",\"type\":\"uint256\"}],\"name\":\"withdraw\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_recipient\",\"type\":\"address\"}],\"name\":\"withdrawExcessRewards\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_recipient\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"}],\"name\":\"withdrawTokens\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}]",
 }
 
-// StakerABI is the input ABI used to generate the binding from.
-// Deprecated: Use StakerMetaData.ABI instead.
-var StakerABI = StakerMetaData.ABI
+// LmaasIsABI is the input ABI used to generate the binding from.
+// Deprecated: Use LmaasIsMetaData.ABI instead.
+var LmaasIsABI = LmaasIsMetaData.ABI
 
-// Staker is an auto generated Go binding around an Ethereum contract.
-type Staker struct {
-	StakerCaller     // Read-only binding to the contract
-	StakerTransactor // Write-only binding to the contract
-	StakerFilterer   // Log filterer for contract events
+// LmaasIs is an auto generated Go binding around an Ethereum contract.
+type LmaasIs struct {
+	LmaasIsCaller     // Read-only binding to the contract
+	LmaasIsTransactor // Write-only binding to the contract
+	LmaasIsFilterer   // Log filterer for contract events
 }
 
-// StakerCaller is an auto generated read-only Go binding around an Ethereum contract.
-type StakerCaller struct {
+// LmaasIsCaller is an auto generated read-only Go binding around an Ethereum contract.
+type LmaasIsCaller struct {
 	contract *bind.BoundContract // Generic contract wrapper for the low level calls
 }
 
-// StakerTransactor is an auto generated write-only Go binding around an Ethereum contract.
-type StakerTransactor struct {
+// LmaasIsTransactor is an auto generated write-only Go binding around an Ethereum contract.
+type LmaasIsTransactor struct {
 	contract *bind.BoundContract // Generic contract wrapper for the low level calls
 }
 
-// StakerFilterer is an auto generated log filtering Go binding around an Ethereum contract events.
-type StakerFilterer struct {
+// LmaasIsFilterer is an auto generated log filtering Go binding around an Ethereum contract events.
+type LmaasIsFilterer struct {
 	contract *bind.BoundContract // Generic contract wrapper for the low level calls
 }
 
-// StakerSession is an auto generated Go binding around an Ethereum contract,
+// LmaasIsSession is an auto generated Go binding around an Ethereum contract,
 // with pre-set call and transact options.
-type StakerSession struct {
-	Contract     *Staker           // Generic contract binding to set the session for
+type LmaasIsSession struct {
+	Contract     *LmaasIs          // Generic contract binding to set the session for
 	CallOpts     bind.CallOpts     // Call options to use throughout this session
 	TransactOpts bind.TransactOpts // Transaction auth options to use throughout this session
 }
 
-// StakerCallerSession is an auto generated read-only Go binding around an Ethereum contract,
+// LmaasIsCallerSession is an auto generated read-only Go binding around an Ethereum contract,
 // with pre-set call options.
-type StakerCallerSession struct {
-	Contract *StakerCaller // Generic contract caller binding to set the session for
-	CallOpts bind.CallOpts // Call options to use throughout this session
+type LmaasIsCallerSession struct {
+	Contract *LmaasIsCaller // Generic contract caller binding to set the session for
+	CallOpts bind.CallOpts  // Call options to use throughout this session
 }
 
-// StakerTransactorSession is an auto generated write-only Go binding around an Ethereum contract,
+// LmaasIsTransactorSession is an auto generated write-only Go binding around an Ethereum contract,
 // with pre-set transact options.
-type StakerTransactorSession struct {
-	Contract     *StakerTransactor // Generic contract transactor binding to set the session for
-	TransactOpts bind.TransactOpts // Transaction auth options to use throughout this session
+type LmaasIsTransactorSession struct {
+	Contract     *LmaasIsTransactor // Generic contract transactor binding to set the session for
+	TransactOpts bind.TransactOpts  // Transaction auth options to use throughout this session
 }
 
-// StakerRaw is an auto generated low-level Go binding around an Ethereum contract.
-type StakerRaw struct {
-	Contract *Staker // Generic contract binding to access the raw methods on
+// LmaasIsRaw is an auto generated low-level Go binding around an Ethereum contract.
+type LmaasIsRaw struct {
+	Contract *LmaasIs // Generic contract binding to access the raw methods on
 }
 
-// StakerCallerRaw is an auto generated low-level read-only Go binding around an Ethereum contract.
-type StakerCallerRaw struct {
-	Contract *StakerCaller // Generic read-only contract binding to access the raw methods on
+// LmaasIsCallerRaw is an auto generated low-level read-only Go binding around an Ethereum contract.
+type LmaasIsCallerRaw struct {
+	Contract *LmaasIsCaller // Generic read-only contract binding to access the raw methods on
 }
 
-// StakerTransactorRaw is an auto generated low-level write-only Go binding around an Ethereum contract.
-type StakerTransactorRaw struct {
-	Contract *StakerTransactor // Generic write-only contract binding to access the raw methods on
+// LmaasIsTransactorRaw is an auto generated low-level write-only Go binding around an Ethereum contract.
+type LmaasIsTransactorRaw struct {
+	Contract *LmaasIsTransactor // Generic write-only contract binding to access the raw methods on
 }
 
-// NewStaker creates a new instance of Staker, bound to a specific deployed contract.
-func NewStaker(address common.Address, backend bind.ContractBackend) (*Staker, error) {
-	contract, err := bindStaker(address, backend, backend, backend)
+// NewLmaasIs creates a new instance of LmaasIs, bound to a specific deployed contract.
+func NewLmaasIs(address common.Address, backend bind.ContractBackend) (*LmaasIs, error) {
+	contract, err := bindLmaasIs(address, backend, backend, backend)
 	if err != nil {
 		return nil, err
 	}
-	return &Staker{StakerCaller: StakerCaller{contract: contract}, StakerTransactor: StakerTransactor{contract: contract}, StakerFilterer: StakerFilterer{contract: contract}}, nil
+	return &LmaasIs{LmaasIsCaller: LmaasIsCaller{contract: contract}, LmaasIsTransactor: LmaasIsTransactor{contract: contract}, LmaasIsFilterer: LmaasIsFilterer{contract: contract}}, nil
 }
 
-// NewStakerCaller creates a new read-only instance of Staker, bound to a specific deployed contract.
-func NewStakerCaller(address common.Address, caller bind.ContractCaller) (*StakerCaller, error) {
-	contract, err := bindStaker(address, caller, nil, nil)
+// NewLmaasIsCaller creates a new read-only instance of LmaasIs, bound to a specific deployed contract.
+func NewLmaasIsCaller(address common.Address, caller bind.ContractCaller) (*LmaasIsCaller, error) {
+	contract, err := bindLmaasIs(address, caller, nil, nil)
 	if err != nil {
 		return nil, err
 	}
-	return &StakerCaller{contract: contract}, nil
+	return &LmaasIsCaller{contract: contract}, nil
 }
 
-// NewStakerTransactor creates a new write-only instance of Staker, bound to a specific deployed contract.
-func NewStakerTransactor(address common.Address, transactor bind.ContractTransactor) (*StakerTransactor, error) {
-	contract, err := bindStaker(address, nil, transactor, nil)
+// NewLmaasIsTransactor creates a new write-only instance of LmaasIs, bound to a specific deployed contract.
+func NewLmaasIsTransactor(address common.Address, transactor bind.ContractTransactor) (*LmaasIsTransactor, error) {
+	contract, err := bindLmaasIs(address, nil, transactor, nil)
 	if err != nil {
 		return nil, err
 	}
-	return &StakerTransactor{contract: contract}, nil
+	return &LmaasIsTransactor{contract: contract}, nil
 }
 
-// NewStakerFilterer creates a new log filterer instance of Staker, bound to a specific deployed contract.
-func NewStakerFilterer(address common.Address, filterer bind.ContractFilterer) (*StakerFilterer, error) {
-	contract, err := bindStaker(address, nil, nil, filterer)
+// NewLmaasIsFilterer creates a new log filterer instance of LmaasIs, bound to a specific deployed contract.
+func NewLmaasIsFilterer(address common.Address, filterer bind.ContractFilterer) (*LmaasIsFilterer, error) {
+	contract, err := bindLmaasIs(address, nil, nil, filterer)
 	if err != nil {
 		return nil, err
 	}
-	return &StakerFilterer{contract: contract}, nil
+	return &LmaasIsFilterer{contract: contract}, nil
 }
 
-// bindStaker binds a generic wrapper to an already deployed contract.
-func bindStaker(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor, filterer bind.ContractFilterer) (*bind.BoundContract, error) {
-	parsed, err := StakerMetaData.GetAbi()
+// bindLmaasIs binds a generic wrapper to an already deployed contract.
+func bindLmaasIs(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor, filterer bind.ContractFilterer) (*bind.BoundContract, error) {
+	parsed, err := LmaasIsMetaData.GetAbi()
 	if err != nil {
 		return nil, err
 	}
@@ -146,46 +146,46 @@ func bindStaker(address common.Address, caller bind.ContractCaller, transactor b
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_Staker *StakerRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
-	return _Staker.Contract.StakerCaller.contract.Call(opts, result, method, params...)
+func (_LmaasIs *LmaasIsRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
+	return _LmaasIs.Contract.LmaasIsCaller.contract.Call(opts, result, method, params...)
 }
 
 // Transfer initiates a plain transaction to move funds to the contract, calling
 // its default method if one is available.
-func (_Staker *StakerRaw) Transfer(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Staker.Contract.StakerTransactor.contract.Transfer(opts)
+func (_LmaasIs *LmaasIsRaw) Transfer(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _LmaasIs.Contract.LmaasIsTransactor.contract.Transfer(opts)
 }
 
 // Transact invokes the (paid) contract method with params as input values.
-func (_Staker *StakerRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
-	return _Staker.Contract.StakerTransactor.contract.Transact(opts, method, params...)
+func (_LmaasIs *LmaasIsRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
+	return _LmaasIs.Contract.LmaasIsTransactor.contract.Transact(opts, method, params...)
 }
 
 // Call invokes the (constant) contract method with params as input values and
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_Staker *StakerCallerRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
-	return _Staker.Contract.contract.Call(opts, result, method, params...)
+func (_LmaasIs *LmaasIsCallerRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
+	return _LmaasIs.Contract.contract.Call(opts, result, method, params...)
 }
 
 // Transfer initiates a plain transaction to move funds to the contract, calling
 // its default method if one is available.
-func (_Staker *StakerTransactorRaw) Transfer(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Staker.Contract.contract.Transfer(opts)
+func (_LmaasIs *LmaasIsTransactorRaw) Transfer(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _LmaasIs.Contract.contract.Transfer(opts)
 }
 
 // Transact invokes the (paid) contract method with params as input values.
-func (_Staker *StakerTransactorRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
-	return _Staker.Contract.contract.Transact(opts, method, params...)
+func (_LmaasIs *LmaasIsTransactorRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
+	return _LmaasIs.Contract.contract.Transact(opts, method, params...)
 }
 
 // AccumulatedRewardMultiplier is a free data retrieval call binding the contract method 0xfb58cad1.
 //
 // Solidity: function accumulatedRewardMultiplier(uint256 ) view returns(uint256)
-func (_Staker *StakerCaller) AccumulatedRewardMultiplier(opts *bind.CallOpts, arg0 *big.Int) (*big.Int, error) {
+func (_LmaasIs *LmaasIsCaller) AccumulatedRewardMultiplier(opts *bind.CallOpts, arg0 *big.Int) (*big.Int, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "accumulatedRewardMultiplier", arg0)
+	err := _LmaasIs.contract.Call(opts, &out, "accumulatedRewardMultiplier", arg0)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -200,23 +200,23 @@ func (_Staker *StakerCaller) AccumulatedRewardMultiplier(opts *bind.CallOpts, ar
 // AccumulatedRewardMultiplier is a free data retrieval call binding the contract method 0xfb58cad1.
 //
 // Solidity: function accumulatedRewardMultiplier(uint256 ) view returns(uint256)
-func (_Staker *StakerSession) AccumulatedRewardMultiplier(arg0 *big.Int) (*big.Int, error) {
-	return _Staker.Contract.AccumulatedRewardMultiplier(&_Staker.CallOpts, arg0)
+func (_LmaasIs *LmaasIsSession) AccumulatedRewardMultiplier(arg0 *big.Int) (*big.Int, error) {
+	return _LmaasIs.Contract.AccumulatedRewardMultiplier(&_LmaasIs.CallOpts, arg0)
 }
 
 // AccumulatedRewardMultiplier is a free data retrieval call binding the contract method 0xfb58cad1.
 //
 // Solidity: function accumulatedRewardMultiplier(uint256 ) view returns(uint256)
-func (_Staker *StakerCallerSession) AccumulatedRewardMultiplier(arg0 *big.Int) (*big.Int, error) {
-	return _Staker.Contract.AccumulatedRewardMultiplier(&_Staker.CallOpts, arg0)
+func (_LmaasIs *LmaasIsCallerSession) AccumulatedRewardMultiplier(arg0 *big.Int) (*big.Int, error) {
+	return _LmaasIs.Contract.AccumulatedRewardMultiplier(&_LmaasIs.CallOpts, arg0)
 }
 
 // BalanceOf is a free data retrieval call binding the contract method 0x70a08231.
 //
 // Solidity: function balanceOf(address _userAddress) view returns(uint256)
-func (_Staker *StakerCaller) BalanceOf(opts *bind.CallOpts, _userAddress common.Address) (*big.Int, error) {
+func (_LmaasIs *LmaasIsCaller) BalanceOf(opts *bind.CallOpts, _userAddress common.Address) (*big.Int, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "balanceOf", _userAddress)
+	err := _LmaasIs.contract.Call(opts, &out, "balanceOf", _userAddress)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -231,23 +231,23 @@ func (_Staker *StakerCaller) BalanceOf(opts *bind.CallOpts, _userAddress common.
 // BalanceOf is a free data retrieval call binding the contract method 0x70a08231.
 //
 // Solidity: function balanceOf(address _userAddress) view returns(uint256)
-func (_Staker *StakerSession) BalanceOf(_userAddress common.Address) (*big.Int, error) {
-	return _Staker.Contract.BalanceOf(&_Staker.CallOpts, _userAddress)
+func (_LmaasIs *LmaasIsSession) BalanceOf(_userAddress common.Address) (*big.Int, error) {
+	return _LmaasIs.Contract.BalanceOf(&_LmaasIs.CallOpts, _userAddress)
 }
 
 // BalanceOf is a free data retrieval call binding the contract method 0x70a08231.
 //
 // Solidity: function balanceOf(address _userAddress) view returns(uint256)
-func (_Staker *StakerCallerSession) BalanceOf(_userAddress common.Address) (*big.Int, error) {
-	return _Staker.Contract.BalanceOf(&_Staker.CallOpts, _userAddress)
+func (_LmaasIs *LmaasIsCallerSession) BalanceOf(_userAddress common.Address) (*big.Int, error) {
+	return _LmaasIs.Contract.BalanceOf(&_LmaasIs.CallOpts, _userAddress)
 }
 
 // Cancel is a free data retrieval call binding the contract method 0xea8a1af0.
 //
 // Solidity: function cancel() pure returns()
-func (_Staker *StakerCaller) Cancel(opts *bind.CallOpts) error {
+func (_LmaasIs *LmaasIsCaller) Cancel(opts *bind.CallOpts) error {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "cancel")
+	err := _LmaasIs.contract.Call(opts, &out, "cancel")
 
 	if err != nil {
 		return err
@@ -260,23 +260,23 @@ func (_Staker *StakerCaller) Cancel(opts *bind.CallOpts) error {
 // Cancel is a free data retrieval call binding the contract method 0xea8a1af0.
 //
 // Solidity: function cancel() pure returns()
-func (_Staker *StakerSession) Cancel() error {
-	return _Staker.Contract.Cancel(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsSession) Cancel() error {
+	return _LmaasIs.Contract.Cancel(&_LmaasIs.CallOpts)
 }
 
 // Cancel is a free data retrieval call binding the contract method 0xea8a1af0.
 //
 // Solidity: function cancel() pure returns()
-func (_Staker *StakerCallerSession) Cancel() error {
-	return _Staker.Contract.Cancel(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsCallerSession) Cancel() error {
+	return _LmaasIs.Contract.Cancel(&_LmaasIs.CallOpts)
 }
 
 // ContractStakeLimit is a free data retrieval call binding the contract method 0x03d1dae0.
 //
 // Solidity: function contractStakeLimit() view returns(uint256)
-func (_Staker *StakerCaller) ContractStakeLimit(opts *bind.CallOpts) (*big.Int, error) {
+func (_LmaasIs *LmaasIsCaller) ContractStakeLimit(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "contractStakeLimit")
+	err := _LmaasIs.contract.Call(opts, &out, "contractStakeLimit")
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -291,23 +291,23 @@ func (_Staker *StakerCaller) ContractStakeLimit(opts *bind.CallOpts) (*big.Int, 
 // ContractStakeLimit is a free data retrieval call binding the contract method 0x03d1dae0.
 //
 // Solidity: function contractStakeLimit() view returns(uint256)
-func (_Staker *StakerSession) ContractStakeLimit() (*big.Int, error) {
-	return _Staker.Contract.ContractStakeLimit(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsSession) ContractStakeLimit() (*big.Int, error) {
+	return _LmaasIs.Contract.ContractStakeLimit(&_LmaasIs.CallOpts)
 }
 
 // ContractStakeLimit is a free data retrieval call binding the contract method 0x03d1dae0.
 //
 // Solidity: function contractStakeLimit() view returns(uint256)
-func (_Staker *StakerCallerSession) ContractStakeLimit() (*big.Int, error) {
-	return _Staker.Contract.ContractStakeLimit(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsCallerSession) ContractStakeLimit() (*big.Int, error) {
+	return _LmaasIs.Contract.ContractStakeLimit(&_LmaasIs.CallOpts)
 }
 
 // EndTimestamp is a free data retrieval call binding the contract method 0xa85adeab.
 //
 // Solidity: function endTimestamp() view returns(uint256)
-func (_Staker *StakerCaller) EndTimestamp(opts *bind.CallOpts) (*big.Int, error) {
+func (_LmaasIs *LmaasIsCaller) EndTimestamp(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "endTimestamp")
+	err := _LmaasIs.contract.Call(opts, &out, "endTimestamp")
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -322,23 +322,23 @@ func (_Staker *StakerCaller) EndTimestamp(opts *bind.CallOpts) (*big.Int, error)
 // EndTimestamp is a free data retrieval call binding the contract method 0xa85adeab.
 //
 // Solidity: function endTimestamp() view returns(uint256)
-func (_Staker *StakerSession) EndTimestamp() (*big.Int, error) {
-	return _Staker.Contract.EndTimestamp(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsSession) EndTimestamp() (*big.Int, error) {
+	return _LmaasIs.Contract.EndTimestamp(&_LmaasIs.CallOpts)
 }
 
 // EndTimestamp is a free data retrieval call binding the contract method 0xa85adeab.
 //
 // Solidity: function endTimestamp() view returns(uint256)
-func (_Staker *StakerCallerSession) EndTimestamp() (*big.Int, error) {
-	return _Staker.Contract.EndTimestamp(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsCallerSession) EndTimestamp() (*big.Int, error) {
+	return _LmaasIs.Contract.EndTimestamp(&_LmaasIs.CallOpts)
 }
 
 // EpochCount is a free data retrieval call binding the contract method 0x829965cc.
 //
 // Solidity: function epochCount() view returns(uint256)
-func (_Staker *StakerCaller) EpochCount(opts *bind.CallOpts) (*big.Int, error) {
+func (_LmaasIs *LmaasIsCaller) EpochCount(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "epochCount")
+	err := _LmaasIs.contract.Call(opts, &out, "epochCount")
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -353,23 +353,23 @@ func (_Staker *StakerCaller) EpochCount(opts *bind.CallOpts) (*big.Int, error) {
 // EpochCount is a free data retrieval call binding the contract method 0x829965cc.
 //
 // Solidity: function epochCount() view returns(uint256)
-func (_Staker *StakerSession) EpochCount() (*big.Int, error) {
-	return _Staker.Contract.EpochCount(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsSession) EpochCount() (*big.Int, error) {
+	return _LmaasIs.Contract.EpochCount(&_LmaasIs.CallOpts)
 }
 
 // EpochCount is a free data retrieval call binding the contract method 0x829965cc.
 //
 // Solidity: function epochCount() view returns(uint256)
-func (_Staker *StakerCallerSession) EpochCount() (*big.Int, error) {
-	return _Staker.Contract.EpochCount(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsCallerSession) EpochCount() (*big.Int, error) {
+	return _LmaasIs.Contract.EpochCount(&_LmaasIs.CallOpts)
 }
 
 // EpochDuration is a free data retrieval call binding the contract method 0x4ff0876a.
 //
 // Solidity: function epochDuration() view returns(uint256)
-func (_Staker *StakerCaller) EpochDuration(opts *bind.CallOpts) (*big.Int, error) {
+func (_LmaasIs *LmaasIsCaller) EpochDuration(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "epochDuration")
+	err := _LmaasIs.contract.Call(opts, &out, "epochDuration")
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -384,23 +384,23 @@ func (_Staker *StakerCaller) EpochDuration(opts *bind.CallOpts) (*big.Int, error
 // EpochDuration is a free data retrieval call binding the contract method 0x4ff0876a.
 //
 // Solidity: function epochDuration() view returns(uint256)
-func (_Staker *StakerSession) EpochDuration() (*big.Int, error) {
-	return _Staker.Contract.EpochDuration(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsSession) EpochDuration() (*big.Int, error) {
+	return _LmaasIs.Contract.EpochDuration(&_LmaasIs.CallOpts)
 }
 
 // EpochDuration is a free data retrieval call binding the contract method 0x4ff0876a.
 //
 // Solidity: function epochDuration() view returns(uint256)
-func (_Staker *StakerCallerSession) EpochDuration() (*big.Int, error) {
-	return _Staker.Contract.EpochDuration(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsCallerSession) EpochDuration() (*big.Int, error) {
+	return _LmaasIs.Contract.EpochDuration(&_LmaasIs.CallOpts)
 }
 
 // Extend is a free data retrieval call binding the contract method 0x6c32bf69.
 //
 // Solidity: function extend(uint256 , uint256[] ) pure returns()
-func (_Staker *StakerCaller) Extend(opts *bind.CallOpts, arg0 *big.Int, arg1 []*big.Int) error {
+func (_LmaasIs *LmaasIsCaller) Extend(opts *bind.CallOpts, arg0 *big.Int, arg1 []*big.Int) error {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "extend", arg0, arg1)
+	err := _LmaasIs.contract.Call(opts, &out, "extend", arg0, arg1)
 
 	if err != nil {
 		return err
@@ -413,23 +413,23 @@ func (_Staker *StakerCaller) Extend(opts *bind.CallOpts, arg0 *big.Int, arg1 []*
 // Extend is a free data retrieval call binding the contract method 0x6c32bf69.
 //
 // Solidity: function extend(uint256 , uint256[] ) pure returns()
-func (_Staker *StakerSession) Extend(arg0 *big.Int, arg1 []*big.Int) error {
-	return _Staker.Contract.Extend(&_Staker.CallOpts, arg0, arg1)
+func (_LmaasIs *LmaasIsSession) Extend(arg0 *big.Int, arg1 []*big.Int) error {
+	return _LmaasIs.Contract.Extend(&_LmaasIs.CallOpts, arg0, arg1)
 }
 
 // Extend is a free data retrieval call binding the contract method 0x6c32bf69.
 //
 // Solidity: function extend(uint256 , uint256[] ) pure returns()
-func (_Staker *StakerCallerSession) Extend(arg0 *big.Int, arg1 []*big.Int) error {
-	return _Staker.Contract.Extend(&_Staker.CallOpts, arg0, arg1)
+func (_LmaasIs *LmaasIsCallerSession) Extend(arg0 *big.Int, arg1 []*big.Int) error {
+	return _LmaasIs.Contract.Extend(&_LmaasIs.CallOpts, arg0, arg1)
 }
 
 // ExtensionDuration is a free data retrieval call binding the contract method 0x2037424b.
 //
 // Solidity: function extensionDuration() view returns(uint256)
-func (_Staker *StakerCaller) ExtensionDuration(opts *bind.CallOpts) (*big.Int, error) {
+func (_LmaasIs *LmaasIsCaller) ExtensionDuration(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "extensionDuration")
+	err := _LmaasIs.contract.Call(opts, &out, "extensionDuration")
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -444,23 +444,23 @@ func (_Staker *StakerCaller) ExtensionDuration(opts *bind.CallOpts) (*big.Int, e
 // ExtensionDuration is a free data retrieval call binding the contract method 0x2037424b.
 //
 // Solidity: function extensionDuration() view returns(uint256)
-func (_Staker *StakerSession) ExtensionDuration() (*big.Int, error) {
-	return _Staker.Contract.ExtensionDuration(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsSession) ExtensionDuration() (*big.Int, error) {
+	return _LmaasIs.Contract.ExtensionDuration(&_LmaasIs.CallOpts)
 }
 
 // ExtensionDuration is a free data retrieval call binding the contract method 0x2037424b.
 //
 // Solidity: function extensionDuration() view returns(uint256)
-func (_Staker *StakerCallerSession) ExtensionDuration() (*big.Int, error) {
-	return _Staker.Contract.ExtensionDuration(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsCallerSession) ExtensionDuration() (*big.Int, error) {
+	return _LmaasIs.Contract.ExtensionDuration(&_LmaasIs.CallOpts)
 }
 
 // ExtensionRewardPerSecond is a free data retrieval call binding the contract method 0x602e007a.
 //
 // Solidity: function extensionRewardPerSecond(uint256 ) view returns(uint256)
-func (_Staker *StakerCaller) ExtensionRewardPerSecond(opts *bind.CallOpts, arg0 *big.Int) (*big.Int, error) {
+func (_LmaasIs *LmaasIsCaller) ExtensionRewardPerSecond(opts *bind.CallOpts, arg0 *big.Int) (*big.Int, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "extensionRewardPerSecond", arg0)
+	err := _LmaasIs.contract.Call(opts, &out, "extensionRewardPerSecond", arg0)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -475,23 +475,23 @@ func (_Staker *StakerCaller) ExtensionRewardPerSecond(opts *bind.CallOpts, arg0 
 // ExtensionRewardPerSecond is a free data retrieval call binding the contract method 0x602e007a.
 //
 // Solidity: function extensionRewardPerSecond(uint256 ) view returns(uint256)
-func (_Staker *StakerSession) ExtensionRewardPerSecond(arg0 *big.Int) (*big.Int, error) {
-	return _Staker.Contract.ExtensionRewardPerSecond(&_Staker.CallOpts, arg0)
+func (_LmaasIs *LmaasIsSession) ExtensionRewardPerSecond(arg0 *big.Int) (*big.Int, error) {
+	return _LmaasIs.Contract.ExtensionRewardPerSecond(&_LmaasIs.CallOpts, arg0)
 }
 
 // ExtensionRewardPerSecond is a free data retrieval call binding the contract method 0x602e007a.
 //
 // Solidity: function extensionRewardPerSecond(uint256 ) view returns(uint256)
-func (_Staker *StakerCallerSession) ExtensionRewardPerSecond(arg0 *big.Int) (*big.Int, error) {
-	return _Staker.Contract.ExtensionRewardPerSecond(&_Staker.CallOpts, arg0)
+func (_LmaasIs *LmaasIsCallerSession) ExtensionRewardPerSecond(arg0 *big.Int) (*big.Int, error) {
+	return _LmaasIs.Contract.ExtensionRewardPerSecond(&_LmaasIs.CallOpts, arg0)
 }
 
 // GetAvailableBalance is a free data retrieval call binding the contract method 0xaabef0db.
 //
 // Solidity: function getAvailableBalance(uint256 _rewardTokenIndex) view returns(uint256)
-func (_Staker *StakerCaller) GetAvailableBalance(opts *bind.CallOpts, _rewardTokenIndex *big.Int) (*big.Int, error) {
+func (_LmaasIs *LmaasIsCaller) GetAvailableBalance(opts *bind.CallOpts, _rewardTokenIndex *big.Int) (*big.Int, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "getAvailableBalance", _rewardTokenIndex)
+	err := _LmaasIs.contract.Call(opts, &out, "getAvailableBalance", _rewardTokenIndex)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -506,23 +506,23 @@ func (_Staker *StakerCaller) GetAvailableBalance(opts *bind.CallOpts, _rewardTok
 // GetAvailableBalance is a free data retrieval call binding the contract method 0xaabef0db.
 //
 // Solidity: function getAvailableBalance(uint256 _rewardTokenIndex) view returns(uint256)
-func (_Staker *StakerSession) GetAvailableBalance(_rewardTokenIndex *big.Int) (*big.Int, error) {
-	return _Staker.Contract.GetAvailableBalance(&_Staker.CallOpts, _rewardTokenIndex)
+func (_LmaasIs *LmaasIsSession) GetAvailableBalance(_rewardTokenIndex *big.Int) (*big.Int, error) {
+	return _LmaasIs.Contract.GetAvailableBalance(&_LmaasIs.CallOpts, _rewardTokenIndex)
 }
 
 // GetAvailableBalance is a free data retrieval call binding the contract method 0xaabef0db.
 //
 // Solidity: function getAvailableBalance(uint256 _rewardTokenIndex) view returns(uint256)
-func (_Staker *StakerCallerSession) GetAvailableBalance(_rewardTokenIndex *big.Int) (*big.Int, error) {
-	return _Staker.Contract.GetAvailableBalance(&_Staker.CallOpts, _rewardTokenIndex)
+func (_LmaasIs *LmaasIsCallerSession) GetAvailableBalance(_rewardTokenIndex *big.Int) (*big.Int, error) {
+	return _LmaasIs.Contract.GetAvailableBalance(&_LmaasIs.CallOpts, _rewardTokenIndex)
 }
 
 // GetPreviousCampaignsCount is a free data retrieval call binding the contract method 0x8285d045.
 //
 // Solidity: function getPreviousCampaignsCount() view returns(uint256)
-func (_Staker *StakerCaller) GetPreviousCampaignsCount(opts *bind.CallOpts) (*big.Int, error) {
+func (_LmaasIs *LmaasIsCaller) GetPreviousCampaignsCount(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "getPreviousCampaignsCount")
+	err := _LmaasIs.contract.Call(opts, &out, "getPreviousCampaignsCount")
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -537,23 +537,23 @@ func (_Staker *StakerCaller) GetPreviousCampaignsCount(opts *bind.CallOpts) (*bi
 // GetPreviousCampaignsCount is a free data retrieval call binding the contract method 0x8285d045.
 //
 // Solidity: function getPreviousCampaignsCount() view returns(uint256)
-func (_Staker *StakerSession) GetPreviousCampaignsCount() (*big.Int, error) {
-	return _Staker.Contract.GetPreviousCampaignsCount(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsSession) GetPreviousCampaignsCount() (*big.Int, error) {
+	return _LmaasIs.Contract.GetPreviousCampaignsCount(&_LmaasIs.CallOpts)
 }
 
 // GetPreviousCampaignsCount is a free data retrieval call binding the contract method 0x8285d045.
 //
 // Solidity: function getPreviousCampaignsCount() view returns(uint256)
-func (_Staker *StakerCallerSession) GetPreviousCampaignsCount() (*big.Int, error) {
-	return _Staker.Contract.GetPreviousCampaignsCount(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsCallerSession) GetPreviousCampaignsCount() (*big.Int, error) {
+	return _LmaasIs.Contract.GetPreviousCampaignsCount(&_LmaasIs.CallOpts)
 }
 
 // GetRewardTokensCount is a free data retrieval call binding the contract method 0x2d9e88e1.
 //
 // Solidity: function getRewardTokensCount() view returns(uint256)
-func (_Staker *StakerCaller) GetRewardTokensCount(opts *bind.CallOpts) (*big.Int, error) {
+func (_LmaasIs *LmaasIsCaller) GetRewardTokensCount(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "getRewardTokensCount")
+	err := _LmaasIs.contract.Call(opts, &out, "getRewardTokensCount")
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -568,23 +568,23 @@ func (_Staker *StakerCaller) GetRewardTokensCount(opts *bind.CallOpts) (*big.Int
 // GetRewardTokensCount is a free data retrieval call binding the contract method 0x2d9e88e1.
 //
 // Solidity: function getRewardTokensCount() view returns(uint256)
-func (_Staker *StakerSession) GetRewardTokensCount() (*big.Int, error) {
-	return _Staker.Contract.GetRewardTokensCount(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsSession) GetRewardTokensCount() (*big.Int, error) {
+	return _LmaasIs.Contract.GetRewardTokensCount(&_LmaasIs.CallOpts)
 }
 
 // GetRewardTokensCount is a free data retrieval call binding the contract method 0x2d9e88e1.
 //
 // Solidity: function getRewardTokensCount() view returns(uint256)
-func (_Staker *StakerCallerSession) GetRewardTokensCount() (*big.Int, error) {
-	return _Staker.Contract.GetRewardTokensCount(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsCallerSession) GetRewardTokensCount() (*big.Int, error) {
+	return _LmaasIs.Contract.GetRewardTokensCount(&_LmaasIs.CallOpts)
 }
 
 // GetUserAccumulatedReward is a free data retrieval call binding the contract method 0xc97559ce.
 //
 // Solidity: function getUserAccumulatedReward(address _userAddress, uint256 _tokenIndex, uint256 _time) view returns(uint256)
-func (_Staker *StakerCaller) GetUserAccumulatedReward(opts *bind.CallOpts, _userAddress common.Address, _tokenIndex *big.Int, _time *big.Int) (*big.Int, error) {
+func (_LmaasIs *LmaasIsCaller) GetUserAccumulatedReward(opts *bind.CallOpts, _userAddress common.Address, _tokenIndex *big.Int, _time *big.Int) (*big.Int, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "getUserAccumulatedReward", _userAddress, _tokenIndex, _time)
+	err := _LmaasIs.contract.Call(opts, &out, "getUserAccumulatedReward", _userAddress, _tokenIndex, _time)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -599,23 +599,23 @@ func (_Staker *StakerCaller) GetUserAccumulatedReward(opts *bind.CallOpts, _user
 // GetUserAccumulatedReward is a free data retrieval call binding the contract method 0xc97559ce.
 //
 // Solidity: function getUserAccumulatedReward(address _userAddress, uint256 _tokenIndex, uint256 _time) view returns(uint256)
-func (_Staker *StakerSession) GetUserAccumulatedReward(_userAddress common.Address, _tokenIndex *big.Int, _time *big.Int) (*big.Int, error) {
-	return _Staker.Contract.GetUserAccumulatedReward(&_Staker.CallOpts, _userAddress, _tokenIndex, _time)
+func (_LmaasIs *LmaasIsSession) GetUserAccumulatedReward(_userAddress common.Address, _tokenIndex *big.Int, _time *big.Int) (*big.Int, error) {
+	return _LmaasIs.Contract.GetUserAccumulatedReward(&_LmaasIs.CallOpts, _userAddress, _tokenIndex, _time)
 }
 
 // GetUserAccumulatedReward is a free data retrieval call binding the contract method 0xc97559ce.
 //
 // Solidity: function getUserAccumulatedReward(address _userAddress, uint256 _tokenIndex, uint256 _time) view returns(uint256)
-func (_Staker *StakerCallerSession) GetUserAccumulatedReward(_userAddress common.Address, _tokenIndex *big.Int, _time *big.Int) (*big.Int, error) {
-	return _Staker.Contract.GetUserAccumulatedReward(&_Staker.CallOpts, _userAddress, _tokenIndex, _time)
+func (_LmaasIs *LmaasIsCallerSession) GetUserAccumulatedReward(_userAddress common.Address, _tokenIndex *big.Int, _time *big.Int) (*big.Int, error) {
+	return _LmaasIs.Contract.GetUserAccumulatedReward(&_LmaasIs.CallOpts, _userAddress, _tokenIndex, _time)
 }
 
 // GetUserOwedTokens is a free data retrieval call binding the contract method 0xce415302.
 //
 // Solidity: function getUserOwedTokens(address _userAddress, uint256 _index) view returns(uint256)
-func (_Staker *StakerCaller) GetUserOwedTokens(opts *bind.CallOpts, _userAddress common.Address, _index *big.Int) (*big.Int, error) {
+func (_LmaasIs *LmaasIsCaller) GetUserOwedTokens(opts *bind.CallOpts, _userAddress common.Address, _index *big.Int) (*big.Int, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "getUserOwedTokens", _userAddress, _index)
+	err := _LmaasIs.contract.Call(opts, &out, "getUserOwedTokens", _userAddress, _index)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -630,23 +630,23 @@ func (_Staker *StakerCaller) GetUserOwedTokens(opts *bind.CallOpts, _userAddress
 // GetUserOwedTokens is a free data retrieval call binding the contract method 0xce415302.
 //
 // Solidity: function getUserOwedTokens(address _userAddress, uint256 _index) view returns(uint256)
-func (_Staker *StakerSession) GetUserOwedTokens(_userAddress common.Address, _index *big.Int) (*big.Int, error) {
-	return _Staker.Contract.GetUserOwedTokens(&_Staker.CallOpts, _userAddress, _index)
+func (_LmaasIs *LmaasIsSession) GetUserOwedTokens(_userAddress common.Address, _index *big.Int) (*big.Int, error) {
+	return _LmaasIs.Contract.GetUserOwedTokens(&_LmaasIs.CallOpts, _userAddress, _index)
 }
 
 // GetUserOwedTokens is a free data retrieval call binding the contract method 0xce415302.
 //
 // Solidity: function getUserOwedTokens(address _userAddress, uint256 _index) view returns(uint256)
-func (_Staker *StakerCallerSession) GetUserOwedTokens(_userAddress common.Address, _index *big.Int) (*big.Int, error) {
-	return _Staker.Contract.GetUserOwedTokens(&_Staker.CallOpts, _userAddress, _index)
+func (_LmaasIs *LmaasIsCallerSession) GetUserOwedTokens(_userAddress common.Address, _index *big.Int) (*big.Int, error) {
+	return _LmaasIs.Contract.GetUserOwedTokens(&_LmaasIs.CallOpts, _userAddress, _index)
 }
 
 // GetUserRewardDebt is a free data retrieval call binding the contract method 0xf27d0264.
 //
 // Solidity: function getUserRewardDebt(address _userAddress, uint256 _index) view returns(uint256)
-func (_Staker *StakerCaller) GetUserRewardDebt(opts *bind.CallOpts, _userAddress common.Address, _index *big.Int) (*big.Int, error) {
+func (_LmaasIs *LmaasIsCaller) GetUserRewardDebt(opts *bind.CallOpts, _userAddress common.Address, _index *big.Int) (*big.Int, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "getUserRewardDebt", _userAddress, _index)
+	err := _LmaasIs.contract.Call(opts, &out, "getUserRewardDebt", _userAddress, _index)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -661,23 +661,23 @@ func (_Staker *StakerCaller) GetUserRewardDebt(opts *bind.CallOpts, _userAddress
 // GetUserRewardDebt is a free data retrieval call binding the contract method 0xf27d0264.
 //
 // Solidity: function getUserRewardDebt(address _userAddress, uint256 _index) view returns(uint256)
-func (_Staker *StakerSession) GetUserRewardDebt(_userAddress common.Address, _index *big.Int) (*big.Int, error) {
-	return _Staker.Contract.GetUserRewardDebt(&_Staker.CallOpts, _userAddress, _index)
+func (_LmaasIs *LmaasIsSession) GetUserRewardDebt(_userAddress common.Address, _index *big.Int) (*big.Int, error) {
+	return _LmaasIs.Contract.GetUserRewardDebt(&_LmaasIs.CallOpts, _userAddress, _index)
 }
 
 // GetUserRewardDebt is a free data retrieval call binding the contract method 0xf27d0264.
 //
 // Solidity: function getUserRewardDebt(address _userAddress, uint256 _index) view returns(uint256)
-func (_Staker *StakerCallerSession) GetUserRewardDebt(_userAddress common.Address, _index *big.Int) (*big.Int, error) {
-	return _Staker.Contract.GetUserRewardDebt(&_Staker.CallOpts, _userAddress, _index)
+func (_LmaasIs *LmaasIsCallerSession) GetUserRewardDebt(_userAddress common.Address, _index *big.Int) (*big.Int, error) {
+	return _LmaasIs.Contract.GetUserRewardDebt(&_LmaasIs.CallOpts, _userAddress, _index)
 }
 
 // GetUserRewardDebtLength is a free data retrieval call binding the contract method 0x0084c927.
 //
 // Solidity: function getUserRewardDebtLength(address _userAddress) view returns(uint256)
-func (_Staker *StakerCaller) GetUserRewardDebtLength(opts *bind.CallOpts, _userAddress common.Address) (*big.Int, error) {
+func (_LmaasIs *LmaasIsCaller) GetUserRewardDebtLength(opts *bind.CallOpts, _userAddress common.Address) (*big.Int, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "getUserRewardDebtLength", _userAddress)
+	err := _LmaasIs.contract.Call(opts, &out, "getUserRewardDebtLength", _userAddress)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -692,23 +692,23 @@ func (_Staker *StakerCaller) GetUserRewardDebtLength(opts *bind.CallOpts, _userA
 // GetUserRewardDebtLength is a free data retrieval call binding the contract method 0x0084c927.
 //
 // Solidity: function getUserRewardDebtLength(address _userAddress) view returns(uint256)
-func (_Staker *StakerSession) GetUserRewardDebtLength(_userAddress common.Address) (*big.Int, error) {
-	return _Staker.Contract.GetUserRewardDebtLength(&_Staker.CallOpts, _userAddress)
+func (_LmaasIs *LmaasIsSession) GetUserRewardDebtLength(_userAddress common.Address) (*big.Int, error) {
+	return _LmaasIs.Contract.GetUserRewardDebtLength(&_LmaasIs.CallOpts, _userAddress)
 }
 
 // GetUserRewardDebtLength is a free data retrieval call binding the contract method 0x0084c927.
 //
 // Solidity: function getUserRewardDebtLength(address _userAddress) view returns(uint256)
-func (_Staker *StakerCallerSession) GetUserRewardDebtLength(_userAddress common.Address) (*big.Int, error) {
-	return _Staker.Contract.GetUserRewardDebtLength(&_Staker.CallOpts, _userAddress)
+func (_LmaasIs *LmaasIsCallerSession) GetUserRewardDebtLength(_userAddress common.Address) (*big.Int, error) {
+	return _LmaasIs.Contract.GetUserRewardDebtLength(&_LmaasIs.CallOpts, _userAddress)
 }
 
 // GetUserTokensOwedLength is a free data retrieval call binding the contract method 0xa1292aea.
 //
 // Solidity: function getUserTokensOwedLength(address _userAddress) view returns(uint256)
-func (_Staker *StakerCaller) GetUserTokensOwedLength(opts *bind.CallOpts, _userAddress common.Address) (*big.Int, error) {
+func (_LmaasIs *LmaasIsCaller) GetUserTokensOwedLength(opts *bind.CallOpts, _userAddress common.Address) (*big.Int, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "getUserTokensOwedLength", _userAddress)
+	err := _LmaasIs.contract.Call(opts, &out, "getUserTokensOwedLength", _userAddress)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -723,23 +723,23 @@ func (_Staker *StakerCaller) GetUserTokensOwedLength(opts *bind.CallOpts, _userA
 // GetUserTokensOwedLength is a free data retrieval call binding the contract method 0xa1292aea.
 //
 // Solidity: function getUserTokensOwedLength(address _userAddress) view returns(uint256)
-func (_Staker *StakerSession) GetUserTokensOwedLength(_userAddress common.Address) (*big.Int, error) {
-	return _Staker.Contract.GetUserTokensOwedLength(&_Staker.CallOpts, _userAddress)
+func (_LmaasIs *LmaasIsSession) GetUserTokensOwedLength(_userAddress common.Address) (*big.Int, error) {
+	return _LmaasIs.Contract.GetUserTokensOwedLength(&_LmaasIs.CallOpts, _userAddress)
 }
 
 // GetUserTokensOwedLength is a free data retrieval call binding the contract method 0xa1292aea.
 //
 // Solidity: function getUserTokensOwedLength(address _userAddress) view returns(uint256)
-func (_Staker *StakerCallerSession) GetUserTokensOwedLength(_userAddress common.Address) (*big.Int, error) {
-	return _Staker.Contract.GetUserTokensOwedLength(&_Staker.CallOpts, _userAddress)
+func (_LmaasIs *LmaasIsCallerSession) GetUserTokensOwedLength(_userAddress common.Address) (*big.Int, error) {
+	return _LmaasIs.Contract.GetUserTokensOwedLength(&_LmaasIs.CallOpts, _userAddress)
 }
 
 // HasStakingStarted is a free data retrieval call binding the contract method 0x57b4f01f.
 //
 // Solidity: function hasStakingStarted() view returns(bool)
-func (_Staker *StakerCaller) HasStakingStarted(opts *bind.CallOpts) (bool, error) {
+func (_LmaasIs *LmaasIsCaller) HasStakingStarted(opts *bind.CallOpts) (bool, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "hasStakingStarted")
+	err := _LmaasIs.contract.Call(opts, &out, "hasStakingStarted")
 
 	if err != nil {
 		return *new(bool), err
@@ -754,23 +754,23 @@ func (_Staker *StakerCaller) HasStakingStarted(opts *bind.CallOpts) (bool, error
 // HasStakingStarted is a free data retrieval call binding the contract method 0x57b4f01f.
 //
 // Solidity: function hasStakingStarted() view returns(bool)
-func (_Staker *StakerSession) HasStakingStarted() (bool, error) {
-	return _Staker.Contract.HasStakingStarted(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsSession) HasStakingStarted() (bool, error) {
+	return _LmaasIs.Contract.HasStakingStarted(&_LmaasIs.CallOpts)
 }
 
 // HasStakingStarted is a free data retrieval call binding the contract method 0x57b4f01f.
 //
 // Solidity: function hasStakingStarted() view returns(bool)
-func (_Staker *StakerCallerSession) HasStakingStarted() (bool, error) {
-	return _Staker.Contract.HasStakingStarted(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsCallerSession) HasStakingStarted() (bool, error) {
+	return _LmaasIs.Contract.HasStakingStarted(&_LmaasIs.CallOpts)
 }
 
 // Name is a free data retrieval call binding the contract method 0x06fdde03.
 //
 // Solidity: function name() view returns(string)
-func (_Staker *StakerCaller) Name(opts *bind.CallOpts) (string, error) {
+func (_LmaasIs *LmaasIsCaller) Name(opts *bind.CallOpts) (string, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "name")
+	err := _LmaasIs.contract.Call(opts, &out, "name")
 
 	if err != nil {
 		return *new(string), err
@@ -785,23 +785,23 @@ func (_Staker *StakerCaller) Name(opts *bind.CallOpts) (string, error) {
 // Name is a free data retrieval call binding the contract method 0x06fdde03.
 //
 // Solidity: function name() view returns(string)
-func (_Staker *StakerSession) Name() (string, error) {
-	return _Staker.Contract.Name(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsSession) Name() (string, error) {
+	return _LmaasIs.Contract.Name(&_LmaasIs.CallOpts)
 }
 
 // Name is a free data retrieval call binding the contract method 0x06fdde03.
 //
 // Solidity: function name() view returns(string)
-func (_Staker *StakerCallerSession) Name() (string, error) {
-	return _Staker.Contract.Name(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsCallerSession) Name() (string, error) {
+	return _LmaasIs.Contract.Name(&_LmaasIs.CallOpts)
 }
 
 // Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
 //
 // Solidity: function owner() view returns(address)
-func (_Staker *StakerCaller) Owner(opts *bind.CallOpts) (common.Address, error) {
+func (_LmaasIs *LmaasIsCaller) Owner(opts *bind.CallOpts) (common.Address, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "owner")
+	err := _LmaasIs.contract.Call(opts, &out, "owner")
 
 	if err != nil {
 		return *new(common.Address), err
@@ -816,26 +816,26 @@ func (_Staker *StakerCaller) Owner(opts *bind.CallOpts) (common.Address, error) 
 // Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
 //
 // Solidity: function owner() view returns(address)
-func (_Staker *StakerSession) Owner() (common.Address, error) {
-	return _Staker.Contract.Owner(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsSession) Owner() (common.Address, error) {
+	return _LmaasIs.Contract.Owner(&_LmaasIs.CallOpts)
 }
 
 // Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
 //
 // Solidity: function owner() view returns(address)
-func (_Staker *StakerCallerSession) Owner() (common.Address, error) {
-	return _Staker.Contract.Owner(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsCallerSession) Owner() (common.Address, error) {
+	return _LmaasIs.Contract.Owner(&_LmaasIs.CallOpts)
 }
 
 // PreviousCampaigns is a free data retrieval call binding the contract method 0x9d662b99.
 //
 // Solidity: function previousCampaigns(uint256 ) view returns(uint256 startTimestamp, uint256 endTimestamp)
-func (_Staker *StakerCaller) PreviousCampaigns(opts *bind.CallOpts, arg0 *big.Int) (struct {
+func (_LmaasIs *LmaasIsCaller) PreviousCampaigns(opts *bind.CallOpts, arg0 *big.Int) (struct {
 	StartTimestamp *big.Int
 	EndTimestamp   *big.Int
 }, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "previousCampaigns", arg0)
+	err := _LmaasIs.contract.Call(opts, &out, "previousCampaigns", arg0)
 
 	outstruct := new(struct {
 		StartTimestamp *big.Int
@@ -855,29 +855,29 @@ func (_Staker *StakerCaller) PreviousCampaigns(opts *bind.CallOpts, arg0 *big.In
 // PreviousCampaigns is a free data retrieval call binding the contract method 0x9d662b99.
 //
 // Solidity: function previousCampaigns(uint256 ) view returns(uint256 startTimestamp, uint256 endTimestamp)
-func (_Staker *StakerSession) PreviousCampaigns(arg0 *big.Int) (struct {
+func (_LmaasIs *LmaasIsSession) PreviousCampaigns(arg0 *big.Int) (struct {
 	StartTimestamp *big.Int
 	EndTimestamp   *big.Int
 }, error) {
-	return _Staker.Contract.PreviousCampaigns(&_Staker.CallOpts, arg0)
+	return _LmaasIs.Contract.PreviousCampaigns(&_LmaasIs.CallOpts, arg0)
 }
 
 // PreviousCampaigns is a free data retrieval call binding the contract method 0x9d662b99.
 //
 // Solidity: function previousCampaigns(uint256 ) view returns(uint256 startTimestamp, uint256 endTimestamp)
-func (_Staker *StakerCallerSession) PreviousCampaigns(arg0 *big.Int) (struct {
+func (_LmaasIs *LmaasIsCallerSession) PreviousCampaigns(arg0 *big.Int) (struct {
 	StartTimestamp *big.Int
 	EndTimestamp   *big.Int
 }, error) {
-	return _Staker.Contract.PreviousCampaigns(&_Staker.CallOpts, arg0)
+	return _LmaasIs.Contract.PreviousCampaigns(&_LmaasIs.CallOpts, arg0)
 }
 
 // RealStartTimestamp is a free data retrieval call binding the contract method 0x4a74662d.
 //
 // Solidity: function realStartTimestamp() view returns(uint256)
-func (_Staker *StakerCaller) RealStartTimestamp(opts *bind.CallOpts) (*big.Int, error) {
+func (_LmaasIs *LmaasIsCaller) RealStartTimestamp(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "realStartTimestamp")
+	err := _LmaasIs.contract.Call(opts, &out, "realStartTimestamp")
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -892,23 +892,23 @@ func (_Staker *StakerCaller) RealStartTimestamp(opts *bind.CallOpts) (*big.Int, 
 // RealStartTimestamp is a free data retrieval call binding the contract method 0x4a74662d.
 //
 // Solidity: function realStartTimestamp() view returns(uint256)
-func (_Staker *StakerSession) RealStartTimestamp() (*big.Int, error) {
-	return _Staker.Contract.RealStartTimestamp(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsSession) RealStartTimestamp() (*big.Int, error) {
+	return _LmaasIs.Contract.RealStartTimestamp(&_LmaasIs.CallOpts)
 }
 
 // RealStartTimestamp is a free data retrieval call binding the contract method 0x4a74662d.
 //
 // Solidity: function realStartTimestamp() view returns(uint256)
-func (_Staker *StakerCallerSession) RealStartTimestamp() (*big.Int, error) {
-	return _Staker.Contract.RealStartTimestamp(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsCallerSession) RealStartTimestamp() (*big.Int, error) {
+	return _LmaasIs.Contract.RealStartTimestamp(&_LmaasIs.CallOpts)
 }
 
 // RewardPerSecond is a free data retrieval call binding the contract method 0xfd67fd7c.
 //
 // Solidity: function rewardPerSecond(uint256 ) view returns(uint256)
-func (_Staker *StakerCaller) RewardPerSecond(opts *bind.CallOpts, arg0 *big.Int) (*big.Int, error) {
+func (_LmaasIs *LmaasIsCaller) RewardPerSecond(opts *bind.CallOpts, arg0 *big.Int) (*big.Int, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "rewardPerSecond", arg0)
+	err := _LmaasIs.contract.Call(opts, &out, "rewardPerSecond", arg0)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -923,23 +923,23 @@ func (_Staker *StakerCaller) RewardPerSecond(opts *bind.CallOpts, arg0 *big.Int)
 // RewardPerSecond is a free data retrieval call binding the contract method 0xfd67fd7c.
 //
 // Solidity: function rewardPerSecond(uint256 ) view returns(uint256)
-func (_Staker *StakerSession) RewardPerSecond(arg0 *big.Int) (*big.Int, error) {
-	return _Staker.Contract.RewardPerSecond(&_Staker.CallOpts, arg0)
+func (_LmaasIs *LmaasIsSession) RewardPerSecond(arg0 *big.Int) (*big.Int, error) {
+	return _LmaasIs.Contract.RewardPerSecond(&_LmaasIs.CallOpts, arg0)
 }
 
 // RewardPerSecond is a free data retrieval call binding the contract method 0xfd67fd7c.
 //
 // Solidity: function rewardPerSecond(uint256 ) view returns(uint256)
-func (_Staker *StakerCallerSession) RewardPerSecond(arg0 *big.Int) (*big.Int, error) {
-	return _Staker.Contract.RewardPerSecond(&_Staker.CallOpts, arg0)
+func (_LmaasIs *LmaasIsCallerSession) RewardPerSecond(arg0 *big.Int) (*big.Int, error) {
+	return _LmaasIs.Contract.RewardPerSecond(&_LmaasIs.CallOpts, arg0)
 }
 
 // RewardTokenDecimals is a free data retrieval call binding the contract method 0xb8ba2430.
 //
 // Solidity: function rewardTokenDecimals(uint256 ) view returns(uint8)
-func (_Staker *StakerCaller) RewardTokenDecimals(opts *bind.CallOpts, arg0 *big.Int) (uint8, error) {
+func (_LmaasIs *LmaasIsCaller) RewardTokenDecimals(opts *bind.CallOpts, arg0 *big.Int) (uint8, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "rewardTokenDecimals", arg0)
+	err := _LmaasIs.contract.Call(opts, &out, "rewardTokenDecimals", arg0)
 
 	if err != nil {
 		return *new(uint8), err
@@ -954,23 +954,23 @@ func (_Staker *StakerCaller) RewardTokenDecimals(opts *bind.CallOpts, arg0 *big.
 // RewardTokenDecimals is a free data retrieval call binding the contract method 0xb8ba2430.
 //
 // Solidity: function rewardTokenDecimals(uint256 ) view returns(uint8)
-func (_Staker *StakerSession) RewardTokenDecimals(arg0 *big.Int) (uint8, error) {
-	return _Staker.Contract.RewardTokenDecimals(&_Staker.CallOpts, arg0)
+func (_LmaasIs *LmaasIsSession) RewardTokenDecimals(arg0 *big.Int) (uint8, error) {
+	return _LmaasIs.Contract.RewardTokenDecimals(&_LmaasIs.CallOpts, arg0)
 }
 
 // RewardTokenDecimals is a free data retrieval call binding the contract method 0xb8ba2430.
 //
 // Solidity: function rewardTokenDecimals(uint256 ) view returns(uint8)
-func (_Staker *StakerCallerSession) RewardTokenDecimals(arg0 *big.Int) (uint8, error) {
-	return _Staker.Contract.RewardTokenDecimals(&_Staker.CallOpts, arg0)
+func (_LmaasIs *LmaasIsCallerSession) RewardTokenDecimals(arg0 *big.Int) (uint8, error) {
+	return _LmaasIs.Contract.RewardTokenDecimals(&_LmaasIs.CallOpts, arg0)
 }
 
 // RewardsTokens is a free data retrieval call binding the contract method 0xb6d0dcd8.
 //
 // Solidity: function rewardsTokens(uint256 ) view returns(address)
-func (_Staker *StakerCaller) RewardsTokens(opts *bind.CallOpts, arg0 *big.Int) (common.Address, error) {
+func (_LmaasIs *LmaasIsCaller) RewardsTokens(opts *bind.CallOpts, arg0 *big.Int) (common.Address, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "rewardsTokens", arg0)
+	err := _LmaasIs.contract.Call(opts, &out, "rewardsTokens", arg0)
 
 	if err != nil {
 		return *new(common.Address), err
@@ -985,23 +985,23 @@ func (_Staker *StakerCaller) RewardsTokens(opts *bind.CallOpts, arg0 *big.Int) (
 // RewardsTokens is a free data retrieval call binding the contract method 0xb6d0dcd8.
 //
 // Solidity: function rewardsTokens(uint256 ) view returns(address)
-func (_Staker *StakerSession) RewardsTokens(arg0 *big.Int) (common.Address, error) {
-	return _Staker.Contract.RewardsTokens(&_Staker.CallOpts, arg0)
+func (_LmaasIs *LmaasIsSession) RewardsTokens(arg0 *big.Int) (common.Address, error) {
+	return _LmaasIs.Contract.RewardsTokens(&_LmaasIs.CallOpts, arg0)
 }
 
 // RewardsTokens is a free data retrieval call binding the contract method 0xb6d0dcd8.
 //
 // Solidity: function rewardsTokens(uint256 ) view returns(address)
-func (_Staker *StakerCallerSession) RewardsTokens(arg0 *big.Int) (common.Address, error) {
-	return _Staker.Contract.RewardsTokens(&_Staker.CallOpts, arg0)
+func (_LmaasIs *LmaasIsCallerSession) RewardsTokens(arg0 *big.Int) (common.Address, error) {
+	return _LmaasIs.Contract.RewardsTokens(&_LmaasIs.CallOpts, arg0)
 }
 
 // StakeLimit is a free data retrieval call binding the contract method 0x45ef79af.
 //
 // Solidity: function stakeLimit() view returns(uint256)
-func (_Staker *StakerCaller) StakeLimit(opts *bind.CallOpts) (*big.Int, error) {
+func (_LmaasIs *LmaasIsCaller) StakeLimit(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "stakeLimit")
+	err := _LmaasIs.contract.Call(opts, &out, "stakeLimit")
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -1016,23 +1016,23 @@ func (_Staker *StakerCaller) StakeLimit(opts *bind.CallOpts) (*big.Int, error) {
 // StakeLimit is a free data retrieval call binding the contract method 0x45ef79af.
 //
 // Solidity: function stakeLimit() view returns(uint256)
-func (_Staker *StakerSession) StakeLimit() (*big.Int, error) {
-	return _Staker.Contract.StakeLimit(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsSession) StakeLimit() (*big.Int, error) {
+	return _LmaasIs.Contract.StakeLimit(&_LmaasIs.CallOpts)
 }
 
 // StakeLimit is a free data retrieval call binding the contract method 0x45ef79af.
 //
 // Solidity: function stakeLimit() view returns(uint256)
-func (_Staker *StakerCallerSession) StakeLimit() (*big.Int, error) {
-	return _Staker.Contract.StakeLimit(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsCallerSession) StakeLimit() (*big.Int, error) {
+	return _LmaasIs.Contract.StakeLimit(&_LmaasIs.CallOpts)
 }
 
 // StakingToken is a free data retrieval call binding the contract method 0x72f702f3.
 //
 // Solidity: function stakingToken() view returns(address)
-func (_Staker *StakerCaller) StakingToken(opts *bind.CallOpts) (common.Address, error) {
+func (_LmaasIs *LmaasIsCaller) StakingToken(opts *bind.CallOpts) (common.Address, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "stakingToken")
+	err := _LmaasIs.contract.Call(opts, &out, "stakingToken")
 
 	if err != nil {
 		return *new(common.Address), err
@@ -1047,23 +1047,23 @@ func (_Staker *StakerCaller) StakingToken(opts *bind.CallOpts) (common.Address, 
 // StakingToken is a free data retrieval call binding the contract method 0x72f702f3.
 //
 // Solidity: function stakingToken() view returns(address)
-func (_Staker *StakerSession) StakingToken() (common.Address, error) {
-	return _Staker.Contract.StakingToken(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsSession) StakingToken() (common.Address, error) {
+	return _LmaasIs.Contract.StakingToken(&_LmaasIs.CallOpts)
 }
 
 // StakingToken is a free data retrieval call binding the contract method 0x72f702f3.
 //
 // Solidity: function stakingToken() view returns(address)
-func (_Staker *StakerCallerSession) StakingToken() (common.Address, error) {
-	return _Staker.Contract.StakingToken(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsCallerSession) StakingToken() (common.Address, error) {
+	return _LmaasIs.Contract.StakingToken(&_LmaasIs.CallOpts)
 }
 
 // StakingTokenDecimals is a free data retrieval call binding the contract method 0xb9f7a7b5.
 //
 // Solidity: function stakingTokenDecimals() view returns(uint8)
-func (_Staker *StakerCaller) StakingTokenDecimals(opts *bind.CallOpts) (uint8, error) {
+func (_LmaasIs *LmaasIsCaller) StakingTokenDecimals(opts *bind.CallOpts) (uint8, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "stakingTokenDecimals")
+	err := _LmaasIs.contract.Call(opts, &out, "stakingTokenDecimals")
 
 	if err != nil {
 		return *new(uint8), err
@@ -1078,23 +1078,23 @@ func (_Staker *StakerCaller) StakingTokenDecimals(opts *bind.CallOpts) (uint8, e
 // StakingTokenDecimals is a free data retrieval call binding the contract method 0xb9f7a7b5.
 //
 // Solidity: function stakingTokenDecimals() view returns(uint8)
-func (_Staker *StakerSession) StakingTokenDecimals() (uint8, error) {
-	return _Staker.Contract.StakingTokenDecimals(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsSession) StakingTokenDecimals() (uint8, error) {
+	return _LmaasIs.Contract.StakingTokenDecimals(&_LmaasIs.CallOpts)
 }
 
 // StakingTokenDecimals is a free data retrieval call binding the contract method 0xb9f7a7b5.
 //
 // Solidity: function stakingTokenDecimals() view returns(uint8)
-func (_Staker *StakerCallerSession) StakingTokenDecimals() (uint8, error) {
-	return _Staker.Contract.StakingTokenDecimals(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsCallerSession) StakingTokenDecimals() (uint8, error) {
+	return _LmaasIs.Contract.StakingTokenDecimals(&_LmaasIs.CallOpts)
 }
 
 // StartTimestamp is a free data retrieval call binding the contract method 0xe6fd48bc.
 //
 // Solidity: function startTimestamp() view returns(uint256)
-func (_Staker *StakerCaller) StartTimestamp(opts *bind.CallOpts) (*big.Int, error) {
+func (_LmaasIs *LmaasIsCaller) StartTimestamp(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "startTimestamp")
+	err := _LmaasIs.contract.Call(opts, &out, "startTimestamp")
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -1109,23 +1109,23 @@ func (_Staker *StakerCaller) StartTimestamp(opts *bind.CallOpts) (*big.Int, erro
 // StartTimestamp is a free data retrieval call binding the contract method 0xe6fd48bc.
 //
 // Solidity: function startTimestamp() view returns(uint256)
-func (_Staker *StakerSession) StartTimestamp() (*big.Int, error) {
-	return _Staker.Contract.StartTimestamp(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsSession) StartTimestamp() (*big.Int, error) {
+	return _LmaasIs.Contract.StartTimestamp(&_LmaasIs.CallOpts)
 }
 
 // StartTimestamp is a free data retrieval call binding the contract method 0xe6fd48bc.
 //
 // Solidity: function startTimestamp() view returns(uint256)
-func (_Staker *StakerCallerSession) StartTimestamp() (*big.Int, error) {
-	return _Staker.Contract.StartTimestamp(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsCallerSession) StartTimestamp() (*big.Int, error) {
+	return _LmaasIs.Contract.StartTimestamp(&_LmaasIs.CallOpts)
 }
 
 // TotalStaked is a free data retrieval call binding the contract method 0x817b1cd2.
 //
 // Solidity: function totalStaked() view returns(uint256)
-func (_Staker *StakerCaller) TotalStaked(opts *bind.CallOpts) (*big.Int, error) {
+func (_LmaasIs *LmaasIsCaller) TotalStaked(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "totalStaked")
+	err := _LmaasIs.contract.Call(opts, &out, "totalStaked")
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -1140,26 +1140,26 @@ func (_Staker *StakerCaller) TotalStaked(opts *bind.CallOpts) (*big.Int, error) 
 // TotalStaked is a free data retrieval call binding the contract method 0x817b1cd2.
 //
 // Solidity: function totalStaked() view returns(uint256)
-func (_Staker *StakerSession) TotalStaked() (*big.Int, error) {
-	return _Staker.Contract.TotalStaked(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsSession) TotalStaked() (*big.Int, error) {
+	return _LmaasIs.Contract.TotalStaked(&_LmaasIs.CallOpts)
 }
 
 // TotalStaked is a free data retrieval call binding the contract method 0x817b1cd2.
 //
 // Solidity: function totalStaked() view returns(uint256)
-func (_Staker *StakerCallerSession) TotalStaked() (*big.Int, error) {
-	return _Staker.Contract.TotalStaked(&_Staker.CallOpts)
+func (_LmaasIs *LmaasIsCallerSession) TotalStaked() (*big.Int, error) {
+	return _LmaasIs.Contract.TotalStaked(&_LmaasIs.CallOpts)
 }
 
 // UserInfo is a free data retrieval call binding the contract method 0x1959a002.
 //
 // Solidity: function userInfo(address ) view returns(uint256 firstStakedTimestamp, uint256 amountStaked)
-func (_Staker *StakerCaller) UserInfo(opts *bind.CallOpts, arg0 common.Address) (struct {
+func (_LmaasIs *LmaasIsCaller) UserInfo(opts *bind.CallOpts, arg0 common.Address) (struct {
 	FirstStakedTimestamp *big.Int
 	AmountStaked         *big.Int
 }, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "userInfo", arg0)
+	err := _LmaasIs.contract.Call(opts, &out, "userInfo", arg0)
 
 	outstruct := new(struct {
 		FirstStakedTimestamp *big.Int
@@ -1179,29 +1179,29 @@ func (_Staker *StakerCaller) UserInfo(opts *bind.CallOpts, arg0 common.Address) 
 // UserInfo is a free data retrieval call binding the contract method 0x1959a002.
 //
 // Solidity: function userInfo(address ) view returns(uint256 firstStakedTimestamp, uint256 amountStaked)
-func (_Staker *StakerSession) UserInfo(arg0 common.Address) (struct {
+func (_LmaasIs *LmaasIsSession) UserInfo(arg0 common.Address) (struct {
 	FirstStakedTimestamp *big.Int
 	AmountStaked         *big.Int
 }, error) {
-	return _Staker.Contract.UserInfo(&_Staker.CallOpts, arg0)
+	return _LmaasIs.Contract.UserInfo(&_LmaasIs.CallOpts, arg0)
 }
 
 // UserInfo is a free data retrieval call binding the contract method 0x1959a002.
 //
 // Solidity: function userInfo(address ) view returns(uint256 firstStakedTimestamp, uint256 amountStaked)
-func (_Staker *StakerCallerSession) UserInfo(arg0 common.Address) (struct {
+func (_LmaasIs *LmaasIsCallerSession) UserInfo(arg0 common.Address) (struct {
 	FirstStakedTimestamp *big.Int
 	AmountStaked         *big.Int
 }, error) {
-	return _Staker.Contract.UserInfo(&_Staker.CallOpts, arg0)
+	return _LmaasIs.Contract.UserInfo(&_LmaasIs.CallOpts, arg0)
 }
 
 // UserStakedEpoch is a free data retrieval call binding the contract method 0xb7b8e51d.
 //
 // Solidity: function userStakedEpoch(address ) view returns(uint256)
-func (_Staker *StakerCaller) UserStakedEpoch(opts *bind.CallOpts, arg0 common.Address) (*big.Int, error) {
+func (_LmaasIs *LmaasIsCaller) UserStakedEpoch(opts *bind.CallOpts, arg0 common.Address) (*big.Int, error) {
 	var out []interface{}
-	err := _Staker.contract.Call(opts, &out, "userStakedEpoch", arg0)
+	err := _LmaasIs.contract.Call(opts, &out, "userStakedEpoch", arg0)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -1216,314 +1216,314 @@ func (_Staker *StakerCaller) UserStakedEpoch(opts *bind.CallOpts, arg0 common.Ad
 // UserStakedEpoch is a free data retrieval call binding the contract method 0xb7b8e51d.
 //
 // Solidity: function userStakedEpoch(address ) view returns(uint256)
-func (_Staker *StakerSession) UserStakedEpoch(arg0 common.Address) (*big.Int, error) {
-	return _Staker.Contract.UserStakedEpoch(&_Staker.CallOpts, arg0)
+func (_LmaasIs *LmaasIsSession) UserStakedEpoch(arg0 common.Address) (*big.Int, error) {
+	return _LmaasIs.Contract.UserStakedEpoch(&_LmaasIs.CallOpts, arg0)
 }
 
 // UserStakedEpoch is a free data retrieval call binding the contract method 0xb7b8e51d.
 //
 // Solidity: function userStakedEpoch(address ) view returns(uint256)
-func (_Staker *StakerCallerSession) UserStakedEpoch(arg0 common.Address) (*big.Int, error) {
-	return _Staker.Contract.UserStakedEpoch(&_Staker.CallOpts, arg0)
+func (_LmaasIs *LmaasIsCallerSession) UserStakedEpoch(arg0 common.Address) (*big.Int, error) {
+	return _LmaasIs.Contract.UserStakedEpoch(&_LmaasIs.CallOpts, arg0)
 }
 
 // CancelExtension is a paid mutator transaction binding the contract method 0x2af9b070.
 //
 // Solidity: function cancelExtension() returns()
-func (_Staker *StakerTransactor) CancelExtension(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Staker.contract.Transact(opts, "cancelExtension")
+func (_LmaasIs *LmaasIsTransactor) CancelExtension(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _LmaasIs.contract.Transact(opts, "cancelExtension")
 }
 
 // CancelExtension is a paid mutator transaction binding the contract method 0x2af9b070.
 //
 // Solidity: function cancelExtension() returns()
-func (_Staker *StakerSession) CancelExtension() (*types.Transaction, error) {
-	return _Staker.Contract.CancelExtension(&_Staker.TransactOpts)
+func (_LmaasIs *LmaasIsSession) CancelExtension() (*types.Transaction, error) {
+	return _LmaasIs.Contract.CancelExtension(&_LmaasIs.TransactOpts)
 }
 
 // CancelExtension is a paid mutator transaction binding the contract method 0x2af9b070.
 //
 // Solidity: function cancelExtension() returns()
-func (_Staker *StakerTransactorSession) CancelExtension() (*types.Transaction, error) {
-	return _Staker.Contract.CancelExtension(&_Staker.TransactOpts)
+func (_LmaasIs *LmaasIsTransactorSession) CancelExtension() (*types.Transaction, error) {
+	return _LmaasIs.Contract.CancelExtension(&_LmaasIs.TransactOpts)
 }
 
 // Claim is a paid mutator transaction binding the contract method 0x4e71d92d.
 //
 // Solidity: function claim() returns()
-func (_Staker *StakerTransactor) Claim(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Staker.contract.Transact(opts, "claim")
+func (_LmaasIs *LmaasIsTransactor) Claim(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _LmaasIs.contract.Transact(opts, "claim")
 }
 
 // Claim is a paid mutator transaction binding the contract method 0x4e71d92d.
 //
 // Solidity: function claim() returns()
-func (_Staker *StakerSession) Claim() (*types.Transaction, error) {
-	return _Staker.Contract.Claim(&_Staker.TransactOpts)
+func (_LmaasIs *LmaasIsSession) Claim() (*types.Transaction, error) {
+	return _LmaasIs.Contract.Claim(&_LmaasIs.TransactOpts)
 }
 
 // Claim is a paid mutator transaction binding the contract method 0x4e71d92d.
 //
 // Solidity: function claim() returns()
-func (_Staker *StakerTransactorSession) Claim() (*types.Transaction, error) {
-	return _Staker.Contract.Claim(&_Staker.TransactOpts)
+func (_LmaasIs *LmaasIsTransactorSession) Claim() (*types.Transaction, error) {
+	return _LmaasIs.Contract.Claim(&_LmaasIs.TransactOpts)
 }
 
 // Exit is a paid mutator transaction binding the contract method 0xe9fad8ee.
 //
 // Solidity: function exit() returns()
-func (_Staker *StakerTransactor) Exit(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Staker.contract.Transact(opts, "exit")
+func (_LmaasIs *LmaasIsTransactor) Exit(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _LmaasIs.contract.Transact(opts, "exit")
 }
 
 // Exit is a paid mutator transaction binding the contract method 0xe9fad8ee.
 //
 // Solidity: function exit() returns()
-func (_Staker *StakerSession) Exit() (*types.Transaction, error) {
-	return _Staker.Contract.Exit(&_Staker.TransactOpts)
+func (_LmaasIs *LmaasIsSession) Exit() (*types.Transaction, error) {
+	return _LmaasIs.Contract.Exit(&_LmaasIs.TransactOpts)
 }
 
 // Exit is a paid mutator transaction binding the contract method 0xe9fad8ee.
 //
 // Solidity: function exit() returns()
-func (_Staker *StakerTransactorSession) Exit() (*types.Transaction, error) {
-	return _Staker.Contract.Exit(&_Staker.TransactOpts)
+func (_LmaasIs *LmaasIsTransactorSession) Exit() (*types.Transaction, error) {
+	return _LmaasIs.Contract.Exit(&_LmaasIs.TransactOpts)
 }
 
 // RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
 //
 // Solidity: function renounceOwnership() returns()
-func (_Staker *StakerTransactor) RenounceOwnership(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Staker.contract.Transact(opts, "renounceOwnership")
+func (_LmaasIs *LmaasIsTransactor) RenounceOwnership(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _LmaasIs.contract.Transact(opts, "renounceOwnership")
 }
 
 // RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
 //
 // Solidity: function renounceOwnership() returns()
-func (_Staker *StakerSession) RenounceOwnership() (*types.Transaction, error) {
-	return _Staker.Contract.RenounceOwnership(&_Staker.TransactOpts)
+func (_LmaasIs *LmaasIsSession) RenounceOwnership() (*types.Transaction, error) {
+	return _LmaasIs.Contract.RenounceOwnership(&_LmaasIs.TransactOpts)
 }
 
 // RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
 //
 // Solidity: function renounceOwnership() returns()
-func (_Staker *StakerTransactorSession) RenounceOwnership() (*types.Transaction, error) {
-	return _Staker.Contract.RenounceOwnership(&_Staker.TransactOpts)
+func (_LmaasIs *LmaasIsTransactorSession) RenounceOwnership() (*types.Transaction, error) {
+	return _LmaasIs.Contract.RenounceOwnership(&_LmaasIs.TransactOpts)
 }
 
 // Stake is a paid mutator transaction binding the contract method 0xa694fc3a.
 //
 // Solidity: function stake(uint256 _tokenAmount) returns()
-func (_Staker *StakerTransactor) Stake(opts *bind.TransactOpts, _tokenAmount *big.Int) (*types.Transaction, error) {
-	return _Staker.contract.Transact(opts, "stake", _tokenAmount)
+func (_LmaasIs *LmaasIsTransactor) Stake(opts *bind.TransactOpts, _tokenAmount *big.Int) (*types.Transaction, error) {
+	return _LmaasIs.contract.Transact(opts, "stake", _tokenAmount)
 }
 
 // Stake is a paid mutator transaction binding the contract method 0xa694fc3a.
 //
 // Solidity: function stake(uint256 _tokenAmount) returns()
-func (_Staker *StakerSession) Stake(_tokenAmount *big.Int) (*types.Transaction, error) {
-	return _Staker.Contract.Stake(&_Staker.TransactOpts, _tokenAmount)
+func (_LmaasIs *LmaasIsSession) Stake(_tokenAmount *big.Int) (*types.Transaction, error) {
+	return _LmaasIs.Contract.Stake(&_LmaasIs.TransactOpts, _tokenAmount)
 }
 
 // Stake is a paid mutator transaction binding the contract method 0xa694fc3a.
 //
 // Solidity: function stake(uint256 _tokenAmount) returns()
-func (_Staker *StakerTransactorSession) Stake(_tokenAmount *big.Int) (*types.Transaction, error) {
-	return _Staker.Contract.Stake(&_Staker.TransactOpts, _tokenAmount)
+func (_LmaasIs *LmaasIsTransactorSession) Stake(_tokenAmount *big.Int) (*types.Transaction, error) {
+	return _LmaasIs.Contract.Stake(&_LmaasIs.TransactOpts, _tokenAmount)
 }
 
 // Start is a paid mutator transaction binding the contract method 0x869d8ead.
 //
 // Solidity: function start(uint256 _startTimestamp, uint256 _endTimestamp, uint256[] _rewardPerSecond) returns()
-func (_Staker *StakerTransactor) Start(opts *bind.TransactOpts, _startTimestamp *big.Int, _endTimestamp *big.Int, _rewardPerSecond []*big.Int) (*types.Transaction, error) {
-	return _Staker.contract.Transact(opts, "start", _startTimestamp, _endTimestamp, _rewardPerSecond)
+func (_LmaasIs *LmaasIsTransactor) Start(opts *bind.TransactOpts, _startTimestamp *big.Int, _endTimestamp *big.Int, _rewardPerSecond []*big.Int) (*types.Transaction, error) {
+	return _LmaasIs.contract.Transact(opts, "start", _startTimestamp, _endTimestamp, _rewardPerSecond)
 }
 
 // Start is a paid mutator transaction binding the contract method 0x869d8ead.
 //
 // Solidity: function start(uint256 _startTimestamp, uint256 _endTimestamp, uint256[] _rewardPerSecond) returns()
-func (_Staker *StakerSession) Start(_startTimestamp *big.Int, _endTimestamp *big.Int, _rewardPerSecond []*big.Int) (*types.Transaction, error) {
-	return _Staker.Contract.Start(&_Staker.TransactOpts, _startTimestamp, _endTimestamp, _rewardPerSecond)
+func (_LmaasIs *LmaasIsSession) Start(_startTimestamp *big.Int, _endTimestamp *big.Int, _rewardPerSecond []*big.Int) (*types.Transaction, error) {
+	return _LmaasIs.Contract.Start(&_LmaasIs.TransactOpts, _startTimestamp, _endTimestamp, _rewardPerSecond)
 }
 
 // Start is a paid mutator transaction binding the contract method 0x869d8ead.
 //
 // Solidity: function start(uint256 _startTimestamp, uint256 _endTimestamp, uint256[] _rewardPerSecond) returns()
-func (_Staker *StakerTransactorSession) Start(_startTimestamp *big.Int, _endTimestamp *big.Int, _rewardPerSecond []*big.Int) (*types.Transaction, error) {
-	return _Staker.Contract.Start(&_Staker.TransactOpts, _startTimestamp, _endTimestamp, _rewardPerSecond)
+func (_LmaasIs *LmaasIsTransactorSession) Start(_startTimestamp *big.Int, _endTimestamp *big.Int, _rewardPerSecond []*big.Int) (*types.Transaction, error) {
+	return _LmaasIs.Contract.Start(&_LmaasIs.TransactOpts, _startTimestamp, _endTimestamp, _rewardPerSecond)
 }
 
 // Start0 is a paid mutator transaction binding the contract method 0x8fb4b573.
 //
 // Solidity: function start(uint256 _epochDuration, uint256 _startTimestamp) returns()
-func (_Staker *StakerTransactor) Start0(opts *bind.TransactOpts, _epochDuration *big.Int, _startTimestamp *big.Int) (*types.Transaction, error) {
-	return _Staker.contract.Transact(opts, "start0", _epochDuration, _startTimestamp)
+func (_LmaasIs *LmaasIsTransactor) Start0(opts *bind.TransactOpts, _epochDuration *big.Int, _startTimestamp *big.Int) (*types.Transaction, error) {
+	return _LmaasIs.contract.Transact(opts, "start0", _epochDuration, _startTimestamp)
 }
 
 // Start0 is a paid mutator transaction binding the contract method 0x8fb4b573.
 //
 // Solidity: function start(uint256 _epochDuration, uint256 _startTimestamp) returns()
-func (_Staker *StakerSession) Start0(_epochDuration *big.Int, _startTimestamp *big.Int) (*types.Transaction, error) {
-	return _Staker.Contract.Start0(&_Staker.TransactOpts, _epochDuration, _startTimestamp)
+func (_LmaasIs *LmaasIsSession) Start0(_epochDuration *big.Int, _startTimestamp *big.Int) (*types.Transaction, error) {
+	return _LmaasIs.Contract.Start0(&_LmaasIs.TransactOpts, _epochDuration, _startTimestamp)
 }
 
 // Start0 is a paid mutator transaction binding the contract method 0x8fb4b573.
 //
 // Solidity: function start(uint256 _epochDuration, uint256 _startTimestamp) returns()
-func (_Staker *StakerTransactorSession) Start0(_epochDuration *big.Int, _startTimestamp *big.Int) (*types.Transaction, error) {
-	return _Staker.Contract.Start0(&_Staker.TransactOpts, _epochDuration, _startTimestamp)
+func (_LmaasIs *LmaasIsTransactorSession) Start0(_epochDuration *big.Int, _startTimestamp *big.Int) (*types.Transaction, error) {
+	return _LmaasIs.Contract.Start0(&_LmaasIs.TransactOpts, _epochDuration, _startTimestamp)
 }
 
 // Start1 is a paid mutator transaction binding the contract method 0x95805dad.
 //
 // Solidity: function start(uint256 _epochDuration) returns()
-func (_Staker *StakerTransactor) Start1(opts *bind.TransactOpts, _epochDuration *big.Int) (*types.Transaction, error) {
-	return _Staker.contract.Transact(opts, "start1", _epochDuration)
+func (_LmaasIs *LmaasIsTransactor) Start1(opts *bind.TransactOpts, _epochDuration *big.Int) (*types.Transaction, error) {
+	return _LmaasIs.contract.Transact(opts, "start1", _epochDuration)
 }
 
 // Start1 is a paid mutator transaction binding the contract method 0x95805dad.
 //
 // Solidity: function start(uint256 _epochDuration) returns()
-func (_Staker *StakerSession) Start1(_epochDuration *big.Int) (*types.Transaction, error) {
-	return _Staker.Contract.Start1(&_Staker.TransactOpts, _epochDuration)
+func (_LmaasIs *LmaasIsSession) Start1(_epochDuration *big.Int) (*types.Transaction, error) {
+	return _LmaasIs.Contract.Start1(&_LmaasIs.TransactOpts, _epochDuration)
 }
 
 // Start1 is a paid mutator transaction binding the contract method 0x95805dad.
 //
 // Solidity: function start(uint256 _epochDuration) returns()
-func (_Staker *StakerTransactorSession) Start1(_epochDuration *big.Int) (*types.Transaction, error) {
-	return _Staker.Contract.Start1(&_Staker.TransactOpts, _epochDuration)
+func (_LmaasIs *LmaasIsTransactorSession) Start1(_epochDuration *big.Int) (*types.Transaction, error) {
+	return _LmaasIs.Contract.Start1(&_LmaasIs.TransactOpts, _epochDuration)
 }
 
 // TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
 //
 // Solidity: function transferOwnership(address newOwner) returns()
-func (_Staker *StakerTransactor) TransferOwnership(opts *bind.TransactOpts, newOwner common.Address) (*types.Transaction, error) {
-	return _Staker.contract.Transact(opts, "transferOwnership", newOwner)
+func (_LmaasIs *LmaasIsTransactor) TransferOwnership(opts *bind.TransactOpts, newOwner common.Address) (*types.Transaction, error) {
+	return _LmaasIs.contract.Transact(opts, "transferOwnership", newOwner)
 }
 
 // TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
 //
 // Solidity: function transferOwnership(address newOwner) returns()
-func (_Staker *StakerSession) TransferOwnership(newOwner common.Address) (*types.Transaction, error) {
-	return _Staker.Contract.TransferOwnership(&_Staker.TransactOpts, newOwner)
+func (_LmaasIs *LmaasIsSession) TransferOwnership(newOwner common.Address) (*types.Transaction, error) {
+	return _LmaasIs.Contract.TransferOwnership(&_LmaasIs.TransactOpts, newOwner)
 }
 
 // TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
 //
 // Solidity: function transferOwnership(address newOwner) returns()
-func (_Staker *StakerTransactorSession) TransferOwnership(newOwner common.Address) (*types.Transaction, error) {
-	return _Staker.Contract.TransferOwnership(&_Staker.TransactOpts, newOwner)
+func (_LmaasIs *LmaasIsTransactorSession) TransferOwnership(newOwner common.Address) (*types.Transaction, error) {
+	return _LmaasIs.Contract.TransferOwnership(&_LmaasIs.TransactOpts, newOwner)
 }
 
 // UpdateRewardMultipliers is a paid mutator transaction binding the contract method 0xdd2da220.
 //
 // Solidity: function updateRewardMultipliers() returns()
-func (_Staker *StakerTransactor) UpdateRewardMultipliers(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Staker.contract.Transact(opts, "updateRewardMultipliers")
+func (_LmaasIs *LmaasIsTransactor) UpdateRewardMultipliers(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _LmaasIs.contract.Transact(opts, "updateRewardMultipliers")
 }
 
 // UpdateRewardMultipliers is a paid mutator transaction binding the contract method 0xdd2da220.
 //
 // Solidity: function updateRewardMultipliers() returns()
-func (_Staker *StakerSession) UpdateRewardMultipliers() (*types.Transaction, error) {
-	return _Staker.Contract.UpdateRewardMultipliers(&_Staker.TransactOpts)
+func (_LmaasIs *LmaasIsSession) UpdateRewardMultipliers() (*types.Transaction, error) {
+	return _LmaasIs.Contract.UpdateRewardMultipliers(&_LmaasIs.TransactOpts)
 }
 
 // UpdateRewardMultipliers is a paid mutator transaction binding the contract method 0xdd2da220.
 //
 // Solidity: function updateRewardMultipliers() returns()
-func (_Staker *StakerTransactorSession) UpdateRewardMultipliers() (*types.Transaction, error) {
-	return _Staker.Contract.UpdateRewardMultipliers(&_Staker.TransactOpts)
+func (_LmaasIs *LmaasIsTransactorSession) UpdateRewardMultipliers() (*types.Transaction, error) {
+	return _LmaasIs.Contract.UpdateRewardMultipliers(&_LmaasIs.TransactOpts)
 }
 
 // Withdraw is a paid mutator transaction binding the contract method 0x2e1a7d4d.
 //
 // Solidity: function withdraw(uint256 _tokenAmount) returns()
-func (_Staker *StakerTransactor) Withdraw(opts *bind.TransactOpts, _tokenAmount *big.Int) (*types.Transaction, error) {
-	return _Staker.contract.Transact(opts, "withdraw", _tokenAmount)
+func (_LmaasIs *LmaasIsTransactor) Withdraw(opts *bind.TransactOpts, _tokenAmount *big.Int) (*types.Transaction, error) {
+	return _LmaasIs.contract.Transact(opts, "withdraw", _tokenAmount)
 }
 
 // Withdraw is a paid mutator transaction binding the contract method 0x2e1a7d4d.
 //
 // Solidity: function withdraw(uint256 _tokenAmount) returns()
-func (_Staker *StakerSession) Withdraw(_tokenAmount *big.Int) (*types.Transaction, error) {
-	return _Staker.Contract.Withdraw(&_Staker.TransactOpts, _tokenAmount)
+func (_LmaasIs *LmaasIsSession) Withdraw(_tokenAmount *big.Int) (*types.Transaction, error) {
+	return _LmaasIs.Contract.Withdraw(&_LmaasIs.TransactOpts, _tokenAmount)
 }
 
 // Withdraw is a paid mutator transaction binding the contract method 0x2e1a7d4d.
 //
 // Solidity: function withdraw(uint256 _tokenAmount) returns()
-func (_Staker *StakerTransactorSession) Withdraw(_tokenAmount *big.Int) (*types.Transaction, error) {
-	return _Staker.Contract.Withdraw(&_Staker.TransactOpts, _tokenAmount)
+func (_LmaasIs *LmaasIsTransactorSession) Withdraw(_tokenAmount *big.Int) (*types.Transaction, error) {
+	return _LmaasIs.Contract.Withdraw(&_LmaasIs.TransactOpts, _tokenAmount)
 }
 
 // WithdrawExcessRewards is a paid mutator transaction binding the contract method 0x2c3f455c.
 //
 // Solidity: function withdrawExcessRewards(address _recipient) returns()
-func (_Staker *StakerTransactor) WithdrawExcessRewards(opts *bind.TransactOpts, _recipient common.Address) (*types.Transaction, error) {
-	return _Staker.contract.Transact(opts, "withdrawExcessRewards", _recipient)
+func (_LmaasIs *LmaasIsTransactor) WithdrawExcessRewards(opts *bind.TransactOpts, _recipient common.Address) (*types.Transaction, error) {
+	return _LmaasIs.contract.Transact(opts, "withdrawExcessRewards", _recipient)
 }
 
 // WithdrawExcessRewards is a paid mutator transaction binding the contract method 0x2c3f455c.
 //
 // Solidity: function withdrawExcessRewards(address _recipient) returns()
-func (_Staker *StakerSession) WithdrawExcessRewards(_recipient common.Address) (*types.Transaction, error) {
-	return _Staker.Contract.WithdrawExcessRewards(&_Staker.TransactOpts, _recipient)
+func (_LmaasIs *LmaasIsSession) WithdrawExcessRewards(_recipient common.Address) (*types.Transaction, error) {
+	return _LmaasIs.Contract.WithdrawExcessRewards(&_LmaasIs.TransactOpts, _recipient)
 }
 
 // WithdrawExcessRewards is a paid mutator transaction binding the contract method 0x2c3f455c.
 //
 // Solidity: function withdrawExcessRewards(address _recipient) returns()
-func (_Staker *StakerTransactorSession) WithdrawExcessRewards(_recipient common.Address) (*types.Transaction, error) {
-	return _Staker.Contract.WithdrawExcessRewards(&_Staker.TransactOpts, _recipient)
+func (_LmaasIs *LmaasIsTransactorSession) WithdrawExcessRewards(_recipient common.Address) (*types.Transaction, error) {
+	return _LmaasIs.Contract.WithdrawExcessRewards(&_LmaasIs.TransactOpts, _recipient)
 }
 
 // WithdrawTokens is a paid mutator transaction binding the contract method 0xa522ad25.
 //
 // Solidity: function withdrawTokens(address _recipient, address _token) returns()
-func (_Staker *StakerTransactor) WithdrawTokens(opts *bind.TransactOpts, _recipient common.Address, _token common.Address) (*types.Transaction, error) {
-	return _Staker.contract.Transact(opts, "withdrawTokens", _recipient, _token)
+func (_LmaasIs *LmaasIsTransactor) WithdrawTokens(opts *bind.TransactOpts, _recipient common.Address, _token common.Address) (*types.Transaction, error) {
+	return _LmaasIs.contract.Transact(opts, "withdrawTokens", _recipient, _token)
 }
 
 // WithdrawTokens is a paid mutator transaction binding the contract method 0xa522ad25.
 //
 // Solidity: function withdrawTokens(address _recipient, address _token) returns()
-func (_Staker *StakerSession) WithdrawTokens(_recipient common.Address, _token common.Address) (*types.Transaction, error) {
-	return _Staker.Contract.WithdrawTokens(&_Staker.TransactOpts, _recipient, _token)
+func (_LmaasIs *LmaasIsSession) WithdrawTokens(_recipient common.Address, _token common.Address) (*types.Transaction, error) {
+	return _LmaasIs.Contract.WithdrawTokens(&_LmaasIs.TransactOpts, _recipient, _token)
 }
 
 // WithdrawTokens is a paid mutator transaction binding the contract method 0xa522ad25.
 //
 // Solidity: function withdrawTokens(address _recipient, address _token) returns()
-func (_Staker *StakerTransactorSession) WithdrawTokens(_recipient common.Address, _token common.Address) (*types.Transaction, error) {
-	return _Staker.Contract.WithdrawTokens(&_Staker.TransactOpts, _recipient, _token)
+func (_LmaasIs *LmaasIsTransactorSession) WithdrawTokens(_recipient common.Address, _token common.Address) (*types.Transaction, error) {
+	return _LmaasIs.Contract.WithdrawTokens(&_LmaasIs.TransactOpts, _recipient, _token)
 }
 
 // Receive is a paid mutator transaction binding the contract receive function.
 //
 // Solidity: receive() payable returns()
-func (_Staker *StakerTransactor) Receive(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Staker.contract.RawTransact(opts, nil) // calldata is disallowed for receive function
+func (_LmaasIs *LmaasIsTransactor) Receive(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _LmaasIs.contract.RawTransact(opts, nil) // calldata is disallowed for receive function
 }
 
 // Receive is a paid mutator transaction binding the contract receive function.
 //
 // Solidity: receive() payable returns()
-func (_Staker *StakerSession) Receive() (*types.Transaction, error) {
-	return _Staker.Contract.Receive(&_Staker.TransactOpts)
+func (_LmaasIs *LmaasIsSession) Receive() (*types.Transaction, error) {
+	return _LmaasIs.Contract.Receive(&_LmaasIs.TransactOpts)
 }
 
 // Receive is a paid mutator transaction binding the contract receive function.
 //
 // Solidity: receive() payable returns()
-func (_Staker *StakerTransactorSession) Receive() (*types.Transaction, error) {
-	return _Staker.Contract.Receive(&_Staker.TransactOpts)
+func (_LmaasIs *LmaasIsTransactorSession) Receive() (*types.Transaction, error) {
+	return _LmaasIs.Contract.Receive(&_LmaasIs.TransactOpts)
 }
 
-// StakerClaimedIterator is returned from FilterClaimed and is used to iterate over the raw logs and unpacked data for Claimed events raised by the Staker contract.
-type StakerClaimedIterator struct {
-	Event *StakerClaimed // Event containing the contract specifics and raw log
+// LmaasIsClaimedIterator is returned from FilterClaimed and is used to iterate over the raw logs and unpacked data for Claimed events raised by the LmaasIs contract.
+type LmaasIsClaimedIterator struct {
+	Event *LmaasIsClaimed // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -1537,7 +1537,7 @@ type StakerClaimedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *StakerClaimedIterator) Next() bool {
+func (it *LmaasIsClaimedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -1546,7 +1546,7 @@ func (it *StakerClaimedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(StakerClaimed)
+			it.Event = new(LmaasIsClaimed)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -1561,7 +1561,7 @@ func (it *StakerClaimedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(StakerClaimed)
+		it.Event = new(LmaasIsClaimed)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -1577,19 +1577,19 @@ func (it *StakerClaimedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *StakerClaimedIterator) Error() error {
+func (it *LmaasIsClaimedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *StakerClaimedIterator) Close() error {
+func (it *LmaasIsClaimedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// StakerClaimed represents a Claimed event raised by the Staker contract.
-type StakerClaimed struct {
+// LmaasIsClaimed represents a Claimed event raised by the LmaasIs contract.
+type LmaasIsClaimed struct {
 	User   common.Address
 	Amount *big.Int
 	Token  common.Address
@@ -1599,31 +1599,31 @@ type StakerClaimed struct {
 // FilterClaimed is a free log retrieval operation binding the contract event 0x7e6632ca16a0ac6cf28448500b1a17d96c8b8163ad4c4a9b44ef5386cc02779e.
 //
 // Solidity: event Claimed(address indexed user, uint256 amount, address token)
-func (_Staker *StakerFilterer) FilterClaimed(opts *bind.FilterOpts, user []common.Address) (*StakerClaimedIterator, error) {
+func (_LmaasIs *LmaasIsFilterer) FilterClaimed(opts *bind.FilterOpts, user []common.Address) (*LmaasIsClaimedIterator, error) {
 
 	var userRule []interface{}
 	for _, userItem := range user {
 		userRule = append(userRule, userItem)
 	}
 
-	logs, sub, err := _Staker.contract.FilterLogs(opts, "Claimed", userRule)
+	logs, sub, err := _LmaasIs.contract.FilterLogs(opts, "Claimed", userRule)
 	if err != nil {
 		return nil, err
 	}
-	return &StakerClaimedIterator{contract: _Staker.contract, event: "Claimed", logs: logs, sub: sub}, nil
+	return &LmaasIsClaimedIterator{contract: _LmaasIs.contract, event: "Claimed", logs: logs, sub: sub}, nil
 }
 
 // WatchClaimed is a free log subscription operation binding the contract event 0x7e6632ca16a0ac6cf28448500b1a17d96c8b8163ad4c4a9b44ef5386cc02779e.
 //
 // Solidity: event Claimed(address indexed user, uint256 amount, address token)
-func (_Staker *StakerFilterer) WatchClaimed(opts *bind.WatchOpts, sink chan<- *StakerClaimed, user []common.Address) (event.Subscription, error) {
+func (_LmaasIs *LmaasIsFilterer) WatchClaimed(opts *bind.WatchOpts, sink chan<- *LmaasIsClaimed, user []common.Address) (event.Subscription, error) {
 
 	var userRule []interface{}
 	for _, userItem := range user {
 		userRule = append(userRule, userItem)
 	}
 
-	logs, sub, err := _Staker.contract.WatchLogs(opts, "Claimed", userRule)
+	logs, sub, err := _LmaasIs.contract.WatchLogs(opts, "Claimed", userRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1633,8 +1633,8 @@ func (_Staker *StakerFilterer) WatchClaimed(opts *bind.WatchOpts, sink chan<- *S
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(StakerClaimed)
-				if err := _Staker.contract.UnpackLog(event, "Claimed", log); err != nil {
+				event := new(LmaasIsClaimed)
+				if err := _LmaasIs.contract.UnpackLog(event, "Claimed", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -1658,18 +1658,18 @@ func (_Staker *StakerFilterer) WatchClaimed(opts *bind.WatchOpts, sink chan<- *S
 // ParseClaimed is a log parse operation binding the contract event 0x7e6632ca16a0ac6cf28448500b1a17d96c8b8163ad4c4a9b44ef5386cc02779e.
 //
 // Solidity: event Claimed(address indexed user, uint256 amount, address token)
-func (_Staker *StakerFilterer) ParseClaimed(log types.Log) (*StakerClaimed, error) {
-	event := new(StakerClaimed)
-	if err := _Staker.contract.UnpackLog(event, "Claimed", log); err != nil {
+func (_LmaasIs *LmaasIsFilterer) ParseClaimed(log types.Log) (*LmaasIsClaimed, error) {
+	event := new(LmaasIsClaimed)
+	if err := _LmaasIs.contract.UnpackLog(event, "Claimed", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
 	return event, nil
 }
 
-// StakerExitedIterator is returned from FilterExited and is used to iterate over the raw logs and unpacked data for Exited events raised by the Staker contract.
-type StakerExitedIterator struct {
-	Event *StakerExited // Event containing the contract specifics and raw log
+// LmaasIsExitedIterator is returned from FilterExited and is used to iterate over the raw logs and unpacked data for Exited events raised by the LmaasIs contract.
+type LmaasIsExitedIterator struct {
+	Event *LmaasIsExited // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -1683,7 +1683,7 @@ type StakerExitedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *StakerExitedIterator) Next() bool {
+func (it *LmaasIsExitedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -1692,7 +1692,7 @@ func (it *StakerExitedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(StakerExited)
+			it.Event = new(LmaasIsExited)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -1707,7 +1707,7 @@ func (it *StakerExitedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(StakerExited)
+		it.Event = new(LmaasIsExited)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -1723,19 +1723,19 @@ func (it *StakerExitedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *StakerExitedIterator) Error() error {
+func (it *LmaasIsExitedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *StakerExitedIterator) Close() error {
+func (it *LmaasIsExitedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// StakerExited represents a Exited event raised by the Staker contract.
-type StakerExited struct {
+// LmaasIsExited represents a Exited event raised by the LmaasIs contract.
+type LmaasIsExited struct {
 	User   common.Address
 	Amount *big.Int
 	Raw    types.Log // Blockchain specific contextual infos
@@ -1744,31 +1744,31 @@ type StakerExited struct {
 // FilterExited is a free log retrieval operation binding the contract event 0x920bb94eb3842a728db98228c375ff6b00c5bc5a54fac6736155517a0a20a61a.
 //
 // Solidity: event Exited(address indexed user, uint256 amount)
-func (_Staker *StakerFilterer) FilterExited(opts *bind.FilterOpts, user []common.Address) (*StakerExitedIterator, error) {
+func (_LmaasIs *LmaasIsFilterer) FilterExited(opts *bind.FilterOpts, user []common.Address) (*LmaasIsExitedIterator, error) {
 
 	var userRule []interface{}
 	for _, userItem := range user {
 		userRule = append(userRule, userItem)
 	}
 
-	logs, sub, err := _Staker.contract.FilterLogs(opts, "Exited", userRule)
+	logs, sub, err := _LmaasIs.contract.FilterLogs(opts, "Exited", userRule)
 	if err != nil {
 		return nil, err
 	}
-	return &StakerExitedIterator{contract: _Staker.contract, event: "Exited", logs: logs, sub: sub}, nil
+	return &LmaasIsExitedIterator{contract: _LmaasIs.contract, event: "Exited", logs: logs, sub: sub}, nil
 }
 
 // WatchExited is a free log subscription operation binding the contract event 0x920bb94eb3842a728db98228c375ff6b00c5bc5a54fac6736155517a0a20a61a.
 //
 // Solidity: event Exited(address indexed user, uint256 amount)
-func (_Staker *StakerFilterer) WatchExited(opts *bind.WatchOpts, sink chan<- *StakerExited, user []common.Address) (event.Subscription, error) {
+func (_LmaasIs *LmaasIsFilterer) WatchExited(opts *bind.WatchOpts, sink chan<- *LmaasIsExited, user []common.Address) (event.Subscription, error) {
 
 	var userRule []interface{}
 	for _, userItem := range user {
 		userRule = append(userRule, userItem)
 	}
 
-	logs, sub, err := _Staker.contract.WatchLogs(opts, "Exited", userRule)
+	logs, sub, err := _LmaasIs.contract.WatchLogs(opts, "Exited", userRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1778,8 +1778,8 @@ func (_Staker *StakerFilterer) WatchExited(opts *bind.WatchOpts, sink chan<- *St
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(StakerExited)
-				if err := _Staker.contract.UnpackLog(event, "Exited", log); err != nil {
+				event := new(LmaasIsExited)
+				if err := _LmaasIs.contract.UnpackLog(event, "Exited", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -1803,18 +1803,18 @@ func (_Staker *StakerFilterer) WatchExited(opts *bind.WatchOpts, sink chan<- *St
 // ParseExited is a log parse operation binding the contract event 0x920bb94eb3842a728db98228c375ff6b00c5bc5a54fac6736155517a0a20a61a.
 //
 // Solidity: event Exited(address indexed user, uint256 amount)
-func (_Staker *StakerFilterer) ParseExited(log types.Log) (*StakerExited, error) {
-	event := new(StakerExited)
-	if err := _Staker.contract.UnpackLog(event, "Exited", log); err != nil {
+func (_LmaasIs *LmaasIsFilterer) ParseExited(log types.Log) (*LmaasIsExited, error) {
+	event := new(LmaasIsExited)
+	if err := _LmaasIs.contract.UnpackLog(event, "Exited", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
 	return event, nil
 }
 
-// StakerExtendedIterator is returned from FilterExtended and is used to iterate over the raw logs and unpacked data for Extended events raised by the Staker contract.
-type StakerExtendedIterator struct {
-	Event *StakerExtended // Event containing the contract specifics and raw log
+// LmaasIsExtendedIterator is returned from FilterExtended and is used to iterate over the raw logs and unpacked data for Extended events raised by the LmaasIs contract.
+type LmaasIsExtendedIterator struct {
+	Event *LmaasIsExtended // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -1828,7 +1828,7 @@ type StakerExtendedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *StakerExtendedIterator) Next() bool {
+func (it *LmaasIsExtendedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -1837,7 +1837,7 @@ func (it *StakerExtendedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(StakerExtended)
+			it.Event = new(LmaasIsExtended)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -1852,7 +1852,7 @@ func (it *StakerExtendedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(StakerExtended)
+		it.Event = new(LmaasIsExtended)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -1868,19 +1868,19 @@ func (it *StakerExtendedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *StakerExtendedIterator) Error() error {
+func (it *LmaasIsExtendedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *StakerExtendedIterator) Close() error {
+func (it *LmaasIsExtendedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// StakerExtended represents a Extended event raised by the Staker contract.
-type StakerExtended struct {
+// LmaasIsExtended represents a Extended event raised by the LmaasIs contract.
+type LmaasIsExtended struct {
 	NewStartTimestamp   *big.Int
 	NewEndTimestamp     *big.Int
 	NewRewardsPerSecond []*big.Int
@@ -1890,21 +1890,21 @@ type StakerExtended struct {
 // FilterExtended is a free log retrieval operation binding the contract event 0xd363ac13638f68e7284bc244076ff171a95616bfe30c8c7629980906a9db0363.
 //
 // Solidity: event Extended(uint256 newStartTimestamp, uint256 newEndTimestamp, uint256[] newRewardsPerSecond)
-func (_Staker *StakerFilterer) FilterExtended(opts *bind.FilterOpts) (*StakerExtendedIterator, error) {
+func (_LmaasIs *LmaasIsFilterer) FilterExtended(opts *bind.FilterOpts) (*LmaasIsExtendedIterator, error) {
 
-	logs, sub, err := _Staker.contract.FilterLogs(opts, "Extended")
+	logs, sub, err := _LmaasIs.contract.FilterLogs(opts, "Extended")
 	if err != nil {
 		return nil, err
 	}
-	return &StakerExtendedIterator{contract: _Staker.contract, event: "Extended", logs: logs, sub: sub}, nil
+	return &LmaasIsExtendedIterator{contract: _LmaasIs.contract, event: "Extended", logs: logs, sub: sub}, nil
 }
 
 // WatchExtended is a free log subscription operation binding the contract event 0xd363ac13638f68e7284bc244076ff171a95616bfe30c8c7629980906a9db0363.
 //
 // Solidity: event Extended(uint256 newStartTimestamp, uint256 newEndTimestamp, uint256[] newRewardsPerSecond)
-func (_Staker *StakerFilterer) WatchExtended(opts *bind.WatchOpts, sink chan<- *StakerExtended) (event.Subscription, error) {
+func (_LmaasIs *LmaasIsFilterer) WatchExtended(opts *bind.WatchOpts, sink chan<- *LmaasIsExtended) (event.Subscription, error) {
 
-	logs, sub, err := _Staker.contract.WatchLogs(opts, "Extended")
+	logs, sub, err := _LmaasIs.contract.WatchLogs(opts, "Extended")
 	if err != nil {
 		return nil, err
 	}
@@ -1914,8 +1914,8 @@ func (_Staker *StakerFilterer) WatchExtended(opts *bind.WatchOpts, sink chan<- *
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(StakerExtended)
-				if err := _Staker.contract.UnpackLog(event, "Extended", log); err != nil {
+				event := new(LmaasIsExtended)
+				if err := _LmaasIs.contract.UnpackLog(event, "Extended", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -1939,18 +1939,18 @@ func (_Staker *StakerFilterer) WatchExtended(opts *bind.WatchOpts, sink chan<- *
 // ParseExtended is a log parse operation binding the contract event 0xd363ac13638f68e7284bc244076ff171a95616bfe30c8c7629980906a9db0363.
 //
 // Solidity: event Extended(uint256 newStartTimestamp, uint256 newEndTimestamp, uint256[] newRewardsPerSecond)
-func (_Staker *StakerFilterer) ParseExtended(log types.Log) (*StakerExtended, error) {
-	event := new(StakerExtended)
-	if err := _Staker.contract.UnpackLog(event, "Extended", log); err != nil {
+func (_LmaasIs *LmaasIsFilterer) ParseExtended(log types.Log) (*LmaasIsExtended, error) {
+	event := new(LmaasIsExtended)
+	if err := _LmaasIs.contract.UnpackLog(event, "Extended", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
 	return event, nil
 }
 
-// StakerOwnershipTransferredIterator is returned from FilterOwnershipTransferred and is used to iterate over the raw logs and unpacked data for OwnershipTransferred events raised by the Staker contract.
-type StakerOwnershipTransferredIterator struct {
-	Event *StakerOwnershipTransferred // Event containing the contract specifics and raw log
+// LmaasIsOwnershipTransferredIterator is returned from FilterOwnershipTransferred and is used to iterate over the raw logs and unpacked data for OwnershipTransferred events raised by the LmaasIs contract.
+type LmaasIsOwnershipTransferredIterator struct {
+	Event *LmaasIsOwnershipTransferred // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -1964,7 +1964,7 @@ type StakerOwnershipTransferredIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *StakerOwnershipTransferredIterator) Next() bool {
+func (it *LmaasIsOwnershipTransferredIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -1973,7 +1973,7 @@ func (it *StakerOwnershipTransferredIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(StakerOwnershipTransferred)
+			it.Event = new(LmaasIsOwnershipTransferred)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -1988,7 +1988,7 @@ func (it *StakerOwnershipTransferredIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(StakerOwnershipTransferred)
+		it.Event = new(LmaasIsOwnershipTransferred)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -2004,19 +2004,19 @@ func (it *StakerOwnershipTransferredIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *StakerOwnershipTransferredIterator) Error() error {
+func (it *LmaasIsOwnershipTransferredIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *StakerOwnershipTransferredIterator) Close() error {
+func (it *LmaasIsOwnershipTransferredIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// StakerOwnershipTransferred represents a OwnershipTransferred event raised by the Staker contract.
-type StakerOwnershipTransferred struct {
+// LmaasIsOwnershipTransferred represents a OwnershipTransferred event raised by the LmaasIs contract.
+type LmaasIsOwnershipTransferred struct {
 	PreviousOwner common.Address
 	NewOwner      common.Address
 	Raw           types.Log // Blockchain specific contextual infos
@@ -2025,7 +2025,7 @@ type StakerOwnershipTransferred struct {
 // FilterOwnershipTransferred is a free log retrieval operation binding the contract event 0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0.
 //
 // Solidity: event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
-func (_Staker *StakerFilterer) FilterOwnershipTransferred(opts *bind.FilterOpts, previousOwner []common.Address, newOwner []common.Address) (*StakerOwnershipTransferredIterator, error) {
+func (_LmaasIs *LmaasIsFilterer) FilterOwnershipTransferred(opts *bind.FilterOpts, previousOwner []common.Address, newOwner []common.Address) (*LmaasIsOwnershipTransferredIterator, error) {
 
 	var previousOwnerRule []interface{}
 	for _, previousOwnerItem := range previousOwner {
@@ -2036,17 +2036,17 @@ func (_Staker *StakerFilterer) FilterOwnershipTransferred(opts *bind.FilterOpts,
 		newOwnerRule = append(newOwnerRule, newOwnerItem)
 	}
 
-	logs, sub, err := _Staker.contract.FilterLogs(opts, "OwnershipTransferred", previousOwnerRule, newOwnerRule)
+	logs, sub, err := _LmaasIs.contract.FilterLogs(opts, "OwnershipTransferred", previousOwnerRule, newOwnerRule)
 	if err != nil {
 		return nil, err
 	}
-	return &StakerOwnershipTransferredIterator{contract: _Staker.contract, event: "OwnershipTransferred", logs: logs, sub: sub}, nil
+	return &LmaasIsOwnershipTransferredIterator{contract: _LmaasIs.contract, event: "OwnershipTransferred", logs: logs, sub: sub}, nil
 }
 
 // WatchOwnershipTransferred is a free log subscription operation binding the contract event 0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0.
 //
 // Solidity: event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
-func (_Staker *StakerFilterer) WatchOwnershipTransferred(opts *bind.WatchOpts, sink chan<- *StakerOwnershipTransferred, previousOwner []common.Address, newOwner []common.Address) (event.Subscription, error) {
+func (_LmaasIs *LmaasIsFilterer) WatchOwnershipTransferred(opts *bind.WatchOpts, sink chan<- *LmaasIsOwnershipTransferred, previousOwner []common.Address, newOwner []common.Address) (event.Subscription, error) {
 
 	var previousOwnerRule []interface{}
 	for _, previousOwnerItem := range previousOwner {
@@ -2057,7 +2057,7 @@ func (_Staker *StakerFilterer) WatchOwnershipTransferred(opts *bind.WatchOpts, s
 		newOwnerRule = append(newOwnerRule, newOwnerItem)
 	}
 
-	logs, sub, err := _Staker.contract.WatchLogs(opts, "OwnershipTransferred", previousOwnerRule, newOwnerRule)
+	logs, sub, err := _LmaasIs.contract.WatchLogs(opts, "OwnershipTransferred", previousOwnerRule, newOwnerRule)
 	if err != nil {
 		return nil, err
 	}
@@ -2067,8 +2067,8 @@ func (_Staker *StakerFilterer) WatchOwnershipTransferred(opts *bind.WatchOpts, s
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(StakerOwnershipTransferred)
-				if err := _Staker.contract.UnpackLog(event, "OwnershipTransferred", log); err != nil {
+				event := new(LmaasIsOwnershipTransferred)
+				if err := _LmaasIs.contract.UnpackLog(event, "OwnershipTransferred", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -2092,18 +2092,18 @@ func (_Staker *StakerFilterer) WatchOwnershipTransferred(opts *bind.WatchOpts, s
 // ParseOwnershipTransferred is a log parse operation binding the contract event 0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0.
 //
 // Solidity: event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
-func (_Staker *StakerFilterer) ParseOwnershipTransferred(log types.Log) (*StakerOwnershipTransferred, error) {
-	event := new(StakerOwnershipTransferred)
-	if err := _Staker.contract.UnpackLog(event, "OwnershipTransferred", log); err != nil {
+func (_LmaasIs *LmaasIsFilterer) ParseOwnershipTransferred(log types.Log) (*LmaasIsOwnershipTransferred, error) {
+	event := new(LmaasIsOwnershipTransferred)
+	if err := _LmaasIs.contract.UnpackLog(event, "OwnershipTransferred", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
 	return event, nil
 }
 
-// StakerStakedIterator is returned from FilterStaked and is used to iterate over the raw logs and unpacked data for Staked events raised by the Staker contract.
-type StakerStakedIterator struct {
-	Event *StakerStaked // Event containing the contract specifics and raw log
+// LmaasIsStakedIterator is returned from FilterStaked and is used to iterate over the raw logs and unpacked data for Staked events raised by the LmaasIs contract.
+type LmaasIsStakedIterator struct {
+	Event *LmaasIsStaked // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -2117,7 +2117,7 @@ type StakerStakedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *StakerStakedIterator) Next() bool {
+func (it *LmaasIsStakedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -2126,7 +2126,7 @@ func (it *StakerStakedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(StakerStaked)
+			it.Event = new(LmaasIsStaked)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -2141,7 +2141,7 @@ func (it *StakerStakedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(StakerStaked)
+		it.Event = new(LmaasIsStaked)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -2157,19 +2157,19 @@ func (it *StakerStakedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *StakerStakedIterator) Error() error {
+func (it *LmaasIsStakedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *StakerStakedIterator) Close() error {
+func (it *LmaasIsStakedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// StakerStaked represents a Staked event raised by the Staker contract.
-type StakerStaked struct {
+// LmaasIsStaked represents a Staked event raised by the LmaasIs contract.
+type LmaasIsStaked struct {
 	User   common.Address
 	Amount *big.Int
 	Raw    types.Log // Blockchain specific contextual infos
@@ -2178,31 +2178,31 @@ type StakerStaked struct {
 // FilterStaked is a free log retrieval operation binding the contract event 0x9e71bc8eea02a63969f509818f2dafb9254532904319f9dbda79b67bd34a5f3d.
 //
 // Solidity: event Staked(address indexed user, uint256 amount)
-func (_Staker *StakerFilterer) FilterStaked(opts *bind.FilterOpts, user []common.Address) (*StakerStakedIterator, error) {
+func (_LmaasIs *LmaasIsFilterer) FilterStaked(opts *bind.FilterOpts, user []common.Address) (*LmaasIsStakedIterator, error) {
 
 	var userRule []interface{}
 	for _, userItem := range user {
 		userRule = append(userRule, userItem)
 	}
 
-	logs, sub, err := _Staker.contract.FilterLogs(opts, "Staked", userRule)
+	logs, sub, err := _LmaasIs.contract.FilterLogs(opts, "Staked", userRule)
 	if err != nil {
 		return nil, err
 	}
-	return &StakerStakedIterator{contract: _Staker.contract, event: "Staked", logs: logs, sub: sub}, nil
+	return &LmaasIsStakedIterator{contract: _LmaasIs.contract, event: "Staked", logs: logs, sub: sub}, nil
 }
 
 // WatchStaked is a free log subscription operation binding the contract event 0x9e71bc8eea02a63969f509818f2dafb9254532904319f9dbda79b67bd34a5f3d.
 //
 // Solidity: event Staked(address indexed user, uint256 amount)
-func (_Staker *StakerFilterer) WatchStaked(opts *bind.WatchOpts, sink chan<- *StakerStaked, user []common.Address) (event.Subscription, error) {
+func (_LmaasIs *LmaasIsFilterer) WatchStaked(opts *bind.WatchOpts, sink chan<- *LmaasIsStaked, user []common.Address) (event.Subscription, error) {
 
 	var userRule []interface{}
 	for _, userItem := range user {
 		userRule = append(userRule, userItem)
 	}
 
-	logs, sub, err := _Staker.contract.WatchLogs(opts, "Staked", userRule)
+	logs, sub, err := _LmaasIs.contract.WatchLogs(opts, "Staked", userRule)
 	if err != nil {
 		return nil, err
 	}
@@ -2212,8 +2212,8 @@ func (_Staker *StakerFilterer) WatchStaked(opts *bind.WatchOpts, sink chan<- *St
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(StakerStaked)
-				if err := _Staker.contract.UnpackLog(event, "Staked", log); err != nil {
+				event := new(LmaasIsStaked)
+				if err := _LmaasIs.contract.UnpackLog(event, "Staked", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -2237,18 +2237,18 @@ func (_Staker *StakerFilterer) WatchStaked(opts *bind.WatchOpts, sink chan<- *St
 // ParseStaked is a log parse operation binding the contract event 0x9e71bc8eea02a63969f509818f2dafb9254532904319f9dbda79b67bd34a5f3d.
 //
 // Solidity: event Staked(address indexed user, uint256 amount)
-func (_Staker *StakerFilterer) ParseStaked(log types.Log) (*StakerStaked, error) {
-	event := new(StakerStaked)
-	if err := _Staker.contract.UnpackLog(event, "Staked", log); err != nil {
+func (_LmaasIs *LmaasIsFilterer) ParseStaked(log types.Log) (*LmaasIsStaked, error) {
+	event := new(LmaasIsStaked)
+	if err := _LmaasIs.contract.UnpackLog(event, "Staked", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
 	return event, nil
 }
 
-// StakerStartedIterator is returned from FilterStarted and is used to iterate over the raw logs and unpacked data for Started events raised by the Staker contract.
-type StakerStartedIterator struct {
-	Event *StakerStarted // Event containing the contract specifics and raw log
+// LmaasIsStartedIterator is returned from FilterStarted and is used to iterate over the raw logs and unpacked data for Started events raised by the LmaasIs contract.
+type LmaasIsStartedIterator struct {
+	Event *LmaasIsStarted // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -2262,7 +2262,7 @@ type StakerStartedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *StakerStartedIterator) Next() bool {
+func (it *LmaasIsStartedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -2271,7 +2271,7 @@ func (it *StakerStartedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(StakerStarted)
+			it.Event = new(LmaasIsStarted)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -2286,7 +2286,7 @@ func (it *StakerStartedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(StakerStarted)
+		it.Event = new(LmaasIsStarted)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -2302,19 +2302,19 @@ func (it *StakerStartedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *StakerStartedIterator) Error() error {
+func (it *LmaasIsStartedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *StakerStartedIterator) Close() error {
+func (it *LmaasIsStartedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// StakerStarted represents a Started event raised by the Staker contract.
-type StakerStarted struct {
+// LmaasIsStarted represents a Started event raised by the LmaasIs contract.
+type LmaasIsStarted struct {
 	StartTimestamp   *big.Int
 	EndTimestamp     *big.Int
 	RewardsPerSecond []*big.Int
@@ -2324,21 +2324,21 @@ type StakerStarted struct {
 // FilterStarted is a free log retrieval operation binding the contract event 0x74e89788dfd5b96dd5e9c38139638937b89fc0d4863da5644783b5d7f876b87a.
 //
 // Solidity: event Started(uint256 startTimestamp, uint256 endTimestamp, uint256[] rewardsPerSecond)
-func (_Staker *StakerFilterer) FilterStarted(opts *bind.FilterOpts) (*StakerStartedIterator, error) {
+func (_LmaasIs *LmaasIsFilterer) FilterStarted(opts *bind.FilterOpts) (*LmaasIsStartedIterator, error) {
 
-	logs, sub, err := _Staker.contract.FilterLogs(opts, "Started")
+	logs, sub, err := _LmaasIs.contract.FilterLogs(opts, "Started")
 	if err != nil {
 		return nil, err
 	}
-	return &StakerStartedIterator{contract: _Staker.contract, event: "Started", logs: logs, sub: sub}, nil
+	return &LmaasIsStartedIterator{contract: _LmaasIs.contract, event: "Started", logs: logs, sub: sub}, nil
 }
 
 // WatchStarted is a free log subscription operation binding the contract event 0x74e89788dfd5b96dd5e9c38139638937b89fc0d4863da5644783b5d7f876b87a.
 //
 // Solidity: event Started(uint256 startTimestamp, uint256 endTimestamp, uint256[] rewardsPerSecond)
-func (_Staker *StakerFilterer) WatchStarted(opts *bind.WatchOpts, sink chan<- *StakerStarted) (event.Subscription, error) {
+func (_LmaasIs *LmaasIsFilterer) WatchStarted(opts *bind.WatchOpts, sink chan<- *LmaasIsStarted) (event.Subscription, error) {
 
-	logs, sub, err := _Staker.contract.WatchLogs(opts, "Started")
+	logs, sub, err := _LmaasIs.contract.WatchLogs(opts, "Started")
 	if err != nil {
 		return nil, err
 	}
@@ -2348,8 +2348,8 @@ func (_Staker *StakerFilterer) WatchStarted(opts *bind.WatchOpts, sink chan<- *S
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(StakerStarted)
-				if err := _Staker.contract.UnpackLog(event, "Started", log); err != nil {
+				event := new(LmaasIsStarted)
+				if err := _LmaasIs.contract.UnpackLog(event, "Started", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -2373,18 +2373,18 @@ func (_Staker *StakerFilterer) WatchStarted(opts *bind.WatchOpts, sink chan<- *S
 // ParseStarted is a log parse operation binding the contract event 0x74e89788dfd5b96dd5e9c38139638937b89fc0d4863da5644783b5d7f876b87a.
 //
 // Solidity: event Started(uint256 startTimestamp, uint256 endTimestamp, uint256[] rewardsPerSecond)
-func (_Staker *StakerFilterer) ParseStarted(log types.Log) (*StakerStarted, error) {
-	event := new(StakerStarted)
-	if err := _Staker.contract.UnpackLog(event, "Started", log); err != nil {
+func (_LmaasIs *LmaasIsFilterer) ParseStarted(log types.Log) (*LmaasIsStarted, error) {
+	event := new(LmaasIsStarted)
+	if err := _LmaasIs.contract.UnpackLog(event, "Started", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
 	return event, nil
 }
 
-// StakerWithdrawnIterator is returned from FilterWithdrawn and is used to iterate over the raw logs and unpacked data for Withdrawn events raised by the Staker contract.
-type StakerWithdrawnIterator struct {
-	Event *StakerWithdrawn // Event containing the contract specifics and raw log
+// LmaasIsWithdrawnIterator is returned from FilterWithdrawn and is used to iterate over the raw logs and unpacked data for Withdrawn events raised by the LmaasIs contract.
+type LmaasIsWithdrawnIterator struct {
+	Event *LmaasIsWithdrawn // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -2398,7 +2398,7 @@ type StakerWithdrawnIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *StakerWithdrawnIterator) Next() bool {
+func (it *LmaasIsWithdrawnIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -2407,7 +2407,7 @@ func (it *StakerWithdrawnIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(StakerWithdrawn)
+			it.Event = new(LmaasIsWithdrawn)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -2422,7 +2422,7 @@ func (it *StakerWithdrawnIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(StakerWithdrawn)
+		it.Event = new(LmaasIsWithdrawn)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -2438,19 +2438,19 @@ func (it *StakerWithdrawnIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *StakerWithdrawnIterator) Error() error {
+func (it *LmaasIsWithdrawnIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *StakerWithdrawnIterator) Close() error {
+func (it *LmaasIsWithdrawnIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// StakerWithdrawn represents a Withdrawn event raised by the Staker contract.
-type StakerWithdrawn struct {
+// LmaasIsWithdrawn represents a Withdrawn event raised by the LmaasIs contract.
+type LmaasIsWithdrawn struct {
 	User   common.Address
 	Amount *big.Int
 	Raw    types.Log // Blockchain specific contextual infos
@@ -2459,31 +2459,31 @@ type StakerWithdrawn struct {
 // FilterWithdrawn is a free log retrieval operation binding the contract event 0x7084f5476618d8e60b11ef0d7d3f06914655adb8793e28ff7f018d4c76d505d5.
 //
 // Solidity: event Withdrawn(address indexed user, uint256 amount)
-func (_Staker *StakerFilterer) FilterWithdrawn(opts *bind.FilterOpts, user []common.Address) (*StakerWithdrawnIterator, error) {
+func (_LmaasIs *LmaasIsFilterer) FilterWithdrawn(opts *bind.FilterOpts, user []common.Address) (*LmaasIsWithdrawnIterator, error) {
 
 	var userRule []interface{}
 	for _, userItem := range user {
 		userRule = append(userRule, userItem)
 	}
 
-	logs, sub, err := _Staker.contract.FilterLogs(opts, "Withdrawn", userRule)
+	logs, sub, err := _LmaasIs.contract.FilterLogs(opts, "Withdrawn", userRule)
 	if err != nil {
 		return nil, err
 	}
-	return &StakerWithdrawnIterator{contract: _Staker.contract, event: "Withdrawn", logs: logs, sub: sub}, nil
+	return &LmaasIsWithdrawnIterator{contract: _LmaasIs.contract, event: "Withdrawn", logs: logs, sub: sub}, nil
 }
 
 // WatchWithdrawn is a free log subscription operation binding the contract event 0x7084f5476618d8e60b11ef0d7d3f06914655adb8793e28ff7f018d4c76d505d5.
 //
 // Solidity: event Withdrawn(address indexed user, uint256 amount)
-func (_Staker *StakerFilterer) WatchWithdrawn(opts *bind.WatchOpts, sink chan<- *StakerWithdrawn, user []common.Address) (event.Subscription, error) {
+func (_LmaasIs *LmaasIsFilterer) WatchWithdrawn(opts *bind.WatchOpts, sink chan<- *LmaasIsWithdrawn, user []common.Address) (event.Subscription, error) {
 
 	var userRule []interface{}
 	for _, userItem := range user {
 		userRule = append(userRule, userItem)
 	}
 
-	logs, sub, err := _Staker.contract.WatchLogs(opts, "Withdrawn", userRule)
+	logs, sub, err := _LmaasIs.contract.WatchLogs(opts, "Withdrawn", userRule)
 	if err != nil {
 		return nil, err
 	}
@@ -2493,8 +2493,8 @@ func (_Staker *StakerFilterer) WatchWithdrawn(opts *bind.WatchOpts, sink chan<- 
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(StakerWithdrawn)
-				if err := _Staker.contract.UnpackLog(event, "Withdrawn", log); err != nil {
+				event := new(LmaasIsWithdrawn)
+				if err := _LmaasIs.contract.UnpackLog(event, "Withdrawn", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -2518,9 +2518,9 @@ func (_Staker *StakerFilterer) WatchWithdrawn(opts *bind.WatchOpts, sink chan<- 
 // ParseWithdrawn is a log parse operation binding the contract event 0x7084f5476618d8e60b11ef0d7d3f06914655adb8793e28ff7f018d4c76d505d5.
 //
 // Solidity: event Withdrawn(address indexed user, uint256 amount)
-func (_Staker *StakerFilterer) ParseWithdrawn(log types.Log) (*StakerWithdrawn, error) {
-	event := new(StakerWithdrawn)
-	if err := _Staker.contract.UnpackLog(event, "Withdrawn", log); err != nil {
+func (_LmaasIs *LmaasIsFilterer) ParseWithdrawn(log types.Log) (*LmaasIsWithdrawn, error) {
+	event := new(LmaasIsWithdrawn)
+	if err := _LmaasIs.contract.UnpackLog(event, "Withdrawn", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
