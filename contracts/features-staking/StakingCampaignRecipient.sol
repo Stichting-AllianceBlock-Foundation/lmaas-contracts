@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity 0.8.9;
 
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
@@ -12,6 +11,7 @@ import '../V2/NonCompoundingRewardsPool.sol';
 */
 contract StakingCampaignRecipient is NonCompoundingRewardsPool {
     using SafeERC20 for IERC20;
+    mapping(address => uint256[]) public pendingRewardsAmount;
 
     /** @param _stakingToken The token to stake
      * @param _rewardsTokens The reward tokens
@@ -44,25 +44,29 @@ contract StakingCampaignRecipient is NonCompoundingRewardsPool {
     /**
      * @dev Add the stakers in a batch to the recipient contract.
      */
-    function addStakersBatch(address[] calldata _stakers, uint256[] calldata _stakingAmounts) external onlyOwner {
+    function addStakersBatch(
+        address[] calldata _stakers,
+        uint256[] calldata _stakingAmounts,
+        uint256[][] calldata _rewardAmounts
+    ) external onlyOwner {
         uint256 stakersLength = _stakers.length;
         uint256 stakingAmountsLength = _stakingAmounts.length;
+
         require(
             stakersLength == stakingAmountsLength,
             'StakingCampaignRecipient: stakers and staking amounts length mismatch'
         );
 
         for (uint256 i = 0; i < stakersLength; i++) {
-            _stake(_stakingAmounts[i], _stakers[i], false);
+            _addStaker(_stakingAmounts[i], _stakers[i], _rewardAmounts[i]);
         }
     }
 
-    /// @dev Override the stake function to not charge the staker.
-    function _stake(
+    function _addStaker(
         uint256 _tokenAmount,
         address _staker,
-        bool
-    ) internal override {
+        uint256[] calldata _rewardAmount
+    ) internal {
         uint256 currentTimestamp = block.timestamp;
         require(
             (startTimestamp > 0 && currentTimestamp > startTimestamp) &&
@@ -83,22 +87,16 @@ contract StakingCampaignRecipient is NonCompoundingRewardsPool {
             user.firstStakedTimestamp = currentTimestamp;
         }
 
-        updateRewardMultipliers(); // Update the accumulated multipliers for everyone
-        _updateUserAccruedReward(_staker); // Update the accrued reward for this specific user
-
-        user.amountStaked = user.amountStaked + _tokenAmount;
+        user.amountStaked = _tokenAmount;
+        pendingRewardsAmount[_staker] = _rewardAmount;
         totalStaked = totalStaked + _tokenAmount;
 
-        uint256 rewardsTokensLength = rewardsTokens.length;
-
-        for (uint256 i = 0; i < rewardsTokensLength; i++) {
-            user.rewardDebt[i] = (user.amountStaked * accumulatedRewardMultiplier[i]) / PRECISION; // Update user reward debt for each token
-        }
+        updateRewardMultipliers();
+        _updateUserAccruedReward(_staker); // Update the accrued reward for this specific user
 
         emit Staked(_staker, _tokenAmount);
     }
 
-    /// @dev Override the exit function to not transfer the staking token (which is simulated).
     function finalizeExit(address _stakingToken, address[] memory _rewardsTokens) internal override returns (uint256) {
         ExitInfo storage info = exitInfo[msg.sender];
         require(block.timestamp > info.exitTimestamp, 'finalizeExit::Trying to exit too early');
@@ -107,8 +105,10 @@ contract StakingCampaignRecipient is NonCompoundingRewardsPool {
         require(infoExitStake > 0, 'finalizeExit::No stake to exit');
         info.exitStake = 0;
 
+        IERC20(_stakingToken).safeTransfer(address(msg.sender), infoExitStake);
+
         for (uint256 i = 0; i < _rewardsTokens.length; i++) {
-            uint256 infoRewards = info.rewards[i];
+            uint256 infoRewards = info.rewards[i] + pendingRewardsAmount[msg.sender][i];
             info.rewards[i] = 0;
 
             IERC20(_rewardsTokens[i]).safeTransfer(msg.sender, infoRewards);
@@ -117,6 +117,30 @@ contract StakingCampaignRecipient is NonCompoundingRewardsPool {
         emit ExitCompleted(msg.sender, infoExitStake);
 
         return infoExitStake;
+    }
+
+    function getUserAccumulatedReward(
+        address _userAddress,
+        uint256 _tokenIndex,
+        uint256 _time
+    ) external view override returns (uint256) {
+        uint256 applicableTimestamp = (_time < endTimestamp) ? _time : endTimestamp;
+        uint256 secondsSinceLastReward = applicableTimestamp - lastRewardTimestamp;
+
+        uint256 newReward = secondsSinceLastReward * rewardPerSecond[_tokenIndex]; // Get newly accumulated reward
+        uint256 rewardMultiplierIncrease = (newReward * PRECISION) / totalStaked; // Calculate the multiplier increase
+        uint256 currentMultiplier = accumulatedRewardMultiplier[_tokenIndex] + rewardMultiplierIncrease; // Simulate the multiplier increase to the accumulated multiplier
+
+        UserInfo storage user = userInfo[_userAddress];
+
+        uint256 totalDebt = (user.amountStaked * currentMultiplier) / PRECISION; // Simulate the current debt
+        uint256 pendingDebt = totalDebt - user.rewardDebt[_tokenIndex]; // Simulate the pending debt
+        return user.tokensOwed[_tokenIndex] + pendingDebt + pendingRewardsAmount[_userAddress][_tokenIndex];
+    }
+
+    function getPendingReward(uint256 _tokenIndex) external view override returns (uint256) {
+        ExitInfo storage info = exitInfo[msg.sender];
+        return info.rewards[_tokenIndex] + pendingRewardsAmount[msg.sender][_tokenIndex];
     }
 
     /**

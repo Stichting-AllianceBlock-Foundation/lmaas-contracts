@@ -37,7 +37,7 @@ contract RewardsPoolBase is Ownable {
 
     uint256 public startTimestamp;
     uint256 public endTimestamp;
-    uint256 private lastRewardTimestamp;
+    uint256 public lastRewardTimestamp;
 
     uint256 public extensionDuration;
     uint256[] public extensionRewardPerSecond;
@@ -411,7 +411,7 @@ contract RewardsPoolBase is Ownable {
         address _userAddress,
         uint256 _tokenIndex,
         uint256 _time
-    ) external view returns (uint256) {
+    ) external view virtual returns (uint256) {
         uint256 applicableTimestamp = (_time < endTimestamp) ? _time : endTimestamp;
         uint256 secondsSinceLastReward = applicableTimestamp - lastRewardTimestamp;
 
