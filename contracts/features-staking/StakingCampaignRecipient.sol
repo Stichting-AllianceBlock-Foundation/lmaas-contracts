@@ -11,7 +11,7 @@ import '../V2/NonCompoundingRewardsPool.sol';
 */
 contract StakingCampaignRecipient is NonCompoundingRewardsPool {
     using SafeERC20 for IERC20;
-    mapping(address => uint256[]) public pendingRewardsAmount;
+    mapping(address => uint256[]) private pendingRewardsAmount;
 
     /** @param _stakingToken The token to stake
      * @param _rewardsTokens The reward tokens
@@ -51,48 +51,53 @@ contract StakingCampaignRecipient is NonCompoundingRewardsPool {
     ) external onlyOwner {
         uint256 stakersLength = _stakers.length;
         uint256 stakingAmountsLength = _stakingAmounts.length;
+        uint256 rewardsAmountLength = _rewardAmounts.length;
 
         require(
-            stakersLength == stakingAmountsLength,
-            'StakingCampaignRecipient: stakers and staking amounts length mismatch'
+            stakersLength == stakingAmountsLength && stakersLength == rewardsAmountLength,
+            'StakingCampaignRecipient: stakers and staking or rewards amounts length mismatch'
         );
 
-        for (uint256 i = 0; i < stakersLength; i++) {
-            _addStaker(_stakingAmounts[i], _stakers[i], _rewardAmounts[i]);
-        }
-    }
-
-    function _addStaker(
-        uint256 _tokenAmount,
-        address _staker,
-        uint256[] calldata _rewardAmount
-    ) internal {
         uint256 currentTimestamp = block.timestamp;
+        updateRewardMultipliers();
+
         require(
             (startTimestamp > 0 && currentTimestamp > startTimestamp) &&
                 (currentTimestamp <= endTimestamp + extensionDuration),
             'RewardsPoolBase: staking is not started or is finished or no extension taking in place'
         );
 
+        for (uint256 i = 0; i < stakersLength; i++) {
+            _addStaker(_stakingAmounts[i], _stakers[i], _rewardAmounts[i], currentTimestamp);
+        }
+    }
+
+    function _addStaker(
+        uint256 _tokenAmount,
+        address _staker,
+        uint256[] calldata _rewardAmount,
+        uint256 _currentTimestamp
+    ) internal {
         UserInfo storage user = userInfo[_staker];
+        uint256 userAmountStaked = user.amountStaked;
+        uint256 userStake = userAmountStaked + _tokenAmount;
+        uint256 totalStakedUser = totalStaked + _tokenAmount;
+
         require(
-            (user.amountStaked + _tokenAmount <= stakeLimit) && (totalStaked + _tokenAmount <= contractStakeLimit),
+            (userStake <= stakeLimit) && (totalStakedUser <= contractStakeLimit),
             'RewardsPoolBase: stake limit reached'
         );
 
         require(_tokenAmount > 0, 'RewardsPoolBase: cannot stake 0');
 
         // if no amount has been staked this is considered the initial stake
-        if (user.amountStaked == 0) {
-            user.firstStakedTimestamp = currentTimestamp;
+        if (userAmountStaked == 0) {
+            user.firstStakedTimestamp = _currentTimestamp;
         }
 
-        user.amountStaked = _tokenAmount;
+        user.amountStaked = userAmountStaked + _tokenAmount;
         pendingRewardsAmount[_staker] = _rewardAmount;
-        totalStaked = totalStaked + _tokenAmount;
-
-        updateRewardMultipliers();
-        _updateUserAccruedReward(_staker); // Update the accrued reward for this specific user
+        totalStaked = totalStakedUser;
 
         emit Staked(_staker, _tokenAmount);
     }
@@ -110,6 +115,7 @@ contract StakingCampaignRecipient is NonCompoundingRewardsPool {
         for (uint256 i = 0; i < _rewardsTokens.length; i++) {
             uint256 infoRewards = info.rewards[i] + pendingRewardsAmount[msg.sender][i];
             info.rewards[i] = 0;
+            pendingRewardsAmount[msg.sender][i] = 0;
 
             IERC20(_rewardsTokens[i]).safeTransfer(msg.sender, infoRewards);
         }
@@ -132,8 +138,12 @@ contract StakingCampaignRecipient is NonCompoundingRewardsPool {
         uint256 currentMultiplier = accumulatedRewardMultiplier[_tokenIndex] + rewardMultiplierIncrease; // Simulate the multiplier increase to the accumulated multiplier
 
         UserInfo storage user = userInfo[_userAddress];
-
         uint256 totalDebt = (user.amountStaked * currentMultiplier) / PRECISION; // Simulate the current debt
+
+        if (user.rewardDebt.length == 0) {
+            return totalDebt + pendingRewardsAmount[_userAddress][_tokenIndex];
+        }
+
         uint256 pendingDebt = totalDebt - user.rewardDebt[_tokenIndex]; // Simulate the pending debt
         return user.tokensOwed[_tokenIndex] + pendingDebt + pendingRewardsAmount[_userAddress][_tokenIndex];
     }
