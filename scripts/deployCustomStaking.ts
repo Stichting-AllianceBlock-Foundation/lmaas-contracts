@@ -10,7 +10,7 @@ const rewardAmounts = addressesInformation.map((a) => a.split(',')[2]);
 const fullReward = ethers.BigNumber.from('7999954860066201558372192');
 const staked = ethers.BigNumber.from('12999999999999996976240178');
 const reward = fullReward.sub(ethers.BigNumber.from('7878001805597348121738098')); // * already distributed rewards
-const timeInSeconds = 777600; // * 1 hour
+const timeInSeconds = 3600; // * 1 hour
 const addresses = addressesInformation.map((a) => a.split(',')[0]);
 
 async function main() {
@@ -45,7 +45,7 @@ async function main() {
 async function startCampaign(contractAddress: string) {
   const currentTimestamp = await getTime();
   const rewardPerSecond = reward.div(timeInSeconds);
-  const startTimestamp = currentTimestamp + 60;
+  const startTimestamp = currentTimestamp + 30;
   const endTimestamp = startTimestamp + timeInSeconds;
 
   const NonCompoundingRewardsPoolInstance = (await ethers.getContractAt(
@@ -70,6 +70,7 @@ async function addStakers(contractAddress: string) {
     '0x6606A67b2d0a1f2a01D27f41671D72bAb47a45D8',
     '0xb42cBDC13772297B5E5896A38470a4FDAFeb5F8a',
     '0x753787ec49405464bE7a0b21130C4216Dd20FB25',
+    '0x6eb9201D61e3D33A5C1b532a011E409183e97C3B',
   ];
 
   for (let i = 0; i <= addresses.length; i += 57) {
@@ -105,12 +106,12 @@ async function addStakers(contractAddress: string) {
 //   process.exitCode = 1;
 // });
 
-// startCampaign('0xbdDa46D0DDc460D500110aa18FA5DF228a9551b3').catch((error) => {
+// startCampaign('0x7De5D6dc44f11817D4a9510A81e21a741291c0FC').catch((error) => {
 //   console.error(error);
 //   process.exitCode = 1;
 // });
 
-addStakers('0xbdDa46D0DDc460D500110aa18FA5DF228a9551b3').catch((error) => {
+addStakers('0x7De5D6dc44f11817D4a9510A81e21a741291c0FC').catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });

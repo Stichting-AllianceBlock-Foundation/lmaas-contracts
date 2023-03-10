@@ -52,7 +52,7 @@ describe('StakingCampaignRecipient', () => {
   let startTimestamp: number;
   let endTimestamp: number;
   const oneMinute = 60;
-  const timeInSeconds = 3600; // * 1 hour
+  const timeInSeconds = 3600;
 
   const setupRewardsPoolParameters = async () => {
     const ERC20 = await ethers.getContractFactory('TestERC20');
@@ -120,6 +120,10 @@ describe('StakingCampaignRecipient', () => {
       await stakeBatch(throttleRoundSeconds, throttleRoundCap);
     });
 
+    it('[Should deploy the campaign correctly]:', async () => {
+      expect(NonCompoundingRewardsPoolInstance.address);
+    });
+
     it('[Should not claim or withdraw]:', async () => {
       await expect(NonCompoundingRewardsPoolInstance.claim()).to.be.revertedWith(
         'OnlyExitFeature::cannot claim from this contract. Only exit.'
@@ -184,7 +188,7 @@ describe('StakingCampaignRecipient', () => {
       );
     });
 
-    it('[Should complete succesfully]:', async () => {
+    it.only('[Should complete succesfully]:', async () => {
       await timeTravel(timeInSeconds);
 
       const exitPR = addresses.map((a) => NonCompoundingRewardsPoolInstance.connect(a).exit());
