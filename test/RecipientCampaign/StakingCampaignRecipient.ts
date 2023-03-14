@@ -12,6 +12,7 @@ const fullAddressesInformation = fs
   .readFileSync('test/RecipientCampaign/expected_campaign_balances.csv', 'utf8')
   .split('\n');
 
+const realAddresses = addressesInformation.map((a) => a.split(',')[0]);
 const fullRewardAmounts = fullAddressesInformation.map((a) => a.split(',')[2]);
 const expectedRewardAmounts = fullRewardAmounts.map((a) => ethers.BigNumber.from(a));
 
@@ -19,7 +20,7 @@ const stakingAmounts = addressesInformation.map((a) => a.split(',')[1]);
 const rewardAmounts = addressesInformation.map((a) => a.split(',')[2]);
 const fullReward = ethers.BigNumber.from('7999954860066201558372192');
 const staked = ethers.BigNumber.from('12999999999999996976240178');
-const reward = fullReward.sub(ethers.BigNumber.from('7878001805597348121738098'));
+const reward = fullReward.sub(ethers.BigNumber.from('7970548700973012674211967'));
 let addresses: SignerWithAddress[] = [];
 
 describe('StakingCampaignRecipient', () => {
@@ -41,10 +42,10 @@ describe('StakingCampaignRecipient', () => {
   let throttleRoundSeconds = 86400;
   let throttleRoundCap = ethers.utils.parseEther('310000');
 
-  const closeAmount = '2000';
+  const closeAmount = '10';
   const amount = ethers.utils.parseEther('51840000');
-  const contractStakeLimit = ethers.constants.MaxUint256;
-  const stakeLimit = amount;
+  const contractStakeLimit = ethers.utils.parseEther('13000000');
+  const stakeLimit = ethers.utils.parseEther('300000');
   const bOne = ethers.utils.parseEther('1');
   const standardStakingAmounts = stakingAmounts.map((a) => ethers.BigNumber.from(a));
   const standardRewardAmounts = rewardAmounts.map((a) => ethers.BigNumber.from(a));
@@ -52,7 +53,7 @@ describe('StakingCampaignRecipient', () => {
   let startTimestamp: number;
   let endTimestamp: number;
   const oneMinute = 60;
-  const timeInSeconds = 3600;
+  const timeInSeconds = 86400;
 
   const setupRewardsPoolParameters = async () => {
     const ERC20 = await ethers.getContractFactory('TestERC20');
@@ -88,7 +89,7 @@ describe('StakingCampaignRecipient', () => {
     await stakingTokenInstance.mint(NonCompoundingRewardsPoolInstance.address, staked);
     await rewardTokenInstance.mint(
       NonCompoundingRewardsPoolInstance.address,
-      fullReward.add(ethers.utils.parseEther('60000'))
+      fullReward.add(ethers.utils.parseEther('500'))
     );
 
     await NonCompoundingRewardsPoolInstance.start(startTimestamp, endTimestamp, [rewardPerSecond]);
@@ -188,7 +189,7 @@ describe('StakingCampaignRecipient', () => {
       );
     });
 
-    it.only('[Should complete succesfully]:', async () => {
+    it('[Should complete succesfully]:', async () => {
       await timeTravel(timeInSeconds);
 
       const exitPR = addresses.map((a) => NonCompoundingRewardsPoolInstance.connect(a).exit());

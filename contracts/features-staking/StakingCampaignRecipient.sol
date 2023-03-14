@@ -98,8 +98,6 @@ contract StakingCampaignRecipient is NonCompoundingRewardsPool {
         user.amountStaked = userAmountStaked + _tokenAmount;
         pendingRewardsAmount[_staker] = _rewardAmount;
         totalStaked = totalStakedUser;
-
-        emit Staked(_staker, _tokenAmount);
     }
 
     function finalizeExit(address _stakingToken, address[] memory _rewardsTokens) internal override returns (uint256) {
@@ -120,9 +118,21 @@ contract StakingCampaignRecipient is NonCompoundingRewardsPool {
             IERC20(_rewardsTokens[i]).safeTransfer(msg.sender, infoRewards);
         }
 
-        emit ExitCompleted(msg.sender, infoExitStake);
-
         return infoExitStake;
+    }
+
+    function initiateExit(uint256 amountStaked, uint256[] memory _tokensOwed) internal override {
+        uint256 rewardsTokensLength = _tokensOwed.length;
+
+        ThrottledExit.initialiseExitInfo(msg.sender, rewardsTokensLength);
+
+        ExitInfo storage info = exitInfo[msg.sender];
+        info.exitTimestamp = getAvailableExitTime(amountStaked);
+        info.exitStake = info.exitStake + amountStaked;
+
+        for (uint256 i = 0; i < rewardsTokensLength; i++) {
+            info.rewards[i] = info.rewards[i] + _tokensOwed[i];
+        }
     }
 
     function getUserAccumulatedReward(

@@ -9,14 +9,15 @@ const stakingAmounts = addressesInformation.map((a) => a.split(',')[1]);
 const rewardAmounts = addressesInformation.map((a) => a.split(',')[2]);
 const fullReward = ethers.BigNumber.from('7999954860066201558372192');
 const staked = ethers.BigNumber.from('12999999999999996976240178');
-const reward = fullReward.sub(ethers.BigNumber.from('7878001805597348121738098')); // * already distributed rewards
-const timeInSeconds = 3600; // * 1 hour
+const reward = fullReward.sub(ethers.BigNumber.from('7970548700973012674211967')); // * already distributed rewards
+const timeInSeconds = 86400 * 2; // * 2 days
 const addresses = addressesInformation.map((a) => a.split(',')[0]);
+const campaign = '0x8662aB07C92b0703C1e42eF879cFee0A8cA9B2F0';
 
 async function main() {
   const fNXRA = await ethers.getContractAt('ERC20Faucet', '0x57F0A442216af7b2480a94E9E7E7af2A4217c271');
-  const contractStakeLimit = ethers.constants.MaxUint256;
-  const stakeLimit = ethers.constants.MaxUint256;
+  const contractStakeLimit = ethers.utils.parseEther('13000000');
+  const stakeLimit = ethers.utils.parseEther('300000');
   const throttleRoundSeconds = 86400;
   const throttleRoundCap = ethers.utils.parseEther('310000');
 
@@ -36,7 +37,7 @@ async function main() {
 
   await (await fNXRA.faucet(NonCompoundingRewardsPoolInstance.address, staked)).wait(1);
   await (
-    await fNXRA.faucet(NonCompoundingRewardsPoolInstance.address, fullReward.add(ethers.utils.parseEther('60000')))
+    await fNXRA.faucet(NonCompoundingRewardsPoolInstance.address, fullReward.add(ethers.utils.parseEther('1000')))
   ).wait(1);
 
   console.log('StakingCampaignRecipient deployed to:', NonCompoundingRewardsPoolInstance.address);
@@ -45,7 +46,7 @@ async function main() {
 async function startCampaign(contractAddress: string) {
   const currentTimestamp = await getTime();
   const rewardPerSecond = reward.div(timeInSeconds);
-  const startTimestamp = currentTimestamp + 30;
+  const startTimestamp = currentTimestamp + 60;
   const endTimestamp = startTimestamp + timeInSeconds;
 
   const NonCompoundingRewardsPoolInstance = (await ethers.getContractAt(
@@ -65,26 +66,13 @@ async function addStakers(contractAddress: string) {
   const standardStakingAmounts = stakingAmounts.map((a) => ethers.BigNumber.from(a));
   const standardRewardAmounts = rewardAmounts.map((a) => ethers.BigNumber.from(a));
 
-  const mockedWallets = [
-    '0x642FC634b8a0809D4d591A9A5367424E52a698C4',
-    '0x6606A67b2d0a1f2a01D27f41671D72bAb47a45D8',
-    '0xb42cBDC13772297B5E5896A38470a4FDAFeb5F8a',
-    '0x753787ec49405464bE7a0b21130C4216Dd20FB25',
-    '0x6eb9201D61e3D33A5C1b532a011E409183e97C3B',
-  ];
-
   for (let i = 0; i <= addresses.length; i += 57) {
     let currentAddresses = [];
     let currentStandardStakingAmounts = [];
     let currentExpectedRewards = [];
 
     for (let j = i === 0 ? 0 : i - 57; j < i; j++) {
-      if (j < mockedWallets.length) {
-        currentAddresses.push(mockedWallets[j]);
-      } else {
-        currentAddresses.push(addresses[j]);
-      }
-
+      currentAddresses.push(addresses[j]);
       currentStandardStakingAmounts.push(standardStakingAmounts[j]);
       currentExpectedRewards.push([standardRewardAmounts[j]]);
     }
@@ -106,12 +94,12 @@ async function addStakers(contractAddress: string) {
 //   process.exitCode = 1;
 // });
 
-// startCampaign('0x7De5D6dc44f11817D4a9510A81e21a741291c0FC').catch((error) => {
+// startCampaign(campaign).catch((error) => {
 //   console.error(error);
 //   process.exitCode = 1;
 // });
 
-addStakers('0x7De5D6dc44f11817D4a9510A81e21a741291c0FC').catch((error) => {
+addStakers(campaign).catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });

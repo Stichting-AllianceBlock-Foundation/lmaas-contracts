@@ -119,7 +119,7 @@ abstract contract ThrottledExit {
         return info.rewards[_tokenIndex];
     }
 
-    function initialiseExitInfo(address _userAddress, uint256 tokensLength) private {
+    function initialiseExitInfo(address _userAddress, uint256 tokensLength) internal virtual {
         ExitInfo storage info = exitInfo[_userAddress];
 
         if (info.rewards.length == tokensLength) {
