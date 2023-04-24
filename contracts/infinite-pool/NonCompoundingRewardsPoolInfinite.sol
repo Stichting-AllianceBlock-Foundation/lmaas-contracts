@@ -12,14 +12,9 @@ import './../pool-features/infinite-pool/StakeReceiverFeatureInfinite.sol';
     Inherits all staking logic from RewardsPoolBase.
     Only allows exit at the end of the time lock and via the throttling mechanism.
 */
-contract NonCompoundingRewardsPoolInfinite is
-    RewardsPoolBaseInfinite,
-    OnlyExitFeatureInfinite,
-    StakeTransfererFeatureInfinite,
-    StakeReceiverFeatureInfinite
-{
+contract NonCompoundingRewardsPoolInfinite is RewardsPoolBaseInfinite, OnlyExitFeatureInfinite {
     uint256 public epochCount;
-    mapping(address => uint256) userStakedEpoch;
+    mapping(address => uint256) public userStakedEpoch;
 
     /** @param _stakingToken The token to stake
      * @param _rewardsTokens The reward tokens
@@ -90,19 +85,11 @@ contract NonCompoundingRewardsPoolInfinite is
 
     /// @dev which you can withdraw your stake and rewards.
     function exit() public override(RewardsPoolBaseInfinite) {
-        require(userStakedEpoch[msg.sender] < epochCount, 'exit::you can only exit at the end of the epoch');
+        require(
+            userStakedEpoch[msg.sender] < epochCount || block.timestamp > endTimestamp,
+            'exit::you can only exit at the end of the epoch'
+        );
         RewardsPoolBaseInfinite.exit();
-
-        // we reset the epoch count for the user
-        userStakedEpoch[msg.sender] = 0;
-    }
-
-    /** @dev Exits the pool and tranfer to another pool
-     * @param transferTo The new pool to tranfer to
-     */
-    function exitAndTransfer(address transferTo) public virtual override(StakeTransfererFeatureInfinite) {
-        require(userStakedEpoch[msg.sender] < epochCount, 'exitAndTransfer::you can only exit at the end of the epoch');
-        StakeTransfererFeatureInfinite.exitAndTransfer(transferTo);
 
         // we reset the epoch count for the user
         userStakedEpoch[msg.sender] = 0;
