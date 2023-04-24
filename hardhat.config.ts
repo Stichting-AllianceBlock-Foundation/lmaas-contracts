@@ -31,7 +31,7 @@ module.exports = {
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
     ethereum: {
-      url: 'https://rpc.ankr.com/eth',
+      url: 'https://nd-158-188-666.p2pify.com/548163c72137050a0454645854af1ffc',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
     binance: {

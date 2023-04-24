@@ -135,6 +135,27 @@ contract StakingCampaignRecipient is NonCompoundingRewardsPool {
         }
     }
 
+    function _start(
+        uint256 _startTimestamp,
+        uint256 _endTimestamp,
+        uint256[] calldata _rewardPerSecond
+    ) internal override {
+        require(startTimestamp == 0, 'RewardsPoolBase: already started');
+        require(
+            _startTimestamp >= block.timestamp && _endTimestamp > _startTimestamp,
+            'RewardsPoolBase: invalid start or end'
+        );
+
+        require(_rewardPerSecond.length == rewardsTokens.length, 'RewardsPoolBase: invalid rewardPerSecond');
+
+        rewardPerSecond = _rewardPerSecond;
+        startTimestamp = _startTimestamp;
+        endTimestamp = _endTimestamp;
+        lastRewardTimestamp = _startTimestamp;
+
+        emit Started(startTimestamp, endTimestamp, rewardPerSecond);
+    }
+
     function getUserAccumulatedReward(
         address _userAddress,
         uint256 _tokenIndex,

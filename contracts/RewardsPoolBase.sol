@@ -131,7 +131,7 @@ contract RewardsPoolBase is Ownable {
         uint256 _startTimestamp,
         uint256 _endTimestamp,
         uint256[] calldata _rewardPerSecond
-    ) internal {
+    ) internal virtual {
         require(startTimestamp == 0, 'RewardsPoolBase: already started');
         require(
             _startTimestamp >= block.timestamp && _endTimestamp > _startTimestamp,
@@ -180,11 +180,7 @@ contract RewardsPoolBase is Ownable {
         _stake(_tokenAmount, msg.sender, true);
     }
 
-    function _stake(
-        uint256 _tokenAmount,
-        address _staker,
-        bool _chargeStaker
-    ) internal {
+    function _stake(uint256 _tokenAmount, address _staker, bool _chargeStaker) internal {
         uint256 currentTimestamp = block.timestamp;
         require(
             (startTimestamp > 0 && currentTimestamp > startTimestamp) &&
