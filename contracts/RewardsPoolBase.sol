@@ -37,7 +37,7 @@ contract RewardsPoolBase is Ownable {
 
     uint256 public startTimestamp;
     uint256 public endTimestamp;
-    uint256 private lastRewardTimestamp;
+    uint256 public lastRewardTimestamp;
 
     uint256 public extensionDuration;
     uint256[] public extensionRewardPerSecond;
@@ -131,7 +131,7 @@ contract RewardsPoolBase is Ownable {
         uint256 _startTimestamp,
         uint256 _endTimestamp,
         uint256[] calldata _rewardPerSecond
-    ) internal {
+    ) internal virtual {
         require(startTimestamp == 0, 'RewardsPoolBase: already started');
         require(
             _startTimestamp >= block.timestamp && _endTimestamp > _startTimestamp,
@@ -180,11 +180,7 @@ contract RewardsPoolBase is Ownable {
         _stake(_tokenAmount, msg.sender, true);
     }
 
-    function _stake(
-        uint256 _tokenAmount,
-        address _staker,
-        bool _chargeStaker
-    ) internal {
+    function _stake(uint256 _tokenAmount, address _staker, bool _chargeStaker) internal {
         uint256 currentTimestamp = block.timestamp;
         require(
             (startTimestamp > 0 && currentTimestamp > startTimestamp) &&
@@ -411,7 +407,7 @@ contract RewardsPoolBase is Ownable {
         address _userAddress,
         uint256 _tokenIndex,
         uint256 _time
-    ) external view returns (uint256) {
+    ) external view virtual returns (uint256) {
         uint256 applicableTimestamp = (_time < endTimestamp) ? _time : endTimestamp;
         uint256 secondsSinceLastReward = applicableTimestamp - lastRewardTimestamp;
 
