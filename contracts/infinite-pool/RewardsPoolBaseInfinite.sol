@@ -52,11 +52,7 @@ contract RewardsPoolBaseInfinite is RewardsPoolBase {
         _start(_startTimestamp, _endTimestamp, _recalculation(_startTimestamp, _endTimestamp));
     }
 
-    function _stake(
-        uint256 _tokenAmount,
-        address _staker,
-        bool _chargeStaker
-    ) internal override {
+    function _stake(uint256 _tokenAmount, address _staker, bool _chargeStaker) internal override {
         uint256 currentTimestamp = block.timestamp;
         uint256 startTimestamp = startTimestamp();
 
@@ -84,8 +80,8 @@ contract RewardsPoolBaseInfinite is RewardsPoolBase {
         uint256 rewardsTokensLength = rewardsTokens.length;
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
             user.rewardDebt[i] =
-                (user.amountStaked * accumulatedRewardMultiplier[i] * (10**rewardTokenDecimals[i])) /
-                (PRECISION * (10**stakingTokenDecimals)); // Update user reward debt for each token
+                (user.amountStaked * accumulatedRewardMultiplier[i] * (10 ** rewardTokenDecimals[i])) /
+                (PRECISION * (10 ** stakingTokenDecimals)); // Update user reward debt for each token
         }
 
         emit Staked(_staker, _tokenAmount);
@@ -127,7 +123,7 @@ contract RewardsPoolBaseInfinite is RewardsPoolBase {
             uint256 balance = getAvailableBalance(i);
             // if we have any rewardsTokens with a balance, the pool should be scheduled
             if (
-                (rewardTokenDecimals[i] > 10 && balance >= (10**(rewardTokenDecimals[i] - 10))) ||
+                (rewardTokenDecimals[i] > 10 && balance >= (10 ** (rewardTokenDecimals[i] - 10))) ||
                 (rewardTokenDecimals[i] <= 10 && balance >= 2)
             ) {
                 return true;

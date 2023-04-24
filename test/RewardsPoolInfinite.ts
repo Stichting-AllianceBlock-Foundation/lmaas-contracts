@@ -336,7 +336,7 @@ describe('RewardsPoolBaseInfinite', () => {
       expect(await rewards[0].balanceOf(stakers[0].address)).to.be.eq(0);
     });
 
-    it.skip('Should be able to stake after 1 epoch with no stakers have passed', async () => {
+    it('Should be able to stake after 1 epoch with no stakers have passed', async () => {
       const staker = stakers[0];
 
       let amount = ethers.utils.parseEther('10000');

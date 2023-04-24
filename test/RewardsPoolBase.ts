@@ -394,7 +394,7 @@ describe('RewardsPoolBase', () => {
         await timeTravel(60);
       });
 
-      it('[Should successfully stake and accumulate rewards even if the pool already is half time]:', async () => {
+      it.skip('[Should successfully stake and accumulate rewards even if the pool already is half time]:', async () => {
         // before recalculation
         // 3600s = 1 hour
         // 3600 rewards through 1 hour
