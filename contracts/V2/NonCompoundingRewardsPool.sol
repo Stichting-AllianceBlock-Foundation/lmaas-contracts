@@ -74,7 +74,7 @@ contract NonCompoundingRewardsPool is
     }
 
     /// @dev Requests a throttled exit from the pool and gives you a time from which you can withdraw your stake and rewards.
-    function exit() public override(ThrottledExitFeature, RewardsPoolBase) {
+    function exit() public virtual override(ThrottledExitFeature, RewardsPoolBase) {
         ThrottledExitFeature.exit();
     }
 
