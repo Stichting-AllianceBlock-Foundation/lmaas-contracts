@@ -15,7 +15,8 @@ contract StakingCampaignPayment is NonCompoundingRewardsPool {
         uint256 _throttleRoundCap,
         uint256 _contractStakeLimit,
         string memory _name,
-        address _paymentContract
+        address _paymentContract,
+        address _wrappedNativeToken
     )
         NonCompoundingRewardsPool(
             _stakingToken,
@@ -24,7 +25,8 @@ contract StakingCampaignPayment is NonCompoundingRewardsPool {
             _throttleRoundSeconds,
             _throttleRoundCap,
             _contractStakeLimit,
-            _name
+            _name,
+            _wrappedNativeToken
         )
     {
         require(_paymentContract != address(0), 'Payment contract address cannot be 0');
@@ -36,11 +38,7 @@ contract StakingCampaignPayment is NonCompoundingRewardsPool {
         _;
     }
 
-    function start(
-        uint256,
-        uint256,
-        uint256[] calldata
-    ) public view override(NonCompoundingRewardsPool) onlyOwner {
+    function start(uint256, uint256, uint256[] calldata) public view override(NonCompoundingRewardsPool) onlyOwner {
         revert('Start cannot be called direct, must be called through payment contract');
     }
 
@@ -64,10 +62,10 @@ contract StakingCampaignPayment is NonCompoundingRewardsPool {
         revert('Extend cannot be called direct, must be called through payment contract');
     }
 
-    function extendWithPaymentContract(uint256 _durationTime, uint256[] calldata _rewardPerSecond)
-        external
-        onlyPaymentContract
-    {
+    function extendWithPaymentContract(
+        uint256 _durationTime,
+        uint256[] calldata _rewardPerSecond
+    ) external onlyPaymentContract {
         NonCompoundingRewardsPool.extend(_durationTime, _rewardPerSecond);
     }
 
