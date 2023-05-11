@@ -4,6 +4,7 @@ pragma solidity 0.8.9;
 
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import './interfaces/IWETH.sol';
 
 /** @dev Provides a throttling mechanism for staking pools. Instead of allowing
     everyone to withdraw their stake at once at the end of the pool, this forces
@@ -65,7 +66,11 @@ abstract contract ThrottledExit {
         emit ExitRequested(msg.sender, info.exitTimestamp);
     }
 
-    function finalizeExit(address _stakingToken, address[] memory _rewardsTokens) internal virtual returns (uint256) {
+    function finalizeExit(
+        address _stakingToken,
+        address[] memory _rewardsTokens,
+        address _wrappedNativeToken
+    ) internal virtual returns (uint256) {
         ExitInfo storage info = exitInfo[msg.sender];
         require(block.timestamp > info.exitTimestamp, 'finalizeExit::Trying to exit too early');
 
@@ -73,13 +78,28 @@ abstract contract ThrottledExit {
         require(infoExitStake > 0, 'finalizeExit::No stake to exit');
         info.exitStake = 0;
 
-        IERC20(_stakingToken).safeTransfer(address(msg.sender), infoExitStake);
+        // Native staking
+        if (_stakingToken == _wrappedNativeToken) {
+            IWETH(_stakingToken).withdraw(infoExitStake);
+
+            /* This will transfer the native token to the user, when he withdraws. */
+            payable(msg.sender).transfer(infoExitStake);
+        } else {
+            IERC20(_stakingToken).safeTransfer(address(msg.sender), infoExitStake);
+        }
 
         for (uint256 i = 0; i < _rewardsTokens.length; i++) {
             uint256 infoRewards = info.rewards[i];
             info.rewards[i] = 0;
 
-            IERC20(_rewardsTokens[i]).safeTransfer(msg.sender, infoRewards);
+            if (_rewardsTokens[i] == _wrappedNativeToken) {
+                IWETH(_rewardsTokens[i]).withdraw(infoRewards);
+
+                /* This will transfer the native token to the user. */
+                payable(msg.sender).transfer(infoRewards);
+            } else {
+                IERC20(_rewardsTokens[i]).safeTransfer(msg.sender, infoRewards);
+            }
         }
 
         emit ExitCompleted(msg.sender, infoExitStake);
@@ -114,12 +134,12 @@ abstract contract ThrottledExit {
     /** @dev Returns the amount of reward tokens that are pending for exit for this user
      * @param _tokenIndex The index of the reward to check
      */
-    function getPendingReward(uint256 _tokenIndex) external view returns (uint256) {
+    function getPendingReward(uint256 _tokenIndex) external view virtual returns (uint256) {
         ExitInfo storage info = exitInfo[msg.sender];
         return info.rewards[_tokenIndex];
     }
 
-    function initialiseExitInfo(address _userAddress, uint256 tokensLength) private {
+    function initialiseExitInfo(address _userAddress, uint256 tokensLength) internal virtual {
         ExitInfo storage info = exitInfo[_userAddress];
 
         if (info.rewards.length == tokensLength) {
