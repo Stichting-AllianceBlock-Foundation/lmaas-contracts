@@ -144,9 +144,9 @@ contract RewardsPoolBaseInfinite is RewardsPoolBase {
             _updateRewardMultipliers(endTimestamp);
             if (_canBeExtended()) {
                 _applyExtension(
-                    endTimestamp,
-                    endTimestamp + epochDuration,
-                    _recalculation(endTimestamp, endTimestamp + epochDuration)
+                    currentTimestamp,
+                    currentTimestamp + epochDuration,
+                    _recalculation(currentTimestamp, currentTimestamp + epochDuration)
                 );
                 _updateRewardMultipliers(currentTimestamp);
             }
