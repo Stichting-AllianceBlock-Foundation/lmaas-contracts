@@ -155,6 +155,37 @@ contract RewardsPoolBaseInfinite is RewardsPoolBase {
         }
     }
 
+    /**
+     * @dev updates the accumulated reward multipliers for everyone and each token
+     */
+    function _updateRewardMultipliers(uint256 _currentTimestamp) internal override {
+        if (_currentTimestamp <= lastRewardTimestamp) {
+            return;
+        }
+
+        uint256 applicableTimestamp = (_currentTimestamp < endTimestamp()) ? _currentTimestamp : endTimestamp();
+        uint256 secondsSinceLastReward = applicableTimestamp - lastRewardTimestamp;
+        uint256 rewardsTokensLength = rewardsTokens.length;
+
+        if (secondsSinceLastReward == 0) {
+            return;
+        }
+
+        if (totalStaked == 0) {
+            lastRewardTimestamp = applicableTimestamp;
+            return;
+        }
+
+        for (uint256 i = 0; i < rewardsTokensLength; i++) {
+            uint256 newReward = secondsSinceLastReward * rewardPerSecond[i]; // Get newly accumulated reward
+            uint256 rewardMultiplierIncrease = (newReward * (10 ** stakingTokenDecimals)) /
+                (totalStaked * (10 ** rewardTokenDecimals[i])); // Calculate the multiplier increase
+            accumulatedRewardMultiplier[i] = accumulatedRewardMultiplier[i] + rewardMultiplierIncrease; // Add the multiplier increase to the accumulated multiplier
+        }
+
+        lastRewardTimestamp = applicableTimestamp;
+    }
+
     // not implemented functions on infinite pools
     function extend(uint256, uint256[] calldata) external pure override {
         revert('RewardsPoolBase: not implemented on infinite pools');

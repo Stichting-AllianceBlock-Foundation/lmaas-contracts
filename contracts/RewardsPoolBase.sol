@@ -41,7 +41,7 @@ contract RewardsPoolBase is Ownable {
     uint256 private originalStartTimestamp;
     uint256 public realStartTimestamp;
     uint256 private realEndTimestamp;
-    uint256 private lastRewardTimestamp;
+    uint256 public lastRewardTimestamp;
     bool private firstTimeStaked;
 
     uint256 public extensionDuration;
@@ -352,7 +352,7 @@ contract RewardsPoolBase is Ownable {
     /**
      * @dev updates the accumulated reward multipliers for everyone and each token
      */
-    function _updateRewardMultipliers(uint256 _currentTimestamp) internal {
+    function _updateRewardMultipliers(uint256 _currentTimestamp) internal virtual {
         if (_currentTimestamp <= lastRewardTimestamp) {
             return;
         }
@@ -365,7 +365,7 @@ contract RewardsPoolBase is Ownable {
             return;
         }
 
-        if (realEndTimestamp <= _currentTimestamp && totalStaked == 0) {
+        if (totalStaked == 0) {
             lastRewardTimestamp = applicableTimestamp;
             return;
         }
