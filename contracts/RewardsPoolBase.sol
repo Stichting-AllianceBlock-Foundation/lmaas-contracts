@@ -41,8 +41,8 @@ contract RewardsPoolBase is Ownable {
     uint256 private originalStartTimestamp;
     uint256 public realStartTimestamp;
     uint256 private realEndTimestamp;
-    uint256 public lastRewardTimestamp;
-    bool private firstTimeStaked;
+    uint256 private lastRewardTimestamp;
+    bool public firstTimeStaked;
 
     uint256 public extensionDuration;
     uint256[] public extensionRewardPerSecond;
@@ -571,6 +571,7 @@ contract RewardsPoolBase is Ownable {
         originalStartTimestamp = _startTimestamp;
         realEndTimestamp = _endTimestamp;
         lastRewardTimestamp = _startTimestamp;
+        if (totalStaked == 0) firstTimeStaked = false;
 
         extensionDuration = 0;
         delete extensionRewardPerSecond;

@@ -61,7 +61,7 @@ contract NonCompoundingRewardsPoolInfinite is RewardsPoolBaseInfinite, OnlyExitF
         uint256 endTimestamp = endTimestamp();
 
         if (currentTimestamp > endTimestamp) {
-            _updateRewardMultipliers(endTimestamp);
+            if (firstTimeStaked) _updateRewardMultipliers(endTimestamp);
             if (_canBeExtended()) {
                 epochCount = epochCount + 1 + ((currentTimestamp - endTimestamp) / epochDuration);
                 _applyExtension(
