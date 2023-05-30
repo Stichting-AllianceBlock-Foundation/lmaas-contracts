@@ -197,12 +197,15 @@ contract RewardsPoolBase is Ownable {
         originalStartTimestamp = 0;
         realEndTimestamp = 0;
         lastRewardTimestamp = 0;
+        extensionDuration = 0;
         firstTimeStaked = false;
 
         uint256[] memory empty = new uint256[](rewardsTokens.length);
         accumulatedRewardMultiplier = empty;
         totalClaimed = empty;
         totalSpentRewards = empty;
+        rewardPerSecond = empty;
+        extensionRewardPerSecond = empty;
 
         _returnRewards();
     }
@@ -341,7 +344,7 @@ contract RewardsPoolBase is Ownable {
         uint256 currentTimestamp = block.timestamp;
 
         if (currentTimestamp > realEndTimestamp && extensionDuration > 0) {
-            _updateRewardMultipliers(realEndTimestamp);
+            if (firstTimeStaked) _updateRewardMultipliers(realEndTimestamp);
             _applyExtension(realEndTimestamp, realEndTimestamp + extensionDuration, extensionRewardPerSecond);
             _updateRewardMultipliers(currentTimestamp);
         } else {
@@ -545,7 +548,7 @@ contract RewardsPoolBase is Ownable {
         }
 
         if (ended) {
-            _updateRewardMultipliers(realEndTimestamp);
+            if (firstTimeStaked) _updateRewardMultipliers(realEndTimestamp);
             _applyExtension(newStartTimestamp, newEndTimestamp, _rewardPerSecond);
         } else {
             extensionDuration = _durationTime;
