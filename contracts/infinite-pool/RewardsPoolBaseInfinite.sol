@@ -54,7 +54,6 @@ contract RewardsPoolBaseInfinite is RewardsPoolBase {
 
     function _stake(uint256 _tokenAmount, address _staker, bool _chargeStaker) internal override {
         uint256 currentTimestamp = block.timestamp;
-        uint256 startTimestamp = startTimestamp();
 
         require(startTimestamp > 0 && currentTimestamp > startTimestamp, 'RewardsPoolBase: staking is not started');
 
@@ -138,10 +137,9 @@ contract RewardsPoolBaseInfinite is RewardsPoolBase {
 	 */
     function updateRewardMultipliers() public virtual override {
         uint256 currentTimestamp = block.timestamp;
-        uint256 endTimestamp = endTimestamp();
 
         if (currentTimestamp > endTimestamp) {
-            if (firstTimeStaked) _updateRewardMultipliers(endTimestamp);
+            _updateRewardMultipliers(endTimestamp);
             if (_canBeExtended()) {
                 _applyExtension(
                     currentTimestamp,

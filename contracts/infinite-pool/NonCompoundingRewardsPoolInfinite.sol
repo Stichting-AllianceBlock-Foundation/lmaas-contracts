@@ -58,10 +58,9 @@ contract NonCompoundingRewardsPoolInfinite is RewardsPoolBaseInfinite, OnlyExitF
      */
     function updateRewardMultipliers() public override {
         uint256 currentTimestamp = block.timestamp;
-        uint256 endTimestamp = endTimestamp();
 
         if (currentTimestamp > endTimestamp) {
-            if (firstTimeStaked) _updateRewardMultipliers(endTimestamp);
+            _updateRewardMultipliers(endTimestamp);
             if (_canBeExtended()) {
                 epochCount = epochCount + 1 + ((currentTimestamp - endTimestamp) / epochDuration);
                 _applyExtension(
@@ -89,7 +88,7 @@ contract NonCompoundingRewardsPoolInfinite is RewardsPoolBaseInfinite, OnlyExitF
     /// @dev which you can withdraw your stake and rewards.
     function exit() public override(RewardsPoolBase) {
         require(
-            userStakedEpoch[msg.sender] < epochCount || block.timestamp > endTimestamp(),
+            userStakedEpoch[msg.sender] < epochCount || block.timestamp > endTimestamp,
             'exit::you can only exit at the end of the epoch'
         );
         RewardsPoolBase.exit();
