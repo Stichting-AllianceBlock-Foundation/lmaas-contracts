@@ -14,7 +14,7 @@ contract RewardsPoolBaseInfinite is RewardsPoolBase {
 
     uint256 internal constant MAX_FEE = 10000; // 100%
     uint256 internal constant CUT_FEE = 300; // 3%
-    address constant feeRecipient = 0x000000000000000000000000000000000000dEaD; // wallet of the feeRecipient
+    address constant feeRecipient = 0xb0644D0aA5ce9132fFc445238fe4E45304C96561; // wallet of the feeRecipient
 
     uint256 public epochDuration;
 
@@ -120,10 +120,13 @@ contract RewardsPoolBaseInfinite is RewardsPoolBase {
     function _canBeExtended() internal view returns (bool) {
         for (uint256 i = 0; i < rewardsTokens.length; i++) {
             uint256 balance = getAvailableBalance(i);
+            uint256 leftRewards = leftoverRewards[i];
+
             // if we have any rewardsTokens with a balance, the pool should be scheduled
             if (
-                (rewardTokenDecimals[i] > 10 && balance >= (10 ** (rewardTokenDecimals[i] - 10))) ||
-                (rewardTokenDecimals[i] <= 10 && balance >= 2)
+                balance > leftRewards &&
+                ((rewardTokenDecimals[i] > 10 && balance >= (10 ** (rewardTokenDecimals[i] - 10))) ||
+                    (rewardTokenDecimals[i] <= 10 && balance >= 2))
             ) {
                 return true;
             }

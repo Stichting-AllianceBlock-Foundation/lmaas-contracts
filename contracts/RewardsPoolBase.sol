@@ -33,6 +33,7 @@ contract RewardsPoolBase is Ownable {
 
     uint256[] public rewardPerSecond;
     address[] public rewardsTokens;
+    uint256[] public leftoverRewards;
     uint8 public stakingTokenDecimals;
     uint8[] public rewardTokenDecimals;
 
@@ -194,6 +195,7 @@ contract RewardsPoolBase is Ownable {
         totalSpentRewards = empty;
         rewardPerSecond = empty;
         extensionRewardPerSecond = empty;
+        leftoverRewards = empty;
 
         _returnRewards();
     }
@@ -358,13 +360,13 @@ contract RewardsPoolBase is Ownable {
 
         if (totalStaked == 0) {
             for (uint256 i = 0; i < rewardsTokensLength; i++) {
-                uint256 leftoverRewards = calculateRewardsAmount(
+                uint256 leftRewards = calculateRewardsAmount(
                     lastRewardTimestamp,
                     applicableTimestamp,
                     rewardPerSecond[i]
                 );
 
-                totalClaimed[i] = totalClaimed[i] + leftoverRewards;
+                leftoverRewards[i] = leftoverRewards[i] + leftRewards;
             }
 
             lastRewardTimestamp = applicableTimestamp;
@@ -519,8 +521,12 @@ contract RewardsPoolBase is Ownable {
 
             // We need to check if we have enough balance available in the contract to pay for the extension
             uint256 availableBalance = getAvailableBalance(i);
+            uint256 leftRewards = leftoverRewards[i];
 
-            require(availableBalance >= newRewards, 'RewardsPoolBase: not enough rewards to extend');
+            require(
+                availableBalance >= newRewards && availableBalance > leftRewards,
+                'RewardsPoolBase: not enough rewards to extend'
+            );
         }
 
         if (ended) {
@@ -550,6 +556,7 @@ contract RewardsPoolBase is Ownable {
         startTimestamp = _startTimestamp;
         endTimestamp = _endTimestamp;
         lastRewardTimestamp = _startTimestamp;
+        leftoverRewards = new uint256[](rewardPerSecondLength);
 
         extensionDuration = 0;
         delete extensionRewardPerSecond;
@@ -597,7 +604,8 @@ contract RewardsPoolBase is Ownable {
         }
 
         uint256 availableBalance = balance -
-            (totalSpentRewards[_rewardTokenIndex] + spentRewards - totalClaimed[_rewardTokenIndex]);
+            (totalSpentRewards[_rewardTokenIndex] +
+                ((spentRewards - totalClaimed[_rewardTokenIndex]) - leftoverRewards[_rewardTokenIndex]));
 
         if (rewardToken == address(stakingToken)) {
             availableBalance = availableBalance - totalStaked;
