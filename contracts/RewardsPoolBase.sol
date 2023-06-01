@@ -42,7 +42,6 @@ contract RewardsPoolBase is Ownable {
     uint256 public startTimestamp;
     uint256 public endTimestamp;
     uint256 private lastRewardTimestamp;
-    bool public firstTimeStaked;
 
     uint256 public extensionDuration;
     uint256[] public extensionRewardPerSecond;
@@ -360,6 +359,8 @@ contract RewardsPoolBase is Ownable {
         }
 
         if (totalStaked == 0) {
+            lastRewardTimestamp = applicableTimestamp;
+
             for (uint256 i = 0; i < rewardsTokensLength; i++) {
                 uint256 leftRewards = calculateRewardsAmount(
                     lastRewardTimestamp,
@@ -370,7 +371,6 @@ contract RewardsPoolBase is Ownable {
                 leftoverRewards[i] = leftoverRewards[i] + leftRewards;
             }
 
-            lastRewardTimestamp = applicableTimestamp;
             return;
         }
 
