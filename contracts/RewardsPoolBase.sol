@@ -118,6 +118,7 @@ contract RewardsPoolBase is Ownable {
         uint256[] memory empty = new uint256[](rewardsTokens.length);
         accumulatedRewardMultiplier = empty;
         totalClaimed = empty;
+        leftoverRewards = empty;
         totalSpentRewards = empty;
 
         name = _name;
@@ -605,7 +606,9 @@ contract RewardsPoolBase is Ownable {
 
         uint256 availableBalance = balance -
             (totalSpentRewards[_rewardTokenIndex] +
-                ((spentRewards - totalClaimed[_rewardTokenIndex]) - leftoverRewards[_rewardTokenIndex]));
+                spentRewards -
+                totalClaimed[_rewardTokenIndex] -
+                leftoverRewards[_rewardTokenIndex]);
 
         if (rewardToken == address(stakingToken)) {
             availableBalance = availableBalance - totalStaked;

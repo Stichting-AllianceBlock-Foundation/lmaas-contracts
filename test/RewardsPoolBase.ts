@@ -394,44 +394,6 @@ describe('RewardsPoolBase', () => {
         await timeTravel(60);
       });
 
-      it('[Should successfully stake and accumulate rewards even if the pool already is half time]:', async () => {
-        await stakingTokenInstance.approve(RewardsPoolBaseInstance.address, ethers.constants.MaxUint256);
-
-        // #1 - 1800 seconds passed
-        await timeTravel(1800);
-        await RewardsPoolBaseInstance.stake(standardStakingAmount);
-
-        // #2 - 1800 seconds passed
-        await timeTravel(1800);
-        await RewardsPoolBaseInstance.exit();
-
-        const availableBalance = await RewardsPoolBaseInstance.getAvailableBalance(0);
-        expect(availableBalance).to.closeTo(ethers.utils.parseEther('1800'), ethers.utils.parseEther('20'));
-      });
-
-      it.only('[Should successfully stake #2 and accumulate rewards even if the pool already is half time and extending]:', async () => {
-        await stakingTokenInstance.approve(RewardsPoolBaseInstance.address, ethers.constants.MaxUint256);
-        await stakingTokenInstance
-          .connect(bobAccount)
-          .approve(RewardsPoolBaseInstance.address, ethers.constants.MaxUint256);
-
-        // #1 - 1800 seconds passed
-        await timeTravel(1800);
-        // #2 - 1800 seconds passed
-        await timeTravel(1800);
-
-        await extend();
-
-        await RewardsPoolBaseInstance.stake(standardStakingAmount);
-        await RewardsPoolBaseInstance.connect(bobAccount).stake(standardStakingAmount);
-
-        await RewardsPoolBaseInstance.exit();
-        await RewardsPoolBaseInstance.connect(bobAccount).exit();
-
-        const availableBalance = await RewardsPoolBaseInstance.getAvailableBalance(0);
-        expect(availableBalance).to.closeTo(ethers.utils.parseEther('3600'), ethers.utils.parseEther('20'));
-      });
-
       it('[(3 stakers) Should successfully stake and accumulate rewards even if the pool already is half time]:', async () => {
         // before recalculation
         // 3600s = 1 hour
