@@ -5,6 +5,7 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import 'hardhat/console.sol';
 
 /** @dev Base pool contract used in all other pools. 
 Users can stake tokens and get rewards based on the percentage of total staked tokens.
@@ -345,6 +346,11 @@ contract RewardsPoolBase is Ownable {
     function calculateLeftoverRewards(uint256 _currentTimestamp, uint256 _index) public view returns (uint256) {
         uint256 applicableTimestamp = (_currentTimestamp < endTimestamp) ? _currentTimestamp : endTimestamp;
         uint256 startLeftoverTimestamp = lastRewardTimestamp > 0 ? lastRewardTimestamp : startTimestamp;
+
+        if (_currentTimestamp < startTimestamp || (applicableTimestamp == 0 && startLeftoverTimestamp == 0)) {
+            return 0;
+        }
+
         return calculateRewardsAmount(startLeftoverTimestamp, applicableTimestamp, rewardPerSecond[_index]);
     }
 
@@ -523,7 +529,7 @@ contract RewardsPoolBase is Ownable {
 
             // We need to check if we have enough balance available in the contract to pay for the extension
             uint256 availableBalance = getAvailableBalance(i);
-            uint256 leftRewards = calculateLeftoverRewards(i, currentTimestamp);
+            uint256 leftRewards = calculateLeftoverRewards(currentTimestamp, i);
 
             require(
                 availableBalance >= newRewards && availableBalance > leftRewards,

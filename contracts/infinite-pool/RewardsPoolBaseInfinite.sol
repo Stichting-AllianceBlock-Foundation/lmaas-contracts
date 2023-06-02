@@ -120,7 +120,7 @@ contract RewardsPoolBaseInfinite is RewardsPoolBase {
     function _canBeExtended() internal view returns (bool) {
         for (uint256 i = 0; i < rewardsTokens.length; i++) {
             uint256 balance = getAvailableBalance(i);
-            uint256 leftRewards = calculateLeftoverRewards(i, block.timestamp);
+            uint256 leftRewards = calculateLeftoverRewards(block.timestamp, i);
 
             // if we have any rewardsTokens with a balance, the pool should be scheduled
             if (
