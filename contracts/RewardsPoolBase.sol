@@ -558,7 +558,6 @@ contract RewardsPoolBase is Ownable {
         startTimestamp = _startTimestamp;
         endTimestamp = _endTimestamp;
         lastRewardTimestamp = _startTimestamp;
-        leftoverRewards = new uint256[](rewardPerSecondLength);
 
         extensionDuration = 0;
         delete extensionRewardPerSecond;
