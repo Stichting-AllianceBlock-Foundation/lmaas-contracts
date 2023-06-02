@@ -342,6 +342,12 @@ contract RewardsPoolBase is Ownable {
         }
     }
 
+    function calculateLeftoverRewards(uint256 _currentTimestamp, uint256 _index) public view returns (uint256) {
+        uint256 applicableTimestamp = (_currentTimestamp < endTimestamp) ? _currentTimestamp : endTimestamp;
+        uint256 startLeftoverTimestamp = lastRewardTimestamp > 0 ? lastRewardTimestamp : startTimestamp;
+        return calculateRewardsAmount(startLeftoverTimestamp, applicableTimestamp, rewardPerSecond[_index]);
+    }
+
     /**
      * @dev updates the accumulated reward multipliers for everyone and each token
      */
@@ -359,14 +365,8 @@ contract RewardsPoolBase is Ownable {
         }
 
         if (totalStaked == 0) {
-            uint256 startLeftoverTimestamp = lastRewardTimestamp > 0 ? lastRewardTimestamp : startTimestamp;
-
             for (uint256 i = 0; i < rewardsTokensLength; i++) {
-                uint256 leftRewards = calculateRewardsAmount(
-                    startLeftoverTimestamp,
-                    applicableTimestamp,
-                    rewardPerSecond[i]
-                );
+                uint256 leftRewards = calculateLeftoverRewards(_currentTimestamp, i);
 
                 leftoverRewards[i] = leftoverRewards[i] + leftRewards;
             }
@@ -523,7 +523,7 @@ contract RewardsPoolBase is Ownable {
 
             // We need to check if we have enough balance available in the contract to pay for the extension
             uint256 availableBalance = getAvailableBalance(i);
-            uint256 leftRewards = leftoverRewards[i];
+            uint256 leftRewards = calculateLeftoverRewards(i, currentTimestamp);
 
             require(
                 availableBalance >= newRewards && availableBalance > leftRewards,
