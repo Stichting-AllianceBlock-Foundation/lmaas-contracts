@@ -91,7 +91,12 @@ contract NonCompoundingRewardsPoolInfinite is RewardsPoolBaseInfinite, OnlyExitF
 
     /// @dev which you can withdraw your stake and rewards.
     function exit() public override(RewardsPoolBase) {
-        require(userStakedEpoch[msg.sender] < epochCount, 'exit::you can only exit at the end of the epoch');
+        require(
+            locked
+                ? userStakedEpoch[msg.sender] < epochCount || block.timestamp > endTimestamp
+                : userStakedEpoch[msg.sender] < epochCount,
+            'exit::you can only exit at the end of the epoch'
+        );
         RewardsPoolBase.exit();
 
         // we reset the epoch count for the user
