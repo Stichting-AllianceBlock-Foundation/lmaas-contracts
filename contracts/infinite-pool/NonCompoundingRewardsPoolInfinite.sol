@@ -15,6 +15,7 @@ import './../pool-features/infinite-pool/StakeReceiverFeatureInfinite.sol';
 contract NonCompoundingRewardsPoolInfinite is RewardsPoolBaseInfinite, OnlyExitFeatureInfinite {
     uint256 public epochCount;
     mapping(address => uint256) public userStakedEpoch;
+    bool public locked;
 
     /** @param _stakingToken The token to stake
      * @param _rewardsTokens The reward tokens
@@ -27,8 +28,11 @@ contract NonCompoundingRewardsPoolInfinite is RewardsPoolBaseInfinite, OnlyExitF
         address[] memory _rewardsTokens,
         uint256 _stakeLimit,
         uint256 _contractStakeLimit,
-        string memory _name
-    ) RewardsPoolBaseInfinite(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _name) {}
+        string memory _name,
+        bool _locked
+    ) RewardsPoolBaseInfinite(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _name) {
+        locked = _locked;
+    }
 
     /** @dev Stake an amount of tokens
      * @param _tokenAmount The amount to be staked
@@ -37,7 +41,7 @@ contract NonCompoundingRewardsPoolInfinite is RewardsPoolBaseInfinite, OnlyExitF
         uint256 userEpochIn = userStakedEpoch[msg.sender];
 
         // we save on which epoch the user started to stake
-        if (userEpochIn == 0) userStakedEpoch[msg.sender] = epochCount;
+        if (userEpochIn == 0 && locked) userStakedEpoch[msg.sender] = epochCount;
 
         _stake(_tokenAmount, msg.sender, true);
     }
