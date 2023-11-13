@@ -23,13 +23,15 @@ async function main() {
 
   const imposed = await ethers.getSigner(IMPOSE_AS);
 
-  const contract = await ethers.getContractAt('RewardsPoolBase', CONTRACT_ADDRESS);
+  const contract = await ethers.getContractAt('NonCompoundingRewardsPool', CONTRACT_ADDRESS);
 
   console.log({
     ...(await contract.userInfo(imposed.address)),
     rewardDebt: await contract.getUserRewardDebt(imposed.address, 0),
     owedTokens: await contract.getUserOwedTokens(imposed.address, 0),
   });
+
+  console.log(await contract.lockEndTimestamp());
 
   console.log('balance before', {
     contract: await boson.balanceOf(contract.address),
