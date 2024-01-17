@@ -87,6 +87,10 @@ module.exports = {
       url: 'https://volta-rpc.energyweb.org/',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
+    sepolia: {
+      url: 'https://rpc.sepolia.ethpandaops.io',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
   },
   gasReporter: {
     currency: 'USD',
