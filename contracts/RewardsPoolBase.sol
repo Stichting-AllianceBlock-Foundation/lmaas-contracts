@@ -6,6 +6,7 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import 'hardhat/console.sol';
+import './interfaces/IWETH.sol';
 
 /** @dev Base pool contract used in all other pools. 
 Users can stake tokens and get rewards based on the percentage of total staked tokens.
@@ -42,7 +43,7 @@ contract RewardsPoolBase is Ownable {
 
     uint256 public startTimestamp;
     uint256 public endTimestamp;
-    uint256 private lastRewardTimestamp;
+    uint256 public lastRewardTimestamp;
 
     uint256 public extensionDuration;
     uint256[] public extensionRewardPerSecond;
@@ -52,6 +53,7 @@ contract RewardsPoolBase is Ownable {
     uint256 public immutable stakeLimit;
     uint256 public immutable contractStakeLimit;
 
+    address public wrappedNativeToken;
     string public name;
 
     struct UserInfo {
@@ -89,7 +91,8 @@ contract RewardsPoolBase is Ownable {
         address[] memory _rewardsTokens,
         uint256 _stakeLimit,
         uint256 _contractStakeLimit,
-        string memory _name
+        string memory _name,
+        address _wrappedNativeToken
     ) {
         require(address(_stakingToken) != address(0), 'RewardsPoolBase: invalid staking token');
 
@@ -122,6 +125,7 @@ contract RewardsPoolBase is Ownable {
         totalSpentRewards = empty;
 
         name = _name;
+        wrappedNativeToken = _wrappedNativeToken;
     }
 
     /** @dev Start the pool. Funds for rewards will be checked and staking will be opened.
@@ -137,7 +141,11 @@ contract RewardsPoolBase is Ownable {
         _start(_startTimestamp, _endTimestamp, _rewardPerSecond);
     }
 
-    function _start(uint256 _startTimestamp, uint256 _endTimestamp, uint256[] memory _rewardPerSecond) internal {
+    function _start(
+        uint256 _startTimestamp,
+        uint256 _endTimestamp,
+        uint256[] calldata _rewardPerSecond
+    ) internal virtual {
         require(startTimestamp == 0, 'RewardsPoolBase: already started');
         require(
             _startTimestamp >= block.timestamp && _endTimestamp > _startTimestamp,
@@ -205,10 +213,22 @@ contract RewardsPoolBase is Ownable {
      * @param _tokenAmount The amount to be staked
      */
     function stake(uint256 _tokenAmount) public virtual {
-        _stake(_tokenAmount, msg.sender, true);
+        _stake(_tokenAmount, msg.sender, true, true);
     }
 
-    function _stake(uint256 _tokenAmount, address _staker, bool _chargeStaker) internal virtual {
+    /** @dev Stake an amount of tokens in a native way
+     */
+    function stakeNative() public payable virtual {
+        require(
+            address(stakingToken) == wrappedNativeToken,
+            'RewardsPoolBase: staking native not available for this campaign'
+        );
+
+        IWETH(address(stakingToken)).deposit{value: msg.value}();
+        _stake(msg.value, msg.sender, true, false);
+    }
+
+    function _stake(uint256 _tokenAmount, address _staker, bool _chargeStaker, bool _shouldTransfer) internal {
         uint256 currentTimestamp = block.timestamp;
         require(
             (startTimestamp > 0 && currentTimestamp > startTimestamp) &&
@@ -244,8 +264,8 @@ contract RewardsPoolBase is Ownable {
         }
 
         emit Staked(_staker, _tokenAmount);
-
-        stakingToken.safeTransferFrom(address(_chargeStaker ? _staker : msg.sender), address(this), _tokenAmount);
+        if (_shouldTransfer)
+            stakingToken.safeTransferFrom(address(_chargeStaker ? _staker : msg.sender), address(this), _tokenAmount);
     }
 
     /** @dev Claim all your rewards, this will not remove your stake
@@ -268,7 +288,14 @@ contract RewardsPoolBase is Ownable {
 
             emit Claimed(_claimer, reward, rewardsTokens[i]);
 
-            IERC20(rewardsTokens[i]).safeTransfer(_claimer, reward);
+            if (rewardsTokens[i] == wrappedNativeToken) {
+                IWETH(rewardsTokens[i]).withdraw(reward);
+
+                /* This will transfer the native token to the user. */
+                payable(msg.sender).transfer(reward);
+            } else {
+                IERC20(rewardsTokens[i]).safeTransfer(_claimer, reward);
+            }
         }
     }
 
@@ -457,7 +484,7 @@ contract RewardsPoolBase is Ownable {
         address _userAddress,
         uint256 _tokenIndex,
         uint256 _time
-    ) external view returns (uint256) {
+    ) external view virtual returns (uint256) {
         uint256 applicableTimestamp = (_time < endTimestamp) ? _time : endTimestamp;
         uint256 secondsSinceLastReward = applicableTimestamp - lastRewardTimestamp;
 

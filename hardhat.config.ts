@@ -29,17 +29,14 @@ module.exports = {
         blockNumber: 10037135,
         url: 'https://nd-734-064-122.p2pify.com/62dc5c5a86cd193963ee39f48eb2cadf',
       },
+      accounts: { count: 2000 },
     },
     localhost: {
       url: 'http://127.0.0.1:8545/',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
-    rinkeby: {
-      url: `https://rpc.ankr.com/eth_rinkeby`,
-      accounts: [process.env.RINKEBY_PRIVATE_KEY],
-    },
     ethereum: {
-      url: `https://rpc.ankr.com/eth`,
+      url: 'https://nd-158-188-666.p2pify.com/548163c72137050a0454645854af1ffc',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
     binance: {
@@ -50,18 +47,14 @@ module.exports = {
       url: 'https://api.avax-test.network/ext/bc/C/rpc',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
-    // avalanche: {
-    //   url: 'https://rpc.ankr.com/avalanche',
-    //   accounts: [process.env.RINKEBY_PRIVATE_KEY],
-    // },
     polygon: {
-      url: 'https://polygon-rpc.com',
+      url: 'https://nd-046-983-923.p2pify.com/1aace6ebb1db9383cd75547f66d39741',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
     energywebchain: {
       url: 'https://rpc.energyweb.org',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
-      gasPrice: 20000000000,
+      gasPrice: 200000000000,
     },
     moonbeam: {
       url: 'https://rpc.ankr.com/moonbeam',
