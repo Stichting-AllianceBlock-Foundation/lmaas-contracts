@@ -43,12 +43,16 @@ module.exports = {
       url: 'https://rpc.ankr.com/bsc',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
-    avalanche: {
+    avalancheTestnet: {
       url: 'https://api.avax-test.network/ext/bc/C/rpc',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
     polygon: {
       url: 'https://nd-046-983-923.p2pify.com/1aace6ebb1db9383cd75547f66d39741',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    avalanche: {
+      url: 'https://api.avax.network/ext/bc/C/rpc',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
     energywebchain: {

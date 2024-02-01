@@ -5,7 +5,6 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
-import 'hardhat/console.sol';
 import './interfaces/IWETH.sol';
 
 /** @dev Base pool contract used in all other pools. 
@@ -144,7 +143,7 @@ contract RewardsPoolBase is Ownable {
     function _start(
         uint256 _startTimestamp,
         uint256 _endTimestamp,
-        uint256[] calldata _rewardPerSecond
+        uint256[] memory _rewardPerSecond
     ) internal virtual {
         require(startTimestamp == 0, 'RewardsPoolBase: already started');
         require(
