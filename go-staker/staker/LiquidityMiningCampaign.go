@@ -31,7 +31,7 @@ var (
 
 // LmaasLmMetaData contains all meta data concerning the LmaasLm contract.
 var LmaasLmMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"contractIERC20\",\"name\":\"_stakingToken\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"_rewardsTokens\",\"type\":\"address[]\"},{\"internalType\":\"uint256\",\"name\":\"_stakeLimit\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_contractStakeLimit\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"_paymentContract\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_reputationContract\",\"type\":\"address\"},{\"internalType\":\"enumLiquidityMiningCampaignPaymentTier.TierList\",\"name\":\"_tierCampaign\",\"type\":\"uint8\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"Claimed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Exited\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newStartTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newEndTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"newRewardsPerSecond\",\"type\":\"uint256[]\"}],\"name\":\"Extended\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Staked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"startTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"endTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"rewardsPerSecond\",\"type\":\"uint256[]\"}],\"name\":\"Started\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Withdrawn\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"accumulatedRewardMultiplier\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"burnCheck\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cancel\",\"outputs\":[],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cancelExtension\",\"outputs\":[],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cancelExtensionWithPaymentContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cancelWithPaymentContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"claim\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"contractStakeLimit\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"endTimestamp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"exit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"transferTo\",\"type\":\"address\"}],\"name\":\"exitAndTransfer\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"}],\"name\":\"extend\",\"outputs\":[],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_durationTime\",\"type\":\"uint256\"},{\"internalType\":\"uint256[]\",\"name\":\"_rewardPerSecond\",\"type\":\"uint256[]\"}],\"name\":\"extendWithPaymentContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"extensionDuration\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"extensionRewardPerSecond\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_rewardTokenIndex\",\"type\":\"uint256\"}],\"name\":\"getAvailableBalance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getPreviousCampaignsCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getRewardTokensCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_time\",\"type\":\"uint256\"}],\"name\":\"getUserAccumulatedReward\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"getUserOwedTokens\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"getUserRewardDebt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"}],\"name\":\"getUserRewardDebtLength\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"}],\"name\":\"getUserTokensOwedLength\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"hasStakingStarted\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"previousCampaigns\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"startTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endTimestamp\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"receiversWhitelist\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"reputationContract\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"rewardPerSecond\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"rewardsTokens\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_receiver\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"_whitelisted\",\"type\":\"bool\"}],\"name\":\"setReceiverWhitelisted\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenAmount\",\"type\":\"uint256\"}],\"name\":\"stake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"stakeLimit\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenAmount\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_signature\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"_maxTier\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_deadline\",\"type\":\"uint256\"}],\"name\":\"stakeWithTier\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"stakingToken\",\"outputs\":[{\"internalType\":\"contractIERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"}],\"name\":\"start\",\"outputs\":[],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"startTimestamp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_startTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_endTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256[]\",\"name\":\"_rewardPerSecond\",\"type\":\"uint256[]\"}],\"name\":\"startWithPaymentContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"tierCampaign\",\"outputs\":[{\"internalType\":\"enumLiquidityMiningCampaignPaymentTier.TierList\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalStaked\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"updateRewardMultipliers\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"userInfo\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"firstStakedTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"amountStaked\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenAmount\",\"type\":\"uint256\"}],\"name\":\"withdraw\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_recipient\",\"type\":\"address\"}],\"name\":\"withdrawExcessRewards\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_recipient\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"}],\"name\":\"withdrawTokens\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}]",
+	ABI: "[{\"inputs\":[{\"internalType\":\"contractIERC20\",\"name\":\"_stakingToken\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"_rewardsTokens\",\"type\":\"address[]\"},{\"internalType\":\"uint256\",\"name\":\"_stakeLimit\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_contractStakeLimit\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"Claimed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Exited\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newStartTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newEndTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"newRewardsPerSecond\",\"type\":\"uint256[]\"}],\"name\":\"Extended\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Staked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"startTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"endTimestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"rewardsPerSecond\",\"type\":\"uint256[]\"}],\"name\":\"Started\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Withdrawn\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"accumulatedRewardMultiplier\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cancel\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cancelExtension\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"claim\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"contractStakeLimit\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"endTimestamp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"exit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"transferTo\",\"type\":\"address\"}],\"name\":\"exitAndTransfer\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_durationTime\",\"type\":\"uint256\"},{\"internalType\":\"uint256[]\",\"name\":\"_rewardPerSecond\",\"type\":\"uint256[]\"}],\"name\":\"extend\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"extensionDuration\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"extensionRewardPerSecond\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_rewardTokenIndex\",\"type\":\"uint256\"}],\"name\":\"getAvailableBalance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getPreviousCampaignsCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getRewardTokensCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_tokenIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_time\",\"type\":\"uint256\"}],\"name\":\"getUserAccumulatedReward\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"getUserOwedTokens\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"getUserRewardDebt\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"}],\"name\":\"getUserRewardDebtLength\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_userAddress\",\"type\":\"address\"}],\"name\":\"getUserTokensOwedLength\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"hasStakingStarted\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"previousCampaigns\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"startTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endTimestamp\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"realStartTimestamp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"receiversWhitelist\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"rewardPerSecond\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"rewardTokenDecimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"rewardsTokens\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_receiver\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"_whitelisted\",\"type\":\"bool\"}],\"name\":\"setReceiverWhitelisted\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenAmount\",\"type\":\"uint256\"}],\"name\":\"stake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"stakeLimit\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"stakingToken\",\"outputs\":[{\"internalType\":\"contractIERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"stakingTokenDecimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_startTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_endTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256[]\",\"name\":\"_rewardPerSecond\",\"type\":\"uint256[]\"}],\"name\":\"start\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"startTimestamp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalStaked\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"updateRewardMultipliers\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"userInfo\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"firstStakedTimestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"amountStaked\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenAmount\",\"type\":\"uint256\"}],\"name\":\"withdraw\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_recipient\",\"type\":\"address\"}],\"name\":\"withdrawExcessRewards\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_recipient\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"}],\"name\":\"withdrawTokens\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}]",
 }
 
 // LmaasLmABI is the input ABI used to generate the binding from.
@@ -242,95 +242,6 @@ func (_LmaasLm *LmaasLmCallerSession) BalanceOf(_userAddress common.Address) (*b
 	return _LmaasLm.Contract.BalanceOf(&_LmaasLm.CallOpts, _userAddress)
 }
 
-// BurnCheck is a free data retrieval call binding the contract method 0x689df1db.
-//
-// Solidity: function burnCheck(address ) view returns(bool)
-func (_LmaasLm *LmaasLmCaller) BurnCheck(opts *bind.CallOpts, arg0 common.Address) (bool, error) {
-	var out []interface{}
-	err := _LmaasLm.contract.Call(opts, &out, "burnCheck", arg0)
-
-	if err != nil {
-		return *new(bool), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
-
-	return out0, err
-
-}
-
-// BurnCheck is a free data retrieval call binding the contract method 0x689df1db.
-//
-// Solidity: function burnCheck(address ) view returns(bool)
-func (_LmaasLm *LmaasLmSession) BurnCheck(arg0 common.Address) (bool, error) {
-	return _LmaasLm.Contract.BurnCheck(&_LmaasLm.CallOpts, arg0)
-}
-
-// BurnCheck is a free data retrieval call binding the contract method 0x689df1db.
-//
-// Solidity: function burnCheck(address ) view returns(bool)
-func (_LmaasLm *LmaasLmCallerSession) BurnCheck(arg0 common.Address) (bool, error) {
-	return _LmaasLm.Contract.BurnCheck(&_LmaasLm.CallOpts, arg0)
-}
-
-// Cancel is a free data retrieval call binding the contract method 0xea8a1af0.
-//
-// Solidity: function cancel() view returns()
-func (_LmaasLm *LmaasLmCaller) Cancel(opts *bind.CallOpts) error {
-	var out []interface{}
-	err := _LmaasLm.contract.Call(opts, &out, "cancel")
-
-	if err != nil {
-		return err
-	}
-
-	return err
-
-}
-
-// Cancel is a free data retrieval call binding the contract method 0xea8a1af0.
-//
-// Solidity: function cancel() view returns()
-func (_LmaasLm *LmaasLmSession) Cancel() error {
-	return _LmaasLm.Contract.Cancel(&_LmaasLm.CallOpts)
-}
-
-// Cancel is a free data retrieval call binding the contract method 0xea8a1af0.
-//
-// Solidity: function cancel() view returns()
-func (_LmaasLm *LmaasLmCallerSession) Cancel() error {
-	return _LmaasLm.Contract.Cancel(&_LmaasLm.CallOpts)
-}
-
-// CancelExtension is a free data retrieval call binding the contract method 0x2af9b070.
-//
-// Solidity: function cancelExtension() view returns()
-func (_LmaasLm *LmaasLmCaller) CancelExtension(opts *bind.CallOpts) error {
-	var out []interface{}
-	err := _LmaasLm.contract.Call(opts, &out, "cancelExtension")
-
-	if err != nil {
-		return err
-	}
-
-	return err
-
-}
-
-// CancelExtension is a free data retrieval call binding the contract method 0x2af9b070.
-//
-// Solidity: function cancelExtension() view returns()
-func (_LmaasLm *LmaasLmSession) CancelExtension() error {
-	return _LmaasLm.Contract.CancelExtension(&_LmaasLm.CallOpts)
-}
-
-// CancelExtension is a free data retrieval call binding the contract method 0x2af9b070.
-//
-// Solidity: function cancelExtension() view returns()
-func (_LmaasLm *LmaasLmCallerSession) CancelExtension() error {
-	return _LmaasLm.Contract.CancelExtension(&_LmaasLm.CallOpts)
-}
-
 // ContractStakeLimit is a free data retrieval call binding the contract method 0x03d1dae0.
 //
 // Solidity: function contractStakeLimit() view returns(uint256)
@@ -391,35 +302,6 @@ func (_LmaasLm *LmaasLmSession) EndTimestamp() (*big.Int, error) {
 // Solidity: function endTimestamp() view returns(uint256)
 func (_LmaasLm *LmaasLmCallerSession) EndTimestamp() (*big.Int, error) {
 	return _LmaasLm.Contract.EndTimestamp(&_LmaasLm.CallOpts)
-}
-
-// Extend is a free data retrieval call binding the contract method 0x6c32bf69.
-//
-// Solidity: function extend(uint256 , uint256[] ) view returns()
-func (_LmaasLm *LmaasLmCaller) Extend(opts *bind.CallOpts, arg0 *big.Int, arg1 []*big.Int) error {
-	var out []interface{}
-	err := _LmaasLm.contract.Call(opts, &out, "extend", arg0, arg1)
-
-	if err != nil {
-		return err
-	}
-
-	return err
-
-}
-
-// Extend is a free data retrieval call binding the contract method 0x6c32bf69.
-//
-// Solidity: function extend(uint256 , uint256[] ) view returns()
-func (_LmaasLm *LmaasLmSession) Extend(arg0 *big.Int, arg1 []*big.Int) error {
-	return _LmaasLm.Contract.Extend(&_LmaasLm.CallOpts, arg0, arg1)
-}
-
-// Extend is a free data retrieval call binding the contract method 0x6c32bf69.
-//
-// Solidity: function extend(uint256 , uint256[] ) view returns()
-func (_LmaasLm *LmaasLmCallerSession) Extend(arg0 *big.Int, arg1 []*big.Int) error {
-	return _LmaasLm.Contract.Extend(&_LmaasLm.CallOpts, arg0, arg1)
 }
 
 // ExtensionDuration is a free data retrieval call binding the contract method 0x2037424b.
@@ -870,6 +752,37 @@ func (_LmaasLm *LmaasLmCallerSession) PreviousCampaigns(arg0 *big.Int) (struct {
 	return _LmaasLm.Contract.PreviousCampaigns(&_LmaasLm.CallOpts, arg0)
 }
 
+// RealStartTimestamp is a free data retrieval call binding the contract method 0x4a74662d.
+//
+// Solidity: function realStartTimestamp() view returns(uint256)
+func (_LmaasLm *LmaasLmCaller) RealStartTimestamp(opts *bind.CallOpts) (*big.Int, error) {
+	var out []interface{}
+	err := _LmaasLm.contract.Call(opts, &out, "realStartTimestamp")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// RealStartTimestamp is a free data retrieval call binding the contract method 0x4a74662d.
+//
+// Solidity: function realStartTimestamp() view returns(uint256)
+func (_LmaasLm *LmaasLmSession) RealStartTimestamp() (*big.Int, error) {
+	return _LmaasLm.Contract.RealStartTimestamp(&_LmaasLm.CallOpts)
+}
+
+// RealStartTimestamp is a free data retrieval call binding the contract method 0x4a74662d.
+//
+// Solidity: function realStartTimestamp() view returns(uint256)
+func (_LmaasLm *LmaasLmCallerSession) RealStartTimestamp() (*big.Int, error) {
+	return _LmaasLm.Contract.RealStartTimestamp(&_LmaasLm.CallOpts)
+}
+
 // ReceiversWhitelist is a free data retrieval call binding the contract method 0x363291dc.
 //
 // Solidity: function receiversWhitelist(address ) view returns(bool)
@@ -901,37 +814,6 @@ func (_LmaasLm *LmaasLmCallerSession) ReceiversWhitelist(arg0 common.Address) (b
 	return _LmaasLm.Contract.ReceiversWhitelist(&_LmaasLm.CallOpts, arg0)
 }
 
-// ReputationContract is a free data retrieval call binding the contract method 0x87bc1425.
-//
-// Solidity: function reputationContract() view returns(address)
-func (_LmaasLm *LmaasLmCaller) ReputationContract(opts *bind.CallOpts) (common.Address, error) {
-	var out []interface{}
-	err := _LmaasLm.contract.Call(opts, &out, "reputationContract")
-
-	if err != nil {
-		return *new(common.Address), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
-
-	return out0, err
-
-}
-
-// ReputationContract is a free data retrieval call binding the contract method 0x87bc1425.
-//
-// Solidity: function reputationContract() view returns(address)
-func (_LmaasLm *LmaasLmSession) ReputationContract() (common.Address, error) {
-	return _LmaasLm.Contract.ReputationContract(&_LmaasLm.CallOpts)
-}
-
-// ReputationContract is a free data retrieval call binding the contract method 0x87bc1425.
-//
-// Solidity: function reputationContract() view returns(address)
-func (_LmaasLm *LmaasLmCallerSession) ReputationContract() (common.Address, error) {
-	return _LmaasLm.Contract.ReputationContract(&_LmaasLm.CallOpts)
-}
-
 // RewardPerSecond is a free data retrieval call binding the contract method 0xfd67fd7c.
 //
 // Solidity: function rewardPerSecond(uint256 ) view returns(uint256)
@@ -961,6 +843,37 @@ func (_LmaasLm *LmaasLmSession) RewardPerSecond(arg0 *big.Int) (*big.Int, error)
 // Solidity: function rewardPerSecond(uint256 ) view returns(uint256)
 func (_LmaasLm *LmaasLmCallerSession) RewardPerSecond(arg0 *big.Int) (*big.Int, error) {
 	return _LmaasLm.Contract.RewardPerSecond(&_LmaasLm.CallOpts, arg0)
+}
+
+// RewardTokenDecimals is a free data retrieval call binding the contract method 0xb8ba2430.
+//
+// Solidity: function rewardTokenDecimals(uint256 ) view returns(uint8)
+func (_LmaasLm *LmaasLmCaller) RewardTokenDecimals(opts *bind.CallOpts, arg0 *big.Int) (uint8, error) {
+	var out []interface{}
+	err := _LmaasLm.contract.Call(opts, &out, "rewardTokenDecimals", arg0)
+
+	if err != nil {
+		return *new(uint8), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(uint8)).(*uint8)
+
+	return out0, err
+
+}
+
+// RewardTokenDecimals is a free data retrieval call binding the contract method 0xb8ba2430.
+//
+// Solidity: function rewardTokenDecimals(uint256 ) view returns(uint8)
+func (_LmaasLm *LmaasLmSession) RewardTokenDecimals(arg0 *big.Int) (uint8, error) {
+	return _LmaasLm.Contract.RewardTokenDecimals(&_LmaasLm.CallOpts, arg0)
+}
+
+// RewardTokenDecimals is a free data retrieval call binding the contract method 0xb8ba2430.
+//
+// Solidity: function rewardTokenDecimals(uint256 ) view returns(uint8)
+func (_LmaasLm *LmaasLmCallerSession) RewardTokenDecimals(arg0 *big.Int) (uint8, error) {
+	return _LmaasLm.Contract.RewardTokenDecimals(&_LmaasLm.CallOpts, arg0)
 }
 
 // RewardsTokens is a free data retrieval call binding the contract method 0xb6d0dcd8.
@@ -1056,33 +969,35 @@ func (_LmaasLm *LmaasLmCallerSession) StakingToken() (common.Address, error) {
 	return _LmaasLm.Contract.StakingToken(&_LmaasLm.CallOpts)
 }
 
-// Start is a free data retrieval call binding the contract method 0x869d8ead.
+// StakingTokenDecimals is a free data retrieval call binding the contract method 0xb9f7a7b5.
 //
-// Solidity: function start(uint256 , uint256 , uint256[] ) view returns()
-func (_LmaasLm *LmaasLmCaller) Start(opts *bind.CallOpts, arg0 *big.Int, arg1 *big.Int, arg2 []*big.Int) error {
+// Solidity: function stakingTokenDecimals() view returns(uint8)
+func (_LmaasLm *LmaasLmCaller) StakingTokenDecimals(opts *bind.CallOpts) (uint8, error) {
 	var out []interface{}
-	err := _LmaasLm.contract.Call(opts, &out, "start", arg0, arg1, arg2)
+	err := _LmaasLm.contract.Call(opts, &out, "stakingTokenDecimals")
 
 	if err != nil {
-		return err
+		return *new(uint8), err
 	}
 
-	return err
+	out0 := *abi.ConvertType(out[0], new(uint8)).(*uint8)
+
+	return out0, err
 
 }
 
-// Start is a free data retrieval call binding the contract method 0x869d8ead.
+// StakingTokenDecimals is a free data retrieval call binding the contract method 0xb9f7a7b5.
 //
-// Solidity: function start(uint256 , uint256 , uint256[] ) view returns()
-func (_LmaasLm *LmaasLmSession) Start(arg0 *big.Int, arg1 *big.Int, arg2 []*big.Int) error {
-	return _LmaasLm.Contract.Start(&_LmaasLm.CallOpts, arg0, arg1, arg2)
+// Solidity: function stakingTokenDecimals() view returns(uint8)
+func (_LmaasLm *LmaasLmSession) StakingTokenDecimals() (uint8, error) {
+	return _LmaasLm.Contract.StakingTokenDecimals(&_LmaasLm.CallOpts)
 }
 
-// Start is a free data retrieval call binding the contract method 0x869d8ead.
+// StakingTokenDecimals is a free data retrieval call binding the contract method 0xb9f7a7b5.
 //
-// Solidity: function start(uint256 , uint256 , uint256[] ) view returns()
-func (_LmaasLm *LmaasLmCallerSession) Start(arg0 *big.Int, arg1 *big.Int, arg2 []*big.Int) error {
-	return _LmaasLm.Contract.Start(&_LmaasLm.CallOpts, arg0, arg1, arg2)
+// Solidity: function stakingTokenDecimals() view returns(uint8)
+func (_LmaasLm *LmaasLmCallerSession) StakingTokenDecimals() (uint8, error) {
+	return _LmaasLm.Contract.StakingTokenDecimals(&_LmaasLm.CallOpts)
 }
 
 // StartTimestamp is a free data retrieval call binding the contract method 0xe6fd48bc.
@@ -1114,37 +1029,6 @@ func (_LmaasLm *LmaasLmSession) StartTimestamp() (*big.Int, error) {
 // Solidity: function startTimestamp() view returns(uint256)
 func (_LmaasLm *LmaasLmCallerSession) StartTimestamp() (*big.Int, error) {
 	return _LmaasLm.Contract.StartTimestamp(&_LmaasLm.CallOpts)
-}
-
-// TierCampaign is a free data retrieval call binding the contract method 0x47224b0b.
-//
-// Solidity: function tierCampaign() view returns(uint8)
-func (_LmaasLm *LmaasLmCaller) TierCampaign(opts *bind.CallOpts) (uint8, error) {
-	var out []interface{}
-	err := _LmaasLm.contract.Call(opts, &out, "tierCampaign")
-
-	if err != nil {
-		return *new(uint8), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(uint8)).(*uint8)
-
-	return out0, err
-
-}
-
-// TierCampaign is a free data retrieval call binding the contract method 0x47224b0b.
-//
-// Solidity: function tierCampaign() view returns(uint8)
-func (_LmaasLm *LmaasLmSession) TierCampaign() (uint8, error) {
-	return _LmaasLm.Contract.TierCampaign(&_LmaasLm.CallOpts)
-}
-
-// TierCampaign is a free data retrieval call binding the contract method 0x47224b0b.
-//
-// Solidity: function tierCampaign() view returns(uint8)
-func (_LmaasLm *LmaasLmCallerSession) TierCampaign() (uint8, error) {
-	return _LmaasLm.Contract.TierCampaign(&_LmaasLm.CallOpts)
 }
 
 // TotalStaked is a free data retrieval call binding the contract method 0x817b1cd2.
@@ -1223,46 +1107,46 @@ func (_LmaasLm *LmaasLmCallerSession) UserInfo(arg0 common.Address) (struct {
 	return _LmaasLm.Contract.UserInfo(&_LmaasLm.CallOpts, arg0)
 }
 
-// CancelExtensionWithPaymentContract is a paid mutator transaction binding the contract method 0xb6c12f9a.
+// Cancel is a paid mutator transaction binding the contract method 0xea8a1af0.
 //
-// Solidity: function cancelExtensionWithPaymentContract() returns()
-func (_LmaasLm *LmaasLmTransactor) CancelExtensionWithPaymentContract(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _LmaasLm.contract.Transact(opts, "cancelExtensionWithPaymentContract")
+// Solidity: function cancel() returns()
+func (_LmaasLm *LmaasLmTransactor) Cancel(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _LmaasLm.contract.Transact(opts, "cancel")
 }
 
-// CancelExtensionWithPaymentContract is a paid mutator transaction binding the contract method 0xb6c12f9a.
+// Cancel is a paid mutator transaction binding the contract method 0xea8a1af0.
 //
-// Solidity: function cancelExtensionWithPaymentContract() returns()
-func (_LmaasLm *LmaasLmSession) CancelExtensionWithPaymentContract() (*types.Transaction, error) {
-	return _LmaasLm.Contract.CancelExtensionWithPaymentContract(&_LmaasLm.TransactOpts)
+// Solidity: function cancel() returns()
+func (_LmaasLm *LmaasLmSession) Cancel() (*types.Transaction, error) {
+	return _LmaasLm.Contract.Cancel(&_LmaasLm.TransactOpts)
 }
 
-// CancelExtensionWithPaymentContract is a paid mutator transaction binding the contract method 0xb6c12f9a.
+// Cancel is a paid mutator transaction binding the contract method 0xea8a1af0.
 //
-// Solidity: function cancelExtensionWithPaymentContract() returns()
-func (_LmaasLm *LmaasLmTransactorSession) CancelExtensionWithPaymentContract() (*types.Transaction, error) {
-	return _LmaasLm.Contract.CancelExtensionWithPaymentContract(&_LmaasLm.TransactOpts)
+// Solidity: function cancel() returns()
+func (_LmaasLm *LmaasLmTransactorSession) Cancel() (*types.Transaction, error) {
+	return _LmaasLm.Contract.Cancel(&_LmaasLm.TransactOpts)
 }
 
-// CancelWithPaymentContract is a paid mutator transaction binding the contract method 0xa74c0053.
+// CancelExtension is a paid mutator transaction binding the contract method 0x2af9b070.
 //
-// Solidity: function cancelWithPaymentContract() returns()
-func (_LmaasLm *LmaasLmTransactor) CancelWithPaymentContract(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _LmaasLm.contract.Transact(opts, "cancelWithPaymentContract")
+// Solidity: function cancelExtension() returns()
+func (_LmaasLm *LmaasLmTransactor) CancelExtension(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _LmaasLm.contract.Transact(opts, "cancelExtension")
 }
 
-// CancelWithPaymentContract is a paid mutator transaction binding the contract method 0xa74c0053.
+// CancelExtension is a paid mutator transaction binding the contract method 0x2af9b070.
 //
-// Solidity: function cancelWithPaymentContract() returns()
-func (_LmaasLm *LmaasLmSession) CancelWithPaymentContract() (*types.Transaction, error) {
-	return _LmaasLm.Contract.CancelWithPaymentContract(&_LmaasLm.TransactOpts)
+// Solidity: function cancelExtension() returns()
+func (_LmaasLm *LmaasLmSession) CancelExtension() (*types.Transaction, error) {
+	return _LmaasLm.Contract.CancelExtension(&_LmaasLm.TransactOpts)
 }
 
-// CancelWithPaymentContract is a paid mutator transaction binding the contract method 0xa74c0053.
+// CancelExtension is a paid mutator transaction binding the contract method 0x2af9b070.
 //
-// Solidity: function cancelWithPaymentContract() returns()
-func (_LmaasLm *LmaasLmTransactorSession) CancelWithPaymentContract() (*types.Transaction, error) {
-	return _LmaasLm.Contract.CancelWithPaymentContract(&_LmaasLm.TransactOpts)
+// Solidity: function cancelExtension() returns()
+func (_LmaasLm *LmaasLmTransactorSession) CancelExtension() (*types.Transaction, error) {
+	return _LmaasLm.Contract.CancelExtension(&_LmaasLm.TransactOpts)
 }
 
 // Claim is a paid mutator transaction binding the contract method 0x4e71d92d.
@@ -1328,25 +1212,25 @@ func (_LmaasLm *LmaasLmTransactorSession) ExitAndTransfer(transferTo common.Addr
 	return _LmaasLm.Contract.ExitAndTransfer(&_LmaasLm.TransactOpts, transferTo)
 }
 
-// ExtendWithPaymentContract is a paid mutator transaction binding the contract method 0x70efefe7.
+// Extend is a paid mutator transaction binding the contract method 0x6c32bf69.
 //
-// Solidity: function extendWithPaymentContract(uint256 _durationTime, uint256[] _rewardPerSecond) returns()
-func (_LmaasLm *LmaasLmTransactor) ExtendWithPaymentContract(opts *bind.TransactOpts, _durationTime *big.Int, _rewardPerSecond []*big.Int) (*types.Transaction, error) {
-	return _LmaasLm.contract.Transact(opts, "extendWithPaymentContract", _durationTime, _rewardPerSecond)
+// Solidity: function extend(uint256 _durationTime, uint256[] _rewardPerSecond) returns()
+func (_LmaasLm *LmaasLmTransactor) Extend(opts *bind.TransactOpts, _durationTime *big.Int, _rewardPerSecond []*big.Int) (*types.Transaction, error) {
+	return _LmaasLm.contract.Transact(opts, "extend", _durationTime, _rewardPerSecond)
 }
 
-// ExtendWithPaymentContract is a paid mutator transaction binding the contract method 0x70efefe7.
+// Extend is a paid mutator transaction binding the contract method 0x6c32bf69.
 //
-// Solidity: function extendWithPaymentContract(uint256 _durationTime, uint256[] _rewardPerSecond) returns()
-func (_LmaasLm *LmaasLmSession) ExtendWithPaymentContract(_durationTime *big.Int, _rewardPerSecond []*big.Int) (*types.Transaction, error) {
-	return _LmaasLm.Contract.ExtendWithPaymentContract(&_LmaasLm.TransactOpts, _durationTime, _rewardPerSecond)
+// Solidity: function extend(uint256 _durationTime, uint256[] _rewardPerSecond) returns()
+func (_LmaasLm *LmaasLmSession) Extend(_durationTime *big.Int, _rewardPerSecond []*big.Int) (*types.Transaction, error) {
+	return _LmaasLm.Contract.Extend(&_LmaasLm.TransactOpts, _durationTime, _rewardPerSecond)
 }
 
-// ExtendWithPaymentContract is a paid mutator transaction binding the contract method 0x70efefe7.
+// Extend is a paid mutator transaction binding the contract method 0x6c32bf69.
 //
-// Solidity: function extendWithPaymentContract(uint256 _durationTime, uint256[] _rewardPerSecond) returns()
-func (_LmaasLm *LmaasLmTransactorSession) ExtendWithPaymentContract(_durationTime *big.Int, _rewardPerSecond []*big.Int) (*types.Transaction, error) {
-	return _LmaasLm.Contract.ExtendWithPaymentContract(&_LmaasLm.TransactOpts, _durationTime, _rewardPerSecond)
+// Solidity: function extend(uint256 _durationTime, uint256[] _rewardPerSecond) returns()
+func (_LmaasLm *LmaasLmTransactorSession) Extend(_durationTime *big.Int, _rewardPerSecond []*big.Int) (*types.Transaction, error) {
+	return _LmaasLm.Contract.Extend(&_LmaasLm.TransactOpts, _durationTime, _rewardPerSecond)
 }
 
 // RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
@@ -1412,46 +1296,25 @@ func (_LmaasLm *LmaasLmTransactorSession) Stake(_tokenAmount *big.Int) (*types.T
 	return _LmaasLm.Contract.Stake(&_LmaasLm.TransactOpts, _tokenAmount)
 }
 
-// StakeWithTier is a paid mutator transaction binding the contract method 0x98850459.
+// Start is a paid mutator transaction binding the contract method 0x869d8ead.
 //
-// Solidity: function stakeWithTier(uint256 _tokenAmount, bytes _signature, uint256 _maxTier, uint256 _deadline) returns()
-func (_LmaasLm *LmaasLmTransactor) StakeWithTier(opts *bind.TransactOpts, _tokenAmount *big.Int, _signature []byte, _maxTier *big.Int, _deadline *big.Int) (*types.Transaction, error) {
-	return _LmaasLm.contract.Transact(opts, "stakeWithTier", _tokenAmount, _signature, _maxTier, _deadline)
+// Solidity: function start(uint256 _startTimestamp, uint256 _endTimestamp, uint256[] _rewardPerSecond) returns()
+func (_LmaasLm *LmaasLmTransactor) Start(opts *bind.TransactOpts, _startTimestamp *big.Int, _endTimestamp *big.Int, _rewardPerSecond []*big.Int) (*types.Transaction, error) {
+	return _LmaasLm.contract.Transact(opts, "start", _startTimestamp, _endTimestamp, _rewardPerSecond)
 }
 
-// StakeWithTier is a paid mutator transaction binding the contract method 0x98850459.
+// Start is a paid mutator transaction binding the contract method 0x869d8ead.
 //
-// Solidity: function stakeWithTier(uint256 _tokenAmount, bytes _signature, uint256 _maxTier, uint256 _deadline) returns()
-func (_LmaasLm *LmaasLmSession) StakeWithTier(_tokenAmount *big.Int, _signature []byte, _maxTier *big.Int, _deadline *big.Int) (*types.Transaction, error) {
-	return _LmaasLm.Contract.StakeWithTier(&_LmaasLm.TransactOpts, _tokenAmount, _signature, _maxTier, _deadline)
+// Solidity: function start(uint256 _startTimestamp, uint256 _endTimestamp, uint256[] _rewardPerSecond) returns()
+func (_LmaasLm *LmaasLmSession) Start(_startTimestamp *big.Int, _endTimestamp *big.Int, _rewardPerSecond []*big.Int) (*types.Transaction, error) {
+	return _LmaasLm.Contract.Start(&_LmaasLm.TransactOpts, _startTimestamp, _endTimestamp, _rewardPerSecond)
 }
 
-// StakeWithTier is a paid mutator transaction binding the contract method 0x98850459.
+// Start is a paid mutator transaction binding the contract method 0x869d8ead.
 //
-// Solidity: function stakeWithTier(uint256 _tokenAmount, bytes _signature, uint256 _maxTier, uint256 _deadline) returns()
-func (_LmaasLm *LmaasLmTransactorSession) StakeWithTier(_tokenAmount *big.Int, _signature []byte, _maxTier *big.Int, _deadline *big.Int) (*types.Transaction, error) {
-	return _LmaasLm.Contract.StakeWithTier(&_LmaasLm.TransactOpts, _tokenAmount, _signature, _maxTier, _deadline)
-}
-
-// StartWithPaymentContract is a paid mutator transaction binding the contract method 0xa22cfd7c.
-//
-// Solidity: function startWithPaymentContract(uint256 _startTimestamp, uint256 _endTimestamp, uint256[] _rewardPerSecond) returns()
-func (_LmaasLm *LmaasLmTransactor) StartWithPaymentContract(opts *bind.TransactOpts, _startTimestamp *big.Int, _endTimestamp *big.Int, _rewardPerSecond []*big.Int) (*types.Transaction, error) {
-	return _LmaasLm.contract.Transact(opts, "startWithPaymentContract", _startTimestamp, _endTimestamp, _rewardPerSecond)
-}
-
-// StartWithPaymentContract is a paid mutator transaction binding the contract method 0xa22cfd7c.
-//
-// Solidity: function startWithPaymentContract(uint256 _startTimestamp, uint256 _endTimestamp, uint256[] _rewardPerSecond) returns()
-func (_LmaasLm *LmaasLmSession) StartWithPaymentContract(_startTimestamp *big.Int, _endTimestamp *big.Int, _rewardPerSecond []*big.Int) (*types.Transaction, error) {
-	return _LmaasLm.Contract.StartWithPaymentContract(&_LmaasLm.TransactOpts, _startTimestamp, _endTimestamp, _rewardPerSecond)
-}
-
-// StartWithPaymentContract is a paid mutator transaction binding the contract method 0xa22cfd7c.
-//
-// Solidity: function startWithPaymentContract(uint256 _startTimestamp, uint256 _endTimestamp, uint256[] _rewardPerSecond) returns()
-func (_LmaasLm *LmaasLmTransactorSession) StartWithPaymentContract(_startTimestamp *big.Int, _endTimestamp *big.Int, _rewardPerSecond []*big.Int) (*types.Transaction, error) {
-	return _LmaasLm.Contract.StartWithPaymentContract(&_LmaasLm.TransactOpts, _startTimestamp, _endTimestamp, _rewardPerSecond)
+// Solidity: function start(uint256 _startTimestamp, uint256 _endTimestamp, uint256[] _rewardPerSecond) returns()
+func (_LmaasLm *LmaasLmTransactorSession) Start(_startTimestamp *big.Int, _endTimestamp *big.Int, _rewardPerSecond []*big.Int) (*types.Transaction, error) {
+	return _LmaasLm.Contract.Start(&_LmaasLm.TransactOpts, _startTimestamp, _endTimestamp, _rewardPerSecond)
 }
 
 // TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.

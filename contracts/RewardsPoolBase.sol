@@ -3,6 +3,7 @@ pragma solidity 0.8.9;
 
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import '@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import './interfaces/IWETH.sol';
 
@@ -33,6 +34,9 @@ contract RewardsPoolBase is Ownable {
 
     uint256[] public rewardPerSecond;
     address[] public rewardsTokens;
+    uint256[] public leftoverRewards;
+    uint8 public stakingTokenDecimals;
+    uint8[] public rewardTokenDecimals;
 
     IERC20 public immutable stakingToken;
 
@@ -54,7 +58,7 @@ contract RewardsPoolBase is Ownable {
     struct UserInfo {
         uint256 firstStakedTimestamp;
         uint256 amountStaked; // How many tokens the user has staked.
-        uint256[] rewardDebt; //
+        uint256[] rewardDebt; // Helper for calculating tokensdebt
         uint256[] tokensOwed; // How many tokens the contract owes to the user.
     }
 
@@ -94,8 +98,12 @@ contract RewardsPoolBase is Ownable {
         require(_stakeLimit != 0 && _contractStakeLimit != 0, 'RewardsPoolBase: invalid stake limit');
 
         require(_rewardsTokens.length > 0, 'RewardsPoolBase: empty rewardsTokens');
+        stakingTokenDecimals = IERC20Metadata(address(_stakingToken)).decimals();
+        rewardTokenDecimals = new uint8[](_rewardsTokens.length);
 
         for (uint256 i = 0; i < _rewardsTokens.length; i++) {
+            rewardTokenDecimals[i] = IERC20Metadata(_rewardsTokens[i]).decimals();
+
             for (uint256 j = i + 1; j < _rewardsTokens.length; j++) {
                 require(
                     address(_rewardsTokens[i]) != address(_rewardsTokens[j]),
@@ -112,6 +120,7 @@ contract RewardsPoolBase is Ownable {
         uint256[] memory empty = new uint256[](rewardsTokens.length);
         accumulatedRewardMultiplier = empty;
         totalClaimed = empty;
+        leftoverRewards = empty;
         totalSpentRewards = empty;
 
         name = _name;
@@ -126,7 +135,7 @@ contract RewardsPoolBase is Ownable {
     function start(
         uint256 _startTimestamp,
         uint256 _endTimestamp,
-        uint256[] calldata _rewardPerSecond
+        uint256[] memory _rewardPerSecond
     ) external virtual onlyOwner {
         _start(_startTimestamp, _endTimestamp, _rewardPerSecond);
     }
@@ -134,7 +143,7 @@ contract RewardsPoolBase is Ownable {
     function _start(
         uint256 _startTimestamp,
         uint256 _endTimestamp,
-        uint256[] calldata _rewardPerSecond
+        uint256[] memory _rewardPerSecond
     ) internal virtual {
         require(startTimestamp == 0, 'RewardsPoolBase: already started');
         require(
@@ -162,19 +171,41 @@ contract RewardsPoolBase is Ownable {
         emit Started(startTimestamp, endTimestamp, rewardPerSecond);
     }
 
-    /** @dev Cancels the scheduled start. Can only be done before the start.
+    /** @dev Cancels the scheduled start.
      */
     function cancel() external virtual onlyOwner {
         _cancel();
     }
 
-    function _cancel() internal {
-        require(block.timestamp < startTimestamp, 'RewardsPoolBase: No start scheduled or already started');
+    function _returnRewards() internal {
+        uint256 rewardsTokensLength = rewardsTokens.length;
 
-        rewardPerSecond = new uint256[](0);
+        for (uint256 i = 0; i < rewardsTokensLength; i++) {
+            uint256 balance = IERC20(rewardsTokens[i]).balanceOf(address(this));
+
+            if (balance > 0) {
+                IERC20(rewardsTokens[i]).safeTransfer(msg.sender, balance);
+            }
+        }
+    }
+
+    function _cancel() internal {
+        require(totalStaked == 0, 'RewardsPoolBase: somebody has staked into the campaign');
+
         startTimestamp = 0;
         endTimestamp = 0;
         lastRewardTimestamp = 0;
+        extensionDuration = 0;
+
+        uint256[] memory empty = new uint256[](rewardsTokens.length);
+        accumulatedRewardMultiplier = empty;
+        totalClaimed = empty;
+        totalSpentRewards = empty;
+        rewardPerSecond = empty;
+        extensionRewardPerSecond = empty;
+        leftoverRewards = empty;
+
+        _returnRewards();
     }
 
     /** @dev Stake an amount of tokens
@@ -226,7 +257,9 @@ contract RewardsPoolBase is Ownable {
         uint256 rewardsTokensLength = rewardsTokens.length;
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
-            user.rewardDebt[i] = (user.amountStaked * accumulatedRewardMultiplier[i]) / PRECISION; // Update user reward debt for each token
+            user.rewardDebt[i] =
+                (user.amountStaked * accumulatedRewardMultiplier[i] * (10 ** rewardTokenDecimals[i])) /
+                (PRECISION * (10 ** stakingTokenDecimals)); // Update user reward debt for each token
         }
 
         emit Staked(_staker, _tokenAmount);
@@ -277,6 +310,8 @@ contract RewardsPoolBase is Ownable {
 
         UserInfo storage user = userInfo[_withdrawer];
 
+        require(_tokenAmount <= user.amountStaked, 'RewardsPoolBase: not enough funds to withdraw');
+
         updateRewardMultipliers(); // Update the accumulated multipliers for everyone
         _updateUserAccruedReward(_withdrawer); // Update the accrued reward for this specific user
 
@@ -286,7 +321,8 @@ contract RewardsPoolBase is Ownable {
         uint256 rewardsTokensLength = rewardsTokens.length;
 
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
-            uint256 totalDebt = (user.amountStaked * accumulatedRewardMultiplier[i]) / PRECISION; // Update user reward debt for each token
+            uint256 totalDebt = (user.amountStaked * accumulatedRewardMultiplier[i] * (10 ** rewardTokenDecimals[i])) /
+                (PRECISION * (10 ** stakingTokenDecimals)); // Update user reward debt for each token
             user.rewardDebt[i] = totalDebt;
         }
 
@@ -321,7 +357,7 @@ contract RewardsPoolBase is Ownable {
     /**
 		@dev Updates the accumulated reward multipliers for everyone and each token
 	 */
-    function updateRewardMultipliers() public {
+    function updateRewardMultipliers() public virtual {
         uint256 currentTimestamp = block.timestamp;
 
         if (currentTimestamp > endTimestamp && extensionDuration > 0) {
@@ -333,6 +369,17 @@ contract RewardsPoolBase is Ownable {
         }
     }
 
+    function calculateLeftoverRewards(uint256 _currentTimestamp, uint256 _index) public view returns (uint256) {
+        uint256 applicableTimestamp = (_currentTimestamp < endTimestamp) ? _currentTimestamp : endTimestamp;
+        uint256 startLeftoverTimestamp = lastRewardTimestamp > 0 ? lastRewardTimestamp : startTimestamp;
+
+        if (_currentTimestamp < startTimestamp || (applicableTimestamp == 0 && startLeftoverTimestamp == 0)) {
+            return 0;
+        }
+
+        return calculateRewardsAmount(startLeftoverTimestamp, applicableTimestamp, rewardPerSecond[_index]);
+    }
+
     /**
      * @dev updates the accumulated reward multipliers for everyone and each token
      */
@@ -342,51 +389,57 @@ contract RewardsPoolBase is Ownable {
         }
 
         uint256 applicableTimestamp = (_currentTimestamp < endTimestamp) ? _currentTimestamp : endTimestamp;
-
         uint256 secondsSinceLastReward = applicableTimestamp - lastRewardTimestamp;
+        uint256 rewardsTokensLength = rewardsTokens.length;
 
         if (secondsSinceLastReward == 0) {
             return;
         }
 
         if (totalStaked == 0) {
+            for (uint256 i = 0; i < rewardsTokensLength; i++) {
+                uint256 leftRewards = calculateLeftoverRewards(_currentTimestamp, i);
+
+                leftoverRewards[i] = leftoverRewards[i] + leftRewards;
+            }
+
             lastRewardTimestamp = applicableTimestamp;
             return;
         }
 
-        uint256 rewardsTokensLength = rewardsTokens.length;
-
         for (uint256 i = 0; i < rewardsTokensLength; i++) {
             uint256 newReward = secondsSinceLastReward * rewardPerSecond[i]; // Get newly accumulated reward
-            uint256 rewardMultiplierIncrease = (newReward * PRECISION) / totalStaked; // Calculate the multiplier increase
+            uint256 rewardMultiplierIncrease = (newReward * (10 ** stakingTokenDecimals)) /
+                (totalStaked * (10 ** rewardTokenDecimals[i])); // Calculate the multiplier increase
             accumulatedRewardMultiplier[i] = accumulatedRewardMultiplier[i] + rewardMultiplierIncrease; // Add the multiplier increase to the accumulated multiplier
         }
 
         lastRewardTimestamp = applicableTimestamp;
     }
 
-    /** @dev Updates the accumulated reward for the user
-     * @param _userAddress the address of the updated user
-     */
     function _updateUserAccruedReward(address _userAddress) internal {
         UserInfo storage user = userInfo[_userAddress];
 
         uint256 rewardsTokensLength = rewardsTokens.length;
 
+        // Initialize user struct if needed
         if (user.rewardDebt.length == 0) {
             // Initialize user struct
-
             uint256[] memory empty = new uint256[](rewardsTokensLength);
             user.rewardDebt = empty;
             user.tokensOwed = empty;
         }
 
+        // Return if user has no staked tokens
         if (user.amountStaked == 0) {
             return;
         }
 
         for (uint256 tokenIndex = 0; tokenIndex < rewardsTokensLength; tokenIndex++) {
-            uint256 totalDebt = (user.amountStaked * accumulatedRewardMultiplier[tokenIndex]) / PRECISION;
+            uint256 totalDebt = (user.amountStaked *
+                accumulatedRewardMultiplier[tokenIndex] *
+                (10 ** rewardTokenDecimals[tokenIndex])) / (PRECISION * (10 ** stakingTokenDecimals));
+
             uint256 pendingDebt = totalDebt - user.rewardDebt[tokenIndex];
 
             if (pendingDebt > 0) {
@@ -434,13 +487,15 @@ contract RewardsPoolBase is Ownable {
         uint256 applicableTimestamp = (_time < endTimestamp) ? _time : endTimestamp;
         uint256 secondsSinceLastReward = applicableTimestamp - lastRewardTimestamp;
 
-        uint256 newReward = secondsSinceLastReward * rewardPerSecond[_tokenIndex]; // Get newly accumulated reward
-        uint256 rewardMultiplierIncrease = (newReward * PRECISION) / totalStaked; // Calculate the multiplier increase
+        uint256 rewardMultiplierIncrease = (secondsSinceLastReward *
+            rewardPerSecond[_tokenIndex] *
+            (10 ** stakingTokenDecimals)) / (totalStaked * (10 ** rewardTokenDecimals[_tokenIndex])); // Calculate the multiplier increase
         uint256 currentMultiplier = accumulatedRewardMultiplier[_tokenIndex] + rewardMultiplierIncrease; // Simulate the multiplier increase to the accumulated multiplier
 
         UserInfo storage user = userInfo[_userAddress];
 
-        uint256 totalDebt = (user.amountStaked * currentMultiplier) / PRECISION; // Simulate the current debt
+        uint256 totalDebt = (user.amountStaked * currentMultiplier * (10 ** rewardTokenDecimals[_tokenIndex])) /
+            (PRECISION * (10 ** stakingTokenDecimals)); // Simulate the current debt
         uint256 pendingDebt = totalDebt - user.rewardDebt[_tokenIndex]; // Simulate the pending debt
         return user.tokensOwed[_tokenIndex] + pendingDebt;
     }
@@ -472,9 +527,9 @@ contract RewardsPoolBase is Ownable {
     }
 
     /**
-     * @dev Extends the rewards period and updates the rates. 
-     When the current campaign is still going on, the extension will be scheduled and started when the campaign ends.
-     The extension can be cancelled until it starts. After it starts, the rewards are locked in and cannot be withdraw.
+     * @dev Extends the rewards period and updates the rates.
+     * When the current campaign is still going on, the extension will be scheduled and started when the campaign ends.
+     * The extension can be canceled until it starts. After it starts, the rewards are locked in and cannot be withdrawn.
      * @param _durationTime duration of the campaign (how many seconds the campaign will have)
      * @param _rewardPerSecond array with new rewards per second for each token
      */
@@ -484,7 +539,6 @@ contract RewardsPoolBase is Ownable {
 
     function _extend(uint256 _durationTime, uint256[] calldata _rewardPerSecond) internal virtual {
         require(extensionDuration == 0, 'RewardsPoolBase: there is already an extension');
-
         require(_durationTime > 0, 'RewardsPoolBase: duration must be greater than 0');
 
         uint256 rewardPerSecondLength = _rewardPerSecond.length;
@@ -501,13 +555,18 @@ contract RewardsPoolBase is Ownable {
 
             // We need to check if we have enough balance available in the contract to pay for the extension
             uint256 availableBalance = getAvailableBalance(i);
+            uint256 leftRewards = calculateLeftoverRewards(currentTimestamp, i);
 
-            require(availableBalance >= newRewards, 'RewardsPoolBase: not enough rewards to extend');
+            require(
+                availableBalance >= newRewards && availableBalance > leftRewards,
+                'RewardsPoolBase: not enough rewards to extend'
+            );
         }
 
         if (ended) {
             _updateRewardMultipliers(endTimestamp);
             _applyExtension(newStartTimestamp, newEndTimestamp, _rewardPerSecond);
+            _updateRewardMultipliers(currentTimestamp);
         } else {
             extensionDuration = _durationTime;
             extensionRewardPerSecond = _rewardPerSecond;
@@ -578,7 +637,10 @@ contract RewardsPoolBase is Ownable {
         }
 
         uint256 availableBalance = balance -
-            (totalSpentRewards[_rewardTokenIndex] + spentRewards - totalClaimed[_rewardTokenIndex]);
+            (totalSpentRewards[_rewardTokenIndex] +
+                spentRewards -
+                totalClaimed[_rewardTokenIndex] -
+                leftoverRewards[_rewardTokenIndex]);
 
         if (rewardToken == address(stakingToken)) {
             availableBalance = availableBalance - totalStaked;
@@ -632,7 +694,7 @@ contract RewardsPoolBase is Ownable {
         uint256 _rewardPerSecond
     ) internal pure returns (uint256) {
         uint256 rewardsPeriodSeconds = _endTimestamp - _startTimestamp;
-        return _rewardPerSecond * rewardsPeriodSeconds;
+        return (_rewardPerSecond * rewardsPeriodSeconds) / PRECISION;
     }
 
     receive() external payable {}

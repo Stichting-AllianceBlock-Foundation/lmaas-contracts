@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { ethers, network } from 'hardhat';
+import { ethers } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { BigNumber } from 'ethers';
 
@@ -22,6 +22,7 @@ describe('RewardsPoolBase', () => {
 
   let startTimestamp: number;
   let endTimestamp: number;
+  const accuracy = ethers.utils.parseEther('1');
   const oneMinute: number = 60; // 1 minute
   const poolLength = oneMinute * 60; // 1 hour
 
@@ -41,17 +42,19 @@ describe('RewardsPoolBase', () => {
 
     for (let i = 0; i < rewardTokensCount; i++) {
       const tknInst = i === 0 ? stakingTokenInstance : await deployERC20(amount);
-
+      let decimals = 18;
+      if (i === 1) {
+        await tknInst.setDecimals(6);
+        decimals = 6;
+      }
       // populate tokens
       rewardTokensInstances.push(tknInst);
       rewardTokensAddresses.push(tknInst.address);
 
       // populate amounts
-      let parsedReward = await ethers.utils.parseEther(`${i + 1}`);
+      let parsedReward = ethers.utils.parseUnits(`${i + 1}`, decimals).mul(accuracy);
       rewardPerSecond.push(parsedReward);
     }
-
-    await rewardTokensInstances[1].setDecimals(6);
 
     startTimestamp = (await getTime()) + oneMinute;
     endTimestamp = startTimestamp + poolLength;
@@ -69,7 +72,10 @@ describe('RewardsPoolBase', () => {
 
     // Send the required amount of tokens to the contract
     for (let i = 0; i < rewardTokensCount; i++) {
-      await rewardTokensInstances[i].mint(instance.address, rewardPerSecond[i].mul(endTimestamp - startTimestamp));
+      await rewardTokensInstances[i].mint(
+        instance.address,
+        rewardPerSecond[i].mul(endTimestamp - startTimestamp).div(accuracy)
+      );
     }
 
     return instance;
@@ -81,12 +87,13 @@ describe('RewardsPoolBase', () => {
     const mintPromises = [];
 
     for (let i = 0; i < rewardTokensCount; i++) {
-      let parsedReward = await ethers.utils.parseEther(`${(i + 1) * 2}`);
+      const rewardTokenDecimals = await rewardTokensInstances[i].decimals();
+      let parsedReward = await ethers.utils.parseUnits(`${(i + 1) * 2}`, rewardTokenDecimals);
 
       // Send the required reward tokens to the RewardsPool
       mintPromises.push(rewardTokensInstances[i].mint(RewardsPoolBaseInstance.address, parsedReward.mul(poolLength)));
 
-      newRewardsPerSecond.push(parsedReward);
+      newRewardsPerSecond.push(parsedReward.mul(accuracy));
     }
 
     await Promise.all(mintPromises);
@@ -101,6 +108,7 @@ describe('RewardsPoolBase', () => {
 
     await stakingTokenInstance.mint(aliceAccount.address, amount);
     await stakingTokenInstance.mint(bobAccount.address, amount);
+    await stakingTokenInstance.mint(carolAccount.address, amount);
 
     stakingTokenAddress = stakingTokenInstance.address;
 
@@ -120,6 +128,7 @@ describe('RewardsPoolBase', () => {
     );
 
     for (let i = 0; i < rewardTokensAddresses.length; i++) {
+      const rewardTokenDecimals = await rewardTokensInstances[i].decimals();
       const tokenAddress = await RewardsPoolBaseInstance.rewardsTokens(i);
       expect(tokenAddress).to.equal(
         rewardTokensAddresses[i],
@@ -127,7 +136,10 @@ describe('RewardsPoolBase', () => {
       );
 
       const rewardPerSecond = await RewardsPoolBaseInstance.rewardPerSecond(i);
-      expect(rewardPerSecond).to.equal(ethers.utils.parseEther(`${i + 1}`), 'The saved reward per second is incorrect');
+      expect(rewardPerSecond).to.equal(
+        ethers.utils.parseUnits(`${i + 1}`, rewardTokenDecimals).mul(accuracy),
+        'The saved reward per second is incorrect'
+      );
 
       const accumulatedMultiplier = await RewardsPoolBaseInstance.accumulatedRewardMultiplier(i);
       expect(accumulatedMultiplier).to.equal(0, 'The saved accumulatedMultiplier is incorrect');
@@ -251,14 +263,22 @@ describe('RewardsPoolBase', () => {
         instance.start(
           startTimestamp,
           endTimestamp,
-          rewardPerSecond.map((r) => r.add(1))
+          rewardPerSecond.map((r) => r.add(accuracy))
         )
       ).to.be.revertedWith('RewardsPoolBase: not enough rewards');
     });
   });
 
   describe('Cancel', function () {
-    it('[Should cancel when start is scheduled but not started]:', async () => {
+    it('[Should cancel when campaign is not started]:', async () => {
+      const instance = await createPool();
+
+      await instance.cancel();
+
+      expect(await instance.startTimestamp()).to.equal(0);
+    });
+
+    it('[Should cancel when campaign is  started]:', async () => {
       const instance = await createPool();
 
       await instance.start(startTimestamp, endTimestamp, rewardPerSecond);
@@ -268,20 +288,61 @@ describe('RewardsPoolBase', () => {
       expect(await instance.startTimestamp()).to.equal(0);
     });
 
-    it('[Should fail if already started]:', async () => {
+    it('[Should successfully cancel and restart the campaign from zero]:', async () => {
       const instance = await createPool();
 
       await instance.start(startTimestamp, endTimestamp, rewardPerSecond);
 
-      await timeTravelTo(startTimestamp + 1);
+      // we travel 60 seconds in the future
+      await timeTravel(60);
 
-      await expect(instance.cancel()).to.be.revertedWith('RewardsPoolBase: No start scheduled or already started');
-    });
+      await stakingTokenInstance.approve(instance.address, ethers.constants.MaxUint256);
 
-    it('[Should fail if no start scheduled]:', async () => {
-      const instance = await createPool();
+      // #1 - 1800 seconds passed
+      await timeTravel(1800);
+      await instance.stake(standardStakingAmount);
 
-      await expect(instance.cancel()).to.be.revertedWith('RewardsPoolBase: No start scheduled or already started');
+      // #2 - 600 seconds passed
+      await timeTravel(600);
+      await instance.stake(standardStakingAmount);
+
+      // #3 - 600 seconds passed
+      await timeTravel(600);
+      await instance.exit();
+
+      // #4 - 600 seconds passed cancel the current campaign and start a new one
+      await timeTravel(600);
+      await instance.cancel();
+
+      startTimestamp = (await getTime()) + oneMinute;
+      endTimestamp = startTimestamp + poolLength;
+
+      // Send the required amount of tokens to the contract
+      for (let i = 0; i < rewardTokensCount; i++) {
+        await rewardTokensInstances[i].mint(instance.address, rewardPerSecond[i].mul(endTimestamp - startTimestamp));
+      }
+
+      await instance.start(startTimestamp, endTimestamp, rewardPerSecond);
+
+      // #5 we travel 60 seconds in the future
+      await timeTravel(60);
+      await instance.stake(standardStakingAmount);
+
+      // #6 we travel 600 seconds in the future
+      await timeTravel(600);
+      await instance.stake(standardStakingAmount);
+
+      // #7 we travel 2900 seconds in the future
+      await timeTravel(2900);
+      await instance.stake(standardStakingAmount);
+
+      // #8 we travel 100 seconds in the future and we exit the pool
+      await timeTravel(100);
+      const userOwedToken = await instance.getUserOwedTokens(aliceAccount.address, 0);
+      await instance.exit();
+
+      // we confirm he should get the same amount of tokens if the campaign is cancel all the way through
+      expect(userOwedToken).to.gte(ethers.utils.parseEther('3500')).and.lte(ethers.utils.parseEther('3600'));
     });
   });
 
@@ -289,7 +350,7 @@ describe('RewardsPoolBase', () => {
     it('[Should not stake before staking start]:', async () => {
       await stakingTokenInstance.approve(RewardsPoolBaseInstance.address, standardStakingAmount);
       await expect(RewardsPoolBaseInstance.stake(standardStakingAmount)).to.be.revertedWith(
-        'RewardsPoolBase: staking is not started or is finished'
+        'RewardsPoolBase: staking is not started or is finished or no extension taking in place'
       );
     });
 
@@ -298,18 +359,29 @@ describe('RewardsPoolBase', () => {
       expect(await RewardsPoolBaseInstance.startTimestamp()).to.equal(0, 'The start timestamp was not reset');
     });
 
-    it('[Should not cancel after staking start]:', async () => {
+    it('[Should cancel after staking start and give rewards back to owner]:', async () => {
       await timeTravel(70);
 
-      await expect(RewardsPoolBaseInstance.cancel()).to.be.revertedWith(
-        'RewardsPoolBase: No start scheduled or already started'
-      );
+      //here
+      const ownerInitialBalance = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
+      await RewardsPoolBaseInstance.cancel();
+      const ownerAfterBalance = await rewardTokensInstances[0].balanceOf(aliceAccount.address);
+      expect(ownerAfterBalance).gt(ownerInitialBalance);
     });
 
     it('[Should be able to restart after cancel]:', async () => {
       await RewardsPoolBaseInstance.cancel();
 
+      // Send the required amount of tokens to the contract
+      for (let i = 0; i < rewardTokensCount; i++) {
+        await rewardTokensInstances[i].mint(
+          RewardsPoolBaseInstance.address,
+          rewardPerSecond[i].mul(endTimestamp - startTimestamp)
+        );
+      }
+
       await RewardsPoolBaseInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
+
       expect(await RewardsPoolBaseInstance.startTimestamp()).to.equal(startTimestamp, 'Was not able to restart');
     });
 
@@ -318,8 +390,55 @@ describe('RewardsPoolBase', () => {
         await stakingTokenInstance.approve(RewardsPoolBaseInstance.address, standardStakingAmount);
         await stakingTokenInstance.connect(bobAccount).approve(RewardsPoolBaseInstance.address, standardStakingAmount);
 
-        //timetraveling 70 seconds from now in order to start the campaign
-        await timeTravel(70);
+        // timetraveling 60 seconds from now in order to start the campaign
+        await timeTravel(60);
+      });
+
+      it('[(3 stakers) Should successfully stake and accumulate rewards even if the pool already is half time]:', async () => {
+        // before recalculation
+        // 3600s = 1 hour
+        // 3600 rewards through 1 hour
+        // 1 rward per second
+
+        // after recalculation
+        // 1800s = 30 minutes
+        // 3600 rewards through 30 minutes
+        // 2 rward per second
+
+        await stakingTokenInstance.approve(RewardsPoolBaseInstance.address, ethers.constants.MaxUint256);
+        await stakingTokenInstance
+          .connect(bobAccount)
+          .approve(RewardsPoolBaseInstance.address, ethers.constants.MaxUint256);
+        await stakingTokenInstance
+          .connect(carolAccount)
+          .approve(RewardsPoolBaseInstance.address, ethers.constants.MaxUint256);
+
+        // #1 - 1800 seconds passed
+        await timeTravel(1800);
+        await RewardsPoolBaseInstance.stake(standardStakingAmount);
+        await RewardsPoolBaseInstance.connect(bobAccount).stake(standardStakingAmount);
+        await RewardsPoolBaseInstance.connect(carolAccount).stake(standardStakingAmount);
+
+        // #2 - 600 seconds passed
+        await timeTravel(600);
+        await RewardsPoolBaseInstance.stake(standardStakingAmount);
+        await RewardsPoolBaseInstance.connect(bobAccount).stake(standardStakingAmount);
+
+        // #3 - 600 seconds passed
+        await timeTravel(600);
+        await RewardsPoolBaseInstance.stake(standardStakingAmount);
+        await RewardsPoolBaseInstance.connect(bobAccount).stake(standardStakingAmount);
+
+        // #4 - 500 seconds passed
+        await timeTravel(500);
+        await RewardsPoolBaseInstance.stake(standardStakingAmount);
+        await RewardsPoolBaseInstance.connect(bobAccount).stake(standardStakingAmount);
+
+        // #5 - 100 seconds passed
+        await timeTravel(100);
+        await RewardsPoolBaseInstance.exit();
+        await RewardsPoolBaseInstance.connect(bobAccount).exit();
+        await RewardsPoolBaseInstance.connect(carolAccount).exit();
       });
 
       it('[Should successfully stake and accumulate reward]:', async () => {
@@ -337,14 +456,29 @@ describe('RewardsPoolBase', () => {
         expect(userRewardDebt).to.equal(0, "User's reward debt is not correct");
         expect(userOwedToken).to.equal(0, "User's reward debt is not correct");
 
+        // before recalculation
+        // 3600s = 1 hour
+        // 3600 rewards through 1 hour
+        // 1 rward per second
+
+        // after recalculation
+        // 1800s = 30 minutes
+        // 3600 rewards through 30 minutes
+        // 2 rward per second
+
+        const corrections = [0, 0, 0, -1, -1];
         for (let i = 0; i < rewardPerSecond.length; i++) {
+          const currentRewardPerSecond = await RewardsPoolBaseInstance.rewardPerSecond(i);
           const accumulatedReward = await RewardsPoolBaseInstance.getUserAccumulatedReward(
             aliceAccount.address,
             i,
             stakeTime + oneMinute
           );
 
-          expect(accumulatedReward).to.equal(rewardPerSecond[i].mul(oneMinute), 'The reward accrued was not 1 token');
+          expect(accumulatedReward).to.equal(
+            currentRewardPerSecond.mul(oneMinute).div(accuracy).add(corrections[i]),
+            'The reward accrued was not 1 token'
+          );
         }
       });
 
@@ -357,11 +491,16 @@ describe('RewardsPoolBase', () => {
 
         await RewardsPoolBaseInstance.connect(bobAccount).stake(standardStakingAmount);
 
-        const tokenMultiplier = '1000000000000000000';
-
+        const stakingTokenDecimals = await stakingTokenInstance.decimals();
         for (let i = 0; i < rewardPerSecond.length; i++) {
+          const rewardTokenDecimals = await rewardTokensInstances[i].decimals();
+
+          const currentRewardPerSecond = await RewardsPoolBaseInstance.rewardPerSecond(i);
           const accumulatedMultiplier = await RewardsPoolBaseInstance.accumulatedRewardMultiplier(i);
-          const rewardMultiplierPerMinute = rewardPerSecond[i].mul(oneMinute).mul(tokenMultiplier);
+          const rewardMultiplierPerMinute = currentRewardPerSecond
+            .mul(oneMinute)
+            .mul(ethers.utils.parseUnits('1', stakingTokenDecimals))
+            .div(ethers.utils.parseUnits('1', rewardTokenDecimals));
 
           // at the time of update (when bob staked) there has only been one minute staked with standardStakingAmount
           expect(accumulatedMultiplier).to.equal(
@@ -370,32 +509,35 @@ describe('RewardsPoolBase', () => {
           );
         }
 
+        let corrections = [-2, 0, -6, -3, -5];
         for (let i = 0; i < rewardPerSecond.length; i++) {
+          const currentRewardPerSecond = await RewardsPoolBaseInstance.rewardPerSecond(i);
           const accumulatedRewardAlice = await RewardsPoolBaseInstance.getUserAccumulatedReward(
             aliceAccount.address,
             i,
             startTimestamp + oneMinute * 3
           );
-          const totalReward = rewardPerSecond[i].mul(oneMinute * 2).mul(tokenMultiplier);
-
+          const totalReward = currentRewardPerSecond.mul(oneMinute * 2);
           // use 3/4 here because alice staked the full first period and half of the second period (-1/4)
-          expect(accumulatedRewardAlice).to.equal(
-            totalReward.mul(3).div(4).div(tokenMultiplier),
+          expect(accumulatedRewardAlice).to.eq(
+            totalReward.mul(3).div(4).div(accuracy).add(corrections[i]),
             'The reward accrued was not correct'
           );
         }
 
+        corrections = [0, 0, -2, -2, -3];
         for (let i = 0; i < rewardPerSecond.length; i++) {
+          const currentRewardPerSecond = await RewardsPoolBaseInstance.rewardPerSecond(i);
           const accumulatedRewardBob = await RewardsPoolBaseInstance.getUserAccumulatedReward(
             bobAccount.address,
             i,
             startTimestamp + oneMinute * 3
           );
-          const totalReward = rewardPerSecond[i].mul(oneMinute * 2).mul(tokenMultiplier);
+          const totalReward = currentRewardPerSecond.mul(oneMinute * 2);
 
           // use 1/4 here because bob didn't stake the first period (-2/4) and half of the second period (-1/4)
           expect(accumulatedRewardBob).to.equal(
-            totalReward.mul(1).div(4).div(tokenMultiplier),
+            totalReward.mul(1).div(4).div(accuracy).add(corrections[i]),
             'The reward accrued was not correct'
           );
         }
@@ -404,8 +546,14 @@ describe('RewardsPoolBase', () => {
         await RewardsPoolBaseInstance.updateRewardMultipliers();
 
         for (let i = 0; i < rewardPerSecond.length; i++) {
+          const rewardTokenDecimals = await rewardTokensInstances[i].decimals();
+
+          const currentRewardPerSecond = await RewardsPoolBaseInstance.rewardPerSecond(i);
           const accumulatedMultiplier = await RewardsPoolBaseInstance.accumulatedRewardMultiplier(i);
-          const rewardMultiplierPerMinute = rewardPerSecond[i].mul(oneMinute).mul(tokenMultiplier);
+          const rewardMultiplierPerMinute = currentRewardPerSecond
+            .mul(oneMinute)
+            .mul(ethers.utils.parseUnits('1', stakingTokenDecimals))
+            .div(ethers.utils.parseUnits('1', rewardTokenDecimals));
 
           // at the time of update (now) there has been one minute staked with standardStakingAmount and one minute staked with standardStakingAmount * 2
           expect(accumulatedMultiplier).to.equal(
@@ -770,7 +918,7 @@ describe('RewardsPoolBase', () => {
         // Send 50% less then the required reward tokens to the RewardsPool
         await rewardTokensInstances[i].mint(RewardsPoolBaseInstance.address, parsedReward.mul(poolLength).div(2));
 
-        newRewardsPerSecond.push(parsedReward);
+        newRewardsPerSecond.push(parsedReward.mul(accuracy));
       }
 
       await expect(RewardsPoolBaseInstance.extend(poolLength, newRewardsPerSecond)).to.be.revertedWith(
@@ -855,32 +1003,24 @@ describe('RewardsPoolBase', () => {
   });
 
   describe('Withdrawing LP rewards', async function () {
-    it('[Should not withdtaw if the caller is not the factory contract]:', async () => {
+    it('[Should not withdtaw if the caller is not the owner of the contract]:', async () => {
       const lpContractInstance = await deployERC20(amount);
       await lpContractInstance.mint(RewardsPoolBaseInstance.address, '100000000000');
 
       await expect(
         RewardsPoolBaseInstance.connect(bobAccount).withdrawTokens(carolAccount.address, lpContractInstance.address)
-      ).to.be.revertedWith('');
-    });
-
-    it('[Should revert if the token to withdraw is part of the rewards]:', async () => {
-      for (let i = 0; i < rewardTokensCount; i++) {
-        await expect(
-          RewardsPoolBaseInstance.withdrawTokens(carolAccount.address, rewardTokensAddresses[i])
-        ).to.be.revertedWith('');
-      }
+      ).to.be.revertedWith('Ownable: caller is not the owner');
     });
   });
 
   describe('Withdrawing excess rewards', async function () {
-    it('[Should not withdraw if the caller is not the factory contract]:', async () => {
+    it('[Should not withdraw if the caller is not the owner of the contract]:', async () => {
       const lpContractInstance = await deployERC20(amount);
       await lpContractInstance.mint(RewardsPoolBaseInstance.address, '100000000000');
 
       await expect(
         RewardsPoolBaseInstance.connect(bobAccount).withdrawExcessRewards(carolAccount.address)
-      ).to.be.revertedWith('');
+      ).to.be.revertedWith('Ownable: caller is not the owner');
     });
 
     it('[Should withdraw excess rewards]:', async () => {

@@ -5,6 +5,7 @@ import '@nomiclabs/hardhat-etherscan';
 import 'hardhat-contract-sizer';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
+import { HardhatUserConfig } from 'hardhat/types';
 
 require('dotenv').config();
 
@@ -20,9 +21,13 @@ module.exports = {
   },
   networks: {
     hardhat: {
-      mining: {
-        auto: true,
-        interval: 0,
+      // mining: {
+      //   auto: true,
+      //   interval: 0,
+      // },
+      forking: {
+        blockNumber: 10037135,
+        url: 'https://nd-734-064-122.p2pify.com/62dc5c5a86cd193963ee39f48eb2cadf',
       },
       accounts: { count: 2000 },
     },
@@ -38,12 +43,16 @@ module.exports = {
       url: 'https://rpc.ankr.com/bsc',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
-    avalanche: {
+    avalancheTestnet: {
       url: 'https://api.avax-test.network/ext/bc/C/rpc',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
     polygon: {
       url: 'https://nd-046-983-923.p2pify.com/1aace6ebb1db9383cd75547f66d39741',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    avalanche: {
+      url: 'https://api.avax.network/ext/bc/C/rpc',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
     energywebchain: {
@@ -73,6 +82,10 @@ module.exports = {
     },
     volta: {
       url: 'https://volta-rpc.energyweb.org/',
+      accounts: [process.env.RINKEBY_PRIVATE_KEY],
+    },
+    sepolia: {
+      url: 'https://rpc.sepolia.ethpandaops.io',
       accounts: [process.env.RINKEBY_PRIVATE_KEY],
     },
   },
