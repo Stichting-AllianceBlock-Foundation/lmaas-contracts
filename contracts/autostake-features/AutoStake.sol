@@ -40,7 +40,12 @@ contract AutoStake is StakeLock, ThrottledExit, Ownable {
         uint256 balanceOf
     );
 
-    constructor(address token, uint256 _throttleRoundSeconds, uint256 _throttleRoundCap, uint256 _contractStakeLimit) {
+    constructor(
+        address token,
+        uint256 _throttleRoundSeconds,
+        uint256 _throttleRoundCap,
+        uint256 _contractStakeLimit
+    ) {
         require(_contractStakeLimit != 0, 'AutoStake: contract stake limit should not be 0');
 
         factory = msg.sender;
@@ -85,7 +90,11 @@ contract AutoStake is StakeLock, ThrottledExit, Ownable {
         _stake(_tokenAmount, msg.sender, true);
     }
 
-    function _stake(uint256 _amount, address _staker, bool _chargeStaker) internal {
+    function _stake(
+        uint256 _amount,
+        address _staker,
+        bool _chargeStaker
+    ) internal {
         exitRewardPool();
         updateValuePerShare();
 
@@ -137,7 +146,7 @@ contract AutoStake is StakeLock, ThrottledExit, Ownable {
         ExitInfo storage info = exitInfo[msg.sender];
         exitStake -= info.exitStake;
 
-        finalizeExit(address(stakingToken), new address[](0), address(0));
+        finalizeExit(address(stakingToken), new address[](0));
 
         updateValuePerShare();
     }

@@ -25,18 +25,8 @@ contract LiquidityMiningCampaignPayment is LiquidityMiningCampaign {
         uint256 _stakeLimit,
         uint256 _contractStakeLimit,
         string memory _name,
-        address _paymentContract,
-        address _wrappedNativeToken
-    )
-        LiquidityMiningCampaign(
-            _stakingToken,
-            _rewardsTokens,
-            _stakeLimit,
-            _contractStakeLimit,
-            _name,
-            _wrappedNativeToken
-        )
-    {
+        address _paymentContract
+    ) LiquidityMiningCampaign(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _name) {
         require(_paymentContract != address(0), 'Payment contract address cannot be 0');
         paymentContract = _paymentContract;
     }
@@ -48,7 +38,11 @@ contract LiquidityMiningCampaignPayment is LiquidityMiningCampaign {
 
     /** @dev Overrides the old start method so that it can only be called by the payment contract
      */
-    function start(uint256, uint256, uint256[] calldata) external view override(RewardsPoolBase) onlyOwner {
+    function start(
+        uint256,
+        uint256,
+        uint256[] calldata
+    ) external view override(RewardsPoolBase) onlyOwner {
         revert('Start cannot be called direct, must be called through payment contract');
     }
 
@@ -86,10 +80,10 @@ contract LiquidityMiningCampaignPayment is LiquidityMiningCampaign {
      * @param _durationTime duration of the campaign (how many seconds the campaign will have)
      * @param _rewardPerSecond array with new rewards per second for each token
      */
-    function extendWithPaymentContract(
-        uint256 _durationTime,
-        uint256[] calldata _rewardPerSecond
-    ) external onlyPaymentContract {
+    function extendWithPaymentContract(uint256 _durationTime, uint256[] calldata _rewardPerSecond)
+        external
+        onlyPaymentContract
+    {
         RewardsPoolBase._extend(_durationTime, _rewardPerSecond);
     }
 
