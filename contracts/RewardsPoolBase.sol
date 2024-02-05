@@ -211,7 +211,7 @@ contract RewardsPoolBase is Ownable {
         _stake(_tokenAmount, msg.sender, true);
     }
 
-    function _stake(uint256 _tokenAmount, address _staker, bool _chargeStaker) internal {
+    function _stake(uint256 _tokenAmount, address _staker, bool _chargeStaker) internal virtual {
         uint256 currentTimestamp = block.timestamp;
         require(
             (startTimestamp > 0 && currentTimestamp > startTimestamp) &&

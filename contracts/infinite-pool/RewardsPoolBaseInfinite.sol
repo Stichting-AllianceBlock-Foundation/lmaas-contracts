@@ -30,7 +30,7 @@ contract RewardsPoolBaseInfinite is RewardsPoolBase {
         uint256 _stakeLimit,
         uint256 _contractStakeLimit,
         string memory _name
-    ) RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _name, address(0)) {}
+    ) RewardsPoolBase(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _name) {}
 
     /** @dev Start the pool now. Funds for rewards will be checked and staking will be opened.
      * @param _epochDuration the duration of the infinite pool ex: (7 days = 604800 seconds)
