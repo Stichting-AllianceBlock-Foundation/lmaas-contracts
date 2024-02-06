@@ -1,16 +1,15 @@
 import { BigNumber } from 'ethers';
-import { ethers } from 'hardhat';
+import { ethers, waffle } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
+const { deployContract } = waffle;
 import TestERC20Artifact from '../artifacts/contracts/TestERC20.sol/TestERC20.json';
-import WTTArtifact from '../artifacts/contracts/canonical-weth/WETH9.sol/WETH9.json';
 import LMCArtifact from '../artifacts/contracts/LiquidityMiningCampaign.sol/LiquidityMiningCampaign.json';
 import NonCompoundingRewardsPoolArtifact from '../artifacts/contracts/V2/NonCompoundingRewardsPool.sol/NonCompoundingRewardsPool.json';
 import { NonCompoundingRewardsPool } from '../typechain/NonCompoundingRewardsPool';
 import { TestERC20 } from '../typechain/TestERC20';
 import { LiquidityMiningCampaign } from '../typechain/LiquidityMiningCampaign';
 import { getTime, timeTravel, timeTravelTo } from './utils';
-import { WETH9 } from '../typechain';
 
 describe('Liquidity mining campaign', () => {
   let accounts: SignerWithAddress[];
@@ -62,7 +61,7 @@ describe('Liquidity mining campaign', () => {
     lockSchemеs = [];
 
     for (let i = 0; i < rewardTokensCount; i++) {
-      const tknInst = (await (await ethers.getContractFactory('TestERC20')).deploy(amount)) as TestERC20;
+      const tknInst = (await deployContract(testAccount, TestERC20Artifact, [amount])) as TestERC20;
 
       rewardTokensInstances.push(tknInst);
       rewardTokensAddresses.push(tknInst.address);
@@ -78,7 +77,7 @@ describe('Liquidity mining campaign', () => {
   };
 
   beforeEach(async () => {
-    stakingTokenInstance = (await (await ethers.getContractFactory('TestERC20')).deploy(amount)) as TestERC20;
+    stakingTokenInstance = (await deployContract(testAccount, TestERC20Artifact, [amount])) as TestERC20;
     await stakingTokenInstance.mint(testAccount.address, thirty);
     await stakingTokenInstance.mint(test2Account.address, amount);
 
@@ -86,16 +85,13 @@ describe('Liquidity mining campaign', () => {
 
     await setupRewardsPoolParameters();
 
-    LmcInstance = (await (
-      await ethers.getContractFactory('LiquidityMiningCampaign')
-    ).deploy(
+    LmcInstance = (await deployContract(testAccount, LMCArtifact, [
       stakingTokenAddress,
       rewardTokensAddresses,
       stakeLimit,
       contractStakeLimit,
       'TestCampaign',
-      ethers.constants.AddressZero
-    )) as LiquidityMiningCampaign;
+    ])) as LiquidityMiningCampaign;
 
     await rewardTokensInstances[0].mint(LmcInstance.address, amount);
 
@@ -138,57 +134,6 @@ describe('Liquidity mining campaign', () => {
 
       const checkTime = await getTime();
       const accumulatedReward = await LmcInstance.getUserAccumulatedReward(testAccount.address, 0, checkTime);
-
-      expect(accumulatedReward).to.equal(bOne.mul(checkTime - stakeTime));
-    });
-
-    it.only('[Should stake in nativeTokens sucessfully]:', async () => {
-      await setupRewardsPoolParameters();
-
-      const _contractStakeLimit = amount;
-
-      let wrappedNativeTokenInstance = (await (await ethers.getContractFactory('WETH9')).deploy()) as WETH9;
-
-      let NewLmcInstance: LiquidityMiningCampaign = (await (
-        await ethers.getContractFactory('LiquidityMiningCampaign')
-      ).deploy(
-        wrappedNativeTokenInstance.address,
-        rewardTokensAddresses,
-        stakeLimit,
-        _contractStakeLimit,
-        'TestCampaign',
-        wrappedNativeTokenInstance.address
-      )) as LiquidityMiningCampaign;
-
-      await rewardTokensInstances[0].mint(NewLmcInstance.address, amount);
-      await NewLmcInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
-
-      await timeTravel(70);
-
-      let contractInitialBalance = await wrappedNativeTokenInstance.balanceOf(NewLmcInstance.address);
-      let userInitialBalance = await testAccount.getBalance();
-
-      await NewLmcInstance.stakeNative({ value: bTen });
-      const stakeTime = await getTime();
-
-      let contractFinalBalance = await wrappedNativeTokenInstance.balanceOf(NewLmcInstance.address);
-      let userFinalBalance = await testAccount.getBalance();
-      const totalStakedAmount = await NewLmcInstance.totalStaked();
-      const userInfo = await NewLmcInstance.userInfo(testAccount.address);
-      const userRewardDebt = await NewLmcInstance.getUserRewardDebt(testAccount.address, 0);
-      const userOwedToken = await NewLmcInstance.getUserOwedTokens(testAccount.address, 0);
-
-      await timeTravel(10);
-
-      expect(contractFinalBalance).to.equal(contractInitialBalance.add(bTen));
-      expect(totalStakedAmount).to.equal(bTen);
-      expect(userInfo.amountStaked).to.equal(bTen);
-      expect(userRewardDebt).to.equal(0);
-      expect(userOwedToken).to.equal(0);
-      expect(userFinalBalance).to.lt(userInitialBalance);
-
-      const checkTime = await getTime();
-      const accumulatedReward = await NewLmcInstance.getUserAccumulatedReward(testAccount.address, 0, checkTime);
 
       expect(accumulatedReward).to.equal(bOne.mul(checkTime - stakeTime));
     });
@@ -305,38 +250,34 @@ describe('Liquidity mining campaign', () => {
 
       const _contractStakeLimit = amount;
 
-      let NewWrappedNativeTokenInstance = (await (await ethers.getContractFactory('WETH9')).deploy()) as WETH9;
-
-      let NewLmcInstance: LiquidityMiningCampaign = (await (
-        await ethers.getContractFactory('LiquidityMiningCampaig')
-      ).deploy(
+      let NewLmcInstance: LiquidityMiningCampaign = (await deployContract(testAccount, LMCArtifact, [
         stakingTokenAddress,
         rewardTokensAddresses,
         stakeLimit,
         _contractStakeLimit,
         'TestCampaign',
-        NewWrappedNativeTokenInstance.address
-      )) as LiquidityMiningCampaign;
+      ])) as LiquidityMiningCampaign;
 
       await rewardTokensInstances[0].mint(NewLmcInstance.address, amount);
       await NewLmcInstance.start(startTimestamp, endTimestamp, rewardPerSecond);
 
-      const externalRewardsTokenInstance = (await (
-        await ethers.getContractFactory('TestERC20')
-      ).deploy(amount)) as TestERC20;
+      let externalRewardsTokenInstance: TestERC20 = (await deployContract(testAccount, TestERC20Artifact, [
+        amount,
+      ])) as TestERC20;
       await externalRewardsTokenInstance.mint(trasury.address, amount);
 
-      let NonCompoundingRewardsPoolInstance: NonCompoundingRewardsPool = (await (
-        await ethers.getContractFactory('NonCompoundingRewardsPool')
-      ).deploy(
-        stakingTokenAddress,
-        rewardTokensAddresses,
-        stakeLimit,
-        throttleRoundSeconds,
-        throttleRoundCap,
-        _contractStakeLimit,
-        'TestNonCompoundingCampaign',
-        NewWrappedNativeTokenInstance.address
+      let NonCompoundingRewardsPoolInstance: NonCompoundingRewardsPool = (await deployContract(
+        testAccount,
+        NonCompoundingRewardsPoolArtifact,
+        [
+          stakingTokenAddress,
+          rewardTokensAddresses,
+          stakeLimit,
+          throttleRoundSeconds,
+          throttleRoundCap,
+          _contractStakeLimit,
+          'TestNonCompoundingCampaign',
+        ]
       )) as NonCompoundingRewardsPool;
 
       await rewardTokensInstances[0].mint(NonCompoundingRewardsPoolInstance.address, amount);

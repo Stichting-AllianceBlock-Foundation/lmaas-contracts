@@ -53,18 +53,8 @@ contract LiquidityMiningCampaignPaymentTier is LiquidityMiningCampaign {
         string memory _name,
         address _paymentContract,
         address _reputationContract,
-        TierList _tierCampaign,
-        address _wrappedNativeToken
-    )
-        LiquidityMiningCampaign(
-            _stakingToken,
-            _rewardsTokens,
-            _stakeLimit,
-            _contractStakeLimit,
-            _name,
-            _wrappedNativeToken
-        )
-    {
+        TierList _tierCampaign
+    ) LiquidityMiningCampaign(_stakingToken, _rewardsTokens, _stakeLimit, _contractStakeLimit, _name) {
         require(_paymentContract != address(0), 'Payment contract address cannot be 0');
         paymentContract = _paymentContract;
         reputationContract = _reputationContract;
@@ -78,7 +68,11 @@ contract LiquidityMiningCampaignPaymentTier is LiquidityMiningCampaign {
 
     /** @dev Overrides the old start method so that it can only be called by the payment contract
      */
-    function start(uint256, uint256, uint256[] calldata) external view override(RewardsPoolBase) onlyOwner {
+    function start(
+        uint256,
+        uint256,
+        uint256[] calldata
+    ) external view override(RewardsPoolBase) onlyOwner {
         revert('Start cannot be called direct, must be called through payment contract');
     }
 
@@ -101,10 +95,15 @@ contract LiquidityMiningCampaignPaymentTier is LiquidityMiningCampaign {
      * @param _maxTier The max tier the user can stake with
      * @param _deadline Deadline of the signature
      */
-    function stakeWithTier(uint256 _tokenAmount, bytes memory _signature, uint256 _maxTier, uint256 _deadline) public {
+    function stakeWithTier(
+        uint256 _tokenAmount,
+        bytes memory _signature,
+        uint256 _maxTier,
+        uint256 _deadline
+    ) public {
         require(tierCampaign != TierList.DEFAULT, 'Not Tier campaign');
 
-        RewardsPoolBase._stake(_tokenAmount, msg.sender, true, false);
+        RewardsPoolBase._stake(_tokenAmount, msg.sender, true);
 
         ILiquidityPoolReputation(reputationContract).checkTierAndBurnReputation(
             msg.sender,
@@ -123,7 +122,7 @@ contract LiquidityMiningCampaignPaymentTier is LiquidityMiningCampaign {
      */
     function stake(uint256 _tokenAmount) public override {
         require(tierCampaign == TierList.DEFAULT, 'Tier campaign');
-        RewardsPoolBase._stake(_tokenAmount, msg.sender, true, true);
+        RewardsPoolBase._stake(_tokenAmount, msg.sender, true);
     }
 
     /// @dev Overrides the old cancel method so that it can only be called by the payment contract
@@ -147,10 +146,10 @@ contract LiquidityMiningCampaignPaymentTier is LiquidityMiningCampaign {
      * @param _durationTime duration of the campaign (how many seconds the campaign will have)
      * @param _rewardPerSecond array with new rewards per second for each token
      */
-    function extendWithPaymentContract(
-        uint256 _durationTime,
-        uint256[] calldata _rewardPerSecond
-    ) external onlyPaymentContract {
+    function extendWithPaymentContract(uint256 _durationTime, uint256[] calldata _rewardPerSecond)
+        external
+        onlyPaymentContract
+    {
         RewardsPoolBase._extend(_durationTime, _rewardPerSecond);
     }
 

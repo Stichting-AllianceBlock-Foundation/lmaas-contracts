@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.9;
 
+import './../RewardsPoolBase.sol';
 import './StakeLockingFeature.sol';
 import './../ThrottledExit.sol';
 
@@ -33,7 +34,7 @@ abstract contract ThrottledExitFeature is StakeLockingFeature, ThrottledExit {
     }
 
     function completeExit() public virtual onlyUnlocked {
-        uint256 removed = finalizeExit(address(stakingToken), rewardsTokens, wrappedNativeToken);
+        uint256 removed = finalizeExit(address(stakingToken), rewardsTokens);
         totalStaked = totalStaked - removed;
     }
 }
