@@ -13,6 +13,7 @@
     "testnet:deployLMC": "npx hardhat run --network rinkeby scripts/deployLMC.ts",
     "testnet:deployStaking": "npx hardhat run --network rinkeby scripts/deployStaking.ts",
     "testnet:deployAutoStaking": "npx hardhat run --network rinkeby scripts/deployAutoStaking.ts",
+    "testnet:deployNuklai": "npx hardhat run --network sepolia scripts/deployNuklai.ts",
     "prettier": "prettier --write 'contracts/**/*.sol'",
     "clean": "hardhat clean",
     "size": "hardhat compile && hardhat size-contracts",
