@@ -25,10 +25,10 @@ module.exports = {
       //   auto: true,
       //   interval: 0,
       // },
-      forking: {
-        blockNumber: 10037135,
-        url: 'https://nd-734-064-122.p2pify.com/62dc5c5a86cd193963ee39f48eb2cadf',
-      },
+      // forking: {
+      //   blockNumber: 10037135,
+      //   url: 'https://nd-734-064-122.p2pify.com/62dc5c5a86cd193963ee39f48eb2cadf',
+      // },
       accounts: { count: 2000 },
     },
     localhost: {

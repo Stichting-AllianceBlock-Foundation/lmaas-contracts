@@ -4,6 +4,7 @@
   "main": "typechain/index.ts",
   "scripts": {
     "test": "hardhat test",
+    "test:nuklai": "hardhat test test/NuklaiStakingPool.ts",
     "compile": "hardhat compile",
     "build": "hardhat compile",
     "prepare": "hardhat compile",
